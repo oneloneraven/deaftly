@@ -157,7 +157,7 @@ class TemplateStoreSerializerTest {
     @Test
     fun roundTripsTheChatProfile() =
         runTest {
-            val document = seed.copy(settings = SettingsDto(chatName = "Alex", chatColour = ParticipantColourDto.PersonB))
+            val document = seed.copy(settings = SettingsDto(chatName = "Alex", chatColour = ParticipantColourDto.Orange))
 
             val settings =
                 Json
@@ -167,7 +167,7 @@ class TemplateStoreSerializerTest {
                     .jsonObject
 
             assertEquals("Alex", settings.getValue("chatName").jsonPrimitive.content)
-            assertEquals("person-b", settings.getValue("chatColour").jsonPrimitive.content)
+            assertEquals("orange", settings.getValue("chatColour").jsonPrimitive.content)
             assertEquals(document.settings, read(write(document)).settings)
         }
 
@@ -191,5 +191,39 @@ class TemplateStoreSerializerTest {
 
             assertEquals("split", settings.getValue("chatLayout").jsonPrimitive.content)
             assertEquals(ChatLayoutDto.Split, read(write(document)).settings.chatLayout)
+        }
+
+    @Test
+    fun readsRetiredColourNamesAsTheirNewColours() =
+        runTest {
+            mapOf(
+                "accent" to ParticipantColourDto.Indigo,
+                "person-b" to ParticipantColourDto.Orange,
+                "rose" to ParticipantColourDto.Red,
+                "teal" to ParticipantColourDto.Green,
+                "forest" to ParticipantColourDto.Green,
+                "berry" to ParticipantColourDto.Green,
+            ).forEach { (stored, expected) ->
+                val settings = read("""{"version":1,"templates":[],"settings":{"chatColour":"$stored"}}""").settings
+
+                assertEquals(expected, settings.chatColour, stored)
+            }
+        }
+
+    @Test
+    fun writesEachColourAsItsOwnName() =
+        runTest {
+            ParticipantColourDto.entries.forEach { colour ->
+                val document = seed.copy(settings = SettingsDto(chatColour = colour))
+
+                val settings =
+                    Json
+                        .parseToJsonElement(write(document))
+                        .jsonObject
+                        .getValue("settings")
+                        .jsonObject
+
+                assertEquals(colour.name.lowercase(), settings.getValue("chatColour").jsonPrimitive.content)
+            }
         }
 }

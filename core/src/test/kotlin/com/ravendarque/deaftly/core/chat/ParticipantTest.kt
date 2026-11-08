@@ -8,8 +8,8 @@ import kotlin.test.assertTrue
 class ParticipantTest {
     @Test
     fun defaultsUseTheAccentAndPersonBColours() {
-        assertEquals(ColourRole.Accent, Participant.defaultA().colour)
-        assertEquals(ColourRole.PersonB, Participant.defaultB().colour)
+        assertEquals(ColourRole.Indigo, Participant.defaultA().colour)
+        assertEquals(ColourRole.Orange, Participant.defaultB().colour)
         assertEquals(ParticipantId.A, Participant.defaultA().id)
         assertEquals(ParticipantId.B, Participant.defaultB().id)
     }

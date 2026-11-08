@@ -2,7 +2,7 @@ package com.ravendarque.deaftly.core.chat
 
 public data class ChatProfile(
     val name: String? = null,
-    val colour: ColourRole = ColourRole.Accent,
+    val colour: ColourRole = ColourRole.Indigo,
 ) {
     public fun startConversation(): Conversation {
         val a = Participant(ParticipantId.A, colour, name)

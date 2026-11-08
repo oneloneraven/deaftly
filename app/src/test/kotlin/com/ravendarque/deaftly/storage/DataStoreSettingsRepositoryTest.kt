@@ -42,17 +42,17 @@ class DataStoreSettingsRepositoryTest {
     @Test
     fun defaultsToNoNameAndTheAccentColourUntilOneIsSet() =
         runTest {
-            assertEquals(ChatProfile(null, ColourRole.Accent), repository(backgroundScope).chatProfile.first())
+            assertEquals(ChatProfile(null, ColourRole.Indigo), repository(backgroundScope).chatProfile.first())
         }
 
     @Test
     fun theChatProfileSurvivesAFreshStore() =
         runTest {
             val firstRun = Job()
-            repository(CoroutineScope(firstRun)).setChatProfile(ChatProfile("Alex", ColourRole.Teal))
+            repository(CoroutineScope(firstRun)).setChatProfile(ChatProfile("Alex", ColourRole.Green))
             firstRun.cancelAndJoin()
 
-            assertEquals(ChatProfile("Alex", ColourRole.Teal), repository(backgroundScope).chatProfile.first())
+            assertEquals(ChatProfile("Alex", ColourRole.Green), repository(backgroundScope).chatProfile.first())
         }
 
     @Test
@@ -60,9 +60,9 @@ class DataStoreSettingsRepositoryTest {
         runTest {
             val repository = repository(backgroundScope)
 
-            repository.setChatProfile(ChatProfile("  ", ColourRole.Rose))
+            repository.setChatProfile(ChatProfile("  ", ColourRole.Red))
 
-            assertEquals(ChatProfile(null, ColourRole.Rose), repository.chatProfile.first())
+            assertEquals(ChatProfile(null, ColourRole.Red), repository.chatProfile.first())
         }
 
     @Test
@@ -71,10 +71,10 @@ class DataStoreSettingsRepositoryTest {
             val repository = repository(backgroundScope)
 
             repository.setShowScheme(ShowScheme.WhiteOnBlack)
-            repository.setChatProfile(ChatProfile("Alex", ColourRole.Berry))
+            repository.setChatProfile(ChatProfile("Alex", ColourRole.Blue))
 
             assertEquals(ShowScheme.WhiteOnBlack, repository.showScheme.first())
-            assertEquals(ChatProfile("Alex", ColourRole.Berry), repository.chatProfile.first())
+            assertEquals(ChatProfile("Alex", ColourRole.Blue), repository.chatProfile.first())
         }
 
     @Test
@@ -82,7 +82,7 @@ class DataStoreSettingsRepositoryTest {
         runTest {
             val store = createTemplateStore(File(folder.root, "templates.json"), builtIns, backgroundScope)
 
-            DataStoreSettingsRepository(store).setChatProfile(ChatProfile("Alex", ColourRole.Berry))
+            DataStoreSettingsRepository(store).setChatProfile(ChatProfile("Alex", ColourRole.Blue))
 
             assertEquals(
                 builtIns,
