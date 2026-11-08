@@ -27,7 +27,7 @@ private val WhiteOnBlack =
         background = Color(0xFF000000),
         text = Color(0xFFFFFFFF),
         muted = Color(0xFFA9A9B3),
-        markBackground = Color(0xFF3342C4),
+        markBackground = Color(0xFF6A4596),
         markText = Color(0xFFFFFFFF),
     )
 

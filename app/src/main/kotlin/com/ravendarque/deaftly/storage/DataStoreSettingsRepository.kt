@@ -76,7 +76,7 @@ private fun ParticipantColourDto.toDomain(): ColourRole =
         ParticipantColourDto.PersonB -> ColourRole.PersonB
         ParticipantColourDto.Teal -> ColourRole.Teal
         ParticipantColourDto.Rose -> ColourRole.Rose
-        ParticipantColourDto.Berry -> ColourRole.Berry
+        ParticipantColourDto.Forest -> ColourRole.Forest
     }
 
 private fun ColourRole.toDto(): ParticipantColourDto =
@@ -85,5 +85,5 @@ private fun ColourRole.toDto(): ParticipantColourDto =
         ColourRole.PersonB -> ParticipantColourDto.PersonB
         ColourRole.Teal -> ParticipantColourDto.Teal
         ColourRole.Rose -> ParticipantColourDto.Rose
-        ColourRole.Berry -> ParticipantColourDto.Berry
+        ColourRole.Forest -> ParticipantColourDto.Forest
     }
