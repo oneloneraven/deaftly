@@ -82,6 +82,13 @@ class OcrViewModel(
         }
     }
 
+    fun selectRange(selection: TextSelection) {
+        mutableState.update { state ->
+            val text = PhraseSelection.text(state.phrases, selection)
+            if (text == null) state else state.copy(selection = selection, fieldText = text)
+        }
+    }
+
     fun editText(text: String) {
         mutableState.update { it.copy(fieldText = text) }
     }

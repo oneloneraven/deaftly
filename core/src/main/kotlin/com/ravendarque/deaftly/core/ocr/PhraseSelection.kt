@@ -19,6 +19,17 @@ public class SelectedRun(
     public val lastWord: Int,
 ) {
     public val coversPhrase: Boolean get() = firstWord == 0 && lastWord == phrase.words.lastIndex
+
+    /** Where the start handle sits: the top-left of the first selected word. */
+    public val start: Point get() = phrase.words[firstWord].quad.points[TOP_LEFT]
+
+    /** Where the end handle sits: the bottom-right of the last selected word. */
+    public val end: Point get() = phrase.words[lastWord].quad.points[BOTTOM_RIGHT]
+
+    private companion object {
+        const val TOP_LEFT = 0
+        const val BOTTOM_RIGHT = 2
+    }
 }
 
 /** Reading order is the order of the phrases list, which is the recogniser's line order. */

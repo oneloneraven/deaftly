@@ -11,10 +11,12 @@ import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.click
+import androidx.compose.ui.test.down
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.junit4.accessibility.enableAccessibilityChecks
 import androidx.compose.ui.test.junit4.v2.createComposeRule
+import androidx.compose.ui.test.moveTo
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
@@ -22,9 +24,11 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.tryPerformAccessibilityChecks
+import androidx.compose.ui.test.up
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.ravendarque.deaftly.core.ocr.PhraseSelection
 import com.ravendarque.deaftly.core.ocr.TextSelection
+import com.ravendarque.deaftly.core.ocr.WordRef
 import com.ravendarque.deaftly.ui.theme.AppTheme
 import org.junit.Before
 import org.junit.Rule
@@ -43,6 +47,7 @@ class OcrScreenTest {
 
     private var closes = 0
     private val taps = mutableListOf<Long?>()
+    private val ranges = mutableListOf<TextSelection>()
     private var selection by mutableStateOf<TextSelection?>(null)
     private var fieldText by mutableStateOf("")
 
@@ -59,6 +64,11 @@ class OcrScreenTest {
                     actions =
                         OcrActions(
                             onClose = { closes++ },
+                            onSelectRange = { range ->
+                                ranges += range
+                                selection = range
+                                fieldText = PhraseSelection.text(menuPhrases, range).orEmpty()
+                            },
                             onTapPhrase = { id ->
                                 taps += id
                                 val phrase = menuPhrases.firstOrNull { it.id == id }
@@ -85,7 +95,7 @@ class OcrScreenTest {
         composeRule.onNodeWithContentDescription("Close camera").assertIsDisplayed()
         composeRule.onNodeWithContentDescription("Torch").assertIsNotEnabled()
         composeRule.onNodeWithContentDescription("Freeze camera").assertIsNotEnabled()
-        composeRule.onNodeWithText("Tap a phrase to pick it.").assertIsDisplayed()
+        composeRule.onNodeWithText("Tap a phrase, or drag across words.").assertIsDisplayed()
         composeRule.onRoot().tryPerformAccessibilityChecks()
     }
 
@@ -157,5 +167,83 @@ class OcrScreenTest {
         composeRule.onNode(hasSetTextAction()).performTextReplacement("Lasagne verde")
 
         assertEquals("Lasagne verde", fieldText)
+    }
+
+    private fun centre(
+        line: Int,
+        word: Int,
+        width: Int,
+        height: Int,
+    ): Offset {
+        val box = menuPhrases[line].words[word].quad.boundingBox()
+        return Offset((box.left + box.right) / 2 * width, (box.top + box.bottom) / 2 * height)
+    }
+
+    @Test
+    fun draggingFromOneWordToAnotherOnALaterLineSelectsTheRangeInReadingOrder() {
+        show()
+
+        composeRule.onNodeWithContentDescription("Camera view").performTouchInput {
+            down(centre(1, 1, width, height))
+            moveTo(centre(1, 2, width, height))
+            moveTo(centre(3, 0, width, height))
+            up()
+        }
+        composeRule.waitForIdle()
+
+        assertEquals(TextSelection(WordRef(2, 1), WordRef(4, 0)), ranges.last())
+        composeRule
+            .onNode(hasSetTextAction())
+            .assertTextContains("arrabbiata 12.50 tomato, garlic, chilli Spaghetti")
+    }
+
+    @Test
+    fun draggingBackwardsSelectsTheSameWords() {
+        show()
+
+        composeRule.onNodeWithContentDescription("Camera view").performTouchInput {
+            down(centre(3, 0, width, height))
+            moveTo(centre(1, 1, width, height))
+            up()
+        }
+        composeRule.waitForIdle()
+
+        composeRule.onNode(hasSetTextAction()).assertTextContains("arrabbiata 12.50 tomato, garlic, chilli Spaghetti")
+    }
+
+    @Test
+    fun aDragThatStartsFarFromAnyWordSelectsNothing() {
+        show()
+
+        composeRule.onNodeWithContentDescription("Camera view").performTouchInput {
+            down(Offset(width * 0.5f, height * 0.06f))
+            moveTo(centre(1, 1, width, height))
+            up()
+        }
+        composeRule.waitForIdle()
+
+        assertEquals(emptyList(), ranges)
+    }
+
+    @Test
+    fun draggingTheEndHandleMovesOnlyThatEnd() {
+        show()
+        composeRule.onNodeWithContentDescription("Pasta arrabbiata 12.50").performClick()
+        composeRule.waitForIdle()
+        ranges.clear()
+
+        composeRule.onNodeWithContentDescription("Camera view").performTouchInput {
+            val end =
+                menuPhrases[1]
+                    .words
+                    .last()
+                    .quad.points[2]
+            down(Offset(end.x * width, end.y * height))
+            moveTo(centre(3, 0, width, height))
+            up()
+        }
+        composeRule.waitForIdle()
+
+        assertEquals(TextSelection(WordRef(2, 0), WordRef(4, 0)), ranges.last())
     }
 }
