@@ -32,6 +32,16 @@
     <string name="fill_scan_menu">Scan the menu</string>
     <string name="fill_add_more">add more</string>
     <string name="fill_type_it">Type it</string>
+    <string name="type_show_clear">Clear message</string>
+    <string name="type_show_label">Message to show</string>
+    <string name="type_show_placeholder">Type your message\u2026</string>
+    <string name="show_close">Close show mode</string>
+    <string name="show_continue_chat">Continue as chat</string>
+    <string name="show_change_colours">Change colours. Now %1$s, next %2$s</string>
+    <string name="show_scheme_black_on_white">black on white</string>
+    <string name="show_scheme_white_on_black">white on black</string>
+    <string name="show_scheme_yellow_on_black">yellow on black</string>
+    <string name="show_hint">Swipe down to go back</string>
     <string name="template_pin">Pin</string>
     <string name="template_unpin">Unpin</string>
     <string name="template_set_category">Set category</string>

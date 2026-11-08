@@ -19,6 +19,9 @@ import com.ravendarque.deaftly.ui.fill.FillViewModel
 import com.ravendarque.deaftly.ui.home.HomeScreen
 import com.ravendarque.deaftly.ui.home.HomeViewModel
 import com.ravendarque.deaftly.ui.placeholder.PlaceholderScreen
+import com.ravendarque.deaftly.ui.show.ShowScreen
+import com.ravendarque.deaftly.ui.show.ShowViewModel
+import com.ravendarque.deaftly.ui.typeshow.TypeShowScreen
 
 @Composable
 fun AppNavigation(container: AppContainer) {
@@ -47,8 +50,22 @@ fun AppNavigation(container: AppContainer) {
                         onBack = { backStack.removeLastOrNull() },
                     )
                 }
-                entry<Route.Show> { PlaceholderEntry(it, backStack, body = it.text) }
-                entry<Route.Chat> { PlaceholderEntry(it, backStack) }
+                entry<Route.TypeShow> {
+                    TypeShowScreen(
+                        onShow = { backStack.add(Route.Show(it)) },
+                        onBack = { backStack.removeLastOrNull() },
+                    )
+                }
+                entry<Route.Show> { route ->
+                    val viewModel = viewModel<ShowViewModel>(factory = container.showViewModelFactory)
+                    ShowScreen(
+                        text = route.text,
+                        viewModel = viewModel,
+                        onClose = { backStack.removeLastOrNull() },
+                        onContinueAsChat = { backStack.add(Route.Chat(route.text)) },
+                    )
+                }
+                entry<Route.Chat> { PlaceholderEntry(it, backStack, body = it.firstMessage) }
                 entry<Route.Ocr> { PlaceholderEntry(it, backStack) }
                 entry<Route.Editor> { route ->
                     val viewModel = viewModel<EditorViewModel>(factory = container.editorViewModelFactory(route.templateId))

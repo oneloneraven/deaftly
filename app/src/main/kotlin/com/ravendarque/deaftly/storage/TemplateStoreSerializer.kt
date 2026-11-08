@@ -9,7 +9,11 @@ import kotlinx.serialization.json.decodeFromJsonElement
 import java.io.InputStream
 import java.io.OutputStream
 
-private val storeJson = Json { encodeDefaults = true }
+private val storeJson =
+    Json {
+        encodeDefaults = true
+        explicitNulls = false
+    }
 
 class TemplateStoreSerializer(
     override val defaultValue: StoreDocument,

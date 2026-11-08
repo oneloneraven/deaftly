@@ -33,13 +33,10 @@ fun createTemplateStore(
     )
 }
 
-fun createTemplateRepository(
+fun createTemplateStore(
     context: Context,
     builtIns: List<Template>,
-): DataStoreTemplateRepository {
+): DataStore<StoreDocument> {
     val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
-    return DataStoreTemplateRepository(
-        createTemplateStore(context.dataStoreFile(TEMPLATE_STORE_FILE), builtIns, scope),
-        builtIns,
-    )
+    return createTemplateStore(context.dataStoreFile(TEMPLATE_STORE_FILE), builtIns, scope)
 }

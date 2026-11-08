@@ -48,6 +48,32 @@ class TemplateStoreSerializerTest {
         }
 
     @Test
+    fun roundTripsTheShowScheme() =
+        runTest {
+            val document = seed.copy(settings = SettingsDto(ShowSchemeDto.YellowOnBlack))
+
+            val written = write(document)
+
+            assertEquals(
+                "yellow-on-black",
+                Json
+                    .parseToJsonElement(written)
+                    .jsonObject
+                    .getValue("settings")
+                    .jsonObject
+                    .getValue("showScheme")
+                    .jsonPrimitive.content,
+            )
+            assertEquals(document.settings, read(written).settings)
+        }
+
+    @Test
+    fun readsSettingsWithoutAShowScheme() =
+        runTest {
+            assertEquals(SettingsDto(), read("""{"version":1,"templates":[],"settings":{}}""").settings)
+        }
+
+    @Test
     fun readsDocumentWithoutOptionalFields() =
         runTest {
             val minimal =
