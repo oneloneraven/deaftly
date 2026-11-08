@@ -107,4 +107,6 @@ object DeaftlyIcons {
     val Utensils: ImageVector by lazy {
         strokeIcon("Utensils", "M7 3v8a2 2 0 0 0 2 2v8M11 3v8M7 7h4M17 3c-2 0-3 3-3 6s1 4 3 4v8")
     }
+
+    val Trash: ImageVector by lazy { strokeIcon("Trash", "M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14") }
 }
