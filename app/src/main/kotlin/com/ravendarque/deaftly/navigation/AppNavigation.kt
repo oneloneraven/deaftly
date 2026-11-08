@@ -1,7 +1,6 @@
 package com.ravendarque.deaftly.navigation
 
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.EntryProviderScope
@@ -22,7 +21,8 @@ import com.ravendarque.deaftly.ui.fill.FillScreen
 import com.ravendarque.deaftly.ui.fill.FillViewModel
 import com.ravendarque.deaftly.ui.home.HomeScreen
 import com.ravendarque.deaftly.ui.home.HomeViewModel
-import com.ravendarque.deaftly.ui.placeholder.PlaceholderScreen
+import com.ravendarque.deaftly.ui.ocr.OcrOutcome
+import com.ravendarque.deaftly.ui.ocr.OcrScreen
 import com.ravendarque.deaftly.ui.settings.SettingsScreen
 import com.ravendarque.deaftly.ui.settings.SettingsViewModel
 import com.ravendarque.deaftly.ui.show.ShowScreen
@@ -75,7 +75,7 @@ fun AppNavigation(container: AppContainer) {
                         onInsertTemplate = { backStack.add(Route.TemplatePicker) },
                     )
                 }
-                entry<Route.Ocr> { PlaceholderEntry(it, backStack) }
+                entry<Route.Ocr> { OcrEntry(it, container, backStack) }
                 entry<Route.Settings> {
                     val viewModel = viewModel<SettingsViewModel>(factory = container.settingsViewModelFactory)
                     SettingsScreen(viewModel, onBack = { backStack.removeLastOrNull() })
@@ -121,10 +121,16 @@ private fun EntryProviderScope<NavKey>.templateEntries(
 }
 
 @Composable
-private fun PlaceholderEntry(
-    route: Route,
+private fun OcrEntry(
+    route: Route.Ocr,
+    container: AppContainer,
     backStack: NavBackStack<NavKey>,
-    body: String? = null,
 ) {
-    PlaceholderScreen(stringResource(route.titleRes()), onBack = { backStack.removeLastOrNull() }, body = body)
+    OcrScreen(
+        onClose = { backStack.removeLastOrNull() },
+        onTypeInstead = {
+            container.ocrOutcomes.post(OcrOutcome.TypeInstead(route.templateId, route.placeholderKey))
+            backStack.removeLastOrNull()
+        },
+    )
 }
