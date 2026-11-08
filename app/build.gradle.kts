@@ -1,5 +1,5 @@
 import com.android.build.api.artifact.SingleArtifact
-import com.ravendarque.deaftly.build.VerifyReleaseManifestTask
+import com.ravendarque.deaftly.guard.VerifyReleaseManifestTask
 
 plugins {
     alias(libs.plugins.android.application)
