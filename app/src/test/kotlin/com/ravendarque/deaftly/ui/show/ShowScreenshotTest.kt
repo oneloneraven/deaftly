@@ -4,7 +4,9 @@ import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onRoot
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.takahirom.roborazzi.captureRoboImage
+import com.ravendarque.deaftly.core.settings.ShowScheme
 import com.ravendarque.deaftly.ui.theme.AppTheme
+import com.ravendarque.deaftly.ui.theme.defaultShowScheme
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestName
@@ -34,9 +36,12 @@ class ShowScreenshotTest {
     private fun shot(
         text: String,
         dark: Boolean,
+        scheme: ShowScheme = defaultShowScheme(dark),
     ) {
         composeRule.setContent {
-            AppTheme(darkTheme = dark) { ShowScreen(text, onClose = {}, onContinueAsChat = {}) }
+            AppTheme(darkTheme = dark) {
+                ShowContent(text, scheme, onCycleScheme = {}, onClose = {}, onContinueAsChat = {})
+            }
         }
         composeRule.waitForIdle()
         composeRule.onRoot().captureRoboImage("$SCREENSHOT_DIR/$PACKAGE.${this::class.simpleName}.${testName.methodName}.png")
@@ -61,4 +66,13 @@ class ShowScreenshotTest {
     @Test
     @Config(fontScale = 2f)
     fun longTextLargeFontScale() = shot(LONG_MESSAGE, dark = false)
+
+    @Test
+    fun blackOnWhiteScheme() = shot(MESSAGE, dark = true, scheme = ShowScheme.BlackOnWhite)
+
+    @Test
+    fun whiteOnBlackScheme() = shot(MESSAGE, dark = false, scheme = ShowScheme.WhiteOnBlack)
+
+    @Test
+    fun yellowOnBlackScheme() = shot(MESSAGE, dark = false, scheme = ShowScheme.YellowOnBlack)
 }

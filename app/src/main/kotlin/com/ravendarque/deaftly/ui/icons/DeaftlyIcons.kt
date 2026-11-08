@@ -71,6 +71,27 @@ object DeaftlyIcons {
         )
     }
 
+    val Contrast: ImageVector by lazy {
+        ImageVector
+            .Builder(
+                name = "Contrast",
+                defaultWidth = VIEWPORT.dp,
+                defaultHeight = VIEWPORT.dp,
+                viewportWidth = VIEWPORT,
+                viewportHeight = VIEWPORT,
+            ).apply {
+                addPath(
+                    pathData = PathParser().parsePathString("M21 12a9 9 0 1 1-18 0 9 9 0 1 1 18 0").toNodes(),
+                    stroke = SolidColor(Color.Black),
+                    strokeLineWidth = STROKE_WIDTH,
+                )
+                addPath(
+                    pathData = PathParser().parsePathString("M12 3a9 9 0 0 1 0 18z").toNodes(),
+                    fill = SolidColor(Color.Black),
+                )
+            }.build()
+    }
+
     val Check: ImageVector by lazy { strokeIcon("Check", "M5 12l5 5L20 7") }
 
     val Expand: ImageVector by lazy { strokeIcon("Expand", "M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7") }

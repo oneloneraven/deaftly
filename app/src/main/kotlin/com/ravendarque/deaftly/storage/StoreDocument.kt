@@ -20,7 +20,21 @@ data class StoreDocument(
 }
 
 @Serializable
-class SettingsDto
+data class SettingsDto(
+    val showScheme: ShowSchemeDto? = null,
+)
+
+@Serializable
+enum class ShowSchemeDto {
+    @SerialName("black-on-white")
+    BlackOnWhite,
+
+    @SerialName("white-on-black")
+    WhiteOnBlack,
+
+    @SerialName("yellow-on-black")
+    YellowOnBlack,
+}
 
 @Serializable
 data class TemplateDto(
