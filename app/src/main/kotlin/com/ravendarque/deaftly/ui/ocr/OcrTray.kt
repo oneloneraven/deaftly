@@ -18,7 +18,10 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
+import com.ravendarque.deaftly.R
+import com.ravendarque.deaftly.ui.components.PrimaryButton
 import com.ravendarque.deaftly.ui.icons.DeaftlyIcons
 import com.ravendarque.deaftly.ui.theme.Deaftly
 
@@ -30,6 +33,7 @@ fun OcrTray(
     fieldLabel: String,
     text: String,
     onTextChange: (String) -> Unit,
+    onAdd: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val c = Deaftly.colors
@@ -72,6 +76,13 @@ fun OcrTray(
                     unfocusedTrailingIconColor = c.inkMuted,
                     cursorColor = c.accent,
                 ),
+        )
+        PrimaryButton(
+            text = stringResource(R.string.ocr_add),
+            onClick = onAdd,
+            enabled = text.isNotBlank(),
+            icon = DeaftlyIcons.Check,
+            modifier = Modifier.fillMaxWidth(),
         )
     }
 }

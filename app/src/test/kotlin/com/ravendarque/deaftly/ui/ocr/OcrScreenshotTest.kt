@@ -64,7 +64,7 @@ class OcrScreenshotTest {
                     frozenImage = if (frozen) fakeFrameImage() else null,
                     torch = torch,
                 ),
-            actions = OcrActions({}, {}, {}, {}, {}, {}),
+            actions = OcrActions({}, {}, {}, {}, {}, {}, {}),
             viewfinder = { FakeCamera(it) },
         )
     }

@@ -23,6 +23,7 @@ import com.ravendarque.deaftly.ui.ocr.OcrOutcomes
 import com.ravendarque.deaftly.ui.ocr.OcrViewModel
 import com.ravendarque.deaftly.ui.settings.SettingsViewModel
 import com.ravendarque.deaftly.ui.show.ShowViewModel
+import kotlinx.coroutines.flow.first
 
 class AppContainer(
     private val context: Context,
@@ -38,15 +39,25 @@ class AppContainer(
     val ocrOutcomes = OcrOutcomes()
     val chatInsertions = ChatInsertions()
 
-    val ocrViewModelFactory =
-        viewModelFactory {
-            initializer {
-                OcrViewModel(
-                    createRecogniser = { PaddleOcrNcnnRecogniser(context.applicationContext) },
-                    captureFrame = { frame, crop -> FrameImage.toBitmap(frame, crop).asImageBitmap() },
-                )
-            }
+    fun ocrViewModelFactory(
+        templateId: String,
+        placeholderKey: String,
+    ) = viewModelFactory {
+        initializer {
+            OcrViewModel(
+                createRecogniser = { PaddleOcrNcnnRecogniser(context.applicationContext) },
+                captureFrame = { frame, crop -> FrameImage.toBitmap(frame, crop).asImageBitmap() },
+                loadFieldLabel = {
+                    templateRepository.templates
+                        .first()
+                        .firstOrNull { it.id == templateId }
+                        ?.placeholders
+                        ?.get(placeholderKey)
+                        ?.label
+                },
+            )
         }
+    }
 
     val homeViewModelFactory =
         viewModelFactory {
