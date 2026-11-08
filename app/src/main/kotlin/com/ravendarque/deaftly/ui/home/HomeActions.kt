@@ -7,4 +7,6 @@ data class HomeActions(
     val onQueryChange: (String) -> Unit,
     val onClearSearch: () -> Unit,
     val onCategorySelected: (String?) -> Unit,
+    val onSetPinned: (String, Boolean) -> Unit,
+    val onSetCategory: (String, String) -> Unit,
 )

@@ -225,4 +225,73 @@ class HomeViewModelTest {
             assertTrue(state.pinned.isEmpty())
             assertTrue(state.categories.isEmpty())
         }
+
+    @Test
+    fun pinningAddsATileAndUnpinningRemovesIt() =
+        runTest {
+            val repository = FakeTemplateRepository(all)
+            val viewModel = viewModel(repository)
+
+            viewModel.setPinned("doctor", true)
+            assertEquals(
+                listOf("check-in", "order", "doctor"),
+                viewModel.state.value.pinned
+                    .map { it.id },
+            )
+            assertTrue(repository.snapshot.first { it.id == "doctor" }.pinned)
+
+            viewModel.setPinned("check-in", false)
+            assertEquals(
+                listOf("order", "doctor"),
+                viewModel.state.value.pinned
+                    .map { it.id },
+            )
+            assertFalse(repository.snapshot.first { it.id == "check-in" }.pinned)
+        }
+
+    @Test
+    fun templatesExposeTheirCategoryAndPinnedState() =
+        runTest {
+            val template =
+                viewModel()
+                    .state.value.templates
+                    .first { it.id == "order" }
+
+            assertEquals("Food & drink", template.category)
+            assertTrue(template.pinned)
+        }
+
+    @Test
+    fun settingACategoryMovesTheTemplateAndAddsNewCategories() =
+        runTest {
+            val repository = FakeTemplateRepository(all)
+            val viewModel = viewModel(repository)
+
+            viewModel.setCategory("cafe", "Travel")
+
+            assertEquals("Travel", repository.snapshot.first { it.id == "cafe" }.category)
+            assertEquals(listOf("Everyday", "Food & drink", "Travel", "Health"), viewModel.state.value.categories)
+        }
+
+    @Test
+    fun settingACategoryTrimsItAndReusesAnExistingSpelling() =
+        runTest {
+            val repository = FakeTemplateRepository(all)
+            val viewModel = viewModel(repository)
+
+            viewModel.setCategory("cafe", "  health ")
+
+            assertEquals("Health", repository.snapshot.first { it.id == "cafe" }.category)
+        }
+
+    @Test
+    fun aBlankCategoryIsIgnored() =
+        runTest {
+            val repository = FakeTemplateRepository(all)
+            val viewModel = viewModel(repository)
+
+            viewModel.setCategory("cafe", "   ")
+
+            assertEquals("Food & drink", repository.snapshot.first { it.id == "cafe" }.category)
+        }
 }
