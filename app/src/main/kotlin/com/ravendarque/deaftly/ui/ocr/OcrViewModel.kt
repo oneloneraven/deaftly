@@ -5,17 +5,22 @@ import androidx.lifecycle.viewModelScope
 import com.ravendarque.deaftly.core.ocr.BoundingBox
 import com.ravendarque.deaftly.core.ocr.LiveRecognition
 import com.ravendarque.deaftly.core.ocr.Phrase
+import com.ravendarque.deaftly.core.ocr.PhraseSelection
 import com.ravendarque.deaftly.core.ocr.RecognitionFrame
 import com.ravendarque.deaftly.core.ocr.TextRecogniser
+import com.ravendarque.deaftly.core.ocr.TextSelection
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
 data class OcrUiState(
     val ready: Boolean = false,
     val phrases: List<Phrase> = emptyList(),
+    val selection: TextSelection? = null,
+    val fieldText: String = "",
 )
 
 class OcrViewModel(
@@ -38,7 +43,7 @@ class OcrViewModel(
                 } else {
                     recogniser = created
                     live = LiveRecognition(created)
-                    mutableState.value = mutableState.value.copy(ready = true)
+                    mutableState.update { it.copy(ready = true) }
                 }
             }
         }
@@ -50,7 +55,7 @@ class OcrViewModel(
         crop: BoundingBox?,
     ) {
         val phrases = synchronized(lock) { live?.let { process(it, frame, crop) } }
-        if (phrases != null) mutableState.value = mutableState.value.copy(phrases = phrases)
+        if (phrases != null) mutableState.update { it.copy(phrases = phrases) }
     }
 
     private fun process(
@@ -65,6 +70,21 @@ class OcrViewModel(
         } catch (_: IllegalArgumentException) {
             null
         }
+
+    fun selectPhrase(id: Long?) {
+        mutableState.update { state ->
+            val phrase = id?.let { wanted -> state.phrases.firstOrNull { it.id == wanted } }
+            if (phrase == null) {
+                state.copy(selection = null)
+            } else {
+                state.copy(selection = PhraseSelection.wholePhrase(phrase), fieldText = phrase.text)
+            }
+        }
+    }
+
+    fun editText(text: String) {
+        mutableState.update { it.copy(fieldText = text) }
+    }
 
     override fun onCleared() {
         synchronized(lock) {
