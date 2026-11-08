@@ -84,7 +84,7 @@ class FillViewModelTest {
 
             val active = assertIs<ActivePlaceholder>(viewModel.ready().active)
             assertEquals("how to reply", active.placeholder.key)
-            assertNull(active.value)
+            assertEquals(emptyList(), active.values)
         }
 
     @Test
@@ -108,7 +108,7 @@ class FillViewModelTest {
             viewModel.choose("Sam")
 
             val state = viewModel.ready()
-            assertEquals("Sam", (state.parts[1] as FillPart.Filled).text)
+            assertEquals("Sam", (state.parts[1] as FillPart.Filled).values.single())
             assertEquals("how to reply", state.active?.placeholder?.key)
             assertFalse(state.canShow)
         }
@@ -139,12 +139,12 @@ class FillViewModelTest {
             viewModel.dismiss()
 
             viewModel.activate("name")
-            assertEquals("Sam", viewModel.ready().active?.value)
+            assertEquals(listOf("Sam"), viewModel.ready().active?.values)
             viewModel.choose("Alex")
 
             val state = viewModel.ready()
             assertNull(state.active)
-            assertEquals("Alex", (state.parts[1] as FillPart.Filled).text)
+            assertEquals("Alex", (state.parts[1] as FillPart.Filled).values.single())
             assertFalse(state.canShow)
         }
 
@@ -167,7 +167,7 @@ class FillViewModelTest {
             assertTrue(viewModel.ready().parts[1] is FillPart.Empty)
 
             viewModel.choose("  Sam  ")
-            assertEquals("Sam", (viewModel.ready().parts[1] as FillPart.Filled).text)
+            assertEquals("Sam", (viewModel.ready().parts[1] as FillPart.Filled).values.single())
         }
 
     @Test
@@ -207,7 +207,96 @@ class FillViewModelTest {
             collect(second)
 
             val state = second.ready()
-            assertEquals("Sam", (state.parts[1] as FillPart.Filled).text)
+            assertEquals("Sam", (state.parts[1] as FillPart.Filled).values.single())
             assertEquals("how to reply", state.active?.placeholder?.key)
+        }
+
+    private fun FillViewModel.menuItems() = (ready().parts.filterIsInstance<FillPart.Filled>().single()).values
+
+    @Test
+    fun aRepeatablePlaceholderCollectsEachChosenValueAndTheTextJoinsThem() =
+        runTest {
+            val viewModel = viewModel("order-food")
+            collect(viewModel)
+
+            viewModel.activate("menu item")
+            viewModel.choose("Pasta arrabbiata")
+            assertNull(viewModel.ready().active)
+            viewModel.activate("menu item")
+            viewModel.choose("Garlic bread")
+            viewModel.activate("menu item")
+            viewModel.choose("Tiramisu")
+
+            assertEquals(listOf("Pasta arrabbiata", "Garlic bread", "Tiramisu"), viewModel.menuItems())
+            assertNull(viewModel.ready().active)
+            assertTrue(viewModel.ready().canShow)
+            assertEquals(
+                "Hi! I'm deaf. Could I have Pasta arrabbiata, Garlic bread and Tiramisu please? " +
+                    "If you have a question, please type it on my phone.",
+                viewModel.ready().text,
+            )
+        }
+
+    @Test
+    fun addingAValueTheRepeatablePlaceholderAlreadyHasChangesNothing() =
+        runTest {
+            val viewModel = viewModel("order-food")
+            collect(viewModel)
+            viewModel.activate("menu item")
+            viewModel.choose("Tiramisu")
+
+            viewModel.activate("menu item")
+            viewModel.choose("Tiramisu")
+
+            assertEquals(listOf("Tiramisu"), viewModel.menuItems())
+        }
+
+    @Test
+    fun removingValuesLeavesTheRestAndEmptyingThePlaceholderUnfillsIt() =
+        runTest {
+            val viewModel = viewModel("order-food")
+            collect(viewModel)
+            listOf("A", "B").forEach {
+                viewModel.activate("menu item")
+                viewModel.choose(it)
+            }
+
+            viewModel.remove("menu item", 0)
+            assertEquals(listOf("B"), viewModel.menuItems())
+            assertTrue(viewModel.ready().canShow)
+
+            viewModel.remove("menu item", 0)
+            assertTrue(viewModel.ready().parts.any { it is FillPart.Empty })
+            assertFalse(viewModel.ready().canShow)
+        }
+
+    @Test
+    fun removingAMissingIndexIsIgnored() =
+        runTest {
+            val viewModel = viewModel("order-food")
+            collect(viewModel)
+            viewModel.activate("menu item")
+            viewModel.choose("A")
+
+            viewModel.remove("menu item", 3)
+
+            assertEquals(listOf("A"), viewModel.menuItems())
+        }
+
+    @Test
+    fun repeatableValuesSurviveRecreationFromSavedState() =
+        runTest {
+            val savedState = SavedStateHandle()
+            val first = viewModel("order-food", savedState)
+            collect(first)
+            listOf("A", "B").forEach {
+                first.activate("menu item")
+                first.choose(it)
+            }
+
+            val second = viewModel("order-food", savedState)
+            collect(second)
+
+            assertEquals(listOf("A", "B"), second.menuItems())
         }
 }

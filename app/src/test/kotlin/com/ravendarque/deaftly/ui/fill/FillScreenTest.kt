@@ -4,7 +4,6 @@ import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assert
-import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.assertIsNotEnabled
@@ -15,7 +14,6 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isSelectable
 import androidx.compose.ui.test.junit4.accessibility.enableAccessibilityChecks
 import androidx.compose.ui.test.junit4.v2.createComposeRule
-import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
@@ -68,7 +66,7 @@ class FillScreenTest {
     private fun option(label: String) = composeRule.onNode(hasText(label) and isSelectable())
 
     private fun fillNameThenReply() {
-        chip("Your name").performClick()
+        chip("name").performClick()
         composeRule.onNode(hasSetTextAction()).performTextInput("Sam")
         composeRule.onNode(hasSetTextAction()).performImeAction()
         composeRule.waitForIdle()
@@ -86,8 +84,8 @@ class FillScreenTest {
                 "Hi! I'm deaf. I'd like to check in. My name is Your name. Please How should they reply?.",
             ).assertExists()
         composeRule.onNodeWithText("Tap a highlighted word to change it.").assertExists()
-        chip("Your name").assertState("Empty")
-        chip("How should they reply?").assertState("Empty")
+        chip("name").assertState("Empty")
+        chip("how to reply").assertState("Empty")
         composeRule.onRoot().tryPerformAccessibilityChecks()
     }
 
@@ -96,7 +94,7 @@ class FillScreenTest {
         show("check-in")
         composeRule.onNodeWithText("Show").assertIsNotEnabled()
 
-        chip("Your name").performClick()
+        chip("name").performClick()
         composeRule.onNode(hasSetTextAction()).performTextInput("Sam")
         composeRule.onNode(hasSetTextAction()).performImeAction()
         composeRule.waitForIdle()
@@ -112,10 +110,10 @@ class FillScreenTest {
     fun tappingAChipOpensItsSheetWithTheOptionsBeforeSomethingElse() {
         show("check-in")
 
-        chip("How should they reply?").performClick()
+        chip("how to reply").performClick()
 
-        chip("How should they reply?").assertState("Editing")
-        composeRule.onAllNodesWithText("How should they reply?").assertCountEquals(2)
+        chip("how to reply").assertState("Editing")
+        composeRule.onNodeWithText("How should they reply?").assertExists()
         replyOptions.forEach { option(it).assertExists() }
         composeRule.onNode(hasSetTextAction()).assertExists()
         composeRule.onRoot().tryPerformAccessibilityChecks()
@@ -124,20 +122,20 @@ class FillScreenTest {
     @Test
     fun choosingAnOptionFillsTheChipAndShowsItSelectedWhenReopened() {
         show("check-in")
-        chip("How should they reply?").performClick()
+        chip("how to reply").performClick()
 
         option("write it down").performClick()
         composeRule.waitForIdle()
 
         chip("write it down").assertState("Filled in")
-        chip("Your name").assertState("Editing")
+        chip("name").assertState("Editing")
         composeRule.onNode(hasSetTextAction()).assertIsFocused()
     }
 
     @Test
     fun aCustomValueFromSomethingElseFillsTheChip() {
         show("check-in")
-        chip("How should they reply?").performClick()
+        chip("how to reply").performClick()
 
         composeRule.onNode(hasSetTextAction()).performTextInput("shout")
         composeRule.onNodeWithContentDescription("Use this").performClick()
@@ -149,7 +147,7 @@ class FillScreenTest {
     @Test
     fun theCurrentValueIsMarkedSelectedInTheSheet() {
         show("check-in")
-        chip("How should they reply?").performClick()
+        chip("how to reply").performClick()
         option("write it down").performClick()
         composeRule.waitForIdle()
         composeRule.onNode(hasSetTextAction()).performTextInput("Sam")
@@ -166,7 +164,7 @@ class FillScreenTest {
     fun aTypingPlaceholderOpensWithItsFieldFocused() {
         show("check-in")
 
-        chip("Your name").performClick()
+        chip("name").performClick()
 
         composeRule.onNode(hasSetTextAction()).assertIsFocused()
     }
@@ -198,7 +196,7 @@ class FillScreenTest {
     fun aCameraPlaceholderOffersScanAndTypeIt() {
         show("order-food")
 
-        chip("Menu item").performClick()
+        chip("menu item").performClick()
 
         composeRule.onNodeWithText("Scan the menu").assertExists()
         composeRule.onNodeWithText("Type it").assertExists()
@@ -209,7 +207,7 @@ class FillScreenTest {
     @Test
     fun scanTheMenuOpensTheOcrScreen() {
         show("order-food")
-        chip("Menu item").performClick()
+        chip("menu item").performClick()
 
         composeRule.onNodeWithText("Scan the menu").performClick()
 
@@ -219,7 +217,7 @@ class FillScreenTest {
     @Test
     fun typeItRevealsTheFieldAndFillsTheChip() {
         show("order-food")
-        chip("Menu item").performClick()
+        chip("menu item").performClick()
 
         composeRule.onNodeWithText("Type it").performClick()
         composeRule.onNode(hasSetTextAction()).assertIsFocused()
@@ -229,5 +227,76 @@ class FillScreenTest {
 
         chip("Pasta arrabbiata").assertState("Filled in")
         composeRule.onNodeWithText("Show").assertIsEnabled()
+    }
+
+    private fun addMenuItem(
+        opener: () -> Unit,
+        name: String,
+    ) {
+        opener()
+        composeRule.onNodeWithText("Type it").performClick()
+        composeRule.onNode(hasSetTextAction()).performTextInput(name)
+        composeRule.onNode(hasSetTextAction()).performImeAction()
+        composeRule.waitForIdle()
+    }
+
+    private fun firstItem() = addMenuItem({ chip("menu item").performClick() }, "Pasta arrabbiata")
+
+    private fun anotherItem(name: String) = addMenuItem({ composeRule.onNodeWithText("add more").performClick() }, name)
+
+    private val joined =
+        "Hi! I'm deaf. Could I have Pasta arrabbiata and Garlic bread please? " +
+            "If you have a question, please type it on my phone."
+
+    @Test
+    fun aRepeatableValueIsARemovableChipFollowedByAddMore() {
+        show("order-food")
+
+        firstItem()
+
+        chip("Pasta arrabbiata").assertState("Filled in")
+        composeRule.onNodeWithContentDescription("Remove Pasta arrabbiata").assertExists()
+        composeRule.onNodeWithText("add more").assertExists()
+        composeRule.onRoot().tryPerformAccessibilityChecks()
+    }
+
+    @Test
+    fun addMoreAddsAValueAndThePreviewJoinsThemInPlainEnglish() {
+        show("order-food")
+        firstItem()
+
+        anotherItem("Garlic bread")
+
+        chip("Garlic bread").assertState("Filled in")
+        composeRule.onNodeWithText(joined).assertExists()
+        composeRule.onNodeWithText("Show").assertIsEnabled()
+        composeRule.onRoot().tryPerformAccessibilityChecks()
+    }
+
+    @Test
+    fun removingAValueUpdatesThePreviewAndRemovingTheLastOneDisablesShow() {
+        show("order-food")
+        firstItem()
+        anotherItem("Garlic bread")
+
+        composeRule.onNodeWithContentDescription("Remove Pasta arrabbiata").performClick()
+        composeRule.onNodeWithText(joined.replace("Pasta arrabbiata and ", "")).assertExists()
+        composeRule.onNodeWithText("Pasta arrabbiata").assertDoesNotExist()
+
+        composeRule.onNodeWithContentDescription("Remove Garlic bread").performClick()
+        chip("menu item").assertState("Empty")
+        composeRule.onNodeWithText("add more").assertDoesNotExist()
+        composeRule.onNodeWithText("Show").assertIsNotEnabled()
+    }
+
+    @Test
+    fun showPassesTheJoinedText() {
+        show("order-food")
+        firstItem()
+        anotherItem("Garlic bread")
+
+        composeRule.onNodeWithText("Show").performClick()
+
+        assertEquals(listOf<Route>(Route.Show(joined)), navigated)
     }
 }

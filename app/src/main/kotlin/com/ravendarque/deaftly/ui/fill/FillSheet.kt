@@ -83,7 +83,7 @@ fun ColumnScope.FillSheetContent(
         ) {
             when (active.placeholder.type) {
                 PlaceholderType.Choices -> {
-                    OptionList(active.placeholder.options, active.value, onChoose)
+                    OptionList(active.placeholder.options, active.values, onChoose)
                     CustomValueField(label = stringResource(R.string.fill_something_else), autofocus = false, onChoose = onChoose)
                 }
 
@@ -102,12 +102,12 @@ fun ColumnScope.FillSheetContent(
 @Composable
 private fun OptionList(
     options: List<String>,
-    selected: String?,
+    selected: List<String>,
     onChoose: (String) -> Unit,
 ) {
     Column(modifier = Modifier.selectableGroup(), verticalArrangement = Arrangement.spacedBy(Deaftly.spacing.space8)) {
         options.forEach { option ->
-            OptionRow(option, selected = option == selected, onClick = { onChoose(option) })
+            OptionRow(option, selected = option in selected, onClick = { onChoose(option) })
         }
     }
 }
