@@ -83,4 +83,16 @@
     <string name="chat_text_size_large">Large</string>
     <string name="chat_text_size_largest">Largest</string>
     <string name="chat_message_from">%1$s: %2$s</string>
+    <string name="chat_message_quoting">Replying to \u201c%1$s\u201d. %2$s</string>
+    <string name="chat_format_bold">Bold</string>
+    <string name="chat_format_italic">Italic</string>
+    <string name="chat_format_highlight">Highlight</string>
+    <string name="chat_format_glyph_bold">B</string>
+    <string name="chat_format_glyph_italic">I</string>
+    <string name="chat_format_on">On</string>
+    <string name="chat_format_off">Off</string>
+    <string name="chat_quote_latest">Quote the latest message</string>
+    <string name="chat_quote_action">Quote</string>
+    <string name="chat_quote_remove">Remove quote</string>
+    <string name="chat_quote_pending">Quoting: %1$s</string>
 </resources>

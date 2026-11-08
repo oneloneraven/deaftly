@@ -21,8 +21,6 @@ import kotlinx.coroutines.launch
 private const val STOP_TIMEOUT_MILLIS = 5_000L
 private const val CONVERSATION_KEY = "conversation"
 private const val TEXT_SIZE_KEY = "text_size"
-private const val DRAFT_A_KEY = "draft_a"
-private const val DRAFT_B_KEY = "draft_b"
 
 sealed interface ChatUiState {
     data object Loading : ChatUiState
@@ -30,9 +28,9 @@ sealed interface ChatUiState {
     data class Ready(
         val conversation: Conversation,
         val textSize: ChatTextSize,
-        val drafts: Map<ParticipantId, String>,
+        val drafts: Map<ParticipantId, Draft>,
     ) : ChatUiState {
-        val draft: String get() = drafts[conversation.turn].orEmpty()
+        val draft: Draft get() = drafts[conversation.turn] ?: Draft()
     }
 }
 
@@ -43,16 +41,10 @@ class ChatViewModel(
 ) : ViewModel() {
     private val conversation = MutableStateFlow(ChatCodec.decode(savedState[CONVERSATION_KEY]))
     private val textSize = MutableStateFlow(ChatTextSize.entries.getOrElse(savedState.get<Int>(TEXT_SIZE_KEY) ?: 0) { ChatTextSize.Normal })
-    private val drafts =
-        MutableStateFlow(
-            mapOf(
-                ParticipantId.A to savedState.get<String>(DRAFT_A_KEY).orEmpty(),
-                ParticipantId.B to savedState.get<String>(DRAFT_B_KEY).orEmpty(),
-            ),
-        )
+    val drafts = ChatDrafts(savedState) { conversation.value?.turn }
 
     val state: StateFlow<ChatUiState> =
-        combine(conversation, textSize, drafts) { conversation, textSize, drafts ->
+        combine(conversation, textSize, drafts.all) { conversation, textSize, drafts ->
             if (conversation == null) ChatUiState.Loading else ChatUiState.Ready(conversation, textSize, drafts)
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS), ChatUiState.Loading)
 
@@ -83,18 +75,32 @@ class ChatViewModel(
         savedState[TEXT_SIZE_KEY] = textSize.value.ordinal
     }
 
-    fun setDraft(text: String) {
-        val turn = conversation.value?.turn ?: return
-        drafts.update { it + (turn to text) }
-        savedState[draftKey(turn)] = text
+    fun quote(
+        messageId: Int,
+        excerpt: String? = null,
+    ) {
+        val current = conversation.value ?: return
+        if (messageId !in current.messages.indices) return
+        drafts.setQuote(current.quote(messageId, excerpt))
+    }
+
+    fun quoteLatest() {
+        val current = conversation.value ?: return
+        val latest = current.messages.lastOrNull { it.author != current.turn } ?: current.messages.lastOrNull() ?: return
+        quote(latest.id)
     }
 
     fun send() {
-        val current = conversation.value ?: return
-        val text = drafts.value[current.turn].orEmpty().trim()
-        if (text.isEmpty()) return
-        change { it.append(RichText.spans(text)) }
-        setDraft("")
+        val current = conversation.value
+        val draft = current?.let { drafts.all.value[it.turn] }
+        if (draft != null && !draft.composition.isBlank) {
+            val spans =
+                draft.composition.content
+                    .trimmed()
+                    .spans
+            change { it.append(spans, draft.quote) }
+            drafts.clear()
+        }
     }
 
     private fun opening(conversation: Conversation): Conversation {
@@ -109,6 +115,4 @@ class ChatViewModel(
     private fun save(conversation: Conversation) {
         savedState[CONVERSATION_KEY] = ChatCodec.encode(conversation)
     }
-
-    private fun draftKey(id: ParticipantId) = if (id == ParticipantId.A) DRAFT_A_KEY else DRAFT_B_KEY
 }

@@ -89,10 +89,32 @@ class ChatScreenshotTest {
         shot { AppTheme(darkTheme = dark) { ChatScreen(viewModel, onEnd = {}) } }
     }
 
+    private fun formatted(dark: Boolean) {
+        val saved =
+            SavedStateHandle(
+                mapOf(
+                    "conversation" to ChatCodec.encode(formattingConversation()),
+                    "draft_b" to ChatCodec.encodeDraft(formattingDraft()),
+                ),
+            )
+        val viewModel = ChatViewModel(FakeSettingsRepository(), saved)
+        shot { AppTheme(darkTheme = dark) { ChatScreen(viewModel, onEnd = {}) } }
+    }
+
     private fun continuedFromShow(dark: Boolean) {
         val viewModel = ChatViewModel(FakeSettingsRepository(), SavedStateHandle(), "Hi! I'm deaf. Could I have a table for two, please?")
         shot { AppTheme(darkTheme = dark) { ChatScreen(viewModel, onEnd = {}) } }
     }
+
+    @Test
+    fun formattingAndQuotesLightTheme() = formatted(dark = false)
+
+    @Test
+    fun formattingAndQuotesDarkTheme() = formatted(dark = true)
+
+    @Test
+    @Config(fontScale = 2f)
+    fun formattingAndQuotesLargeFontScale() = formatted(dark = false)
 
     @Test
     fun continuedFromShowLightTheme() = continuedFromShow(dark = false)

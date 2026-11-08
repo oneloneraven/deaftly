@@ -8,6 +8,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -20,6 +21,7 @@ fun ChatScreen(
     onEnd: () -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val composerActions = rememberComposerActions(viewModel)
     var editingParticipants by rememberSaveable { mutableStateOf(false) }
     when (val current = state) {
         ChatUiState.Loading -> {
@@ -37,12 +39,12 @@ fun ChatScreen(
                         textSize = current.textSize,
                         onCycleTextSize = viewModel::cycleTextSize,
                     )
-                    MessageList(conversation, current.textSize, Modifier.weight(1f).fillMaxSize())
+                    MessageList(conversation, current.textSize, viewModel::quote, Modifier.weight(1f).fillMaxSize())
                     Composer(
                         participant = conversation.activeParticipant,
                         draft = current.draft,
-                        onDraftChange = viewModel::setDraft,
-                        onSend = viewModel::send,
+                        canQuote = conversation.messages.isNotEmpty(),
+                        actions = composerActions,
                         modifier = Modifier.padding(horizontal = Deaftly.spacing.space12),
                     )
                     TurnControl(
@@ -71,3 +73,14 @@ fun ChatScreen(
         }
     }
 }
+
+@Composable
+private fun rememberComposerActions(viewModel: ChatViewModel): ComposerActions =
+    remember(viewModel) {
+        ComposerActions(
+            onChange = viewModel.drafts::setComposition,
+            onQuoteLatest = viewModel::quoteLatest,
+            onRemoveQuote = { viewModel.drafts.setQuote(null) },
+            onSend = viewModel::send,
+        )
+    }

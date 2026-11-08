@@ -84,25 +84,30 @@ class ConversationTest {
             conversation()
                 .append(styled)
                 .switchTurn()
-                .append(text("What?"), quoting = 0)
+                .let { it.append(text("What?"), it.quote(0)) }
         val quote = conversation.messages.last().quote
         assertEquals(Quote(messageId = 0, text = "Hello brave world"), quote)
     }
 
     @Test
     fun quoteTextIsASnapshotAndQuotesDoNotNest() {
-        val conversation =
-            conversation()
-                .append(text("first"))
-                .append(text("second"), quoting = 0)
-                .append(text("third"), quoting = 1)
+        val first = conversation().append(text("first"))
+        val second = first.append(text("second"), first.quote(0))
+        val conversation = second.append(text("third"), second.quote(1))
         assertEquals("second", conversation.messages[2].quote?.text)
+    }
+
+    @Test
+    fun quotingAnExcerptKeepsJustThatText() {
+        val conversation = conversation().append(text("Do you want it spicy or mild?"))
+        assertEquals(Quote(0, "spicy or mild"), conversation.quote(0, "spicy or mild"))
+        assertEquals(Quote(0, "Do you want it spicy or mild?"), conversation.quote(0, "  "))
     }
 
     @Test
     fun quotingAnUnknownMessageIsRejected() {
         assertFailsWith<IllegalArgumentException> { conversation().quote(0) }
-        assertFailsWith<IllegalArgumentException> { conversation().append(text("Hi"), quoting = 3) }
+        assertFailsWith<IllegalArgumentException> { conversation().append(text("Hi"), Quote(3, "x")) }
         assertFailsWith<IllegalArgumentException> { conversation().append(text("Hi")).quote(-1) }
     }
 
