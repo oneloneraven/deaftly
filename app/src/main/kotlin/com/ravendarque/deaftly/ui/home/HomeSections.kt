@@ -23,6 +23,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
@@ -48,6 +49,7 @@ private val tileIcons = listOf(DeaftlyIcons.Home, DeaftlyIcons.Utensils)
 internal fun TemplateList(
     state: HomeUiState,
     actions: HomeActions,
+    onOpenOptions: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     LazyColumn(
@@ -63,7 +65,7 @@ internal fun TemplateList(
     ) {
         if (state.pinned.isNotEmpty()) {
             item(key = "pinned") {
-                PinnedSection(state.pinned, actions.onNavigate, Modifier.padding(bottom = Deaftly.spacing.space12))
+                PinnedSection(state.pinned, actions, onOpenOptions, Modifier.padding(bottom = Deaftly.spacing.space12))
             }
         }
         if (state.categories.isNotEmpty()) {
@@ -79,6 +81,9 @@ internal fun TemplateList(
                 title = template.title,
                 preview = template.preview.map(::toPreviewPart),
                 onClick = { actions.onNavigate(Route.Fill(template.id)) },
+                onLongClick = { onOpenOptions(template.id) },
+                onLongClickLabel = stringResource(R.string.template_options_label),
+                customActions = optionsActions(template, actions.onSetPinned) { onOpenOptions(template.id) },
             )
         }
     }
@@ -87,7 +92,8 @@ internal fun TemplateList(
 @Composable
 private fun PinnedSection(
     pinned: List<HomeTemplate>,
-    onNavigate: (Route) -> Unit,
+    actions: HomeActions,
+    onOpenOptions: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(Deaftly.spacing.space12)) {
@@ -108,9 +114,12 @@ private fun PinnedSection(
                         title = template.title,
                         preview = tilePreview(template.preview),
                         icon = tileIcons[index % tileIcons.size],
-                        onClick = { onNavigate(Route.Fill(template.id)) },
+                        onClick = { actions.onNavigate(Route.Fill(template.id)) },
                         modifier = Modifier.weight(1f).fillMaxHeight(),
                         tone = if (index % 2 == 0) TileTone.Accent else TileTone.PersonB,
+                        onLongClick = { onOpenOptions(template.id) },
+                        onLongClickLabel = stringResource(R.string.template_options_label),
+                        customActions = optionsActions(template, actions.onSetPinned) { onOpenOptions(template.id) },
                     )
                 }
                 repeat(perRow - row.size) { Spacer(Modifier.weight(1f)) }
@@ -176,6 +185,26 @@ private fun EmptyState(
             SecondaryButton(stringResource(R.string.home_clear_search), onClick = onClearSearch)
         }
     }
+}
+
+@Composable
+private fun optionsActions(
+    template: HomeTemplate,
+    onSetPinned: (String, Boolean) -> Unit,
+    onSetCategory: () -> Unit,
+): List<CustomAccessibilityAction> {
+    val pinLabel = stringResource(if (template.pinned) R.string.template_unpin else R.string.template_pin)
+    val categoryLabel = stringResource(R.string.template_set_category)
+    return listOf(
+        CustomAccessibilityAction(pinLabel) {
+            onSetPinned(template.id, !template.pinned)
+            true
+        },
+        CustomAccessibilityAction(categoryLabel) {
+            onSetCategory()
+            true
+        },
+    )
 }
 
 private fun toPreviewPart(part: RenderedPart): PreviewPart =

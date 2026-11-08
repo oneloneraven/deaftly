@@ -21,7 +21,10 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusManager
@@ -50,7 +53,14 @@ fun HomeScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val actions =
         remember(viewModel, onNavigate) {
-            HomeActions(onNavigate, viewModel::onQueryChange, viewModel::onClearSearch, viewModel::onCategorySelected)
+            HomeActions(
+                onNavigate,
+                viewModel::onQueryChange,
+                viewModel::onClearSearch,
+                viewModel::onCategorySelected,
+                viewModel::setPinned,
+                viewModel::setCategory,
+            )
         }
     HomeContent(state, actions)
 }
@@ -60,11 +70,13 @@ fun HomeContent(
     state: HomeUiState,
     actions: HomeActions,
 ) {
+    var optionsFor by rememberSaveable { mutableStateOf<String?>(null) }
+    val optionsTemplate = (state.pinned + state.templates).firstOrNull { it.id == optionsFor }
     Surface(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.safeDrawingPadding()) {
             Header(actions.onNavigate)
             SearchField(state.query, actions.onQueryChange)
-            TemplateList(state, actions, Modifier.weight(1f))
+            TemplateList(state, actions, onOpenOptions = { optionsFor = it }, modifier = Modifier.weight(1f))
             ActionDock(
                 start = { modifier ->
                     InkButton(
@@ -84,6 +96,15 @@ fun HomeContent(
                 },
             )
         }
+    }
+    if (optionsTemplate != null) {
+        TemplateOptionsSheet(
+            template = optionsTemplate,
+            categories = state.categories,
+            onSetPinned = { actions.onSetPinned(optionsTemplate.id, it) },
+            onSetCategory = { actions.onSetCategory(optionsTemplate.id, it) },
+            onDismiss = { optionsFor = null },
+        )
     }
 }
 

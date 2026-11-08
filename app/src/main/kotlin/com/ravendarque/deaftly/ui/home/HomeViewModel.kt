@@ -12,13 +12,17 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 private const val STOP_TIMEOUT_MILLIS = 5_000L
 
 data class HomeTemplate(
     val id: String,
     val title: String,
+    val category: String,
+    val pinned: Boolean,
     val preview: List<RenderedPart>,
 )
 
@@ -32,7 +36,7 @@ data class HomeUiState(
 )
 
 class HomeViewModel(
-    repository: TemplateRepository,
+    private val repository: TemplateRepository,
 ) : ViewModel() {
     private val query = MutableStateFlow("")
     private val selectedCategory = MutableStateFlow<String?>(null)
@@ -51,6 +55,29 @@ class HomeViewModel(
 
     fun onCategorySelected(category: String?) {
         selectedCategory.value = category
+    }
+
+    fun setPinned(
+        id: String,
+        pinned: Boolean,
+    ) {
+        viewModelScope.launch { repository.setPinned(id, pinned) }
+    }
+
+    fun setCategory(
+        id: String,
+        category: String,
+    ) {
+        val name = category.trim()
+        if (name.isEmpty()) return
+        viewModelScope.launch {
+            val existing =
+                repository.templates
+                    .first()
+                    .map { it.category }
+                    .firstOrNull { it.equals(name, ignoreCase = true) }
+            repository.setCategory(id, existing ?: name)
+        }
     }
 
     private fun buildState(
@@ -72,5 +99,11 @@ class HomeViewModel(
     }
 
     private fun toHomeTemplate(template: Template) =
-        HomeTemplate(template.id, template.title, TemplateRenderer.render(template, TemplateFill()).parts)
+        HomeTemplate(
+            template.id,
+            template.title,
+            template.category,
+            template.pinned,
+            TemplateRenderer.render(template, TemplateFill()).parts,
+        )
 }

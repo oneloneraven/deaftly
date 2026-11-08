@@ -1,7 +1,7 @@
 package com.ravendarque.deaftly.ui.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,7 +16,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.customActions
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -48,6 +51,9 @@ fun ListCard(
     preview: List<PreviewPart>,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    onLongClick: (() -> Unit)? = null,
+    onLongClickLabel: String? = null,
+    customActions: List<CustomAccessibilityAction> = emptyList(),
 ) {
     val shape = Deaftly.shapes.cardSmall
     val previewText = rememberPreview(preview)
@@ -58,7 +64,12 @@ fun ListCard(
                 .heightIn(min = CardMinHeight)
                 .clip(shape)
                 .background(Deaftly.colors.surface, shape)
-                .clickable(role = Role.Button, onClick = onClick)
+                .combinedClickable(
+                    role = Role.Button,
+                    onLongClickLabel = onLongClickLabel,
+                    onLongClick = onLongClick,
+                    onClick = onClick,
+                ).semantics { this.customActions = customActions }
                 .padding(horizontal = Deaftly.spacing.space16, vertical = Deaftly.spacing.space14),
         verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
@@ -100,6 +111,9 @@ fun PinnedTile(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     tone: TileTone = TileTone.Accent,
+    onLongClick: (() -> Unit)? = null,
+    onLongClickLabel: String? = null,
+    customActions: List<CustomAccessibilityAction> = emptyList(),
 ) {
     val c = Deaftly.colors
     val shape = Deaftly.shapes.card
@@ -114,7 +128,12 @@ fun PinnedTile(
                 .heightIn(min = TileMinHeight)
                 .clip(shape)
                 .background(container, shape)
-                .clickable(role = Role.Button, onClick = onClick)
+                .combinedClickable(
+                    role = Role.Button,
+                    onLongClickLabel = onLongClickLabel,
+                    onLongClick = onLongClick,
+                    onClick = onClick,
+                ).semantics { this.customActions = customActions }
                 .padding(Deaftly.spacing.space16),
         verticalArrangement = Arrangement.spacedBy(Deaftly.spacing.space12),
     ) {
