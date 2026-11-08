@@ -89,6 +89,21 @@ class ChatScreenshotTest {
         shot { AppTheme(darkTheme = dark) { ChatScreen(viewModel, onEnd = {}) } }
     }
 
+    private fun continuedFromShow(dark: Boolean) {
+        val viewModel = ChatViewModel(FakeSettingsRepository(), SavedStateHandle(), "Hi! I'm deaf. Could I have a table for two, please?")
+        shot { AppTheme(darkTheme = dark) { ChatScreen(viewModel, onEnd = {}) } }
+    }
+
+    @Test
+    fun continuedFromShowLightTheme() = continuedFromShow(dark = false)
+
+    @Test
+    fun continuedFromShowDarkTheme() = continuedFromShow(dark = true)
+
+    @Test
+    @Config(fontScale = 2f)
+    fun continuedFromShowLargeFontScale() = continuedFromShow(dark = false)
+
     @Test
     fun conversationHearingPersonsTurnLightTheme() = screen(ParticipantId.B, dark = false)
 

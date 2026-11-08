@@ -134,6 +134,26 @@ class AppNavigationTest {
     }
 
     @Test
+    fun continueAsChatFromShowOpensTheChatWithTheShownMessageAsTheDeafUsersFirstTurn() {
+        composeRule.enableAccessibilityChecks()
+        showApp()
+        composeRule.onNodeWithText(text(R.string.home_type_and_show)).performClick()
+        composeRule.onNodeWithContentDescription(text(R.string.type_show_label)).performTextInput("Table for two")
+        composeRule.onNodeWithText(text(R.string.fill_show)).performClick()
+
+        composeRule.onNodeWithText(text(R.string.show_continue_chat)).performClick()
+        composeRule.waitUntil(LOAD_TIMEOUT_MILLIS) {
+            composeRule.onAllNodesWithText(text(R.string.chat_turn_prompt_other)).fetchSemanticsNodes().isNotEmpty()
+        }
+
+        composeRule.onNodeWithContentDescription("Me: Table for two").assertExists()
+        composeRule.onNodeWithContentDescription(text(R.string.chat_turn_label)).assertExists()
+        composeRule.onRoot().tryPerformAccessibilityChecks()
+        composeRule.onNodeWithContentDescription(text(R.string.chat_end)).performClick()
+        composeRule.onNodeWithContentDescription(text(R.string.show_close)).assertExists()
+    }
+
+    @Test
     fun tappingATemplateOpensFill() {
         showApp()
 

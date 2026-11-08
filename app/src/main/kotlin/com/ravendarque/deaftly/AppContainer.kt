@@ -36,9 +36,9 @@ class AppContainer(
             initializer { ShowViewModel(settingsRepository) }
         }
 
-    val chatViewModelFactory =
+    fun chatViewModelFactory(firstMessage: String?) =
         viewModelFactory {
-            initializer { ChatViewModel(settingsRepository, createSavedStateHandle()) }
+            initializer { ChatViewModel(settingsRepository, createSavedStateHandle(), firstMessage) }
         }
 
     fun fillViewModelFactory(templateId: String) =

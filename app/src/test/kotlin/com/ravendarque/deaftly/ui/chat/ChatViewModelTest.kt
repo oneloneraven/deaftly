@@ -37,7 +37,8 @@ class ChatViewModelTest {
     private fun viewModel(
         settings: FakeSettingsRepository = FakeSettingsRepository(),
         savedState: SavedStateHandle = SavedStateHandle(),
-    ) = ChatViewModel(settings, savedState)
+        firstMessage: String? = null,
+    ) = ChatViewModel(settings, savedState, firstMessage)
 
     private fun ChatViewModel.conversation(): Conversation = assertIs<ChatUiState.Ready>(state.value).conversation
 
@@ -267,5 +268,49 @@ class ChatViewModelTest {
             collect(second)
 
             assertEquals(0, second.conversation().messages.size)
+        }
+
+    @Test
+    fun aFirstMessageStartsTheChatAsTheDeafUsersTurnAndPassesTheTurnToTheOtherPerson() =
+        runTest {
+            val viewModel = viewModel(firstMessage = "Table for two, please")
+            collect(viewModel)
+
+            val conversation = viewModel.conversation()
+            val message = conversation.messages.single()
+            assertEquals("Table for two, please", message.plainText)
+            assertEquals(ParticipantId.A, message.author)
+            assertEquals(ParticipantId.B, conversation.turn)
+        }
+
+    @Test
+    fun theFirstMessageUsesTheRememberedName() =
+        runTest {
+            val viewModel = viewModel(FakeSettingsRepository(ChatProfile("Alex", ColourRole.Teal)), firstMessage = "Hello")
+            collect(viewModel)
+
+            assertEquals("Alex", viewModel.conversation().participantA.name)
+        }
+
+    @Test
+    fun aBlankFirstMessageStartsAnEmptyChat() =
+        runTest {
+            val viewModel = viewModel(firstMessage = "   ")
+            collect(viewModel)
+
+            assertEquals(0, viewModel.conversation().messages.size)
+            assertEquals(ParticipantId.A, viewModel.conversation().turn)
+        }
+
+    @Test
+    fun recreatingTheChatDoesNotAddTheFirstMessageAgain() =
+        runTest {
+            val savedState = SavedStateHandle()
+            collect(viewModel(savedState = savedState, firstMessage = "Hello"))
+
+            val restored = viewModel(savedState = savedState, firstMessage = "Hello")
+            collect(restored)
+
+            assertEquals(1, restored.conversation().messages.size)
         }
 }

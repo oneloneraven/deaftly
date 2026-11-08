@@ -39,6 +39,7 @@ sealed interface ChatUiState {
 class ChatViewModel(
     private val settings: SettingsRepository,
     private val savedState: SavedStateHandle,
+    private val firstMessage: String? = null,
 ) : ViewModel() {
     private val conversation = MutableStateFlow(ChatCodec.decode(savedState[CONVERSATION_KEY]))
     private val textSize = MutableStateFlow(ChatTextSize.entries.getOrElse(savedState.get<Int>(TEXT_SIZE_KEY) ?: 0) { ChatTextSize.Normal })
@@ -58,7 +59,7 @@ class ChatViewModel(
     init {
         if (conversation.value == null) {
             viewModelScope.launch {
-                val started = settings.chatProfile.first().startConversation()
+                val started = opening(settings.chatProfile.first().startConversation())
                 if (conversation.compareAndSet(null, started)) save(started)
             }
         }
@@ -94,6 +95,11 @@ class ChatViewModel(
         if (text.isEmpty()) return
         change { it.append(RichText.spans(text)) }
         setDraft("")
+    }
+
+    private fun opening(conversation: Conversation): Conversation {
+        val text = firstMessage?.trim().orEmpty()
+        return if (text.isEmpty()) conversation else conversation.append(RichText.spans(text)).withTurn(ParticipantId.B)
     }
 
     private fun change(transform: (Conversation) -> Conversation) {

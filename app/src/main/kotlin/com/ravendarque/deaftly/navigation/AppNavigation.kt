@@ -64,8 +64,8 @@ fun AppNavigation(container: AppContainer) {
                         onContinueAsChat = { backStack.add(Route.Chat(route.text)) },
                     )
                 }
-                entry<Route.Chat> {
-                    val viewModel = viewModel<ChatViewModel>(factory = container.chatViewModelFactory)
+                entry<Route.Chat> { route ->
+                    val viewModel = viewModel<ChatViewModel>(factory = container.chatViewModelFactory(route.firstMessage))
                     ChatScreen(viewModel, onEnd = { backStack.removeLastOrNull() })
                 }
                 entry<Route.Ocr> { PlaceholderEntry(it, backStack) }
