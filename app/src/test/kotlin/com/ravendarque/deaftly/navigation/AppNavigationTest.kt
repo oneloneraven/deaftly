@@ -1,6 +1,7 @@
 package com.ravendarque.deaftly.navigation
 
 import androidx.activity.ComponentActivity
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.accessibility.enableAccessibilityChecks
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
@@ -8,6 +9,7 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.tryPerformAccessibilityChecks
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.ravendarque.deaftly.AppContainer
@@ -67,16 +69,23 @@ class AppNavigationTest {
     }
 
     @Test
-    fun typeAndShowOpensTheShowScreenAndCloseReturnsHome() {
+    fun typeAndShowKeepsTheTextAfterReturningFromShowUntilCleared() {
         composeRule.enableAccessibilityChecks()
         showApp()
-
         composeRule.onNodeWithText(text(R.string.home_type_and_show)).performClick()
-        composeRule.onNodeWithContentDescription(text(R.string.show_close)).assertExists()
+
+        composeRule.onNodeWithContentDescription(text(R.string.type_show_label)).performTextInput("Table for two")
+        composeRule.onNodeWithText(text(R.string.fill_show)).performClick()
+        composeRule.onNodeWithText("Table for two").assertExists()
         composeRule.onNodeWithText(text(R.string.show_hint)).assertExists()
         composeRule.onRoot().tryPerformAccessibilityChecks()
-
         composeRule.onNodeWithContentDescription(text(R.string.show_close)).performClick()
+
+        composeRule.onNodeWithText("Table for two").assertExists()
+        composeRule.onNodeWithContentDescription(text(R.string.type_show_clear)).performClick()
+        composeRule.onNodeWithText(text(R.string.type_show_placeholder)).assertExists()
+        composeRule.onNodeWithText(text(R.string.fill_show)).assertIsNotEnabled()
+        composeRule.onNodeWithContentDescription(text(R.string.back)).performClick()
         composeRule.onNodeWithText(text(R.string.home_start_chat)).assertExists()
     }
 
@@ -110,6 +119,7 @@ class AppNavigationTest {
             listOf(
                 Route.Home,
                 Route.Fill("template-1"),
+                Route.TypeShow,
                 Route.Show("Hello"),
                 Route.Chat(),
                 Route.Chat("Hello"),

@@ -18,6 +18,7 @@ import com.ravendarque.deaftly.ui.home.HomeViewModel
 import com.ravendarque.deaftly.ui.placeholder.PlaceholderScreen
 import com.ravendarque.deaftly.ui.show.ShowScreen
 import com.ravendarque.deaftly.ui.show.ShowViewModel
+import com.ravendarque.deaftly.ui.typeshow.TypeShowScreen
 
 @Composable
 fun AppNavigation(container: AppContainer) {
@@ -43,6 +44,12 @@ fun AppNavigation(container: AppContainer) {
                         templateId = route.templateId,
                         viewModel = viewModel,
                         onNavigate = { backStack.add(it) },
+                        onBack = { backStack.removeLastOrNull() },
+                    )
+                }
+                entry<Route.TypeShow> {
+                    TypeShowScreen(
+                        onShow = { backStack.add(Route.Show(it)) },
                         onBack = { backStack.removeLastOrNull() },
                     )
                 }

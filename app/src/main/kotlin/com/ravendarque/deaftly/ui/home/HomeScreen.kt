@@ -81,7 +81,7 @@ fun HomeContent(
                 start = { modifier ->
                     InkButton(
                         text = stringResource(R.string.home_type_and_show),
-                        onClick = { actions.onNavigate(Route.Show()) },
+                        onClick = { actions.onNavigate(Route.TypeShow) },
                         modifier = modifier,
                         icon = DeaftlyIcons.Type,
                     )
