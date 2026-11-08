@@ -41,7 +41,7 @@ class EditorViewModelTest {
     private fun EditorViewModel.type(
         text: String,
         cursor: Int = text.length,
-    ) = onBodyChange(TextFieldValue(text, TextRange(cursor)))
+    ) = edit { it.withBody(TextFieldValue(text, TextRange(cursor))) }
 
     private fun stored(id: String) = repository.snapshot.first { it.id == id }
 
@@ -126,7 +126,7 @@ class EditorViewModelTest {
             val viewModel = viewModel(null)
             viewModel.type("Could I have  please?", cursor = 13)
 
-            viewModel.insertPlaceholder()
+            viewModel.edit { it.insertPlaceholder(editorStrings.newPlaceholderName) }
 
             assertEquals("Could I have {new placeholder} please?", viewModel.draft.body)
             assertEquals("new placeholder", viewModel.draft.selectedKey)
@@ -139,8 +139,8 @@ class EditorViewModelTest {
         runTest {
             val viewModel = viewModel(null)
 
-            viewModel.insertPlaceholder()
-            viewModel.insertPlaceholder()
+            viewModel.edit { it.insertPlaceholder(editorStrings.newPlaceholderName) }
+            viewModel.edit { it.insertPlaceholder(editorStrings.newPlaceholderName) }
 
             assertEquals("{new placeholder}{new placeholder 2}", viewModel.draft.body)
             assertEquals("new placeholder 2", viewModel.draft.selectedKey)
@@ -309,7 +309,7 @@ class EditorViewModelTest {
         runTest {
             val viewModel = viewModel(null)
             viewModel.edit { it.copy(name = "N", category = "C") }
-            viewModel.insertPlaceholder()
+            viewModel.edit { it.insertPlaceholder(editorStrings.newPlaceholderName) }
 
             viewModel.save()
 

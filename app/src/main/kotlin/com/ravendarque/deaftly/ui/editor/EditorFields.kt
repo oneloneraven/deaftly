@@ -198,15 +198,19 @@ fun LinkButton(
     }
 }
 
+data class ConfirmSpec(
+    val title: String,
+    val text: String,
+    val confirm: String,
+    val dismiss: String,
+    val destructive: Boolean = false,
+)
+
 @Composable
 fun ConfirmDialog(
-    title: String,
-    text: String,
-    confirm: String,
-    dismiss: String,
+    spec: ConfirmSpec,
     onConfirm: () -> Unit,
     onDismiss: () -> Unit,
-    destructive: Boolean = false,
 ) {
     val c = Deaftly.colors
     AlertDialog(
@@ -214,16 +218,16 @@ fun ConfirmDialog(
         containerColor = c.surface,
         titleContentColor = c.ink,
         textContentColor = c.inkSecondary,
-        title = { Text(title) },
-        text = { Text(text) },
+        title = { Text(spec.title) },
+        text = { Text(spec.text) },
         confirmButton = {
             TextButton(onClick = onConfirm, modifier = Modifier.heightIn(min = TargetSize)) {
-                Text(confirm, color = if (destructive) c.error else c.accentStrong, fontWeight = FontWeight.Bold)
+                Text(spec.confirm, color = if (spec.destructive) c.error else c.accentStrong, fontWeight = FontWeight.Bold)
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss, modifier = Modifier.heightIn(min = TargetSize)) {
-                Text(dismiss, color = c.ink)
+                Text(spec.dismiss, color = c.ink)
             }
         },
     )

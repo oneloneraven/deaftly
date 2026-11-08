@@ -39,9 +39,11 @@ fun OptionsEditor(
                 number = index + 1,
                 value = option,
                 requestFocus = focusIndex == index,
-                onFocused = { focusIndex = NO_FOCUS },
                 onValueChange = { value -> onChange(options.mapIndexed { i, old -> if (i == index) value else old }) },
-                onRemove = { onChange(options.filterIndexed { i, _ -> i != index }) },
+                onRemove = {
+                    focusIndex = NO_FOCUS
+                    onChange(options.filterIndexed { i, _ -> i != index })
+                },
             )
         }
         ToolButton(
@@ -60,7 +62,6 @@ private fun OptionField(
     number: Int,
     value: String,
     requestFocus: Boolean,
-    onFocused: () -> Unit,
     onValueChange: (String) -> Unit,
     onRemove: () -> Unit,
 ) {
@@ -68,7 +69,6 @@ private fun OptionField(
     LaunchedEffect(requestFocus) {
         if (requestFocus) {
             focusRequester.requestFocus()
-            onFocused()
         }
     }
     OutlinedTextField(

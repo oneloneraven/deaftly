@@ -3,7 +3,6 @@ package com.ravendarque.deaftly.ui.editor
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -67,6 +66,8 @@ class EditorViewModel(
 
     val isNew: Boolean get() = templateId == null
 
+    val newPlaceholderName: String get() = strings.newPlaceholderName
+
     val isDirty: Boolean
         get() = baseline?.let { draft.toTemplate(it.id, it.pinned, it.builtIn) != it } ?: false
 
@@ -76,14 +77,6 @@ class EditorViewModel(
 
     fun edit(change: (EditorDraft) -> EditorDraft) {
         commit(change(draft))
-    }
-
-    fun onBodyChange(value: TextFieldValue) {
-        commit(draft.withBody(value))
-    }
-
-    fun insertPlaceholder() {
-        commit(draft.insertPlaceholder(strings.newPlaceholderName))
     }
 
     fun save() {
@@ -120,7 +113,11 @@ class EditorViewModel(
             repository.templates
                 .first()
                 .firstOrNull { it.id == id }
-                ?.let { start(it) }
+                ?.let {
+                    val initial = EditorDraft.from(it)
+                    baseline = initial.toTemplate(it.id, it.pinned, it.builtIn)
+                    commit(initial)
+                }
             showErrors = false
         }
     }
@@ -141,40 +138,26 @@ class EditorViewModel(
         val id = existing?.id ?: createdId
         baseline = initial.toTemplate(id, existing?.pinned ?: false, existing?.builtIn ?: false)
         builtIn = existing?.builtIn == true
-        draft = restoredDraft() ?: initial
+        draft = savedState.get<String>(DRAFT_KEY)?.let(::decodeDraft) ?: initial
         phase = EditorPhase.Ready
     }
 
-    private fun start(template: Template) {
-        val initial = EditorDraft.from(template)
-        baseline = initial.toTemplate(template.id, template.pinned, template.builtIn)
-        commit(initial)
-    }
-
     private suspend fun buildTemplate(id: String? = null): Template? {
-        val current = baseline ?: return null
-        if (draft.errors.isNotEmpty()) {
-            showErrors = true
-            return null
+        val current = baseline
+        showErrors = showErrors || draft.errors.isNotEmpty()
+        return if (current == null || draft.errors.isNotEmpty()) {
+            null
+        } else {
+            val target = id ?: current.id
+            val latest = if (id == null) repository.templates.first().firstOrNull { it.id == target } else null
+            draft.toTemplate(target, latest?.pinned ?: current.pinned, current.builtIn)
         }
-        val target = id ?: current.id
-        val latest = if (id == null) repository.templates.first().firstOrNull { it.id == target } else null
-        return draft.toTemplate(target, latest?.pinned ?: current.pinned, current.builtIn)
     }
 
     private fun commit(next: EditorDraft) {
         draft = next
         savedState[DRAFT_KEY] = Json.encodeToString(EditorDraft.serializer(), next)
     }
-
-    private fun restoredDraft(): EditorDraft? =
-        savedState.get<String>(DRAFT_KEY)?.let {
-            try {
-                Json.decodeFromString(EditorDraft.serializer(), it)
-            } catch (_: SerializationException) {
-                null
-            }
-        }
 
     private fun launchGuarded(block: suspend () -> Unit) {
         if (busy || phase != EditorPhase.Ready) return
@@ -188,3 +171,10 @@ class EditorViewModel(
         }
     }
 }
+
+private fun decodeDraft(encoded: String): EditorDraft? =
+    try {
+        Json.decodeFromString(EditorDraft.serializer(), encoded)
+    } catch (_: SerializationException) {
+        null
+    }

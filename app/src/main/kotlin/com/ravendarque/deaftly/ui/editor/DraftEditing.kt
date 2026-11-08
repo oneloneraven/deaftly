@@ -44,18 +44,23 @@ fun EditorDraft.select(key: String): EditorDraft =
     }
 
 fun EditorDraft.renameSelected(input: String): EditorDraft {
-    val current = selectedKey ?: return this
+    val current = selectedKey
     val typed = copy(keyInput = input)
     val candidate = input.trim()
-    if (typed.keyError != null || candidate == current) return typed
+    return if (current == null || typed.keyError != null || candidate == current) typed else typed.renamed(current, candidate)
+}
+
+private fun EditorDraft.renamed(
+    current: String,
+    candidate: String,
+): EditorDraft {
     val rename = TemplateEditing.renameKey(body, current, candidate)
-    return typed.copy(
+    return copy(
         body = rename.text,
         selectionStart = rename.mapOffset(selectionStart),
         selectionEnd = rename.mapOffset(selectionEnd),
         placeholders = placeholders.map { if (it.key == current) it.copy(key = candidate) else it },
         selectedKey = candidate,
-        keyInput = input,
     )
 }
 

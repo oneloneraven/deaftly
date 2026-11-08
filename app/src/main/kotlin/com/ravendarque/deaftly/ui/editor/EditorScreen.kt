@@ -88,8 +88,8 @@ fun EditorScreen(
                 actions =
                     EditorActions(
                         onEdit = viewModel::edit,
-                        onBodyChange = viewModel::onBodyChange,
-                        onInsertPlaceholder = viewModel::insertPlaceholder,
+                        onBodyChange = { value -> viewModel.edit { it.withBody(value) } },
+                        onInsertPlaceholder = { viewModel.edit { it.insertPlaceholder(viewModel.newPlaceholderName) } },
                         onSave = viewModel::save,
                         onDiscard = viewModel::discard,
                         onMakeCopy = viewModel::makeCopy,
@@ -240,37 +240,42 @@ private fun EditorDialogs(
     actions: EditorActions,
     onClose: () -> Unit,
 ) {
+    val cancel = stringResource(R.string.editor_dialog_cancel)
     when (dialog) {
         EditorDialog.Discard -> {
-            ConfirmDialog(
-                title = stringResource(R.string.editor_discard_title),
-                text = stringResource(R.string.editor_discard_text),
-                confirm = stringResource(R.string.editor_discard_confirm),
-                dismiss = stringResource(R.string.editor_keep_editing),
-                onConfirm = actions.onDiscard,
-                onDismiss = onClose,
-                destructive = true,
-            )
+            val spec =
+                ConfirmSpec(
+                    title = stringResource(R.string.editor_discard_title),
+                    text = stringResource(R.string.editor_discard_text),
+                    confirm = stringResource(R.string.editor_discard_confirm),
+                    dismiss = stringResource(R.string.editor_keep_editing),
+                    destructive = true,
+                )
+            ConfirmDialog(spec, onConfirm = actions.onDiscard, onDismiss = onClose)
         }
 
         EditorDialog.Delete -> {
-            ConfirmDialog(
-                title = stringResource(R.string.editor_delete_title),
-                text = stringResource(R.string.editor_delete_text, state.draft.name.trim()),
-                confirm = stringResource(R.string.editor_delete_confirm),
-                dismiss = stringResource(R.string.editor_dialog_cancel),
-                onConfirm = actions.onDelete,
-                onDismiss = onClose,
-                destructive = true,
-            )
+            val spec =
+                ConfirmSpec(
+                    title = stringResource(R.string.editor_delete_title),
+                    text = stringResource(R.string.editor_delete_text, state.draft.name.trim()),
+                    confirm = stringResource(R.string.editor_delete_confirm),
+                    dismiss = cancel,
+                    destructive = true,
+                )
+            ConfirmDialog(spec, onConfirm = actions.onDelete, onDismiss = onClose)
         }
 
         EditorDialog.Restore -> {
+            val spec =
+                ConfirmSpec(
+                    title = stringResource(R.string.editor_restore_title),
+                    text = stringResource(R.string.editor_restore_text),
+                    confirm = stringResource(R.string.editor_restore_confirm),
+                    dismiss = cancel,
+                )
             ConfirmDialog(
-                title = stringResource(R.string.editor_restore_title),
-                text = stringResource(R.string.editor_restore_text),
-                confirm = stringResource(R.string.editor_restore_confirm),
-                dismiss = stringResource(R.string.editor_dialog_cancel),
+                spec,
                 onConfirm = {
                     actions.onRestore()
                     onClose()

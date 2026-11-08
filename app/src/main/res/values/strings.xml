@@ -51,7 +51,6 @@
     <string name="editor_add_placeholder">Placeholder</string>
     <string name="editor_new_placeholder_name">new placeholder</string>
     <string name="editor_placeholders">Placeholders in this message</string>
-    <string name="editor_placeholder_settings">Placeholder settings</string>
     <string name="editor_placeholder_heading">Placeholder: %1$s</string>
     <string name="editor_delete_placeholder">Delete placeholder</string>
     <string name="editor_placeholder_name">Name in the message</string>
