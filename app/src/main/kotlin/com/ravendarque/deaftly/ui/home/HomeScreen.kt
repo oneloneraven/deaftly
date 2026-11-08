@@ -81,7 +81,7 @@ fun HomeContent(
                 start = { modifier ->
                     InkButton(
                         text = stringResource(R.string.home_type_and_show),
-                        onClick = { actions.onNavigate(Route.Show()) },
+                        onClick = { actions.onNavigate(Route.TypeShow) },
                         modifier = modifier,
                         icon = DeaftlyIcons.Type,
                     )
@@ -89,7 +89,7 @@ fun HomeContent(
                 end = { modifier ->
                     SecondaryButton(
                         text = stringResource(R.string.home_start_chat),
-                        onClick = { actions.onNavigate(Route.Chat) },
+                        onClick = { actions.onNavigate(Route.Chat()) },
                         modifier = modifier,
                         icon = DeaftlyIcons.Chat,
                     )

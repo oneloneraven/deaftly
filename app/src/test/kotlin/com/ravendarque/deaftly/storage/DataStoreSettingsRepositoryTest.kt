@@ -2,6 +2,7 @@ package com.ravendarque.deaftly.storage
 
 import com.ravendarque.deaftly.core.chat.ChatProfile
 import com.ravendarque.deaftly.core.chat.ColourRole
+import com.ravendarque.deaftly.core.settings.ShowScheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
@@ -12,6 +13,7 @@ import org.junit.rules.TemporaryFolder
 import java.io.File
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 
 class DataStoreSettingsRepositoryTest {
     @get:Rule
@@ -19,6 +21,22 @@ class DataStoreSettingsRepositoryTest {
 
     private fun repository(scope: CoroutineScope) =
         DataStoreSettingsRepository(createTemplateStore(File(folder.root, "templates.json"), builtIns, scope))
+
+    @Test
+    fun hasNoChosenSchemeUntilOneIsSet() =
+        runTest {
+            assertNull(repository(backgroundScope).showScheme.first())
+        }
+
+    @Test
+    fun theChosenSchemeSurvivesAFreshStore() =
+        runTest {
+            val firstRun = Job()
+            repository(CoroutineScope(firstRun)).setShowScheme(ShowScheme.YellowOnBlack)
+            firstRun.cancelAndJoin()
+
+            assertEquals(ShowScheme.YellowOnBlack, repository(backgroundScope).showScheme.first())
+        }
 
     @Test
     fun defaultsToNoNameAndTheAccentColourUntilOneIsSet() =
@@ -44,6 +62,18 @@ class DataStoreSettingsRepositoryTest {
             repository.setChatProfile(ChatProfile("  ", ColourRole.Rose))
 
             assertEquals(ChatProfile(null, ColourRole.Rose), repository.chatProfile.first())
+        }
+
+    @Test
+    fun theChatProfileAndTheShowSchemeDoNotOverwriteEachOther() =
+        runTest {
+            val repository = repository(backgroundScope)
+
+            repository.setShowScheme(ShowScheme.WhiteOnBlack)
+            repository.setChatProfile(ChatProfile("Alex", ColourRole.Berry))
+
+            assertEquals(ShowScheme.WhiteOnBlack, repository.showScheme.first())
+            assertEquals(ChatProfile("Alex", ColourRole.Berry), repository.chatProfile.first())
         }
 
     @Test

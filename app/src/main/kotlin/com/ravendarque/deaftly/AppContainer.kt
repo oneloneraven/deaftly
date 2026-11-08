@@ -13,6 +13,7 @@ import com.ravendarque.deaftly.templates.builtInTemplates
 import com.ravendarque.deaftly.ui.chat.ChatViewModel
 import com.ravendarque.deaftly.ui.fill.FillViewModel
 import com.ravendarque.deaftly.ui.home.HomeViewModel
+import com.ravendarque.deaftly.ui.show.ShowViewModel
 
 class AppContainer(
     private val context: Context,
@@ -28,6 +29,11 @@ class AppContainer(
     val homeViewModelFactory =
         viewModelFactory {
             initializer { HomeViewModel(templateRepository) }
+        }
+
+    val showViewModelFactory =
+        viewModelFactory {
+            initializer { ShowViewModel(settingsRepository) }
         }
 
     val chatViewModelFactory =
