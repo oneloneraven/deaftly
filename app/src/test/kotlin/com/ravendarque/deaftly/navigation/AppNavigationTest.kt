@@ -58,7 +58,6 @@ class AppNavigationTest {
         showApp()
         val opens =
             listOf(
-                { composeRule.onNodeWithContentDescription(text(R.string.home_new_template)).performClick() } to R.string.route_editor,
                 { composeRule.onNodeWithContentDescription(text(R.string.route_settings)).performClick() } to R.string.route_settings,
             )
 
@@ -110,6 +109,19 @@ class AppNavigationTest {
 
         composeRule.onNodeWithText(text(R.string.chat_empty)).assertExists()
         composeRule.onNodeWithContentDescription("Me: Hello there").assertDoesNotExist()
+    }
+
+    @Test
+    fun newTemplateOpensTheEditorAndCancelReturnsHome() {
+        showApp()
+
+        composeRule.onNodeWithContentDescription(text(R.string.home_new_template)).performClick()
+        composeRule.onNodeWithText(text(R.string.editor_title_new)).assertExists()
+        composeRule.onNodeWithContentDescription(text(R.string.editor_cancel)).performClick()
+        composeRule.waitForIdle()
+
+        composeRule.onNodeWithText(text(R.string.editor_title_new)).assertDoesNotExist()
+        composeRule.onNodeWithText(text(R.string.home_start_chat)).assertExists()
     }
 
     @Test
