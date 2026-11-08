@@ -13,4 +13,5 @@ kotlin {
 
 dependencies {
     testImplementation(libs.kotlin.test)
+    testImplementation(libs.kotlinx.coroutines.test)
 }
