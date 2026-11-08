@@ -1,5 +1,8 @@
 import com.android.build.api.artifact.SingleArtifact
 import com.ravendarque.deaftly.guard.VerifyReleaseManifestTask
+import java.net.URI
+import java.security.MessageDigest
+import javax.inject.Inject
 
 plugins {
     alias(libs.plugins.android.application)
@@ -13,6 +16,47 @@ val appVersionParts =
         "appVersion must be X.Y.Z with each part 0-999, not $appVersion"
     }.destructured.toList().map(String::toInt)
 val (appMajor, appMinor, appPatch) = appVersionParts
+
+val withEngine = !providers.gradleProperty("withoutOcrEngine").isPresent
+
+abstract class FetchNcnnTask
+    @Inject
+    constructor(
+        private val files: FileSystemOperations,
+        private val archives: ArchiveOperations,
+    ) : DefaultTask() {
+        @get:Input
+        abstract val url: Property<String>
+
+        @get:Input
+        abstract val sha256: Property<String>
+
+        @get:OutputDirectory
+        abstract val outputDir: DirectoryProperty
+
+        @TaskAction
+        fun fetch() {
+            val zip = temporaryDir.resolve("ncnn.zip")
+            URI(url.get()).toURL().openStream().use { input -> zip.outputStream().use { input.copyTo(it) } }
+            val actual = MessageDigest.getInstance("SHA-256").digest(zip.readBytes()).joinToString("") { "%02x".format(it) }
+            check(actual == sha256.get()) { "ncnn archive checksum mismatch: $actual" }
+            files.sync {
+                from(archives.zipTree(zip)) {
+                    include("*/arm64-v8a/**", "*/x86_64/**")
+                    eachFile { relativePath = RelativePath(true, *relativePath.segments.drop(1).toTypedArray()) }
+                    includeEmptyDirs = false
+                }
+                into(outputDir)
+            }
+        }
+    }
+
+val fetchNcnn =
+    tasks.register<FetchNcnnTask>("fetchNcnn") {
+        url.set("https://github.com/Tencent/ncnn/releases/download/20261020/ncnn-20261020-android.zip")
+        sha256.set("62a9edb493ceb42a5c9cbf2d3a79b3f44bff06c625134ffb64d183dcc42c25fc")
+        outputDir.set(rootProject.layout.projectDirectory.dir("third_party/ncnn/dist"))
+    }
 
 val releaseKeystore = providers.environmentVariable("ANDROID_KEYSTORE_PATH")
 
@@ -32,6 +76,30 @@ android {
         versionName = appVersion
         versionCode = (appMajor * 1_000_000 + appMinor * 1_000 + appPatch).coerceAtLeast(1)
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        if (withEngine) {
+            ndk { abiFilters += listOf("arm64-v8a", "x86_64") }
+            externalNativeBuild {
+                cmake {
+                    arguments(
+                        "-DNCNN_ROOT=${rootProject.layout.projectDirectory.dir("third_party/ncnn/dist").asFile.absolutePath}",
+                        "-DANDROID_STL=c++_static",
+                    )
+                }
+            }
+        }
+    }
+
+    ndkVersion = "30.0.16248370"
+
+    if (withEngine) {
+        externalNativeBuild {
+            cmake {
+                path = file("src/main/cpp/CMakeLists.txt")
+                version = "4.1.2"
+            }
+        }
+    } else {
+        androidResources { ignoreAssetsPatterns += "ocr" }
     }
 
     signingConfigs {
@@ -128,6 +196,7 @@ kotlin {
 dependencies {
     implementation(project(":core"))
     implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.kotlinx.coroutines.android)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
@@ -145,6 +214,9 @@ dependencies {
     androidTestImplementation(libs.androidx.test.junit)
     androidTestImplementation(libs.androidx.test.runner)
     androidTestImplementation(libs.junit)
+    androidTestImplementation(libs.kotlin.test)
+    androidTestImplementation(libs.kotlinx.coroutines.test)
+    androidTestImplementation(testFixtures(project(":core")))
 
     testImplementation(platform(libs.androidx.compose.bom))
     testImplementation(libs.androidx.compose.ui.test.junit4)
@@ -161,6 +233,12 @@ dependencies {
 
 roborazzi {
     outputDir.set(file("src/test/screenshots"))
+}
+
+if (withEngine) {
+    tasks
+        .matching { it.name.startsWith("configureCMake") || it.name.startsWith("generateJsonModel") }
+        .configureEach { dependsOn(fetchNcnn) }
 }
 
 androidComponents {
