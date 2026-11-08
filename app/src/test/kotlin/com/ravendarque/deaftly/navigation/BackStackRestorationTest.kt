@@ -1,6 +1,5 @@
 package com.ravendarque.deaftly.navigation
 
-import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -10,6 +9,7 @@ import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.ravendarque.deaftly.MainActivity
 import com.ravendarque.deaftly.R
+import com.ravendarque.deaftly.ui.chat.isParticipantNameField
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -56,7 +56,7 @@ class BackStackRestorationTest {
             composeRule.onAllNodesWithText(text(R.string.chat_empty)).fetchSemanticsNodes().isNotEmpty()
         }
         composeRule.onNodeWithContentDescription(text(R.string.chat_edit_participants, "Them", "Me")).performClick()
-        composeRule.onAllNodes(hasSetTextAction())[1].performTextInput("Sam")
+        composeRule.onAllNodes(isParticipantNameField)[1].performTextInput("Sam")
         composeRule.onNodeWithText(text(R.string.participants_done)).performClick()
 
         composeRule.activityRule.scenario.recreate()

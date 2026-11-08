@@ -1,22 +1,17 @@
 package com.ravendarque.deaftly.ui.chat
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.ravendarque.deaftly.R
 import com.ravendarque.deaftly.ui.theme.Deaftly
 
 @Composable
@@ -32,25 +27,40 @@ fun ChatScreen(
         }
 
         is ChatUiState.Ready -> {
+            val conversation = current.conversation
             Surface(modifier = Modifier.fillMaxSize()) {
                 Column(modifier = Modifier.safeDrawingPadding()) {
                     ChatHeader(
-                        conversation = current.conversation,
+                        conversation = conversation,
                         onEnd = onEnd,
                         onEditParticipants = { editingParticipants = true },
+                        textSize = current.textSize,
+                        onCycleTextSize = viewModel::cycleTextSize,
                     )
-                    Box(modifier = Modifier.weight(1f).fillMaxSize(), contentAlignment = Alignment.Center) {
-                        Text(
-                            text = stringResource(R.string.chat_empty),
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = Deaftly.colors.inkMuted,
-                        )
-                    }
+                    MessageList(conversation, current.textSize, Modifier.weight(1f).fillMaxSize())
+                    Composer(
+                        participant = conversation.activeParticipant,
+                        draft = current.draft,
+                        onDraftChange = viewModel::setDraft,
+                        onSend = viewModel::send,
+                        modifier = Modifier.padding(horizontal = Deaftly.spacing.space12),
+                    )
+                    TurnControl(
+                        conversation = conversation,
+                        onSelect = viewModel::selectTurn,
+                        modifier =
+                            Modifier.padding(
+                                start = Deaftly.spacing.space12,
+                                top = Deaftly.spacing.space12,
+                                end = Deaftly.spacing.space12,
+                                bottom = Deaftly.spacing.space12,
+                            ),
+                    )
                 }
             }
             if (editingParticipants) {
                 ParticipantsSheet(
-                    conversation = current.conversation,
+                    conversation = conversation,
                     onChange = viewModel::updateParticipant,
                     onDone = {
                         viewModel.rememberOwnDefaults()

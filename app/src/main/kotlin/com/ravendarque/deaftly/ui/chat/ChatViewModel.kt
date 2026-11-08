@@ -4,44 +4,56 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ravendarque.deaftly.core.chat.ChatProfile
-import com.ravendarque.deaftly.core.chat.ColourRole
 import com.ravendarque.deaftly.core.chat.Conversation
 import com.ravendarque.deaftly.core.chat.Participant
 import com.ravendarque.deaftly.core.chat.ParticipantId
+import com.ravendarque.deaftly.core.chat.RichText
 import com.ravendarque.deaftly.core.settings.SettingsRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 private const val STOP_TIMEOUT_MILLIS = 5_000L
-private const val A_NAME_KEY = "a_name"
-private const val A_COLOUR_KEY = "a_colour"
-private const val B_NAME_KEY = "b_name"
-private const val B_COLOUR_KEY = "b_colour"
+private const val CONVERSATION_KEY = "conversation"
+private const val TEXT_SIZE_KEY = "text_size"
+private const val DRAFT_A_KEY = "draft_a"
+private const val DRAFT_B_KEY = "draft_b"
 
 sealed interface ChatUiState {
     data object Loading : ChatUiState
 
     data class Ready(
         val conversation: Conversation,
-    ) : ChatUiState
+        val textSize: ChatTextSize,
+        val drafts: Map<ParticipantId, String>,
+    ) : ChatUiState {
+        val draft: String get() = drafts[conversation.turn].orEmpty()
+    }
 }
 
 class ChatViewModel(
     private val settings: SettingsRepository,
     private val savedState: SavedStateHandle,
 ) : ViewModel() {
-    private val conversation = MutableStateFlow(restore())
+    private val conversation = MutableStateFlow(ChatCodec.decode(savedState[CONVERSATION_KEY]))
+    private val textSize = MutableStateFlow(ChatTextSize.entries.getOrElse(savedState.get<Int>(TEXT_SIZE_KEY) ?: 0) { ChatTextSize.Normal })
+    private val drafts =
+        MutableStateFlow(
+            mapOf(
+                ParticipantId.A to savedState.get<String>(DRAFT_A_KEY).orEmpty(),
+                ParticipantId.B to savedState.get<String>(DRAFT_B_KEY).orEmpty(),
+            ),
+        )
 
     val state: StateFlow<ChatUiState> =
-        conversation
-            .map { it?.let(ChatUiState::Ready) ?: ChatUiState.Loading }
-            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS), ChatUiState.Loading)
+        combine(conversation, textSize, drafts) { conversation, textSize, drafts ->
+            if (conversation == null) ChatUiState.Loading else ChatUiState.Ready(conversation, textSize, drafts)
+        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS), ChatUiState.Loading)
 
     init {
         if (conversation.value == null) {
@@ -53,7 +65,7 @@ class ChatViewModel(
     }
 
     fun updateParticipant(participant: Participant) {
-        conversation.update { current -> current?.withParticipant(participant)?.also(::save) }
+        change { it.withParticipant(participant) }
     }
 
     fun rememberOwnDefaults() {
@@ -61,25 +73,36 @@ class ChatViewModel(
         viewModelScope.launch { settings.setChatProfile(ChatProfile(own.name, own.colour)) }
     }
 
+    fun selectTurn(id: ParticipantId) {
+        change { it.withTurn(id) }
+    }
+
+    fun cycleTextSize() {
+        textSize.update { it.next() }
+        savedState[TEXT_SIZE_KEY] = textSize.value.ordinal
+    }
+
+    fun setDraft(text: String) {
+        val turn = conversation.value?.turn ?: return
+        drafts.update { it + (turn to text) }
+        savedState[draftKey(turn)] = text
+    }
+
+    fun send() {
+        val current = conversation.value ?: return
+        val text = drafts.value[current.turn].orEmpty().trim()
+        if (text.isEmpty()) return
+        change { it.append(RichText.spans(text)) }
+        setDraft("")
+    }
+
+    private fun change(transform: (Conversation) -> Conversation) {
+        conversation.update { current -> current?.let(transform)?.also(::save) }
+    }
+
     private fun save(conversation: Conversation) {
-        savedState[A_NAME_KEY] = conversation.participantA.name
-        savedState[A_COLOUR_KEY] = conversation.participantA.colour.name
-        savedState[B_NAME_KEY] = conversation.participantB.name
-        savedState[B_COLOUR_KEY] = conversation.participantB.colour.name
+        savedState[CONVERSATION_KEY] = ChatCodec.encode(conversation)
     }
 
-    private fun restore(): Conversation? {
-        val a = savedState.get<String>(A_COLOUR_KEY)?.let(::colourOrNull)
-        val b = savedState.get<String>(B_COLOUR_KEY)?.let(::colourOrNull)
-        return if (a == null || b == null || a == b) {
-            null
-        } else {
-            Conversation(
-                Participant(ParticipantId.A, a, savedState[A_NAME_KEY]),
-                Participant(ParticipantId.B, b, savedState[B_NAME_KEY]),
-            )
-        }
-    }
-
-    private fun colourOrNull(name: String): ColourRole? = ColourRole.entries.firstOrNull { it.name == name }
+    private fun draftKey(id: ParticipantId) = if (id == ParticipantId.A) DRAFT_A_KEY else DRAFT_B_KEY
 }

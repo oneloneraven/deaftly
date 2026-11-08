@@ -8,10 +8,12 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.tryPerformAccessibilityChecks
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.ravendarque.deaftly.AppContainer
 import com.ravendarque.deaftly.R
+import com.ravendarque.deaftly.ui.chat.isMessageField
 import com.ravendarque.deaftly.ui.theme.AppTheme
 import kotlinx.serialization.json.Json
 import org.junit.Rule
@@ -86,6 +88,28 @@ class AppNavigationTest {
         composeRule.onNodeWithContentDescription(text(R.string.chat_end)).performClick()
         composeRule.onNodeWithText(text(R.string.home_start_chat)).assertExists()
         composeRule.onNodeWithText(text(R.string.chat_empty)).assertDoesNotExist()
+    }
+
+    @Test
+    fun endingAChatDiscardsItsMessages() {
+        showApp()
+
+        fun openChat() {
+            composeRule.onNodeWithText(text(R.string.home_start_chat)).performClick()
+            composeRule.waitUntil(LOAD_TIMEOUT_MILLIS) {
+                composeRule.onAllNodesWithText(text(R.string.chat_composer_hint)).fetchSemanticsNodes().isNotEmpty()
+            }
+        }
+
+        openChat()
+        composeRule.onNode(isMessageField).performTextInput("Hello there")
+        composeRule.onNodeWithContentDescription(text(R.string.chat_send)).performClick()
+        composeRule.onNodeWithContentDescription("Me: Hello there").assertExists()
+        composeRule.onNodeWithContentDescription(text(R.string.chat_end)).performClick()
+        openChat()
+
+        composeRule.onNodeWithText(text(R.string.chat_empty)).assertExists()
+        composeRule.onNodeWithContentDescription("Me: Hello there").assertDoesNotExist()
     }
 
     @Test

@@ -3,7 +3,8 @@ package com.ravendarque.deaftly.ui.chat
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
@@ -17,11 +18,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.ravendarque.deaftly.R
@@ -34,13 +35,15 @@ import com.ravendarque.deaftly.ui.theme.colours
 
 private val HeaderTarget = 48.dp
 private val DividerWidth = 1.dp
-private const val STACK_FONT_SCALE = 1.3f
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun ChatHeader(
     conversation: Conversation,
     onEnd: () -> Unit,
     onEditParticipants: () -> Unit,
+    textSize: ChatTextSize,
+    onCycleTextSize: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val left = conversation.participantB.labelled()
@@ -69,37 +72,25 @@ fun ChatHeader(
                     .semantics(mergeDescendants = true) { contentDescription = description },
             contentAlignment = Alignment.Center,
         ) {
-            if (LocalDensity.current.fontScale >= STACK_FONT_SCALE) {
-                Column(verticalArrangement = Arrangement.spacedBy(Deaftly.spacing.space4)) {
-                    HeaderPerson(left)
-                    HeaderPerson(right)
-                }
-            } else {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(Deaftly.spacing.space8, Alignment.CenterHorizontally),
-                ) {
-                    HeaderPerson(left, Modifier.weight(1f, fill = false))
-                    Text(
-                        text = stringResource(R.string.chat_and),
-                        color = Deaftly.colors.inkMuted,
-                        style = MaterialTheme.typography.labelLarge,
-                    )
-                    HeaderPerson(right, Modifier.weight(1f, fill = false))
-                }
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(Deaftly.spacing.space8, Alignment.CenterHorizontally),
+                verticalArrangement = Arrangement.spacedBy(Deaftly.spacing.space4),
+                itemVerticalAlignment = Alignment.CenterVertically,
+            ) {
+                HeaderPerson(left, trailing = stringResource(R.string.chat_and))
+                HeaderPerson(right)
             }
         }
-        Box(Modifier.size(HeaderTarget))
+        TextSizeButton(textSize, onCycleTextSize)
     }
 }
 
 @Composable
 private fun HeaderPerson(
     participant: Participant,
-    modifier: Modifier = Modifier,
+    trailing: String? = null,
 ) {
     Row(
-        modifier = modifier,
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(Deaftly.spacing.space4),
     ) {
@@ -111,5 +102,36 @@ private fun HeaderPerson(
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
         )
+        if (trailing != null) {
+            Text(
+                text = trailing,
+                color = Deaftly.colors.inkMuted,
+                style = MaterialTheme.typography.labelLarge,
+                modifier = Modifier.padding(start = Deaftly.spacing.space4),
+            )
+        }
+    }
+}
+
+@Composable
+private fun TextSizeButton(
+    textSize: ChatTextSize,
+    onClick: () -> Unit,
+) {
+    val label = stringResource(R.string.chat_text_size)
+    val state = stringResource(textSize.label)
+    Box(
+        modifier =
+            Modifier
+                .size(HeaderTarget)
+                .clip(Deaftly.shapes.controlSmall)
+                .clickable(role = Role.Button, onClick = onClick)
+                .semantics {
+                    contentDescription = label
+                    stateDescription = state
+                },
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(text = stringResource(R.string.chat_text_size_glyph), style = MaterialTheme.typography.titleMedium, color = Deaftly.colors.ink)
     }
 }

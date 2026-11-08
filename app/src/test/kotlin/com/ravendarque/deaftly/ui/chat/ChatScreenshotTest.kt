@@ -9,6 +9,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onRoot
+import androidx.lifecycle.SavedStateHandle
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.takahirom.roborazzi.captureRoboImage
 import com.ravendarque.deaftly.core.chat.ColourRole
@@ -71,9 +72,42 @@ class ChatScreenshotTest {
         dark: Boolean,
     ) = shot {
         AppTheme(darkTheme = dark) {
-            Surface { ChatHeader(conversation, onEnd = {}, onEditParticipants = {}) }
+            Surface { ChatHeader(conversation, onEnd = {}, onEditParticipants = {}, textSize = ChatTextSize.Normal, onCycleTextSize = {}) }
         }
     }
+
+    private fun screen(
+        turn: ParticipantId,
+        dark: Boolean,
+        draft: String = "",
+    ) {
+        val saved =
+            SavedStateHandle(
+                mapOf("conversation" to ChatCodec.encode(orderingConversation(turn)), "draft_a" to draft, "draft_b" to draft),
+            )
+        val viewModel = ChatViewModel(FakeSettingsRepository(), saved)
+        shot { AppTheme(darkTheme = dark) { ChatScreen(viewModel, onEnd = {}) } }
+    }
+
+    @Test
+    fun conversationHearingPersonsTurnLightTheme() = screen(ParticipantId.B, dark = false)
+
+    @Test
+    fun conversationHearingPersonsTurnDarkTheme() = screen(ParticipantId.B, dark = true)
+
+    @Test
+    @Config(fontScale = 2f)
+    fun conversationHearingPersonsTurnLargeFontScale() = screen(ParticipantId.B, dark = false)
+
+    @Test
+    fun conversationDeafUsersTurnLightTheme() = screen(ParticipantId.A, dark = false, draft = "Thank you")
+
+    @Test
+    fun conversationDeafUsersTurnDarkTheme() = screen(ParticipantId.A, dark = true)
+
+    @Test
+    @Config(fontScale = 2f)
+    fun conversationDeafUsersTurnLargeFontScale() = screen(ParticipantId.A, dark = false)
 
     @Test
     fun sheetWithDefaultsLightTheme() = sheet(defaults, dark = false)
