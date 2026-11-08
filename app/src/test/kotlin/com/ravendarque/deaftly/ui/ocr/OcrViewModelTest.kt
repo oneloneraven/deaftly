@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.ravendarque.deaftly.core.ocr.BoundingBox
 import com.ravendarque.deaftly.core.ocr.FakeTextRecogniser
+import com.ravendarque.deaftly.core.ocr.PhraseSelection
 import com.ravendarque.deaftly.core.ocr.PixelFormat
 import com.ravendarque.deaftly.core.ocr.RecognitionFrame
 import com.ravendarque.deaftly.core.ocr.RecognitionResult
@@ -129,6 +130,51 @@ class OcrViewModelTest {
             viewModel.state.value.phrases
                 .isNotEmpty(),
         )
+    }
+
+    @Test
+    fun tappingAPhraseSelectsItAndFillsTheTrayWithItsText() {
+        val viewModel = viewModel()
+        viewModel.awaitReady()
+        viewModel.analyse(frame(), null)
+        val phrase =
+            viewModel.state.value.phrases
+                .single()
+
+        viewModel.selectPhrase(phrase.id)
+
+        assertEquals("Lasagne", viewModel.state.value.fieldText)
+        assertEquals(PhraseSelection.wholePhrase(phrase), viewModel.state.value.selection)
+    }
+
+    @Test
+    fun tappingNothingClearsTheSelectionButKeepsTheEditedText() {
+        val viewModel = viewModel()
+        viewModel.awaitReady()
+        viewModel.analyse(frame(), null)
+        viewModel.selectPhrase(
+            viewModel.state.value.phrases
+                .single()
+                .id,
+        )
+        viewModel.editText("Lasagne verde")
+
+        viewModel.selectPhrase(null)
+
+        assertEquals(null, viewModel.state.value.selection)
+        assertEquals("Lasagne verde", viewModel.state.value.fieldText)
+    }
+
+    @Test
+    fun selectingAPhraseThatIsNotThereChangesNothingButTheSelection() {
+        val viewModel = viewModel()
+        viewModel.awaitReady()
+        viewModel.editText("typed")
+
+        viewModel.selectPhrase(99)
+
+        assertEquals(null, viewModel.state.value.selection)
+        assertEquals("typed", viewModel.state.value.fieldText)
     }
 
     private companion object {

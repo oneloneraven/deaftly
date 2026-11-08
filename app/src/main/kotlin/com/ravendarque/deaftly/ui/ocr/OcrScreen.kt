@@ -10,6 +10,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
@@ -21,6 +22,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ravendarque.deaftly.R
 import com.ravendarque.deaftly.core.ocr.Phrase
+import com.ravendarque.deaftly.core.ocr.TextSelection
 import com.ravendarque.deaftly.ui.theme.CameraColours
 
 @Composable
@@ -39,21 +41,38 @@ fun OcrScreen(
         val viewModel = viewModel<OcrViewModel>(factory = viewModelFactory)
         val state by viewModel.state.collectAsStateWithLifecycle()
         OcrCameraContent(
-            status = stringResource(if (state.ready) R.string.ocr_status_live else R.string.ocr_status_starting),
-            phrases = state.phrases,
-            onClose = onClose,
-            controlsEnabled = false,
+            content =
+                OcrContent(
+                    status = stringResource(if (state.ready) R.string.ocr_status_live else R.string.ocr_status_starting),
+                    phrases = state.phrases,
+                    selection = state.selection,
+                    fieldText = state.fieldText,
+                    controlsEnabled = false,
+                ),
+            actions = OcrActions(onClose, viewModel::selectPhrase, viewModel::editText),
             viewfinder = { CameraViewfinder(viewModel::analyse, onUnavailable = { unavailable = true }, modifier = it) },
         )
     }
 }
 
+data class OcrContent(
+    val status: String,
+    val phrases: List<Phrase>,
+    val selection: TextSelection?,
+    val fieldText: String,
+    val controlsEnabled: Boolean,
+)
+
+data class OcrActions(
+    val onClose: () -> Unit,
+    val onTapPhrase: (Long?) -> Unit,
+    val onFieldChange: (String) -> Unit,
+)
+
 @Composable
 fun OcrCameraContent(
-    status: String,
-    phrases: List<Phrase>,
-    onClose: () -> Unit,
-    controlsEnabled: Boolean,
+    content: OcrContent,
+    actions: OcrActions,
     viewfinder: @Composable (Modifier) -> Unit,
 ) {
     LightSystemBarIcons()
@@ -61,13 +80,20 @@ fun OcrCameraContent(
     Box(modifier = Modifier.fillMaxSize().background(CameraColours.backdrop)) {
         Box(modifier = Modifier.fillMaxSize().semantics { contentDescription = cameraView }) {
             viewfinder(Modifier.fillMaxSize())
-            PhraseOverlay(phrases, Modifier.fillMaxSize())
+            PhraseOverlay(content.phrases, content.selection, actions.onTapPhrase, Modifier.fillMaxSize())
         }
         OcrTopBar(
-            status = status,
-            onClose = onClose,
-            controlsEnabled = controlsEnabled,
+            status = content.status,
+            onClose = actions.onClose,
+            controlsEnabled = content.controlsEnabled,
             modifier = Modifier.statusBarsPadding(),
+        )
+        OcrTray(
+            hint = stringResource(R.string.ocr_tray_hint),
+            fieldLabel = stringResource(R.string.ocr_tray_label),
+            text = content.fieldText,
+            onTextChange = actions.onFieldChange,
+            modifier = Modifier.align(Alignment.BottomCenter),
         )
     }
 }
