@@ -1,6 +1,7 @@
 package com.ravendarque.deaftly
 
 import android.content.Context
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
@@ -17,6 +18,7 @@ import com.ravendarque.deaftly.ui.editor.EditorStrings
 import com.ravendarque.deaftly.ui.editor.EditorViewModel
 import com.ravendarque.deaftly.ui.fill.FillViewModel
 import com.ravendarque.deaftly.ui.home.HomeViewModel
+import com.ravendarque.deaftly.ui.ocr.FrameImage
 import com.ravendarque.deaftly.ui.ocr.OcrOutcomes
 import com.ravendarque.deaftly.ui.ocr.OcrViewModel
 import com.ravendarque.deaftly.ui.settings.SettingsViewModel
@@ -38,7 +40,12 @@ class AppContainer(
 
     val ocrViewModelFactory =
         viewModelFactory {
-            initializer { OcrViewModel { PaddleOcrNcnnRecogniser(context.applicationContext) } }
+            initializer {
+                OcrViewModel(
+                    createRecogniser = { PaddleOcrNcnnRecogniser(context.applicationContext) },
+                    captureFrame = { frame, crop -> FrameImage.toBitmap(frame, crop).asImageBitmap() },
+                )
+            }
         }
 
     val homeViewModelFactory =

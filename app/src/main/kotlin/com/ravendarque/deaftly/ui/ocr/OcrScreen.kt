@@ -1,5 +1,7 @@
 package com.ravendarque.deaftly.ui.ocr
 
+import androidx.annotation.StringRes
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -12,6 +14,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
@@ -43,14 +47,32 @@ fun OcrScreen(
         OcrCameraContent(
             content =
                 OcrContent(
-                    status = stringResource(if (state.ready) R.string.ocr_status_live else R.string.ocr_status_starting),
+                    status = stringResource(statusFor(state)),
                     phrases = state.phrases,
                     selection = state.selection,
                     fieldText = state.fieldText,
-                    controlsEnabled = false,
+                    frozen = state.frozen || state.freezeRequested,
+                    frozenImage = state.frozenImage,
+                    canFreeze = state.ready,
+                    torch = if (state.torchAvailable) state.torchOn else null,
                 ),
-            actions = OcrActions(onClose, viewModel::selectPhrase, viewModel::selectRange, viewModel::editText),
-            viewfinder = { CameraViewfinder(viewModel::analyse, onUnavailable = { unavailable = true }, modifier = it) },
+            actions =
+                OcrActions(
+                    onClose,
+                    viewModel::selectPhrase,
+                    viewModel::selectRange,
+                    viewModel::editText,
+                    viewModel::toggleFreeze,
+                    viewModel::toggleTorch,
+                ),
+            viewfinder = {
+                CameraViewfinder(
+                    viewModel::analyse,
+                    TorchLink(state.torchOn, viewModel::setTorchAvailable),
+                    onUnavailable = { unavailable = true },
+                    modifier = it,
+                )
+            },
         )
     }
 }
@@ -60,7 +82,10 @@ data class OcrContent(
     val phrases: List<Phrase>,
     val selection: TextSelection?,
     val fieldText: String,
-    val controlsEnabled: Boolean,
+    val frozen: Boolean = false,
+    val frozenImage: ImageBitmap? = null,
+    val canFreeze: Boolean = true,
+    val torch: Boolean? = null,
 )
 
 data class OcrActions(
@@ -68,6 +93,8 @@ data class OcrActions(
     val onTapPhrase: (Long?) -> Unit,
     val onSelectRange: (TextSelection) -> Unit,
     val onFieldChange: (String) -> Unit,
+    val onToggleFreeze: () -> Unit,
+    val onToggleTorch: () -> Unit,
 )
 
 @Composable
@@ -81,12 +108,16 @@ fun OcrCameraContent(
     Box(modifier = Modifier.fillMaxSize().background(CameraColours.backdrop)) {
         Box(modifier = Modifier.fillMaxSize().semantics { contentDescription = cameraView }) {
             viewfinder(Modifier.fillMaxSize())
+            content.frozenImage?.let {
+                Image(it, contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
+            }
             PhraseOverlay(content.phrases, content.selection, actions.onTapPhrase, actions.onSelectRange, Modifier.fillMaxSize())
         }
         OcrTopBar(
             status = content.status,
             onClose = actions.onClose,
-            controlsEnabled = content.controlsEnabled,
+            freeze = ToggleControl(content.frozen, content.canFreeze, actions.onToggleFreeze),
+            torch = content.torch?.let { ToggleControl(it, true, actions.onToggleTorch) },
             modifier = Modifier.statusBarsPadding(),
         )
         OcrTray(
@@ -98,6 +129,14 @@ fun OcrCameraContent(
         )
     }
 }
+
+@StringRes
+private fun statusFor(state: OcrUiState): Int =
+    when {
+        state.frozen -> R.string.ocr_status_frozen
+        state.ready -> R.string.ocr_status_live
+        else -> R.string.ocr_status_starting
+    }
 
 @Composable
 private fun LightSystemBarIcons() {
