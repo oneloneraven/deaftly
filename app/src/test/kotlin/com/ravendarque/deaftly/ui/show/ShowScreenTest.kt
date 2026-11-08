@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Density
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.ravendarque.deaftly.core.settings.ShowScheme
+import com.ravendarque.deaftly.navigation.HighlightRange
 import com.ravendarque.deaftly.ui.theme.AppTheme
 import org.junit.Before
 import org.junit.Rule
@@ -55,6 +56,7 @@ class ShowScreenTest {
     private fun show(
         text: String,
         darkTheme: Boolean = false,
+        highlights: List<HighlightRange> = emptyList(),
     ) {
         composeRule.setContent {
             AppTheme(darkTheme = darkTheme) {
@@ -64,6 +66,7 @@ class ShowScreenTest {
                     onCycleScheme = { scheme = scheme.next() },
                     onClose = { closes++ },
                     onContinueAsChat = { chats++ },
+                    highlights = highlights,
                 )
             }
         }
@@ -90,6 +93,19 @@ class ShowScreenTest {
         show(SHORT, darkTheme = true)
 
         composeRule.onRoot().tryPerformAccessibilityChecks()
+    }
+
+    @Test
+    fun highlightedTextPassesAccessibilityChecksInEveryScheme() {
+        val start = SHORT.indexOf("type on my phone")
+        val highlights = listOf(HighlightRange(start, start + "type on my phone".length))
+        show(SHORT, highlights = highlights)
+        ShowScheme.entries.forEach { current ->
+            scheme = current
+            composeRule.waitForIdle()
+            composeRule.onNodeWithText(SHORT).assertExists()
+            composeRule.onRoot().tryPerformAccessibilityChecks()
+        }
     }
 
     @Test

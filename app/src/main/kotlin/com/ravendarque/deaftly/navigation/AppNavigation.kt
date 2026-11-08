@@ -62,6 +62,7 @@ fun AppNavigation(container: AppContainer) {
                     val viewModel = viewModel<ShowViewModel>(factory = container.showViewModelFactory)
                     ShowScreen(
                         text = route.text,
+                        highlights = route.highlights,
                         viewModel = viewModel,
                         onClose = { backStack.removeLastOrNull() },
                         onContinueAsChat = { backStack.add(Route.Chat(route.text)) },

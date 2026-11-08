@@ -10,6 +10,7 @@ import com.ravendarque.deaftly.core.template.TemplateFill
 import com.ravendarque.deaftly.core.template.TemplateRenderer
 import com.ravendarque.deaftly.core.template.TemplateRepository
 import com.ravendarque.deaftly.core.template.TemplateSegment
+import com.ravendarque.deaftly.core.template.TextSpan
 import com.ravendarque.deaftly.ui.ocr.OcrOutcome
 import com.ravendarque.deaftly.ui.ocr.OcrOutcomes
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -57,6 +58,7 @@ sealed interface FillUiState {
         val parts: List<FillPart>,
         val active: ActivePlaceholder?,
         val text: String,
+        val highlights: List<TextSpan>,
         val canShow: Boolean,
     ) : FillUiState
 }
@@ -194,6 +196,7 @@ class FillViewModel(
                             ActivePlaceholder(template.placeholder(it), fill.values(it), typeInstead = it == typingKey)
                         },
                     text = rendered.text,
+                    highlights = rendered.valueSpans,
                     canShow = rendered.isComplete,
                 )
             }
