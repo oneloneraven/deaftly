@@ -127,6 +127,7 @@ private fun OcrEntry(
     backStack: NavBackStack<NavKey>,
 ) {
     OcrScreen(
+        viewModelFactory = container.ocrViewModelFactory,
         onClose = { backStack.removeLastOrNull() },
         onTypeInstead = {
             container.ocrOutcomes.post(OcrOutcome.TypeInstead(route.templateId, route.placeholderKey))

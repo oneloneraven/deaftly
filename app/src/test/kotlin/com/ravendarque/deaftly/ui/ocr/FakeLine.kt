@@ -1,5 +1,9 @@
 package com.ravendarque.deaftly.ui.ocr
 
+import com.ravendarque.deaftly.core.ocr.BoundingBox
+import com.ravendarque.deaftly.core.ocr.Phrase
+import com.ravendarque.deaftly.core.ocr.PhraseWord
+
 class FakeLine(
     val text: String,
     val left: Float,
@@ -19,3 +23,16 @@ val fakeMenu =
         FakeLine("SIDES", 0.38f, 0.495f, 0.24f, 0.035f),
         FakeLine("Garlic bread   4.50", 0.12f, 0.545f, 0.76f, 0.035f),
     )
+
+fun FakeLine.toPhrase(id: Long): Phrase {
+    val box = BoundingBox(left, top, left + width, top + height)
+    val words =
+        Regex("\\S+").findAll(text).map { match ->
+            val start = left + width * match.range.first / text.length
+            val end = left + width * (match.range.last + 1) / text.length
+            PhraseWord(match.value, BoundingBox(start, top, end, top + height).toQuad())
+        }
+    return Phrase(id, text.replace(Regex("\\s+"), " "), box.toQuad(), words.toList())
+}
+
+val menuPhrases: List<Phrase> = fakeMenu.mapIndexed { index, line -> line.toPhrase(index + 1L) }

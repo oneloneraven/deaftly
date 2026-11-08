@@ -53,6 +53,7 @@
     <string name="ocr_unavailable_body">Deaftly can\u2019t find a camera on this phone. You can type it instead.</string>
     <string name="ocr_close">Close camera</string>
     <string name="ocr_status_live">Live</string>
+    <string name="ocr_status_starting">Getting ready</string>
     <string name="ocr_view_description">Camera view</string>
     <string name="ocr_torch">Torch</string>
     <string name="ocr_freeze">Freeze camera</string>

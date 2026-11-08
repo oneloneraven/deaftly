@@ -46,6 +46,7 @@ class OcrScreenshotTest {
         shot(dark) {
             OcrCameraContent(
                 status = "Live",
+                phrases = menuPhrases,
                 onClose = {},
                 controlsEnabled = false,
                 viewfinder = { FakeCamera(it) },
