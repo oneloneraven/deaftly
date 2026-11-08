@@ -4,6 +4,7 @@ import android.util.Rational
 import android.util.Size
 import android.view.Surface
 import androidx.camera.compose.CameraXViewfinder
+import androidx.camera.core.Camera
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
 import androidx.camera.core.Preview
@@ -41,6 +42,7 @@ private const val ANALYSIS_SHORT_SIDE = 720
 @Composable
 fun CameraViewfinder(
     analyse: (RecognitionFrame, BoundingBox?) -> Unit,
+    torch: TorchLink,
     onUnavailable: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -49,6 +51,7 @@ fun CameraViewfinder(
     val rotation = LocalView.current.display?.rotation ?: Surface.ROTATION_0
     val currentAnalyse by rememberUpdatedState(analyse)
     var size by remember { mutableStateOf(IntSize.Zero) }
+    var camera by remember { mutableStateOf<Camera?>(null) }
     var surfaceRequest by remember { mutableStateOf<SurfaceRequest?>(null) }
     val executor = remember { Executors.newSingleThreadExecutor() }
     DisposableEffect(executor) { onDispose { executor.shutdown() } }
@@ -81,13 +84,18 @@ fun CameraViewfinder(
                 .addUseCase(imageAnalysis)
                 .build()
         try {
-            provider.bindToLifecycle(lifecycleOwner, CameraSelector.DEFAULT_BACK_CAMERA, group)
+            camera = provider.bindToLifecycle(lifecycleOwner, CameraSelector.DEFAULT_BACK_CAMERA, group)
+            camera?.let { torch.onAvailable(it.cameraInfo.hasFlashUnit()) }
             awaitCancellation()
         } catch (_: IllegalArgumentException) {
             onUnavailable()
         } finally {
+            camera = null
             provider.unbind(preview, imageAnalysis)
         }
+    }
+    LaunchedEffect(camera, torch.on) {
+        camera?.takeIf { it.cameraInfo.hasFlashUnit() }?.cameraControl?.enableTorch(torch.on)
     }
     val sized = modifier.onSizeChanged { size = it }
     val request = surfaceRequest

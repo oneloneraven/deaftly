@@ -9,13 +9,36 @@ data class ShowColours(
     val background: Color,
     val text: Color,
     val muted: Color,
+    val markBackground: Color,
+    val markText: Color,
 )
 
-private val BlackOnWhite = ShowColours(background = Color(0xFFFFFFFF), text = Color(0xFF000000), muted = Color(0xFF55555E))
+private val BlackOnWhite =
+    ShowColours(
+        background = Color(0xFFFFFFFF),
+        text = Color(0xFF000000),
+        muted = Color(0xFF55555E),
+        markBackground = Color(0xFFFFE15C),
+        markText = Color(0xFF000000),
+    )
 
-private val WhiteOnBlack = ShowColours(background = Color(0xFF000000), text = Color(0xFFFFFFFF), muted = Color(0xFFA9A9B3))
+private val WhiteOnBlack =
+    ShowColours(
+        background = Color(0xFF000000),
+        text = Color(0xFFFFFFFF),
+        muted = Color(0xFFA9A9B3),
+        markBackground = Color(0xFF3342C4),
+        markText = Color(0xFFFFFFFF),
+    )
 
-private val YellowOnBlack = ShowColours(background = Color(0xFF000000), text = Color(0xFFFFE15C), muted = Color(0xFFBDB27A))
+private val YellowOnBlack =
+    ShowColours(
+        background = Color(0xFF000000),
+        text = Color(0xFFFFE15C),
+        muted = Color(0xFFBDB27A),
+        markBackground = Color(0xFFFFE15C),
+        markText = Color(0xFF000000),
+    )
 
 val ShowScheme.colours: ShowColours
     get() =

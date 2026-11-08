@@ -88,6 +88,7 @@ private fun AppNavigationHost(
                     val viewModel = viewModel<ShowViewModel>(factory = container.showViewModelFactory)
                     ShowScreen(
                         text = route.text,
+                        highlights = route.highlights,
                         viewModel = viewModel,
                         onClose = { backStack.removeLastOrNull() },
                         onContinueAsChat = { backStack.add(Route.Chat(route.text)) },
@@ -153,10 +154,14 @@ private fun OcrEntry(
     backStack: NavBackStack<NavKey>,
 ) {
     OcrScreen(
-        viewModelFactory = container.ocrViewModelFactory,
+        viewModelFactory = container.ocrViewModelFactory(route.templateId, route.placeholderKey),
         onClose = { backStack.removeLastOrNull() },
         onTypeInstead = {
             container.ocrOutcomes.post(OcrOutcome.TypeInstead(route.templateId, route.placeholderKey))
+            backStack.removeLastOrNull()
+        },
+        onAdd = { text ->
+            container.ocrOutcomes.post(OcrOutcome.Text(route.templateId, route.placeholderKey, text))
             backStack.removeLastOrNull()
         },
     )

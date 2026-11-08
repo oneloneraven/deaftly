@@ -6,16 +6,19 @@ import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.ravendarque.deaftly.core.ocr.BoundingBox
 import com.ravendarque.deaftly.core.ocr.FakeTextRecogniser
+import com.ravendarque.deaftly.core.ocr.PhraseSelection
 import com.ravendarque.deaftly.core.ocr.PixelFormat
 import com.ravendarque.deaftly.core.ocr.RecognitionFrame
 import com.ravendarque.deaftly.core.ocr.RecognitionResult
 import com.ravendarque.deaftly.core.ocr.TextBlock
 import com.ravendarque.deaftly.core.ocr.TextLine
+import com.ravendarque.deaftly.core.ocr.TextSelection
+import com.ravendarque.deaftly.core.ocr.WordRef
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
 import kotlinx.coroutines.withTimeout
@@ -35,10 +38,11 @@ class OcrViewModelTest {
     private val box = BoundingBox(10f, 10f, 60f, 20f)
     private val result = RecognitionResult(listOf(TextBlock(listOf(TextLine("Lasagne", box, corners = box.toQuad())), box)))
     private val fake = FakeTextRecogniser(result)
+    private var captured = 0
 
     @BeforeTest
     fun setUp() {
-        Dispatchers.setMain(StandardTestDispatcher())
+        Dispatchers.setMain(UnconfinedTestDispatcher())
     }
 
     @AfterTest
@@ -55,10 +59,17 @@ class OcrViewModelTest {
                     modelClass: KClass<T>,
                     extras: CreationExtras,
                 ): T =
-                    OcrViewModel {
-                        release.await()
-                        fake
-                    } as T
+                    OcrViewModel(
+                        createRecogniser = {
+                            release.await()
+                            fake
+                        },
+                        loadFieldLabel = { "Menu item" },
+                        captureFrame = { _, _ ->
+                            captured++
+                            null
+                        },
+                    ) as T
             }
         return ViewModelProvider.create(store, factory)[OcrViewModel::class]
     }
@@ -129,6 +140,151 @@ class OcrViewModelTest {
             viewModel.state.value.phrases
                 .isNotEmpty(),
         )
+    }
+
+    @Test
+    fun tappingAPhraseSelectsItAndFillsTheTrayWithItsText() {
+        val viewModel = viewModel()
+        viewModel.awaitReady()
+        viewModel.analyse(frame(), null)
+        val phrase =
+            viewModel.state.value.phrases
+                .single()
+
+        viewModel.selectPhrase(phrase.id)
+
+        assertEquals("Lasagne", viewModel.state.value.fieldText)
+        assertEquals(PhraseSelection.wholePhrase(phrase), viewModel.state.value.selection)
+    }
+
+    @Test
+    fun tappingNothingClearsTheSelectionButKeepsTheEditedText() {
+        val viewModel = viewModel()
+        viewModel.awaitReady()
+        viewModel.analyse(frame(), null)
+        viewModel.selectPhrase(
+            viewModel.state.value.phrases
+                .single()
+                .id,
+        )
+        viewModel.editText("Lasagne verde")
+
+        viewModel.selectPhrase(null)
+
+        assertEquals(null, viewModel.state.value.selection)
+        assertEquals("Lasagne verde", viewModel.state.value.fieldText)
+    }
+
+    @Test
+    fun selectingAPhraseThatIsNotThereChangesNothingButTheSelection() {
+        val viewModel = viewModel()
+        viewModel.awaitReady()
+        viewModel.editText("typed")
+
+        viewModel.selectPhrase(99)
+
+        assertEquals(null, viewModel.state.value.selection)
+        assertEquals("typed", viewModel.state.value.fieldText)
+    }
+
+    @Test
+    fun aDraggedRangeSetsTheSelectionAndTheTrayText() {
+        val viewModel = viewModel()
+        viewModel.awaitReady()
+        viewModel.analyse(frame(), null)
+        val phrase =
+            viewModel.state.value.phrases
+                .single()
+        val range = TextSelection(WordRef(phrase.id, 0), WordRef(phrase.id, 0))
+
+        viewModel.selectRange(range)
+
+        assertEquals(range, viewModel.state.value.selection)
+        assertEquals("Lasagne", viewModel.state.value.fieldText)
+    }
+
+    @Test
+    fun aRangeOverPhrasesThatAreGoneIsIgnored() {
+        val viewModel = viewModel()
+        viewModel.awaitReady()
+        viewModel.editText("kept")
+
+        viewModel.selectRange(TextSelection(WordRef(42, 0), WordRef(42, 1)))
+
+        assertEquals(null, viewModel.state.value.selection)
+        assertEquals("kept", viewModel.state.value.fieldText)
+    }
+
+    @Test
+    fun freezingHoldsTheNextFrameAndItsPhrasesAndStopsAnalysis() {
+        val viewModel = viewModel()
+        viewModel.awaitReady()
+        viewModel.analyse(frame(), null)
+
+        viewModel.toggleFreeze()
+        assertTrue(viewModel.state.value.freezeRequested)
+        viewModel.analyse(frame(), null)
+
+        val frozen = viewModel.state.value
+        assertTrue(frozen.frozen)
+        assertFalse(frozen.freezeRequested)
+        assertEquals(listOf("Lasagne"), frozen.phrases.map { it.text })
+        assertEquals(1, captured)
+        val seen = fake.frames.size
+        viewModel.analyse(frame(), null)
+        assertEquals(seen, fake.frames.size)
+    }
+
+    @Test
+    fun unfreezingResumesAnalysisAndDropsTheImage() {
+        val viewModel = viewModel()
+        viewModel.awaitReady()
+        viewModel.toggleFreeze()
+        viewModel.analyse(frame(), null)
+
+        viewModel.toggleFreeze()
+        viewModel.analyse(frame(), null)
+
+        assertFalse(viewModel.state.value.frozen)
+        assertEquals(null, viewModel.state.value.frozenImage)
+        assertEquals(2, fake.frames.size)
+    }
+
+    @Test
+    fun aFreezeRequestCanBeCancelledBeforeAFrameArrives() {
+        val viewModel = viewModel()
+        viewModel.awaitReady()
+
+        viewModel.toggleFreeze()
+        viewModel.toggleFreeze()
+        viewModel.analyse(frame(), null)
+
+        assertFalse(viewModel.state.value.frozen)
+        assertEquals(0, captured)
+    }
+
+    @Test
+    fun theTorchToggleOnlyWorksWhereThereIsAFlash() {
+        val viewModel = viewModel()
+        viewModel.toggleTorch()
+        viewModel.setTorchAvailable(false)
+        assertFalse(viewModel.state.value.torchOn)
+
+        viewModel.setTorchAvailable(true)
+        viewModel.toggleTorch()
+        assertTrue(viewModel.state.value.torchOn)
+        viewModel.setTorchAvailable(false)
+        assertFalse(viewModel.state.value.torchOn)
+        assertFalse(viewModel.state.value.torchAvailable)
+    }
+
+    @Test
+    fun theTrayIsLabelledWithThePlaceholdersLabelOnceLoaded() {
+        val viewModel = viewModel()
+
+        val label = runBlocking { withTimeout(TIMEOUT_MILLIS) { viewModel.state.first { it.fieldLabel != null } } }
+
+        assertEquals("Menu item", label.fieldLabel)
     }
 
     private companion object {

@@ -5,6 +5,10 @@ import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onRoot
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.takahirom.roborazzi.captureRoboImage
+import com.ravendarque.deaftly.core.ocr.Phrase
+import com.ravendarque.deaftly.core.ocr.PhraseSelection
+import com.ravendarque.deaftly.core.ocr.TextSelection
+import com.ravendarque.deaftly.core.ocr.WordRef
 import com.ravendarque.deaftly.ui.theme.AppTheme
 import org.junit.Rule
 import org.junit.Test
@@ -42,16 +46,28 @@ class OcrScreenshotTest {
         CameraGate(access, unavailable = false, actions = CameraGateActions({}, {}, {}, {})) {}
     }
 
-    private fun camera(dark: Boolean) =
-        shot(dark) {
-            OcrCameraContent(
-                status = "Live",
-                phrases = menuPhrases,
-                onClose = {},
-                controlsEnabled = false,
-                viewfinder = { FakeCamera(it) },
-            )
-        }
+    private fun camera(
+        dark: Boolean,
+        picked: Phrase? = null,
+        range: TextSelection? = picked?.let(PhraseSelection::wholePhrase),
+        frozen: Boolean = false,
+        torch: Boolean? = null,
+    ) = shot(dark) {
+        OcrCameraContent(
+            content =
+                OcrContent(
+                    status = if (frozen) "Frozen" else "Live",
+                    phrases = menuPhrases,
+                    selection = range,
+                    fieldText = range?.let { PhraseSelection.text(menuPhrases, it) }.orEmpty(),
+                    frozen = frozen,
+                    frozenImage = if (frozen) fakeFrameImage() else null,
+                    torch = torch,
+                ),
+            actions = OcrActions({}, {}, {}, {}, {}, {}, {}),
+            viewfinder = { FakeCamera(it) },
+        )
+    }
 
     @Test
     fun explanationLightTheme() = gate(CameraAccess.NotAsked, dark = false)
@@ -85,4 +101,39 @@ class OcrScreenshotTest {
     @Test
     @Config(fontScale = 2f)
     fun cameraLargeFontScale() = camera(dark = false)
+
+    @Test
+    fun selectedPhraseLightTheme() = camera(dark = false, picked = menuPhrases[1])
+
+    @Test
+    fun selectedPhraseDarkTheme() = camera(dark = true, picked = menuPhrases[1])
+
+    @Test
+    @Config(fontScale = 2f)
+    fun selectedPhraseLargeFontScale() = camera(dark = false, picked = menuPhrases[1])
+
+    private val acrossLines = TextSelection(WordRef(2, 1), WordRef(4, 1))
+
+    @Test
+    fun draggedRangeAcrossLinesLightTheme() = camera(dark = false, range = acrossLines)
+
+    @Test
+    fun draggedRangeAcrossLinesDarkTheme() = camera(dark = true, range = acrossLines)
+
+    @Test
+    @Config(fontScale = 2f)
+    fun draggedRangeAcrossLinesLargeFontScale() = camera(dark = false, range = acrossLines)
+
+    @Test
+    fun frozenWithTorchOnLightTheme() = camera(dark = false, picked = menuPhrases[3], frozen = true, torch = true)
+
+    @Test
+    fun frozenWithTorchOnDarkTheme() = camera(dark = true, picked = menuPhrases[3], frozen = true, torch = true)
+
+    @Test
+    @Config(fontScale = 2f)
+    fun frozenWithTorchOffLargeFontScale() = camera(dark = false, frozen = true, torch = false)
+
+    @Test
+    fun liveWithTorchOffLightTheme() = camera(dark = false, torch = false)
 }

@@ -5,6 +5,7 @@ import androidx.compose.ui.test.onRoot
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.takahirom.roborazzi.captureRoboImage
 import com.ravendarque.deaftly.core.settings.ShowScheme
+import com.ravendarque.deaftly.navigation.HighlightRange
 import com.ravendarque.deaftly.ui.theme.AppTheme
 import com.ravendarque.deaftly.ui.theme.defaultShowScheme
 import org.junit.Rule
@@ -23,6 +24,9 @@ private const val LONG_MESSAGE =
         "Could you please type any questions on my phone, or write them down, because I can't hear you and I can't " +
         "read lips well. Thank you very much for your patience, it really helps."
 
+private val MESSAGE_HIGHLIGHTS =
+    listOf("Sam", "type on my phone").map { HighlightRange(MESSAGE.indexOf(it), MESSAGE.indexOf(it) + it.length) }
+
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(qualifiers = "w390dp-h844dp")
@@ -37,10 +41,11 @@ class ShowScreenshotTest {
         text: String,
         dark: Boolean,
         scheme: ShowScheme = defaultShowScheme(dark),
+        highlights: List<HighlightRange> = MESSAGE_HIGHLIGHTS,
     ) {
         composeRule.setContent {
             AppTheme(darkTheme = dark) {
-                ShowContent(text, scheme, onCycleScheme = {}, onClose = {}, onContinueAsChat = {})
+                ShowContent(text, scheme, onCycleScheme = {}, onClose = {}, onContinueAsChat = {}, highlights = highlights)
             }
         }
         composeRule.waitForIdle()
@@ -56,6 +61,17 @@ class ShowScreenshotTest {
     @Test
     @Config(fontScale = 2f)
     fun shortTextLargeFontScale() = shot(MESSAGE, dark = false)
+
+    @Test
+    fun withoutHighlights() = shot(MESSAGE, dark = false, highlights = emptyList())
+
+    @Test
+    @Config(fontScale = 2f)
+    fun yellowOnBlackLargeFontScale() = shot(MESSAGE, dark = false, scheme = ShowScheme.YellowOnBlack)
+
+    @Test
+    @Config(fontScale = 2f)
+    fun whiteOnBlackLargeFontScale() = shot(MESSAGE, dark = false, scheme = ShowScheme.WhiteOnBlack)
 
     @Test
     fun longTextLightTheme() = shot(LONG_MESSAGE, dark = false)

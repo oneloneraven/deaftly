@@ -1,6 +1,7 @@
 package com.ravendarque.deaftly
 
 import android.content.Context
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
@@ -18,10 +19,12 @@ import com.ravendarque.deaftly.ui.editor.EditorViewModel
 import com.ravendarque.deaftly.ui.fill.FillViewModel
 import com.ravendarque.deaftly.ui.firstrun.FirstRunViewModel
 import com.ravendarque.deaftly.ui.home.HomeViewModel
+import com.ravendarque.deaftly.ui.ocr.FrameImage
 import com.ravendarque.deaftly.ui.ocr.OcrOutcomes
 import com.ravendarque.deaftly.ui.ocr.OcrViewModel
 import com.ravendarque.deaftly.ui.settings.SettingsViewModel
 import com.ravendarque.deaftly.ui.show.ShowViewModel
+import kotlinx.coroutines.flow.first
 
 class AppContainer(
     private val context: Context,
@@ -37,10 +40,25 @@ class AppContainer(
     val ocrOutcomes = OcrOutcomes()
     val chatInsertions = ChatInsertions()
 
-    val ocrViewModelFactory =
-        viewModelFactory {
-            initializer { OcrViewModel { PaddleOcrNcnnRecogniser(context.applicationContext) } }
+    fun ocrViewModelFactory(
+        templateId: String,
+        placeholderKey: String,
+    ) = viewModelFactory {
+        initializer {
+            OcrViewModel(
+                createRecogniser = { PaddleOcrNcnnRecogniser(context.applicationContext) },
+                captureFrame = { frame, crop -> FrameImage.toBitmap(frame, crop).asImageBitmap() },
+                loadFieldLabel = {
+                    templateRepository.templates
+                        .first()
+                        .firstOrNull { it.id == templateId }
+                        ?.placeholders
+                        ?.get(placeholderKey)
+                        ?.label
+                },
+            )
         }
+    }
 
     val homeViewModelFactory =
         viewModelFactory {
