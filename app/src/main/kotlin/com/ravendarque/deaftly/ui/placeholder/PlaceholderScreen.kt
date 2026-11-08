@@ -20,6 +20,7 @@ import com.ravendarque.deaftly.ui.theme.Deaftly
 fun PlaceholderScreen(
     title: String,
     onBack: () -> Unit,
+    body: String? = null,
 ) {
     Surface(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.safeDrawingPadding().padding(Deaftly.spacing.space24)) {
@@ -31,6 +32,9 @@ fun PlaceholderScreen(
                 style = MaterialTheme.typography.headlineMedium,
                 modifier = Modifier.semantics { heading() },
             )
+            if (!body.isNullOrBlank()) {
+                Text(text = body, style = MaterialTheme.typography.displaySmall)
+            }
         }
     }
 }

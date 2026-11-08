@@ -81,7 +81,7 @@ fun HomeContent(
                 start = { modifier ->
                     InkButton(
                         text = stringResource(R.string.home_type_and_show),
-                        onClick = { actions.onNavigate(Route.Show) },
+                        onClick = { actions.onNavigate(Route.Show()) },
                         modifier = modifier,
                         icon = DeaftlyIcons.Type,
                     )
@@ -124,7 +124,7 @@ private fun Header(onNavigate: (Route) -> Unit) {
     ) {
         Wordmark(Modifier.weight(1f))
         Row(horizontalArrangement = Arrangement.spacedBy(Deaftly.spacing.space4)) {
-            DeaftlyIconButton(DeaftlyIcons.Plus, stringResource(R.string.home_new_template), onClick = { onNavigate(Route.Editor) })
+            DeaftlyIconButton(DeaftlyIcons.Plus, stringResource(R.string.home_new_template), onClick = { onNavigate(Route.Editor()) })
             DeaftlyIconButton(DeaftlyIcons.Settings, stringResource(R.string.route_settings), onClick = { onNavigate(Route.Settings) })
         }
     }
