@@ -50,17 +50,21 @@ class OcrScreenshotTest {
         dark: Boolean,
         picked: Phrase? = null,
         range: TextSelection? = picked?.let(PhraseSelection::wholePhrase),
+        frozen: Boolean = false,
+        torch: Boolean? = null,
     ) = shot(dark) {
         OcrCameraContent(
             content =
                 OcrContent(
-                    status = "Live",
+                    status = if (frozen) "Frozen" else "Live",
                     phrases = menuPhrases,
                     selection = range,
                     fieldText = range?.let { PhraseSelection.text(menuPhrases, it) }.orEmpty(),
-                    controlsEnabled = false,
+                    frozen = frozen,
+                    frozenImage = if (frozen) fakeFrameImage() else null,
+                    torch = torch,
                 ),
-            actions = OcrActions({}, {}, {}, {}),
+            actions = OcrActions({}, {}, {}, {}, {}, {}),
             viewfinder = { FakeCamera(it) },
         )
     }
@@ -119,4 +123,17 @@ class OcrScreenshotTest {
     @Test
     @Config(fontScale = 2f)
     fun draggedRangeAcrossLinesLargeFontScale() = camera(dark = false, range = acrossLines)
+
+    @Test
+    fun frozenWithTorchOnLightTheme() = camera(dark = false, picked = menuPhrases[3], frozen = true, torch = true)
+
+    @Test
+    fun frozenWithTorchOnDarkTheme() = camera(dark = true, picked = menuPhrases[3], frozen = true, torch = true)
+
+    @Test
+    @Config(fontScale = 2f)
+    fun frozenWithTorchOffLargeFontScale() = camera(dark = false, frozen = true, torch = false)
+
+    @Test
+    fun liveWithTorchOffLightTheme() = camera(dark = false, torch = false)
 }

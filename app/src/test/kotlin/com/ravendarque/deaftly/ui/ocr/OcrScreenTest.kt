@@ -4,10 +4,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertIsNotSelected
+import androidx.compose.ui.test.assertIsOff
+import androidx.compose.ui.test.assertIsOn
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.click
@@ -50,6 +53,10 @@ class OcrScreenTest {
     private val ranges = mutableListOf<TextSelection>()
     private var selection by mutableStateOf<TextSelection?>(null)
     private var fieldText by mutableStateOf("")
+    private var frozen by mutableStateOf(false)
+    private var torch by mutableStateOf<Boolean?>(null)
+    private var freezes = 0
+    private var torches = 0
 
     @Before
     fun enableChecks() {
@@ -60,7 +67,7 @@ class OcrScreenTest {
         composeRule.setContent {
             AppTheme {
                 OcrCameraContent(
-                    content = OcrContent("Live", menuPhrases, selection, fieldText, controlsEnabled = false),
+                    content = OcrContent("Live", menuPhrases, selection, fieldText, frozen = frozen, torch = torch),
                     actions =
                         OcrActions(
                             onClose = { closes++ },
@@ -76,6 +83,14 @@ class OcrScreenTest {
                                 if (phrase != null) fieldText = phrase.text
                             },
                             onFieldChange = { fieldText = it },
+                            onToggleFreeze = {
+                                freezes++
+                                frozen = !frozen
+                            },
+                            onToggleTorch = {
+                                torches++
+                                torch = torch?.not()
+                            },
                         ),
                     viewfinder = { FakeCamera(it) },
                 )
@@ -93,8 +108,8 @@ class OcrScreenTest {
         composeRule.onNodeWithContentDescription("Camera view").assertIsDisplayed()
         composeRule.onNodeWithText("Live").assertIsDisplayed()
         composeRule.onNodeWithContentDescription("Close camera").assertIsDisplayed()
-        composeRule.onNodeWithContentDescription("Torch").assertIsNotEnabled()
-        composeRule.onNodeWithContentDescription("Freeze camera").assertIsNotEnabled()
+        composeRule.onNodeWithContentDescription("Torch").assertDoesNotExist()
+        composeRule.onNodeWithContentDescription("Freeze camera").assertIsOff()
         composeRule.onNodeWithText("Tap a phrase, or drag across words.").assertIsDisplayed()
         composeRule.onRoot().tryPerformAccessibilityChecks()
     }
@@ -246,4 +261,38 @@ class OcrScreenTest {
 
         assertEquals(TextSelection(WordRef(2, 0), WordRef(4, 0)), ranges.last())
     }
+
+    @Test
+    fun theFreezeButtonIsAToggleThatReportsItsState() {
+        show()
+
+        composeRule.onNodeWithContentDescription("Freeze camera").assertIsOff().performClick()
+        composeRule.waitForIdle()
+
+        assertEquals(1, freezes)
+        composeRule.onNodeWithContentDescription("Freeze camera").assertIsOn()
+        composeRule.onNodeWithContentDescription("Freeze camera").assert(hasStateDescription("Frozen"))
+        composeRule.onRoot().tryPerformAccessibilityChecks()
+    }
+
+    @Test
+    fun theTorchButtonIsHiddenUnlessTheDeviceHasAFlash() {
+        show()
+        composeRule.onNodeWithContentDescription("Torch").assertDoesNotExist()
+
+        torch = false
+        composeRule.waitForIdle()
+
+        composeRule
+            .onNodeWithContentDescription("Torch")
+            .assertIsOff()
+            .assert(hasStateDescription("Off"))
+            .performClick()
+        composeRule.waitForIdle()
+        assertEquals(1, torches)
+        composeRule.onNodeWithContentDescription("Torch").assertIsOn().assert(hasStateDescription("On"))
+        composeRule.onRoot().tryPerformAccessibilityChecks()
+    }
+
+    private fun hasStateDescription(text: String) = SemanticsMatcher.expectValue(SemanticsProperties.StateDescription, text)
 }

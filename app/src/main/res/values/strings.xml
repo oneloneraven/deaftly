@@ -58,6 +58,9 @@
     <string name="ocr_status_starting">Getting ready</string>
     <string name="ocr_view_description">Camera view</string>
     <string name="ocr_torch">Torch</string>
+    <string name="ocr_torch_on">On</string>
+    <string name="ocr_torch_off">Off</string>
+    <string name="ocr_status_frozen">Frozen</string>
     <string name="ocr_freeze">Freeze camera</string>
     <string name="type_show_clear">Clear message</string>
     <string name="type_show_label">Message to show</string>

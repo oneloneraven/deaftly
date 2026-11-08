@@ -1,5 +1,6 @@
 package com.ravendarque.deaftly.ui.ocr
 
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ravendarque.deaftly.core.ocr.BoundingBox
@@ -21,10 +22,16 @@ data class OcrUiState(
     val phrases: List<Phrase> = emptyList(),
     val selection: TextSelection? = null,
     val fieldText: String = "",
+    val freezeRequested: Boolean = false,
+    val frozen: Boolean = false,
+    val frozenImage: ImageBitmap? = null,
+    val torchAvailable: Boolean = false,
+    val torchOn: Boolean = false,
 )
 
 class OcrViewModel(
     private val createRecogniser: () -> TextRecogniser,
+    private val captureFrame: (RecognitionFrame, BoundingBox?) -> ImageBitmap? = { _, _ -> null },
 ) : ViewModel() {
     private val lock = Any()
     private var recogniser: TextRecogniser? = null
@@ -54,8 +61,33 @@ class OcrViewModel(
         frame: RecognitionFrame,
         crop: BoundingBox?,
     ) {
-        val phrases = synchronized(lock) { live?.let { process(it, frame, crop) } }
-        if (phrases != null) mutableState.update { it.copy(phrases = phrases) }
+        if (mutableState.value.frozen) return
+        val phrases = synchronized(lock) { live?.let { process(it, frame, crop) } } ?: return
+        val snapshot = if (mutableState.value.freezeRequested) captureFrame(frame, crop) else null
+        mutableState.update { state ->
+            if (state.freezeRequested) {
+                state.copy(phrases = phrases, freezeRequested = false, frozen = true, frozenImage = snapshot)
+            } else {
+                state.copy(phrases = phrases)
+            }
+        }
+    }
+
+    fun toggleFreeze() {
+        mutableState.update { state ->
+            when {
+                state.frozen -> state.copy(frozen = false, frozenImage = null)
+                else -> state.copy(freezeRequested = !state.freezeRequested)
+            }
+        }
+    }
+
+    fun toggleTorch() {
+        mutableState.update { it.copy(torchOn = !it.torchOn) }
+    }
+
+    fun setTorchAvailable(available: Boolean) {
+        mutableState.update { it.copy(torchAvailable = available, torchOn = it.torchOn && available) }
     }
 
     private fun process(

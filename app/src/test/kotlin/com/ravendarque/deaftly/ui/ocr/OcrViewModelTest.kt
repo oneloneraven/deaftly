@@ -38,6 +38,7 @@ class OcrViewModelTest {
     private val box = BoundingBox(10f, 10f, 60f, 20f)
     private val result = RecognitionResult(listOf(TextBlock(listOf(TextLine("Lasagne", box, corners = box.toQuad())), box)))
     private val fake = FakeTextRecogniser(result)
+    private var captured = 0
 
     @BeforeTest
     fun setUp() {
@@ -58,10 +59,16 @@ class OcrViewModelTest {
                     modelClass: KClass<T>,
                     extras: CreationExtras,
                 ): T =
-                    OcrViewModel {
-                        release.await()
-                        fake
-                    } as T
+                    OcrViewModel(
+                        createRecogniser = {
+                            release.await()
+                            fake
+                        },
+                        captureFrame = { _, _ ->
+                            captured++
+                            null
+                        },
+                    ) as T
             }
         return ViewModelProvider.create(store, factory)[OcrViewModel::class]
     }
@@ -205,6 +212,69 @@ class OcrViewModelTest {
 
         assertEquals(null, viewModel.state.value.selection)
         assertEquals("kept", viewModel.state.value.fieldText)
+    }
+
+    @Test
+    fun freezingHoldsTheNextFrameAndItsPhrasesAndStopsAnalysis() {
+        val viewModel = viewModel()
+        viewModel.awaitReady()
+        viewModel.analyse(frame(), null)
+
+        viewModel.toggleFreeze()
+        assertTrue(viewModel.state.value.freezeRequested)
+        viewModel.analyse(frame(), null)
+
+        val frozen = viewModel.state.value
+        assertTrue(frozen.frozen)
+        assertFalse(frozen.freezeRequested)
+        assertEquals(listOf("Lasagne"), frozen.phrases.map { it.text })
+        assertEquals(1, captured)
+        val seen = fake.frames.size
+        viewModel.analyse(frame(), null)
+        assertEquals(seen, fake.frames.size)
+    }
+
+    @Test
+    fun unfreezingResumesAnalysisAndDropsTheImage() {
+        val viewModel = viewModel()
+        viewModel.awaitReady()
+        viewModel.toggleFreeze()
+        viewModel.analyse(frame(), null)
+
+        viewModel.toggleFreeze()
+        viewModel.analyse(frame(), null)
+
+        assertFalse(viewModel.state.value.frozen)
+        assertEquals(null, viewModel.state.value.frozenImage)
+        assertEquals(2, fake.frames.size)
+    }
+
+    @Test
+    fun aFreezeRequestCanBeCancelledBeforeAFrameArrives() {
+        val viewModel = viewModel()
+        viewModel.awaitReady()
+
+        viewModel.toggleFreeze()
+        viewModel.toggleFreeze()
+        viewModel.analyse(frame(), null)
+
+        assertFalse(viewModel.state.value.frozen)
+        assertEquals(0, captured)
+    }
+
+    @Test
+    fun theTorchToggleOnlyWorksWhereThereIsAFlash() {
+        val viewModel = viewModel()
+        viewModel.toggleTorch()
+        viewModel.setTorchAvailable(false)
+        assertFalse(viewModel.state.value.torchOn)
+
+        viewModel.setTorchAvailable(true)
+        viewModel.toggleTorch()
+        assertTrue(viewModel.state.value.torchOn)
+        viewModel.setTorchAvailable(false)
+        assertFalse(viewModel.state.value.torchOn)
+        assertFalse(viewModel.state.value.torchAvailable)
     }
 
     private companion object {
