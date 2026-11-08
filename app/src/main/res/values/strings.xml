@@ -8,4 +8,8 @@
     <string name="route_chat">Chat</string>
     <string name="route_ocr">Read text</string>
     <string name="route_editor">Edit templates</string>
+    <string name="chip_state_empty">Empty</string>
+    <string name="chip_state_filled">Filled in</string>
+    <string name="chip_state_focused">Editing</string>
+    <string name="chip_remove">Remove %1$s</string>
 </resources>

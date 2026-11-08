@@ -12,6 +12,7 @@ import androidx.compose.ui.unit.dp
 data class DeaftlyShapes(
     val chip: Shape = RoundedCornerShape(8.dp),
     val pill: Shape = CircleShape,
+    val button: Shape = RoundedCornerShape(20.dp),
     val controlSmall: Shape = RoundedCornerShape(14.dp),
     val control: Shape = RoundedCornerShape(16.dp),
     val cardSmall: Shape = RoundedCornerShape(18.dp),

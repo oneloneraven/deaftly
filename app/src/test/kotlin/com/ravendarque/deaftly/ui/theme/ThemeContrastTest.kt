@@ -36,10 +36,22 @@ class ThemeContrastTest {
             ColourPair("onPersonA on personA", c.onPersonA, c.personA),
             ColourPair("onPersonB on personB", c.onPersonB, c.personB),
             ColourPair("onPersonBMuted on personB", c.onPersonBMuted, c.personB),
+            ColourPair("onPersonBMuted on surface", c.onPersonBMuted, c.surface),
             ColourPair("onPersonBStrong on personBStrong", c.onPersonBStrong, c.personBStrong),
             ColourPair("onHighlight on highlight", c.onHighlight, c.highlight),
             ColourPair("onError on error", c.onError, c.error),
             ColourPair("onErrorContainer on errorContainer", c.onErrorContainer, c.errorContainer),
+        )
+
+    private fun controlBoundaryPairs(c: DeaftlyColors) =
+        listOf(
+            ColourPair("outline on ground", c.outline, c.ground),
+            ColourPair("outline on surface", c.outline, c.surface),
+            ColourPair("accent on ground", c.accent, c.ground),
+            ColourPair("accent on surface", c.accent, c.surface),
+            ColourPair("personBOutline on ground", c.personBOutline, c.ground),
+            ColourPair("personBOutline on surface", c.personBOutline, c.surface),
+            ColourPair("ink on surface", c.ink, c.surface),
         )
 
     private fun materialPairs(
@@ -78,6 +90,36 @@ class ThemeContrastTest {
                 "${it.name} (%.2f)".format(WcagContrast.contrastRatio(it.foreground.toArgb(), it.background.toArgb()))
             },
         )
+    }
+
+    private fun assertAllMeetNonText(
+        theme: String,
+        pairs: List<ColourPair>,
+    ) {
+        val failures =
+            pairs.filter {
+                WcagContrast.contrastRatio(it.foreground.toArgb(), it.background.toArgb()) < WcagContrast.AA_LARGE_TEXT
+            }
+        assertTrue(
+            failures.isEmpty(),
+            failures.joinToString(prefix = "$theme below 3:1: ") {
+                "${it.name} (%.2f)".format(WcagContrast.contrastRatio(it.foreground.toArgb(), it.background.toArgb()))
+            },
+        )
+    }
+
+    @Test
+    fun lightControlBoundariesMeetThreeToOne() = assertAllMeetNonText("light", controlBoundaryPairs(LightDeaftlyColors))
+
+    @Test
+    fun darkControlBoundariesMeetThreeToOne() = assertAllMeetNonText("dark", controlBoundaryPairs(DarkDeaftlyColors))
+
+    @Test
+    fun materialOutlineIsTheControlBoundaryToken() {
+        listOf(false, true).forEach { dark ->
+            val colours = if (dark) DarkDeaftlyColors else LightDeaftlyColors
+            assertTrue(colours.toMaterialColorScheme(dark).outline == colours.outline)
+        }
     }
 
     @Test

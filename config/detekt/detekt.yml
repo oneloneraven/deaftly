@@ -8,3 +8,6 @@ style:
       - "**/test/**"
       - "**/androidTest/**"
       - "**/ui/theme/**"
+complexity:
+  LongParameterList:
+    ignoreDefaultParameters: true
