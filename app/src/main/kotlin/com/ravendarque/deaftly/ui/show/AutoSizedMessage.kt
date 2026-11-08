@@ -13,14 +13,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
+import com.ravendarque.deaftly.navigation.HighlightRange
 import com.ravendarque.deaftly.ui.theme.AtkinsonHyperlegibleNext
 
 internal const val MIN_SHOW_FONT_SP = 32
@@ -67,11 +71,30 @@ internal fun fitFontSizeSp(
     return low
 }
 
+internal fun highlighted(
+    text: String,
+    highlights: List<HighlightRange>,
+    background: Color,
+    foreground: Color,
+): AnnotatedString =
+    buildAnnotatedString {
+        append(text)
+        val mark = SpanStyle(color = foreground, background = background)
+        highlights.forEach { range ->
+            val start = range.start.coerceIn(0, text.length)
+            val end = range.end.coerceIn(start, text.length)
+            if (end > start) addStyle(mark, start, end)
+        }
+    }
+
 @Composable
 fun AutoSizedMessage(
     text: String,
     color: Color,
     modifier: Modifier = Modifier,
+    highlights: List<HighlightRange> = emptyList(),
+    markBackground: Color = Color.Unspecified,
+    markText: Color = color,
 ) {
     val measurer = rememberTextMeasurer()
     val density = LocalDensity.current
@@ -83,7 +106,11 @@ fun AutoSizedMessage(
                 modifier = Modifier.fillMaxWidth().heightIn(min = viewportHeight),
                 contentAlignment = Alignment.Center,
             ) {
-                BasicText(text = text, style = showStyle(sizeSp, color))
+                val styled =
+                    remember(text, highlights, markBackground, markText) {
+                        highlighted(text, highlights, markBackground, markText)
+                    }
+                BasicText(text = styled, style = showStyle(sizeSp, color))
             }
         }
     }

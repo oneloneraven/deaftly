@@ -43,6 +43,7 @@ import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ravendarque.deaftly.R
 import com.ravendarque.deaftly.core.settings.ShowScheme
+import com.ravendarque.deaftly.navigation.HighlightRange
 import com.ravendarque.deaftly.ui.icons.DeaftlyIcons
 import com.ravendarque.deaftly.ui.theme.LocalDarkTheme
 import com.ravendarque.deaftly.ui.theme.colours
@@ -57,6 +58,7 @@ private val ChatButtonBorder = 2.dp
 @Composable
 fun ShowScreen(
     text: String,
+    highlights: List<HighlightRange>,
     viewModel: ShowViewModel,
     onClose: () -> Unit,
     onContinueAsChat: () -> Unit,
@@ -69,7 +71,14 @@ fun ShowScreen(
 
         is ShowUiState.Ready -> {
             val scheme = current.chosen ?: defaultShowScheme(LocalDarkTheme.current)
-            ShowContent(text, scheme, onCycleScheme = { viewModel.cycle(scheme) }, onClose = onClose, onContinueAsChat = onContinueAsChat)
+            ShowContent(
+                text,
+                scheme,
+                onCycleScheme = { viewModel.cycle(scheme) },
+                onClose = onClose,
+                onContinueAsChat = onContinueAsChat,
+                highlights = highlights,
+            )
         }
     }
 }
@@ -81,6 +90,7 @@ fun ShowContent(
     onCycleScheme: () -> Unit,
     onClose: () -> Unit,
     onContinueAsChat: () -> Unit,
+    highlights: List<HighlightRange> = emptyList(),
 ) {
     val colours = scheme.colours
     KeepScreenOn()
@@ -98,6 +108,9 @@ fun ShowContent(
             text = text,
             color = colours.text,
             modifier = Modifier.weight(1f).fillMaxWidth().padding(horizontal = 26.dp),
+            highlights = highlights,
+            markBackground = colours.markBackground,
+            markText = colours.markText,
         )
         Column(
             modifier = Modifier.fillMaxWidth().padding(start = 20.dp, end = 20.dp, bottom = 28.dp, top = 8.dp),

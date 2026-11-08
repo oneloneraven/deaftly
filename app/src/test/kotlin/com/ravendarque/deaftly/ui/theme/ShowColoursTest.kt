@@ -19,6 +19,14 @@ class ShowColoursTest {
     }
 
     @Test
+    fun everySchemeHasAtLeastSevenToOneContrastForHighlightedText() {
+        ShowScheme.entries.forEach { scheme ->
+            val ratio = WcagContrast.contrastRatio(scheme.colours.markText.toArgb(), scheme.colours.markBackground.toArgb())
+            assertTrue(ratio >= MESSAGE_CONTRAST, "$scheme highlight contrast $ratio")
+        }
+    }
+
+    @Test
     fun everySchemeMeetsAaForTheSecondaryText() {
         ShowScheme.entries.forEach { scheme ->
             assertTrue(WcagContrast.meetsAa(scheme.colours.muted.toArgb(), scheme.colours.background.toArgb()), "$scheme muted text")

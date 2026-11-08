@@ -1,11 +1,13 @@
 package com.ravendarque.deaftly
 
 import android.content.Context
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.ravendarque.deaftly.core.settings.SettingsRepository
 import com.ravendarque.deaftly.core.template.TemplateRepository
+import com.ravendarque.deaftly.ocr.paddle.PaddleOcrNcnnRecogniser
 import com.ravendarque.deaftly.storage.DataStoreSettingsRepository
 import com.ravendarque.deaftly.storage.DataStoreTemplateRepository
 import com.ravendarque.deaftly.storage.createTemplateStore
@@ -16,8 +18,12 @@ import com.ravendarque.deaftly.ui.editor.EditorStrings
 import com.ravendarque.deaftly.ui.editor.EditorViewModel
 import com.ravendarque.deaftly.ui.fill.FillViewModel
 import com.ravendarque.deaftly.ui.home.HomeViewModel
+import com.ravendarque.deaftly.ui.ocr.FrameImage
+import com.ravendarque.deaftly.ui.ocr.OcrOutcomes
+import com.ravendarque.deaftly.ui.ocr.OcrViewModel
 import com.ravendarque.deaftly.ui.settings.SettingsViewModel
 import com.ravendarque.deaftly.ui.show.ShowViewModel
+import kotlinx.coroutines.flow.first
 
 class AppContainer(
     private val context: Context,
@@ -30,7 +36,28 @@ class AppContainer(
 
     val settingsRepository: SettingsRepository by lazy { DataStoreSettingsRepository(store) }
 
+    val ocrOutcomes = OcrOutcomes()
     val chatInsertions = ChatInsertions()
+
+    fun ocrViewModelFactory(
+        templateId: String,
+        placeholderKey: String,
+    ) = viewModelFactory {
+        initializer {
+            OcrViewModel(
+                createRecogniser = { PaddleOcrNcnnRecogniser(context.applicationContext) },
+                captureFrame = { frame, crop -> FrameImage.toBitmap(frame, crop).asImageBitmap() },
+                loadFieldLabel = {
+                    templateRepository.templates
+                        .first()
+                        .firstOrNull { it.id == templateId }
+                        ?.placeholders
+                        ?.get(placeholderKey)
+                        ?.label
+                },
+            )
+        }
+    }
 
     val homeViewModelFactory =
         viewModelFactory {
@@ -67,6 +94,6 @@ class AppContainer(
 
     fun fillViewModelFactory(templateId: String) =
         viewModelFactory {
-            initializer { FillViewModel(templateId, templateRepository, createSavedStateHandle()) }
+            initializer { FillViewModel(templateId, templateRepository, createSavedStateHandle(), ocrOutcomes) }
         }
 }

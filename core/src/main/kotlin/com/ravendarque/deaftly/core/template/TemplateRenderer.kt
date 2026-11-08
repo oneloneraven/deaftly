@@ -16,6 +16,11 @@ public sealed interface RenderedPart {
     ) : RenderedPart
 }
 
+public data class TextSpan(
+    val start: Int,
+    val end: Int,
+)
+
 public data class Rendered(
     val parts: List<RenderedPart>,
     val unfilledKeys: List<String>,
@@ -26,6 +31,20 @@ public data class Rendered(
                 is RenderedPart.Text -> it.text
                 is RenderedPart.Value -> it.text
                 is RenderedPart.Unfilled -> it.label
+            }
+        }
+
+    val valueSpans: List<TextSpan> =
+        buildList {
+            var offset = 0
+            for (part in parts) {
+                val length =
+                    when (part) {
+                        is RenderedPart.Text -> part.text.length
+                        is RenderedPart.Value -> part.text.length.also { add(TextSpan(offset, offset + it)) }
+                        is RenderedPart.Unfilled -> part.label.length
+                    }
+                offset += length
             }
         }
 

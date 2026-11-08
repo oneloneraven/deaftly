@@ -23,6 +23,7 @@ import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.tryPerformAccessibilityChecks
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.ravendarque.deaftly.navigation.HighlightRange
 import com.ravendarque.deaftly.navigation.Route
 import com.ravendarque.deaftly.ui.home.FakeTemplateRepository
 import com.ravendarque.deaftly.ui.theme.AppTheme
@@ -178,7 +179,9 @@ class FillScreenTest {
         composeRule.onNodeWithText("Hi! I'm deaf. I'd like to check in. My name is Sam. Please write it down.").assertExists()
         composeRule.onNodeWithText("Show").performClick()
 
-        assertEquals(listOf<Route>(Route.Show("Hi! I'm deaf. I'd like to check in. My name is Sam. Please write it down.")), navigated)
+        val text = "Hi! I'm deaf. I'd like to check in. My name is Sam. Please write it down."
+        val highlights = listOf("Sam", "write it down").map { HighlightRange(text.indexOf(it), text.indexOf(it) + it.length) }
+        assertEquals(listOf<Route>(Route.Show(text, highlights)), navigated)
     }
 
     @Test
@@ -211,7 +214,7 @@ class FillScreenTest {
 
         composeRule.onNodeWithText("Scan the menu").performClick()
 
-        assertEquals(listOf<Route>(Route.Ocr), navigated)
+        assertEquals(listOf<Route>(Route.Ocr("order-food", "menu item")), navigated)
     }
 
     @Test
@@ -297,7 +300,9 @@ class FillScreenTest {
 
         composeRule.onNodeWithText("Show").performClick()
 
-        assertEquals(listOf<Route>(Route.Show(joined)), navigated)
+        val items = "Pasta arrabbiata and Garlic bread"
+        val start = joined.indexOf(items)
+        assertEquals(listOf<Route>(Route.Show(joined, listOf(HighlightRange(start, start + items.length)))), navigated)
     }
 
     @Test

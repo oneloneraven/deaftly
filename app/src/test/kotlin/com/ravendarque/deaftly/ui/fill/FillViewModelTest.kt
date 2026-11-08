@@ -2,6 +2,8 @@ package com.ravendarque.deaftly.ui.fill
 
 import androidx.lifecycle.SavedStateHandle
 import com.ravendarque.deaftly.ui.home.FakeTemplateRepository
+import com.ravendarque.deaftly.ui.ocr.OcrOutcome
+import com.ravendarque.deaftly.ui.ocr.OcrOutcomes
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
@@ -33,10 +35,12 @@ class FillViewModelTest {
         Dispatchers.resetMain()
     }
 
+    private val outcomes = OcrOutcomes()
+
     private fun viewModel(
         id: String = "check-in",
         savedState: SavedStateHandle = SavedStateHandle(),
-    ) = FillViewModel(id, repository, savedState)
+    ) = FillViewModel(id, repository, savedState, outcomes)
 
     private fun FillViewModel.ready() = assertIs<FillUiState.Ready>(state.value)
 
@@ -127,6 +131,19 @@ class FillViewModelTest {
             assertNull(state.active)
             assertTrue(state.canShow)
             assertEquals("Hi! I'm deaf. I'd like to check in. My name is Sam. Please write it down.", state.text)
+        }
+
+    @Test
+    fun exposesTheRangesOfTheFilledValuesInTheRenderedText() =
+        runTest {
+            val viewModel = viewModel()
+            collect(viewModel)
+            viewModel.activate("name")
+            viewModel.choose("Sam")
+            viewModel.choose("write it down")
+
+            val state = viewModel.ready()
+            assertEquals(listOf("Sam", "write it down"), state.highlights.map { state.text.substring(it.start, it.end) })
         }
 
     @Test
@@ -298,5 +315,74 @@ class FillViewModelTest {
             collect(second)
 
             assertEquals(listOf("A", "B"), second.menuItems())
+        }
+
+    @Test
+    fun scannedTextFillsThePlaceholderItCameFromAndIsConsumed() =
+        runTest {
+            val viewModel = viewModel("order-food")
+            collect(viewModel)
+            viewModel.activate("menu item")
+
+            outcomes.post(OcrOutcome.Text("order-food", "menu item", "  Pasta arrabbiata "))
+
+            val state = viewModel.ready()
+            assertEquals(listOf("Pasta arrabbiata"), (state.parts[1] as FillPart.Filled).values)
+            assertNull(state.active)
+            assertTrue(outcomes.pending.value.isEmpty())
+        }
+
+    @Test
+    fun scannedTextAppendsToARepeatablePlaceholder() =
+        runTest {
+            val viewModel = viewModel("order-food")
+            collect(viewModel)
+            viewModel.activate("menu item")
+            viewModel.choose("Garlic bread")
+            viewModel.activate("menu item")
+
+            outcomes.post(OcrOutcome.Text("order-food", "menu item", "Lasagne"))
+
+            assertEquals(listOf("Garlic bread", "Lasagne"), (viewModel.ready().parts[1] as FillPart.Filled).values)
+        }
+
+    @Test
+    fun scannedTextForAnotherTemplateOrAnUnknownPlaceholderIsLeftAlone() =
+        runTest {
+            val viewModel = viewModel("order-food")
+            collect(viewModel)
+
+            val other = OcrOutcome.Text("check-in", "name", "Sam")
+            outcomes.post(other)
+            outcomes.post(OcrOutcome.Text("order-food", "starter", "Soup"))
+
+            assertEquals(listOf(other), outcomes.pending.value)
+            assertTrue((viewModel.ready().parts[1] is FillPart.Empty))
+        }
+
+    @Test
+    fun typeInsteadReopensThePlaceholderWithTheTypingField() =
+        runTest {
+            val viewModel = viewModel("order-food")
+            collect(viewModel)
+
+            outcomes.post(OcrOutcome.TypeInstead("order-food", "menu item"))
+
+            val active = assertIs<ActivePlaceholder>(viewModel.ready().active)
+            assertEquals("menu item", active.placeholder.key)
+            assertTrue(active.typeInstead)
+            viewModel.dismiss()
+            viewModel.activate("menu item")
+            assertFalse(assertIs<ActivePlaceholder>(viewModel.ready().active).typeInstead)
+        }
+
+    @Test
+    fun scannedTextThatArrivesBeforeTheTemplateLoadsIsAppliedOnceItHas() =
+        runTest {
+            outcomes.post(OcrOutcome.Text("order-food", "menu item", "Lasagne"))
+            val viewModel = viewModel("order-food")
+            collect(viewModel)
+
+            assertEquals(listOf("Lasagne"), (viewModel.ready().parts[1] as FillPart.Filled).values)
         }
 }

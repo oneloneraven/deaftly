@@ -10,16 +10,22 @@ import com.ravendarque.deaftly.core.template.TemplateFill
 import com.ravendarque.deaftly.core.template.TemplateRenderer
 import com.ravendarque.deaftly.core.template.TemplateRepository
 import com.ravendarque.deaftly.core.template.TemplateSegment
+import com.ravendarque.deaftly.core.template.TextSpan
+import com.ravendarque.deaftly.ui.ocr.OcrOutcome
+import com.ravendarque.deaftly.ui.ocr.OcrOutcomes
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 private const val STOP_TIMEOUT_MILLIS = 5_000L
 private const val FILL_KEY = "fill"
 private const val ACTIVE_KEY = "active"
+private const val TYPING_KEY = "typing"
 
 sealed interface FillPart {
     data class Text(
@@ -39,6 +45,7 @@ sealed interface FillPart {
 data class ActivePlaceholder(
     val placeholder: Placeholder,
     val values: List<String>,
+    val typeInstead: Boolean = false,
 )
 
 sealed interface FillUiState {
@@ -51,6 +58,7 @@ sealed interface FillUiState {
         val parts: List<FillPart>,
         val active: ActivePlaceholder?,
         val text: String,
+        val highlights: List<TextSpan>,
         val canShow: Boolean,
     ) : FillUiState
 }
@@ -59,9 +67,11 @@ class FillViewModel(
     private val templateId: String,
     repository: TemplateRepository,
     private val savedState: SavedStateHandle,
+    private val outcomes: OcrOutcomes = OcrOutcomes(),
 ) : ViewModel() {
     private val fill = MutableStateFlow(FillCodec.decode(savedState[FILL_KEY]))
     private val activeKey = MutableStateFlow(savedState.get<String>(ACTIVE_KEY))
+    private val typingKey = MutableStateFlow(savedState.get<String>(TYPING_KEY))
 
     private val loaded: StateFlow<Loaded?> =
         repository.templates
@@ -69,8 +79,20 @@ class FillViewModel(
             .stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     val state: StateFlow<FillUiState> =
-        combine(loaded, fill, activeKey, ::buildState)
+        combine(loaded, fill, activeKey, typingKey, ::buildState)
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS), FillUiState.Loading)
+
+    init {
+        viewModelScope.launch {
+            combine(loaded.filterNotNull(), outcomes.pending) { loaded, pending -> loaded.template to pending }
+                .collect { (template, pending) ->
+                    pending.filter { it.templateId == templateId }.forEach { outcome ->
+                        if (template != null) apply(template, outcome)
+                        outcomes.consume(outcome)
+                    }
+                }
+        }
+    }
 
     fun activate(key: String) {
         val template = loaded.value?.template ?: return
@@ -82,10 +104,34 @@ class FillViewModel(
     }
 
     fun choose(value: String) {
+        activeKey.value?.let { fill(it, value) }
+    }
+
+    private fun apply(
+        template: Template,
+        outcome: OcrOutcome,
+    ) {
+        if (outcome.placeholderKey !in placeholderKeys(template)) return
+        when (outcome) {
+            is OcrOutcome.Text -> {
+                fill(outcome.placeholderKey, outcome.text)
+            }
+
+            is OcrOutcome.TypeInstead -> {
+                setActive(outcome.placeholderKey)
+                typingKey.value = outcome.placeholderKey
+                savedState[TYPING_KEY] = outcome.placeholderKey
+            }
+        }
+    }
+
+    private fun fill(
+        key: String,
+        value: String,
+    ) {
         val template = loaded.value?.template
-        val key = activeKey.value
         val clean = value.trim()
-        if (template != null && key != null && clean.isNotEmpty()) {
+        if (template != null && key in placeholderKeys(template) && clean.isNotEmpty()) {
             val wasUnfilled = key in TemplateRenderer.render(template, fill.value).unfilledKeys
             val before = fill.value
             val after =
@@ -118,12 +164,17 @@ class FillViewModel(
     private fun setActive(key: String?) {
         activeKey.value = key
         savedState[ACTIVE_KEY] = key
+        if (typingKey.value != key) {
+            typingKey.value = null
+            savedState[TYPING_KEY] = null
+        }
     }
 
     private fun buildState(
         loaded: Loaded?,
         fill: TemplateFill,
         activeKey: String?,
+        typingKey: String?,
     ): FillUiState {
         val template = loaded?.template
         return when {
@@ -142,9 +193,10 @@ class FillViewModel(
                     parts = rendered.parts.map { toPart(template, fill, it) },
                     active =
                         activeKey?.takeIf { it in placeholderKeys(template) }?.let {
-                            ActivePlaceholder(template.placeholder(it), fill.values(it))
+                            ActivePlaceholder(template.placeholder(it), fill.values(it), typeInstead = it == typingKey)
                         },
                     text = rendered.text,
+                    highlights = rendered.valueSpans,
                     canShow = rendered.isComplete,
                 )
             }
@@ -177,10 +229,10 @@ class FillViewModel(
             }
         }
 
-    private fun placeholderKeys(template: Template): Set<String> =
-        template.segments().filterIsInstance<TemplateSegment.PlaceholderRef>().mapTo(linkedSetOf()) { it.key }
-
     private class Loaded(
         val template: Template?,
     )
 }
+
+private fun placeholderKeys(template: Template): Set<String> =
+    template.segments().filterIsInstance<TemplateSegment.PlaceholderRef>().mapTo(linkedSetOf()) { it.key }
