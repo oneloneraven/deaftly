@@ -13,6 +13,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.ravendarque.deaftly.core.settings.ChatLayout
 import com.ravendarque.deaftly.ui.theme.Deaftly
 
 @Composable
@@ -30,40 +31,20 @@ fun ChatScreen(
         }
 
         is ChatUiState.Ready -> {
-            val conversation = current.conversation
-            Surface(modifier = Modifier.fillMaxSize()) {
-                Column(modifier = Modifier.safeDrawingPadding()) {
-                    ChatHeader(
-                        conversation = conversation,
-                        onEnd = onEnd,
-                        onEditParticipants = { editingParticipants = true },
-                        textSize = current.textSize,
-                        onCycleTextSize = viewModel::cycleTextSize,
-                    )
-                    MessageList(conversation, current.textSize, viewModel::quote, Modifier.weight(1f).fillMaxSize())
-                    Composer(
-                        participant = conversation.activeParticipant,
-                        draft = current.draft,
-                        canQuote = conversation.messages.isNotEmpty(),
-                        actions = composerActions,
-                        modifier = Modifier.padding(horizontal = Deaftly.spacing.space12),
-                    )
-                    TurnControl(
-                        conversation = conversation,
-                        onSelect = viewModel::selectTurn,
-                        modifier =
-                            Modifier.padding(
-                                start = Deaftly.spacing.space12,
-                                top = Deaftly.spacing.space12,
-                                end = Deaftly.spacing.space12,
-                                bottom = Deaftly.spacing.space12,
-                            ),
-                    )
-                }
+            if (current.layout == ChatLayout.Split) {
+                SplitChat(current, rememberSplitActions(viewModel, onEnd))
+            } else {
+                SidesChat(
+                    current,
+                    viewModel,
+                    composerActions,
+                    onEnd,
+                    onEditParticipants = { editingParticipants = true },
+                )
             }
             if (editingParticipants) {
                 ParticipantsSheet(
-                    conversation = conversation,
+                    conversation = current.conversation,
                     onChange = viewModel::updateParticipant,
                     onDone = {
                         viewModel.rememberOwnDefaults()
@@ -74,6 +55,55 @@ fun ChatScreen(
         }
     }
 }
+
+@Composable
+private fun SidesChat(
+    current: ChatUiState.Ready,
+    viewModel: ChatViewModel,
+    composerActions: ComposerActions,
+    onEnd: () -> Unit,
+    onEditParticipants: () -> Unit,
+) {
+    val conversation = current.conversation
+    Surface(modifier = Modifier.fillMaxSize()) {
+        Column(modifier = Modifier.safeDrawingPadding()) {
+            ChatHeader(
+                conversation = conversation,
+                onEnd = onEnd,
+                onEditParticipants = onEditParticipants,
+                textSize = current.textSize,
+                onCycleTextSize = viewModel.display::cycleTextSize,
+            )
+            MessageList(conversation, current.textSize, viewModel::quote, Modifier.weight(1f).fillMaxSize())
+            Composer(
+                participant = conversation.activeParticipant,
+                draft = current.draft,
+                canQuote = conversation.messages.isNotEmpty(),
+                actions = composerActions,
+                modifier = Modifier.padding(horizontal = Deaftly.spacing.space12),
+            )
+            TurnControl(
+                conversation = conversation,
+                onSelect = viewModel::selectTurn,
+                modifier = Modifier.padding(Deaftly.spacing.space12),
+            )
+        }
+    }
+}
+
+@Composable
+private fun rememberSplitActions(
+    viewModel: ChatViewModel,
+    onEnd: () -> Unit,
+): SplitActions =
+    remember(viewModel, onEnd) {
+        SplitActions(
+            onChange = viewModel.drafts::setComposition,
+            onSend = viewModel::send,
+            onSelectTurn = viewModel::selectTurn,
+            onEnd = onEnd,
+        )
+    }
 
 @Composable
 private fun rememberComposerActions(

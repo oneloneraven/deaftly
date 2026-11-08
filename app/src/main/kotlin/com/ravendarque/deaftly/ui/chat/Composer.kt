@@ -266,7 +266,7 @@ private fun QuotePreview(
 }
 
 @Composable
-private fun SendButton(
+internal fun SendButton(
     enabled: Boolean,
     onClick: () -> Unit,
     container: Color,
@@ -289,17 +289,19 @@ private fun SendButton(
 }
 
 @Composable
-private fun MessageField(
+internal fun MessageField(
     state: ComposerState,
     owner: String,
     cursor: Color,
     onSend: () -> Unit,
+    modifier: Modifier = Modifier,
+    hint: String = stringResource(R.string.chat_composer_hint),
 ) {
     val c = Deaftly.colors
     val label = stringResource(R.string.chat_composer_label, owner)
     BasicTextField(
         state = state.field,
-        modifier = Modifier.fillMaxWidth().heightIn(min = InputMinHeight).semantics { contentDescription = label },
+        modifier = modifier.fillMaxWidth().heightIn(min = InputMinHeight).semantics { contentDescription = label },
         inputTransformation = state.input,
         outputTransformation = state.output,
         textStyle = MaterialTheme.typography.bodyLarge.copy(color = c.ink),
@@ -311,7 +313,7 @@ private fun MessageField(
             TextFieldDecorator { inner ->
                 Box(Modifier.heightIn(min = InputMinHeight), contentAlignment = Alignment.CenterStart) {
                     if (state.field.text.isEmpty()) {
-                        Text(stringResource(R.string.chat_composer_hint), style = MaterialTheme.typography.bodyLarge, color = c.inkMuted)
+                        Text(hint, style = MaterialTheme.typography.bodyLarge, color = c.inkMuted)
                     }
                     inner()
                 }
