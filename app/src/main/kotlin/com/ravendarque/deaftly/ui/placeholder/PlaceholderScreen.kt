@@ -13,8 +13,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.unit.dp
 import com.ravendarque.deaftly.R
+import com.ravendarque.deaftly.ui.theme.Deaftly
 
 @Composable
 fun PlaceholderScreen(
@@ -22,7 +22,7 @@ fun PlaceholderScreen(
     onBack: () -> Unit,
 ) {
     Surface(modifier = Modifier.fillMaxSize()) {
-        Column(modifier = Modifier.safeDrawingPadding().padding(24.dp)) {
+        Column(modifier = Modifier.safeDrawingPadding().padding(Deaftly.spacing.space24)) {
             TextButton(onClick = onBack) {
                 Text(stringResource(R.string.back))
             }

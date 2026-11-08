@@ -2,6 +2,7 @@
 <resources>
     <string name="app_name">Deaftly</string>
     <string name="back">Back</string>
+    <string name="wordmark">deaftly</string>
     <string name="route_fill">Fill in a template</string>
     <string name="route_show">Show a message</string>
     <string name="route_chat">Chat</string>
