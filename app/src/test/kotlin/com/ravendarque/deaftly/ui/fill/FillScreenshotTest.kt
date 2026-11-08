@@ -7,10 +7,13 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performImeAction
+import androidx.compose.ui.test.performTextInput
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.takahirom.roborazzi.captureRoboImage
@@ -67,7 +70,7 @@ class FillScreenshotTest {
         val placeholder = fillTemplates.first { it.id == templateId }.placeholder(placeholderKey)
         composeRule.setContent {
             AppTheme(darkTheme = dark) {
-                SheetPreview(ActivePlaceholder(placeholder, value))
+                SheetPreview(ActivePlaceholder(placeholder, listOfNotNull(value)))
             }
         }
         composeRule.waitForIdle()
@@ -85,7 +88,7 @@ class FillScreenshotTest {
     }
 
     private fun openReplyChip() {
-        composeRule.onNodeWithText("How should they reply?").performClick()
+        composeRule.onNodeWithText("how to reply").performClick()
     }
 
     @Test
@@ -116,4 +119,24 @@ class FillScreenshotTest {
 
     @Test
     fun typingSheetLightTheme() = sheet("check-in", "name", dark = false)
+
+    private fun orderWithTwoItems() {
+        listOf("Pasta arrabbiata", "Garlic bread").forEachIndexed { index, item ->
+            composeRule.onNodeWithText(if (index == 0) "menu item" else "add more").performClick()
+            composeRule.onNodeWithText("Type it").performClick()
+            composeRule.onNode(hasSetTextAction()).performTextInput(item)
+            composeRule.onNode(hasSetTextAction()).performImeAction()
+            composeRule.waitForIdle()
+        }
+    }
+
+    @Test
+    fun orderFoodWithTwoItemsLightTheme() = screen("order-food", dark = false, interact = ::orderWithTwoItems)
+
+    @Test
+    fun orderFoodWithTwoItemsDarkTheme() = screen("order-food", dark = true, interact = ::orderWithTwoItems)
+
+    @Test
+    @Config(fontScale = 2f)
+    fun orderFoodWithTwoItemsLargeFontScale() = screen("order-food", dark = false, interact = ::orderWithTwoItems)
 }

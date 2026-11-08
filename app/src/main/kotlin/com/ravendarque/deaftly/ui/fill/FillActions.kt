@@ -7,5 +7,6 @@ data class FillActions(
     val onActivate: (String) -> Unit,
     val onDismiss: () -> Unit,
     val onChoose: (String) -> Unit,
+    val onRemove: (String, Int) -> Unit,
     val onScan: () -> Unit,
 )
