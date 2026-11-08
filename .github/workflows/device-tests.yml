@@ -39,6 +39,14 @@ jobs:
           validate-wrappers: true
       - name: Run the instrumented tests on the managed device
         run: ./gradlew pixel6Api36DebugAndroidTest -Pandroid.testoptions.manageddevices.emulator.gpu=swiftshader_indirect
+      - name: Upload the OCR benchmark reports
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: ocr-benchmark
+          path: app/build/outputs/managed_device_android_test_additional_output/
+          if-no-files-found: warn
+          retention-days: 14
       - name: Upload the reports and device logs when the tests fail
         if: failure()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2

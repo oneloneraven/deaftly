@@ -26,7 +26,7 @@ The repository is set up with the `project-bootstrap` plugin, using the `core` m
 | Navigation | **Jetpack Navigation 3** | Stable since November 2025 and built for Compose ([Android Developers Blog](https://android-developers.googleblog.com/2025/11/jetpack-navigation-3-is-stable.html)). |
 | Dependency injection | **Manual** (one `AppContainer`) | A handful of dependencies doesn't justify a framework (KISS). |
 | Camera | **CameraX** (`Preview` + `ImageAnalysis`) | Handles device quirks, freezing a frame (O5) and the torch (O6). |
-| OCR | **To be decided by a spike (D6).** Candidates are ML Kit Text Recognition v2 (bundled) and PaddleOCR mobile models. Both sit behind a `TextRecogniser` interface, so the choice doesn't leak into the app. | See §3. |
+| OCR | **PP-OCRv5 mobile (PaddleOCR) on ncnn**, behind the `TextRecogniser` interface ([ADR-0010](adr/0010-recognise-text-with-paddleocr-on-ncnn.md)). | See §3. |
 | Persistence | **DataStore + kotlinx.serialization (JSON)** for templates and settings | Tens of templates; no database needed. Chats are in memory only (H7). |
 | Rich text | Own minimal span model (bold, italic, highlight, quote) rendered with `AnnotatedString` | Four formats don't justify a library. |
 | Show-mode text sizing | Compose auto-size text with a minimum size, then scrolling | S2. |

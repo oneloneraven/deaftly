@@ -3,9 +3,12 @@ naming:
     ignoreAnnotated:
       - Composable
 style:
+  MaxLineLength:
+    maxLineLength: 140
   MagicNumber:
     excludes:
       - "**/test/**"
+      - "**/testFixtures/**"
       - "**/androidTest/**"
       - "**/ui/theme/**"
 complexity:
