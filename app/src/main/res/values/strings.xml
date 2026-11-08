@@ -34,6 +34,10 @@
     <string name="fill_type_it">Type it</string>
     <string name="show_close">Close show mode</string>
     <string name="show_continue_chat">Continue as chat</string>
+    <string name="show_change_colours">Change colours. Now %1$s, next %2$s</string>
+    <string name="show_scheme_black_on_white">black on white</string>
+    <string name="show_scheme_white_on_black">white on black</string>
+    <string name="show_scheme_yellow_on_black">yellow on black</string>
     <string name="show_hint">Swipe down to go back</string>
     <string name="template_pin">Pin</string>
     <string name="template_unpin">Unpin</string>

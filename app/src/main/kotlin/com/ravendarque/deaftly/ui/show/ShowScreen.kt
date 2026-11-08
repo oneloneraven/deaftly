@@ -23,6 +23,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -31,6 +32,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
@@ -38,11 +40,13 @@ import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ravendarque.deaftly.R
+import com.ravendarque.deaftly.core.settings.ShowScheme
 import com.ravendarque.deaftly.ui.icons.DeaftlyIcons
 import com.ravendarque.deaftly.ui.theme.LocalDarkTheme
-import com.ravendarque.deaftly.ui.theme.ShowColours
-import com.ravendarque.deaftly.ui.theme.defaultShowColours
+import com.ravendarque.deaftly.ui.theme.colours
+import com.ravendarque.deaftly.ui.theme.defaultShowScheme
 
 private const val GESTURE_GAP_NANOS = 300_000_000L
 private val SwipeToLeave = 96.dp
@@ -53,10 +57,32 @@ private val ChatButtonBorder = 2.dp
 @Composable
 fun ShowScreen(
     text: String,
+    viewModel: ShowViewModel,
     onClose: () -> Unit,
     onContinueAsChat: () -> Unit,
-    colours: ShowColours = defaultShowColours(LocalDarkTheme.current),
 ) {
+    val state by viewModel.state.collectAsStateWithLifecycle()
+    when (val current = state) {
+        ShowUiState.Loading -> {
+            Surface(modifier = Modifier.fillMaxSize(), color = Color.Black) {}
+        }
+
+        is ShowUiState.Ready -> {
+            val scheme = current.chosen ?: defaultShowScheme(LocalDarkTheme.current)
+            ShowContent(text, scheme, onCycleScheme = { viewModel.cycle(scheme) }, onClose = onClose, onContinueAsChat = onContinueAsChat)
+        }
+    }
+}
+
+@Composable
+fun ShowContent(
+    text: String,
+    scheme: ShowScheme,
+    onCycleScheme: () -> Unit,
+    onClose: () -> Unit,
+    onContinueAsChat: () -> Unit,
+) {
+    val colours = scheme.colours
     KeepScreenOn()
     ImmersiveMode()
     Column(
@@ -67,15 +93,7 @@ fun ShowScreen(
                 .safeDrawingPadding()
                 .leaveOnSwipeDown(onClose),
     ) {
-        Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp)) {
-            IconButton(
-                onClick = onClose,
-                modifier = Modifier.size(BarTarget),
-                colors = IconButtonDefaults.iconButtonColors(contentColor = colours.muted),
-            ) {
-                Icon(DeaftlyIcons.Close, contentDescription = stringResource(R.string.show_close))
-            }
-        }
+        ShowHeader(scheme, onCycleScheme, onClose)
         AutoSizedMessage(
             text = text,
             color = colours.text,
@@ -104,6 +122,33 @@ fun ShowScreen(
                 style = MaterialTheme.typography.bodySmall,
                 color = colours.muted,
             )
+        }
+    }
+}
+
+@Composable
+private fun ShowHeader(
+    scheme: ShowScheme,
+    onCycleScheme: () -> Unit,
+    onClose: () -> Unit,
+) {
+    val colours = scheme.colours
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+    ) {
+        val barColours = IconButtonDefaults.iconButtonColors(contentColor = colours.muted)
+        IconButton(onClick = onClose, modifier = Modifier.size(BarTarget), colors = barColours) {
+            Icon(DeaftlyIcons.Close, contentDescription = stringResource(R.string.show_close))
+        }
+        val change =
+            stringResource(
+                R.string.show_change_colours,
+                stringResource(scheme.labelRes()),
+                stringResource(scheme.next().labelRes()),
+            )
+        IconButton(onClick = onCycleScheme, modifier = Modifier.size(BarTarget), colors = barColours) {
+            Icon(DeaftlyIcons.Contrast, contentDescription = change)
         }
     }
 }
@@ -169,4 +214,11 @@ private tailrec fun Context.findActivity(): Activity? =
         is Activity -> this
         is ContextWrapper -> baseContext.findActivity()
         else -> null
+    }
+
+private fun ShowScheme.labelRes(): Int =
+    when (this) {
+        ShowScheme.BlackOnWhite -> R.string.show_scheme_black_on_white
+        ShowScheme.WhiteOnBlack -> R.string.show_scheme_white_on_black
+        ShowScheme.YellowOnBlack -> R.string.show_scheme_yellow_on_black
     }

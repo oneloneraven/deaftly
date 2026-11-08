@@ -21,6 +21,7 @@ import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Density
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.ravendarque.deaftly.core.settings.ShowScheme
 import com.ravendarque.deaftly.ui.theme.AppTheme
 import org.junit.Before
 import org.junit.Rule
@@ -44,6 +45,7 @@ class ShowScreenTest {
 
     private var closes = 0
     private var chats = 0
+    private var scheme by mutableStateOf(ShowScheme.BlackOnWhite)
 
     @Before
     fun enableChecks() {
@@ -56,7 +58,13 @@ class ShowScreenTest {
     ) {
         composeRule.setContent {
             AppTheme(darkTheme = darkTheme) {
-                ShowScreen(text, onClose = { closes++ }, onContinueAsChat = { chats++ })
+                ShowContent(
+                    text,
+                    scheme,
+                    onCycleScheme = { scheme = scheme.next() },
+                    onClose = { closes++ },
+                    onContinueAsChat = { chats++ },
+                )
             }
         }
         composeRule.waitForIdle()
@@ -82,6 +90,17 @@ class ShowScreenTest {
         show(SHORT, darkTheme = true)
 
         composeRule.onRoot().tryPerformAccessibilityChecks()
+    }
+
+    @Test
+    fun theColourButtonCyclesTheSchemeAndNamesCurrentAndNext() {
+        show(SHORT)
+
+        composeRule.onNodeWithContentDescription("Change colours. Now black on white, next white on black").performClick()
+        composeRule.onNodeWithContentDescription("Change colours. Now white on black, next yellow on black").performClick()
+        composeRule.onNodeWithContentDescription("Change colours. Now yellow on black, next black on white").assertExists()
+        composeRule.onRoot().tryPerformAccessibilityChecks()
+        assertEquals(ShowScheme.YellowOnBlack, scheme)
     }
 
     @Test
@@ -136,7 +155,7 @@ class ShowScreenTest {
         composeRule.setContent {
             AppTheme {
                 Capture { view = it }
-                if (shown) ShowScreen(SHORT, onClose = {}, onContinueAsChat = {})
+                if (shown) ShowContent(SHORT, ShowScheme.BlackOnWhite, onCycleScheme = {}, onClose = {}, onContinueAsChat = {})
             }
         }
         composeRule.waitForIdle()

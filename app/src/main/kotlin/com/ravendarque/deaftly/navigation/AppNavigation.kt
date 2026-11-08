@@ -17,6 +17,7 @@ import com.ravendarque.deaftly.ui.home.HomeScreen
 import com.ravendarque.deaftly.ui.home.HomeViewModel
 import com.ravendarque.deaftly.ui.placeholder.PlaceholderScreen
 import com.ravendarque.deaftly.ui.show.ShowScreen
+import com.ravendarque.deaftly.ui.show.ShowViewModel
 
 @Composable
 fun AppNavigation(container: AppContainer) {
@@ -46,8 +47,10 @@ fun AppNavigation(container: AppContainer) {
                     )
                 }
                 entry<Route.Show> { route ->
+                    val viewModel = viewModel<ShowViewModel>(factory = container.showViewModelFactory)
                     ShowScreen(
                         text = route.text,
+                        viewModel = viewModel,
                         onClose = { backStack.removeLastOrNull() },
                         onContinueAsChat = { backStack.add(Route.Chat(route.text)) },
                     )
