@@ -1,0 +1,14 @@
+{
+  "noneAllowed": [
+    "docs/",
+    ".github/",
+    ".claude/",
+    ".gitignore",
+    "*.md",
+    "app/src/test/",
+    "core/src/test/",
+    "config/detekt/",
+    ".editorconfig"
+  ],
+  "noneForbidden": []
+}
