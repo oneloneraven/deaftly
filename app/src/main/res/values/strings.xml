@@ -32,6 +32,9 @@
     <string name="fill_scan_menu">Scan the menu</string>
     <string name="fill_add_more">add more</string>
     <string name="fill_type_it">Type it</string>
+    <string name="show_close">Close show mode</string>
+    <string name="show_continue_chat">Continue as chat</string>
+    <string name="show_hint">Swipe down to go back</string>
     <string name="template_pin">Pin</string>
     <string name="template_unpin">Unpin</string>
     <string name="template_set_category">Set category</string>

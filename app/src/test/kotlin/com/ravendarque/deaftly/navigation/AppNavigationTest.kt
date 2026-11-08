@@ -52,7 +52,6 @@ class AppNavigationTest {
             listOf(
                 { composeRule.onNodeWithContentDescription(text(R.string.home_new_template)).performClick() } to R.string.route_editor,
                 { composeRule.onNodeWithContentDescription(text(R.string.route_settings)).performClick() } to R.string.route_settings,
-                { composeRule.onNodeWithText(text(R.string.home_type_and_show)).performClick() } to R.string.route_show,
                 { composeRule.onNodeWithText(text(R.string.home_start_chat)).performClick() } to R.string.route_chat,
             )
 
@@ -65,6 +64,20 @@ class AppNavigationTest {
             composeRule.onNodeWithText(text(R.string.home_start_chat)).assertExists()
             composeRule.onNodeWithText(text(R.string.back)).assertDoesNotExist()
         }
+    }
+
+    @Test
+    fun typeAndShowOpensTheShowScreenAndCloseReturnsHome() {
+        composeRule.enableAccessibilityChecks()
+        showApp()
+
+        composeRule.onNodeWithText(text(R.string.home_type_and_show)).performClick()
+        composeRule.onNodeWithContentDescription(text(R.string.show_close)).assertExists()
+        composeRule.onNodeWithText(text(R.string.show_hint)).assertExists()
+        composeRule.onRoot().tryPerformAccessibilityChecks()
+
+        composeRule.onNodeWithContentDescription(text(R.string.show_close)).performClick()
+        composeRule.onNodeWithText(text(R.string.home_start_chat)).assertExists()
     }
 
     @Test
@@ -98,7 +111,8 @@ class AppNavigationTest {
                 Route.Home,
                 Route.Fill("template-1"),
                 Route.Show("Hello"),
-                Route.Chat,
+                Route.Chat(),
+                Route.Chat("Hello"),
                 Route.Editor("template-1"),
                 Route.Editor(),
                 Route.Settings,

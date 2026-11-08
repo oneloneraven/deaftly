@@ -21,7 +21,9 @@ sealed interface Route : NavKey {
     ) : Route
 
     @Serializable
-    data object Chat : Route
+    data class Chat(
+        val firstMessage: String? = null,
+    ) : Route
 
     @Serializable
     data object Ocr : Route
@@ -41,7 +43,7 @@ fun Route.titleRes(): Int =
         Route.Home -> R.string.app_name
         is Route.Fill -> R.string.route_fill
         is Route.Show -> R.string.route_show
-        Route.Chat -> R.string.route_chat
+        is Route.Chat -> R.string.route_chat
         Route.Ocr -> R.string.route_ocr
         is Route.Editor -> R.string.route_editor
         Route.Settings -> R.string.route_settings

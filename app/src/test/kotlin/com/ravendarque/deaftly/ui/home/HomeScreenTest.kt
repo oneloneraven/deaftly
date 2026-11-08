@@ -132,7 +132,7 @@ class HomeScreenTest {
         composeRule.onNodeWithText("Type & show").performClick()
         composeRule.onNodeWithText("Start chat").performClick()
 
-        assertEquals(listOf<Route>(Route.Show(), Route.Chat), navigated)
+        assertEquals(listOf<Route>(Route.Show(), Route.Chat()), navigated)
     }
 
     private fun templateInRepository(id: String) = repository.snapshot.first { it.id == id }
