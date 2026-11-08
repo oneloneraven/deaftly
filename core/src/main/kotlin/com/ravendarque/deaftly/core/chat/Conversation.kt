@@ -9,6 +9,7 @@ public data class Conversation(
     init {
         require(participantA.id == ParticipantId.A) { "participantA must have id A" }
         require(participantB.id == ParticipantId.B) { "participantB must have id B" }
+        require(participantA.colour != participantB.colour) { "Participants must have different colours" }
         require(messages.withIndex().all { (index, message) -> message.id == index }) {
             "Message ids must match their position in the conversation"
         }
@@ -20,6 +21,12 @@ public data class Conversation(
         when (id) {
             ParticipantId.A -> participantA
             ParticipantId.B -> participantB
+        }
+
+    public fun withParticipant(participant: Participant): Conversation =
+        when (participant.id) {
+            ParticipantId.A -> copy(participantA = participant)
+            ParticipantId.B -> copy(participantB = participant)
         }
 
     public fun withTurn(turn: ParticipantId): Conversation = copy(turn = turn)

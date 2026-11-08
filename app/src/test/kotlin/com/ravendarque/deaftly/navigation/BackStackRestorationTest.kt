@@ -2,11 +2,14 @@ package com.ravendarque.deaftly.navigation
 
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.ravendarque.deaftly.MainActivity
 import com.ravendarque.deaftly.R
+import com.ravendarque.deaftly.ui.chat.isParticipantNameField
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -24,17 +27,40 @@ class BackStackRestorationTest {
 
     private fun text(id: Int) = composeRule.activity.getString(id)
 
+    private fun text(
+        id: Int,
+        vararg args: Any,
+    ) = composeRule.activity.getString(id, *args)
+
     @Test
     fun theBackStackSurvivesRecreation() {
         composeRule.waitUntil(LOAD_TIMEOUT_MILLIS) {
             composeRule.onAllNodesWithText(text(R.string.home_start_chat)).fetchSemanticsNodes().isNotEmpty()
         }
-        composeRule.onNodeWithText(text(R.string.home_start_chat)).performClick()
-        composeRule.onNodeWithText(text(R.string.route_chat)).assertExists()
+        composeRule.onNodeWithContentDescription(text(R.string.route_settings)).performClick()
+        composeRule.onNodeWithText(text(R.string.route_settings)).assertExists()
 
         composeRule.activityRule.scenario.recreate()
 
-        composeRule.onNodeWithText(text(R.string.route_chat)).assertExists()
+        composeRule.onNodeWithText(text(R.string.route_settings)).assertExists()
         composeRule.onNodeWithText(text(R.string.back)).assertExists()
+    }
+
+    @Test
+    fun theChatParticipantsSurviveRecreation() {
+        composeRule.waitUntil(LOAD_TIMEOUT_MILLIS) {
+            composeRule.onAllNodesWithText(text(R.string.home_start_chat)).fetchSemanticsNodes().isNotEmpty()
+        }
+        composeRule.onNodeWithText(text(R.string.home_start_chat)).performClick()
+        composeRule.waitUntil(LOAD_TIMEOUT_MILLIS) {
+            composeRule.onAllNodesWithText(text(R.string.chat_empty)).fetchSemanticsNodes().isNotEmpty()
+        }
+        composeRule.onNodeWithContentDescription(text(R.string.chat_edit_participants, "Them", "Me")).performClick()
+        composeRule.onAllNodes(isParticipantNameField)[1].performTextInput("Sam")
+        composeRule.onNodeWithText(text(R.string.participants_done)).performClick()
+
+        composeRule.activityRule.scenario.recreate()
+
+        composeRule.onNodeWithContentDescription(text(R.string.chat_edit_participants, "Sam", "Me")).assertExists()
     }
 }

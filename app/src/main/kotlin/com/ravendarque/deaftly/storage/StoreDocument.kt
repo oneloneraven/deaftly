@@ -22,6 +22,8 @@ data class StoreDocument(
 @Serializable
 data class SettingsDto(
     val showScheme: ShowSchemeDto? = null,
+    val chatName: String? = null,
+    val chatColour: ParticipantColourDto? = null,
 )
 
 @Serializable
@@ -34,6 +36,24 @@ enum class ShowSchemeDto {
 
     @SerialName("yellow-on-black")
     YellowOnBlack,
+}
+
+@Serializable
+enum class ParticipantColourDto {
+    @SerialName("accent")
+    Accent,
+
+    @SerialName("person-b")
+    PersonB,
+
+    @SerialName("teal")
+    Teal,
+
+    @SerialName("rose")
+    Rose,
+
+    @SerialName("berry")
+    Berry,
 }
 
 @Serializable

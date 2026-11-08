@@ -1,6 +1,8 @@
 package com.ravendarque.deaftly.storage
 
 import androidx.datastore.core.DataStore
+import com.ravendarque.deaftly.core.chat.ChatProfile
+import com.ravendarque.deaftly.core.chat.ColourRole
 import com.ravendarque.deaftly.core.settings.SettingsRepository
 import com.ravendarque.deaftly.core.settings.ShowScheme
 import kotlinx.coroutines.flow.Flow
@@ -12,8 +14,25 @@ class DataStoreSettingsRepository(
 ) : SettingsRepository {
     override val showScheme: Flow<ShowScheme?> = store.data.map { it.settings.showScheme?.toDomain() }.distinctUntilChanged()
 
+    override val chatProfile: Flow<ChatProfile> =
+        store.data
+            .map { ChatProfile(it.settings.chatName, it.settings.chatColour?.toDomain() ?: ColourRole.Accent) }
+            .distinctUntilChanged()
+
     override suspend fun setShowScheme(scheme: ShowScheme) {
         store.updateData { document -> document.copy(settings = document.settings.copy(showScheme = scheme.toDto())) }
+    }
+
+    override suspend fun setChatProfile(profile: ChatProfile) {
+        store.updateData { document ->
+            document.copy(
+                settings =
+                    document.settings.copy(
+                        chatName = profile.name?.trim()?.takeIf { it.isNotEmpty() },
+                        chatColour = profile.colour.toDto(),
+                    ),
+            )
+        }
     }
 }
 
@@ -29,4 +48,22 @@ private fun ShowScheme.toDto(): ShowSchemeDto =
         ShowScheme.BlackOnWhite -> ShowSchemeDto.BlackOnWhite
         ShowScheme.WhiteOnBlack -> ShowSchemeDto.WhiteOnBlack
         ShowScheme.YellowOnBlack -> ShowSchemeDto.YellowOnBlack
+    }
+
+private fun ParticipantColourDto.toDomain(): ColourRole =
+    when (this) {
+        ParticipantColourDto.Accent -> ColourRole.Accent
+        ParticipantColourDto.PersonB -> ColourRole.PersonB
+        ParticipantColourDto.Teal -> ColourRole.Teal
+        ParticipantColourDto.Rose -> ColourRole.Rose
+        ParticipantColourDto.Berry -> ColourRole.Berry
+    }
+
+private fun ColourRole.toDto(): ParticipantColourDto =
+    when (this) {
+        ColourRole.Accent -> ParticipantColourDto.Accent
+        ColourRole.PersonB -> ParticipantColourDto.PersonB
+        ColourRole.Teal -> ParticipantColourDto.Teal
+        ColourRole.Rose -> ParticipantColourDto.Rose
+        ColourRole.Berry -> ParticipantColourDto.Berry
     }

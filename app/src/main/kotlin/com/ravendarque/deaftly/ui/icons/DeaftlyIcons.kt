@@ -37,6 +37,8 @@ private fun strokeIcon(
 object DeaftlyIcons {
     val Back: ImageVector by lazy { strokeIcon("Back", "M15 18l-6-6 6-6") }
 
+    val Chevron: ImageVector by lazy { strokeIcon("Chevron", "M9 6l6 6-6 6") }
+
     val Close: ImageVector by lazy { strokeIcon("Close", "M6 6l12 12M18 6L6 18") }
 
     val Plus: ImageVector by lazy { strokeIcon("Plus", "M12 5v14M5 12h14") }

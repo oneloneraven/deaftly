@@ -3,6 +3,7 @@ package com.ravendarque.deaftly.core.chat
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 class ParticipantTest {
     @Test
@@ -42,5 +43,17 @@ class ParticipantTest {
     @Test
     fun initialKeepsAWholeCodePoint() {
         assertEquals("😀", Participant.defaultA("😀 Grin").avatarInitial)
+    }
+
+    @Test
+    fun namedOrFillsInOnlyAMissingName() {
+        assertEquals("Me", Participant.defaultA().namedOr("Me").displayName)
+        assertEquals("Me", Participant.defaultA("  ").namedOr("Me").displayName)
+        assertEquals("Alex", Participant.defaultA("Alex").namedOr("Me").displayName)
+    }
+
+    @Test
+    fun thePaletteOffersFourToSixColours() {
+        assertTrue(ColourRole.entries.size in 4..6)
     }
 }

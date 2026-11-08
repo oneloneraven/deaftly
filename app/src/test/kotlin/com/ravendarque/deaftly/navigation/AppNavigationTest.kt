@@ -14,6 +14,7 @@ import androidx.compose.ui.test.tryPerformAccessibilityChecks
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.ravendarque.deaftly.AppContainer
 import com.ravendarque.deaftly.R
+import com.ravendarque.deaftly.ui.chat.isMessageField
 import com.ravendarque.deaftly.ui.theme.AppTheme
 import kotlinx.serialization.json.Json
 import org.junit.Rule
@@ -34,6 +35,11 @@ class AppNavigationTest {
 
     private fun text(id: Int) = composeRule.activity.getString(id)
 
+    private fun text(
+        id: Int,
+        vararg args: Any,
+    ) = composeRule.activity.getString(id, *args)
+
     private fun showApp() {
         composeRule.setContent { AppTheme { AppNavigation(AppContainer(composeRule.activity.applicationContext)) } }
         composeRule.waitUntil(LOAD_TIMEOUT_MILLIS) {
@@ -53,7 +59,6 @@ class AppNavigationTest {
         val opens =
             listOf(
                 { composeRule.onNodeWithContentDescription(text(R.string.route_settings)).performClick() } to R.string.route_settings,
-                { composeRule.onNodeWithText(text(R.string.home_start_chat)).performClick() } to R.string.route_chat,
             )
 
         opens.forEach { (open, title) ->
@@ -65,6 +70,45 @@ class AppNavigationTest {
             composeRule.onNodeWithText(text(R.string.home_start_chat)).assertExists()
             composeRule.onNodeWithText(text(R.string.back)).assertDoesNotExist()
         }
+    }
+
+    @Test
+    fun startChatOpensTheChatWithBothParticipantsAndEndingReturnsHome() {
+        composeRule.enableAccessibilityChecks()
+        showApp()
+
+        composeRule.onNodeWithText(text(R.string.home_start_chat)).performClick()
+        composeRule.waitUntil(LOAD_TIMEOUT_MILLIS) {
+            composeRule.onAllNodesWithText(text(R.string.chat_empty)).fetchSemanticsNodes().isNotEmpty()
+        }
+        composeRule.onNodeWithContentDescription(text(R.string.chat_edit_participants, "Them", "Me")).assertExists()
+        composeRule.onRoot().tryPerformAccessibilityChecks()
+
+        composeRule.onNodeWithContentDescription(text(R.string.chat_end)).performClick()
+        composeRule.onNodeWithText(text(R.string.home_start_chat)).assertExists()
+        composeRule.onNodeWithText(text(R.string.chat_empty)).assertDoesNotExist()
+    }
+
+    @Test
+    fun endingAChatDiscardsItsMessages() {
+        showApp()
+
+        fun openChat() {
+            composeRule.onNodeWithText(text(R.string.home_start_chat)).performClick()
+            composeRule.waitUntil(LOAD_TIMEOUT_MILLIS) {
+                composeRule.onAllNodesWithText(text(R.string.chat_composer_hint)).fetchSemanticsNodes().isNotEmpty()
+            }
+        }
+
+        openChat()
+        composeRule.onNode(isMessageField).performTextInput("Hello there")
+        composeRule.onNodeWithContentDescription(text(R.string.chat_send)).performClick()
+        composeRule.onNodeWithContentDescription("Me: Hello there").assertExists()
+        composeRule.onNodeWithContentDescription(text(R.string.chat_end)).performClick()
+        openChat()
+
+        composeRule.onNodeWithText(text(R.string.chat_empty)).assertExists()
+        composeRule.onNodeWithContentDescription("Me: Hello there").assertDoesNotExist()
     }
 
     @Test
@@ -102,6 +146,26 @@ class AppNavigationTest {
     }
 
     @Test
+    fun continueAsChatFromShowOpensTheChatWithTheShownMessageAsTheDeafUsersFirstTurn() {
+        composeRule.enableAccessibilityChecks()
+        showApp()
+        composeRule.onNodeWithText(text(R.string.home_type_and_show)).performClick()
+        composeRule.onNodeWithContentDescription(text(R.string.type_show_label)).performTextInput("Table for two")
+        composeRule.onNodeWithText(text(R.string.fill_show)).performClick()
+
+        composeRule.onNodeWithText(text(R.string.show_continue_chat)).performClick()
+        composeRule.waitUntil(LOAD_TIMEOUT_MILLIS) {
+            composeRule.onAllNodesWithText(text(R.string.chat_turn_prompt_other)).fetchSemanticsNodes().isNotEmpty()
+        }
+
+        composeRule.onNodeWithContentDescription("Me: Table for two").assertExists()
+        composeRule.onNodeWithContentDescription(text(R.string.chat_turn_label)).assertExists()
+        composeRule.onRoot().tryPerformAccessibilityChecks()
+        composeRule.onNodeWithContentDescription(text(R.string.chat_end)).performClick()
+        composeRule.onNodeWithContentDescription(text(R.string.show_close)).assertExists()
+    }
+
+    @Test
     fun tappingATemplateOpensFill() {
         showApp()
 
@@ -116,7 +180,7 @@ class AppNavigationTest {
     fun systemBackPopsTheStack() {
         showApp()
 
-        composeRule.onNodeWithText(text(R.string.home_start_chat)).performClick()
+        composeRule.onNodeWithContentDescription(text(R.string.route_settings)).performClick()
         composeRule.onNodeWithText(text(R.string.back)).assertExists()
         composeRule.runOnUiThread { composeRule.activity.onBackPressedDispatcher.onBackPressed() }
         composeRule.waitForIdle()

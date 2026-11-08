@@ -152,4 +152,27 @@ class TemplateStoreSerializerTest {
             assertEquals("Old", migrated.templates.single().title)
             assertEquals(2, migrated.version)
         }
+
+    @Test
+    fun roundTripsTheChatProfile() =
+        runTest {
+            val document = seed.copy(settings = SettingsDto(chatName = "Alex", chatColour = ParticipantColourDto.PersonB))
+
+            val settings =
+                Json
+                    .parseToJsonElement(write(document))
+                    .jsonObject
+                    .getValue("settings")
+                    .jsonObject
+
+            assertEquals("Alex", settings.getValue("chatName").jsonPrimitive.content)
+            assertEquals("person-b", settings.getValue("chatColour").jsonPrimitive.content)
+            assertEquals(document.settings, read(write(document)).settings)
+        }
+
+    @Test
+    fun readsSettingsWithoutAChatProfile() =
+        runTest {
+            assertEquals(SettingsDto(), read("""{"version":1,"templates":[],"settings":{}}""").settings)
+        }
 }
