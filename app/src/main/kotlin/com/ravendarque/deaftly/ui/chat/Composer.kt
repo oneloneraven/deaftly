@@ -64,6 +64,7 @@ private const val QUOTE_LINES = 2
 private const val GLYPH_SP = 18
 
 data class ComposerActions(
+    val onInsertTemplate: () -> Unit,
     val onChange: (Composition) -> Unit,
     val onQuoteLatest: () -> Unit,
     val onRemoveQuote: () -> Unit,
@@ -171,6 +172,14 @@ private fun FormattingToolbar(
             onClick = if (draft.quote != null) actions.onRemoveQuote else actions.onQuoteLatest,
         ) {
             Icon(DeaftlyIcons.Quote, contentDescription = null, modifier = Modifier.size(ToolbarIcon), tint = it)
+        }
+        ToolbarButton(
+            label = stringResource(R.string.chat_insert_template),
+            selected = false,
+            colours = colours,
+            onClick = actions.onInsertTemplate,
+        ) {
+            Icon(DeaftlyIcons.Template, contentDescription = null, modifier = Modifier.size(ToolbarIcon), tint = it)
         }
     }
 }

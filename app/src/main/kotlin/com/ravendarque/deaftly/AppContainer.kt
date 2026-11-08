@@ -10,6 +10,7 @@ import com.ravendarque.deaftly.storage.DataStoreSettingsRepository
 import com.ravendarque.deaftly.storage.DataStoreTemplateRepository
 import com.ravendarque.deaftly.storage.createTemplateStore
 import com.ravendarque.deaftly.templates.builtInTemplates
+import com.ravendarque.deaftly.ui.chat.ChatInsertions
 import com.ravendarque.deaftly.ui.chat.ChatViewModel
 import com.ravendarque.deaftly.ui.fill.FillViewModel
 import com.ravendarque.deaftly.ui.home.HomeViewModel
@@ -26,6 +27,8 @@ class AppContainer(
 
     val settingsRepository: SettingsRepository by lazy { DataStoreSettingsRepository(store) }
 
+    val chatInsertions = ChatInsertions()
+
     val homeViewModelFactory =
         viewModelFactory {
             initializer { HomeViewModel(templateRepository) }
@@ -38,7 +41,7 @@ class AppContainer(
 
     fun chatViewModelFactory(firstMessage: String?) =
         viewModelFactory {
-            initializer { ChatViewModel(settingsRepository, createSavedStateHandle(), firstMessage) }
+            initializer { ChatViewModel(settingsRepository, createSavedStateHandle(), firstMessage, chatInsertions) }
         }
 
     fun fillViewModelFactory(templateId: String) =

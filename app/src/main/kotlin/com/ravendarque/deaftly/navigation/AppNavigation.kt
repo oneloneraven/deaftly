@@ -13,6 +13,7 @@ import androidx.navigation3.ui.NavDisplay
 import com.ravendarque.deaftly.AppContainer
 import com.ravendarque.deaftly.ui.chat.ChatScreen
 import com.ravendarque.deaftly.ui.chat.ChatViewModel
+import com.ravendarque.deaftly.ui.chat.TemplatePickerScreen
 import com.ravendarque.deaftly.ui.fill.FillScreen
 import com.ravendarque.deaftly.ui.fill.FillViewModel
 import com.ravendarque.deaftly.ui.home.HomeScreen
@@ -25,6 +26,10 @@ import com.ravendarque.deaftly.ui.typeshow.TypeShowScreen
 @Composable
 fun AppNavigation(container: AppContainer) {
     val backStack = rememberNavBackStack(Route.Home)
+    val insertIntoChat: (String) -> Unit = { text ->
+        container.chatInsertions.offer(text)
+        while (backStack.lastOrNull() !is Route.Chat && backStack.size > 1) backStack.removeLastOrNull()
+    }
 
     NavDisplay(
         backStack = backStack,
@@ -47,6 +52,16 @@ fun AppNavigation(container: AppContainer) {
                         viewModel = viewModel,
                         onNavigate = { backStack.add(it) },
                         onBack = { backStack.removeLastOrNull() },
+                        onInsert = if (route.forChat) insertIntoChat else null,
+                    )
+                }
+                entry<Route.TemplatePicker> {
+                    val viewModel = viewModel<HomeViewModel>(factory = container.homeViewModelFactory)
+                    TemplatePickerScreen(
+                        viewModel = viewModel,
+                        onFill = { backStack.add(Route.Fill(it, forChat = true)) },
+                        onInsert = insertIntoChat,
+                        onBack = { backStack.removeLastOrNull() },
                     )
                 }
                 entry<Route.TypeShow> {
@@ -66,7 +81,11 @@ fun AppNavigation(container: AppContainer) {
                 }
                 entry<Route.Chat> { route ->
                     val viewModel = viewModel<ChatViewModel>(factory = container.chatViewModelFactory(route.firstMessage))
-                    ChatScreen(viewModel, onEnd = { backStack.removeLastOrNull() })
+                    ChatScreen(
+                        viewModel,
+                        onEnd = { backStack.removeLastOrNull() },
+                        onInsertTemplate = { backStack.add(Route.TemplatePicker) },
+                    )
                 }
                 entry<Route.Ocr> { PlaceholderEntry(it, backStack) }
                 entry<Route.Editor> { PlaceholderEntry(it, backStack) }

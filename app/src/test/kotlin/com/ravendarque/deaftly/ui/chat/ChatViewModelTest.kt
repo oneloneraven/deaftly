@@ -44,7 +44,8 @@ class ChatViewModelTest {
         settings: FakeSettingsRepository = FakeSettingsRepository(),
         savedState: SavedStateHandle = SavedStateHandle(),
         firstMessage: String? = null,
-    ) = ChatViewModel(settings, savedState, firstMessage)
+        insertions: ChatInsertions = ChatInsertions(),
+    ) = ChatViewModel(settings, savedState, firstMessage, insertions)
 
     private fun ChatViewModel.type(text: String) = drafts.setComposition(Composition().withText(text, text.length, text.length))
 
@@ -474,5 +475,33 @@ class ChatViewModelTest {
             viewModel.drafts.insertText("there")
 
             assertEquals("Hello there", viewModel.draft().text)
+        }
+
+    @Test
+    fun anOfferedInsertionLandsAtTheCursorOfTheActiveDraftAndIsConsumed() =
+        runTest {
+            val insertions = ChatInsertions()
+            val viewModel = viewModel(insertions = insertions)
+            collect(viewModel)
+            viewModel.drafts.setComposition(Composition(FormattedText("Hello world")).select(5, 5))
+
+            insertions.offer(", dear")
+
+            assertEquals("Hello, dear world", viewModel.draft().text)
+            assertEquals(11, viewModel.draft().composition.selectionStart)
+            assertNull(insertions.text.value)
+        }
+
+    @Test
+    fun anInsertionIsNotSentOnItsOwn() =
+        runTest {
+            val insertions = ChatInsertions()
+            val viewModel = viewModel(insertions = insertions)
+            collect(viewModel)
+
+            insertions.offer("Table for two")
+
+            assertEquals(0, viewModel.conversation().messages.size)
+            assertEquals("Table for two", viewModel.draft().text)
         }
 }
