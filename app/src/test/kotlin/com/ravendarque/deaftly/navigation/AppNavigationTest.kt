@@ -22,6 +22,7 @@ import com.ravendarque.deaftly.AppContainer
 import com.ravendarque.deaftly.R
 import com.ravendarque.deaftly.core.template.Template
 import com.ravendarque.deaftly.ui.chat.isMessageField
+import com.ravendarque.deaftly.ui.ocr.OcrOutcome
 import com.ravendarque.deaftly.ui.theme.AppTheme
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
@@ -232,6 +233,23 @@ class AppNavigationTest {
         composeRule.waitForIdle()
         composeRule.onNodeWithText(text(R.string.ocr_permission_body)).assertDoesNotExist()
         composeRule.onNode(hasSetTextAction()).assertIsFocused()
+    }
+
+    @Test
+    fun textAddedFromTheScannerFillsTheCameraPlaceholderOnReturning() {
+        val container = AppContainer(composeRule.activity.applicationContext)
+        showApp(container)
+        composeRule.onAllNodesWithText(text(R.string.template_order_food_title))[0].performClick()
+        composeRule.onNode(hasText("menu item") and hasClickAction()).performClick()
+        composeRule.onNodeWithText(text(R.string.fill_scan_menu)).performClick()
+        composeRule.onNodeWithText(text(R.string.ocr_permission_body)).assertExists()
+
+        container.ocrOutcomes.post(OcrOutcome.Text("builtin.order-food", "menu item", "Lasagne"))
+        composeRule.runOnUiThread { composeRule.activity.onBackPressedDispatcher.onBackPressed() }
+        composeRule.waitForIdle()
+
+        composeRule.onNodeWithText(text(R.string.ocr_permission_body)).assertDoesNotExist()
+        composeRule.onNode(hasText("Lasagne") and hasClickAction()).assertExists()
     }
 
     @Test

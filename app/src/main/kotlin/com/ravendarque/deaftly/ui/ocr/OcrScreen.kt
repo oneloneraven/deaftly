@@ -34,6 +34,7 @@ fun OcrScreen(
     viewModelFactory: ViewModelProvider.Factory,
     onClose: () -> Unit,
     onTypeInstead: () -> Unit,
+    onAdd: (String) -> Unit,
 ) {
     val permission = rememberCameraPermission()
     var unavailable by rememberSaveable { mutableStateOf(false) }
@@ -51,6 +52,7 @@ fun OcrScreen(
                     phrases = state.phrases,
                     selection = state.selection,
                     fieldText = state.fieldText,
+                    fieldLabel = state.fieldLabel,
                     frozen = state.frozen || state.freezeRequested,
                     frozenImage = state.frozenImage,
                     canFreeze = state.ready,
@@ -64,6 +66,7 @@ fun OcrScreen(
                     viewModel::editText,
                     viewModel::toggleFreeze,
                     viewModel::toggleTorch,
+                    { onAdd(state.fieldText.trim()) },
                 ),
             viewfinder = {
                 CameraViewfinder(
@@ -82,6 +85,7 @@ data class OcrContent(
     val phrases: List<Phrase>,
     val selection: TextSelection?,
     val fieldText: String,
+    val fieldLabel: String? = null,
     val frozen: Boolean = false,
     val frozenImage: ImageBitmap? = null,
     val canFreeze: Boolean = true,
@@ -95,6 +99,7 @@ data class OcrActions(
     val onFieldChange: (String) -> Unit,
     val onToggleFreeze: () -> Unit,
     val onToggleTorch: () -> Unit,
+    val onAdd: () -> Unit,
 )
 
 @Composable
@@ -122,9 +127,10 @@ fun OcrCameraContent(
         )
         OcrTray(
             hint = stringResource(R.string.ocr_tray_hint),
-            fieldLabel = stringResource(R.string.ocr_tray_label),
+            fieldLabel = content.fieldLabel ?: stringResource(R.string.ocr_tray_label),
             text = content.fieldText,
             onTextChange = actions.onFieldChange,
+            onAdd = actions.onAdd,
             modifier = Modifier.align(Alignment.BottomCenter),
         )
     }

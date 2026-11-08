@@ -8,6 +8,8 @@ import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.assertIsOff
 import androidx.compose.ui.test.assertIsOn
@@ -17,6 +19,7 @@ import androidx.compose.ui.test.click
 import androidx.compose.ui.test.down
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasSetTextAction
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.accessibility.enableAccessibilityChecks
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.moveTo
@@ -53,9 +56,11 @@ class OcrScreenTest {
     private val ranges = mutableListOf<TextSelection>()
     private var selection by mutableStateOf<TextSelection?>(null)
     private var fieldText by mutableStateOf("")
+    private var label by mutableStateOf<String?>(null)
     private var frozen by mutableStateOf(false)
     private var torch by mutableStateOf<Boolean?>(null)
     private var freezes = 0
+    private val added = mutableListOf<String>()
     private var torches = 0
 
     @Before
@@ -67,7 +72,7 @@ class OcrScreenTest {
         composeRule.setContent {
             AppTheme {
                 OcrCameraContent(
-                    content = OcrContent("Live", menuPhrases, selection, fieldText, frozen = frozen, torch = torch),
+                    content = OcrContent("Live", menuPhrases, selection, fieldText, frozen = frozen, torch = torch, fieldLabel = label),
                     actions =
                         OcrActions(
                             onClose = { closes++ },
@@ -87,6 +92,7 @@ class OcrScreenTest {
                                 freezes++
                                 frozen = !frozen
                             },
+                            onAdd = { added += fieldText.trim() },
                             onToggleTorch = {
                                 torches++
                                 torch = torch?.not()
@@ -295,4 +301,38 @@ class OcrScreenTest {
     }
 
     private fun hasStateDescription(text: String) = SemanticsMatcher.expectValue(SemanticsProperties.StateDescription, text)
+
+    @Test
+    fun addToMessageIsDisabledUntilThereIsText() {
+        show()
+
+        composeRule.onNodeWithText("Add to message").assertIsNotEnabled()
+        composeRule.onNode(hasSetTextAction()).performTextReplacement("   ")
+        composeRule.onNodeWithText("Add to message").assertIsNotEnabled()
+
+        composeRule.onNodeWithContentDescription(lasagne).performClick()
+        composeRule.waitForIdle()
+
+        composeRule.onNodeWithText("Add to message").assertIsEnabled()
+    }
+
+    @Test
+    fun addToMessageSendsTheEditedTextWithoutSurroundingSpaces() {
+        show()
+        composeRule.onNodeWithContentDescription(lasagne).performClick()
+        composeRule.onNode(hasSetTextAction()).performTextReplacement("  Lasagne verde ")
+
+        composeRule.onNodeWithText("Add to message").performClick()
+
+        assertEquals(listOf("Lasagne verde"), added)
+    }
+
+    @Test
+    fun theFieldIsLabelledWithThePlaceholdersLabel() {
+        label = "Menu item"
+        show()
+
+        composeRule.onNode(hasSetTextAction()).assert(hasText("Menu item"))
+        composeRule.onRoot().tryPerformAccessibilityChecks()
+    }
 }

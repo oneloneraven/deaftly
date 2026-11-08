@@ -18,7 +18,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.setMain
 import kotlinx.coroutines.withTimeout
@@ -42,7 +42,7 @@ class OcrViewModelTest {
 
     @BeforeTest
     fun setUp() {
-        Dispatchers.setMain(StandardTestDispatcher())
+        Dispatchers.setMain(UnconfinedTestDispatcher())
     }
 
     @AfterTest
@@ -64,6 +64,7 @@ class OcrViewModelTest {
                             release.await()
                             fake
                         },
+                        loadFieldLabel = { "Menu item" },
                         captureFrame = { _, _ ->
                             captured++
                             null
@@ -275,6 +276,15 @@ class OcrViewModelTest {
         viewModel.setTorchAvailable(false)
         assertFalse(viewModel.state.value.torchOn)
         assertFalse(viewModel.state.value.torchAvailable)
+    }
+
+    @Test
+    fun theTrayIsLabelledWithThePlaceholdersLabelOnceLoaded() {
+        val viewModel = viewModel()
+
+        val label = runBlocking { withTimeout(TIMEOUT_MILLIS) { viewModel.state.first { it.fieldLabel != null } } }
+
+        assertEquals("Menu item", label.fieldLabel)
     }
 
     private companion object {

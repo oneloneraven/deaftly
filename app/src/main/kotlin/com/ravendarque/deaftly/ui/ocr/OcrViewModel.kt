@@ -22,6 +22,7 @@ data class OcrUiState(
     val phrases: List<Phrase> = emptyList(),
     val selection: TextSelection? = null,
     val fieldText: String = "",
+    val fieldLabel: String? = null,
     val freezeRequested: Boolean = false,
     val frozen: Boolean = false,
     val frozenImage: ImageBitmap? = null,
@@ -32,6 +33,7 @@ data class OcrUiState(
 class OcrViewModel(
     private val createRecogniser: () -> TextRecogniser,
     private val captureFrame: (RecognitionFrame, BoundingBox?) -> ImageBitmap? = { _, _ -> null },
+    private val loadFieldLabel: suspend () -> String? = { null },
 ) : ViewModel() {
     private val lock = Any()
     private var recogniser: TextRecogniser? = null
@@ -42,6 +44,7 @@ class OcrViewModel(
     val state: StateFlow<OcrUiState> = mutableState
 
     init {
+        viewModelScope.launch { mutableState.update { it.copy(fieldLabel = loadFieldLabel()) } }
         viewModelScope.launch(Dispatchers.Default) {
             val created = createRecogniser()
             synchronized(lock) {
