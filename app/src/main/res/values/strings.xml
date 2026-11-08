@@ -94,6 +94,12 @@
     <string name="chat_format_off">Off</string>
     <string name="chat_quote_latest">Quote the latest message</string>
     <string name="chat_insert_template">Insert template</string>
+    <string name="chat_split_half_other">%1$s\u2019s half, upside down for the person opposite</string>
+    <string name="chat_split_half_own">%1$s\u2019s half</string>
+    <string name="chat_split_turn">%1$s\u2019s turn</string>
+    <string name="chat_split_hint">Your turn \u2013 type here</string>
+    <string name="chat_split_waiting">Waiting for %1$s\u2026</string>
+    <string name="chat_split_my_turn">My turn</string>
     <string name="chat_quote_action">Quote</string>
     <string name="chat_quote_remove">Remove quote</string>
     <string name="chat_quote_pending">Quoting: %1$s</string>

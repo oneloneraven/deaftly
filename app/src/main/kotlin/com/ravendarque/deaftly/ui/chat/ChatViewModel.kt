@@ -8,6 +8,7 @@ import com.ravendarque.deaftly.core.chat.Conversation
 import com.ravendarque.deaftly.core.chat.Participant
 import com.ravendarque.deaftly.core.chat.ParticipantId
 import com.ravendarque.deaftly.core.chat.RichText
+import com.ravendarque.deaftly.core.settings.ChatLayout
 import com.ravendarque.deaftly.core.settings.SettingsRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -21,7 +22,6 @@ import kotlinx.coroutines.launch
 
 private const val STOP_TIMEOUT_MILLIS = 5_000L
 private const val CONVERSATION_KEY = "conversation"
-private const val TEXT_SIZE_KEY = "text_size"
 
 sealed interface ChatUiState {
     data object Loading : ChatUiState
@@ -29,6 +29,7 @@ sealed interface ChatUiState {
     data class Ready(
         val conversation: Conversation,
         val textSize: ChatTextSize,
+        val layout: ChatLayout,
         val drafts: Map<ParticipantId, Draft>,
     ) : ChatUiState {
         val draft: Draft get() = drafts[conversation.turn] ?: Draft()
@@ -42,12 +43,12 @@ class ChatViewModel(
     private val insertions: ChatInsertions = ChatInsertions(),
 ) : ViewModel() {
     private val conversation = MutableStateFlow(ChatCodec.decode(savedState[CONVERSATION_KEY]))
-    private val textSize = MutableStateFlow(ChatTextSize.entries.getOrElse(savedState.get<Int>(TEXT_SIZE_KEY) ?: 0) { ChatTextSize.Normal })
+    val display = ChatDisplay(savedState)
     val drafts = ChatDrafts(savedState) { conversation.value?.turn }
 
     val state: StateFlow<ChatUiState> =
-        combine(conversation, textSize, drafts.all) { conversation, textSize, drafts ->
-            if (conversation == null) ChatUiState.Loading else ChatUiState.Ready(conversation, textSize, drafts)
+        combine(conversation, display.textSize, display.layout, drafts.all) { conversation, textSize, layout, drafts ->
+            if (conversation == null) ChatUiState.Loading else ChatUiState.Ready(conversation, textSize, layout, drafts)
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS), ChatUiState.Loading)
 
     init {
@@ -76,11 +77,6 @@ class ChatViewModel(
 
     fun selectTurn(id: ParticipantId) {
         change { it.withTurn(id) }
-    }
-
-    fun cycleTextSize() {
-        textSize.update { it.next() }
-        savedState[TEXT_SIZE_KEY] = textSize.value.ordinal
     }
 
     fun quote(

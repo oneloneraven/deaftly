@@ -12,6 +12,7 @@ import com.ravendarque.deaftly.core.chat.Quote
 import com.ravendarque.deaftly.core.chat.Span
 import com.ravendarque.deaftly.core.chat.SpanStyle
 import com.ravendarque.deaftly.core.chat.StyleRange
+import com.ravendarque.deaftly.core.settings.ChatLayout
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
@@ -239,11 +240,11 @@ class ChatViewModelTest {
             fun size() = assertIs<ChatUiState.Ready>(viewModel.state.value).textSize
 
             assertEquals(ChatTextSize.Normal, size())
-            viewModel.cycleTextSize()
+            viewModel.display.cycleTextSize()
             assertEquals(ChatTextSize.Large, size())
-            viewModel.cycleTextSize()
+            viewModel.display.cycleTextSize()
             assertEquals(ChatTextSize.Largest, size())
-            viewModel.cycleTextSize()
+            viewModel.display.cycleTextSize()
             assertEquals(ChatTextSize.Normal, size())
         }
 
@@ -257,7 +258,7 @@ class ChatViewModelTest {
             first.send()
             first.selectTurn(ParticipantId.B)
             first.type("typing")
-            first.cycleTextSize()
+            first.display.cycleTextSize()
 
             val restored = viewModel(FakeSettingsRepository(ChatProfile("Other", ColourRole.Teal)), savedState)
             collect(restored)
@@ -503,5 +504,34 @@ class ChatViewModelTest {
 
             assertEquals(0, viewModel.conversation().messages.size)
             assertEquals("Table for two", viewModel.draft().text)
+        }
+
+    @Test
+    fun theLayoutStartsAsSidesAndSurvivesRecreation() =
+        runTest {
+            val savedState = SavedStateHandle()
+            val first = viewModel(savedState = savedState)
+            collect(first)
+            assertEquals(ChatLayout.Sides, assertIs<ChatUiState.Ready>(first.state.value).layout)
+
+            first.display.setLayout(ChatLayout.Split)
+            val restored = viewModel(savedState = savedState)
+            collect(restored)
+
+            assertEquals(ChatLayout.Split, assertIs<ChatUiState.Ready>(restored.state.value).layout)
+        }
+
+    @Test
+    fun changingTheLayoutKeepsTheConversationAndDrafts() =
+        runTest {
+            val viewModel = viewModel()
+            collect(viewModel)
+            viewModel.type("half a thought")
+            val before = viewModel.conversation()
+
+            viewModel.display.setLayout(ChatLayout.Split)
+
+            assertEquals(before, viewModel.conversation())
+            assertEquals("half a thought", viewModel.draft().text)
         }
 }

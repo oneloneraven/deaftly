@@ -30,7 +30,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.customActions
+import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.traversalIndex
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ravendarque.deaftly.R
@@ -53,8 +55,9 @@ private const val SELECTION_ALPHA = 0.4f
 fun MessageList(
     conversation: Conversation,
     textSize: ChatTextSize,
-    onQuote: (messageId: Int, excerpt: String?) -> Unit,
+    onQuote: ((messageId: Int, excerpt: String?) -> Unit)?,
     modifier: Modifier = Modifier,
+    reader: ParticipantId = ParticipantId.A,
 ) {
     val listState = rememberLazyListState()
     val count = conversation.messages.size
@@ -72,13 +75,13 @@ fun MessageList(
         if (count > 0) listState.animateScrollToItem(count - 1)
     }
     LazyColumn(
-        modifier = modifier,
+        modifier = modifier.semantics { isTraversalGroup = true },
         state = listState,
         contentPadding = PaddingValues(horizontal = Deaftly.spacing.space14, vertical = Deaftly.spacing.space16),
         verticalArrangement = Arrangement.spacedBy(Deaftly.spacing.space10, Alignment.Bottom),
     ) {
         items(conversation.messages, key = { it.id }) { message ->
-            MessageBubble(message, conversation, textSize, onQuote)
+            MessageBubble(message, conversation, textSize, reader, onQuote)
         }
     }
 }
@@ -88,9 +91,10 @@ private fun MessageBubble(
     message: Message,
     conversation: Conversation,
     textSize: ChatTextSize,
-    onQuote: (messageId: Int, excerpt: String?) -> Unit,
+    reader: ParticipantId,
+    onQuote: ((messageId: Int, excerpt: String?) -> Unit)?,
 ) {
-    val own = message.author == ParticipantId.A
+    val own = message.author == reader
     val author = conversation.participant(message.author).labelled()
     val colours = author.colour.colours()
     val quoteLabel = stringResource(R.string.chat_quote_action)
@@ -113,13 +117,16 @@ private fun MessageBubble(
                     .padding(horizontal = Deaftly.spacing.space16, vertical = Deaftly.spacing.space12)
                     .semantics(mergeDescendants = true) {
                         contentDescription = description
-                        customActions =
-                            listOf(
-                                CustomAccessibilityAction(quoteLabel) {
-                                    onQuote(message.id, null)
-                                    true
-                                },
-                            )
+                        traversalIndex = message.id.toFloat()
+                        if (onQuote != null) {
+                            customActions =
+                                listOf(
+                                    CustomAccessibilityAction(quoteLabel) {
+                                        onQuote(message.id, null)
+                                        true
+                                    },
+                                )
+                        }
                     },
             verticalArrangement = Arrangement.spacedBy(Deaftly.spacing.space8),
         ) {
@@ -143,7 +150,7 @@ private fun SelectableText(
     colours: ParticipantColours,
     textSize: ChatTextSize,
     quoteLabel: String,
-    onQuote: (messageId: Int, excerpt: String?) -> Unit,
+    onQuote: ((messageId: Int, excerpt: String?) -> Unit)?,
 ) {
     val formatting = rememberChatFormatting()
     val selection = rememberSelectionState()
@@ -156,10 +163,12 @@ private fun SelectableText(
             state = selection,
             modifier =
                 Modifier.appendTextContextMenuComponents {
-                    item(QuoteMenuKey, quoteLabel) {
-                        onQuote(message.id, selection.selectedTexts.joinToString("") { it.text })
-                        selection.clear()
-                        close()
+                    if (onQuote != null) {
+                        item(QuoteMenuKey, quoteLabel) {
+                            onQuote(message.id, selection.selectedTexts.joinToString("") { it.text })
+                            selection.clear()
+                            close()
+                        }
                     }
                 },
         ) {
