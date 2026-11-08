@@ -33,17 +33,21 @@ public data class Conversation(
 
     public fun switchTurn(): Conversation = withTurn(if (turn == ParticipantId.A) ParticipantId.B else ParticipantId.A)
 
-    public fun quote(messageId: Int): Quote {
+    public fun quote(
+        messageId: Int,
+        excerpt: String? = null,
+    ): Quote {
         val message = requireNotNull(messages.getOrNull(messageId)) { "No message with id $messageId" }
-        return Quote(message.id, message.plainText)
+        return Quote(message.id, excerpt?.takeIf { it.isNotBlank() } ?: message.plainText)
     }
 
     public fun append(
         spans: List<Span>,
-        quoting: Int? = null,
+        quote: Quote? = null,
     ): Conversation {
         require(spans.isNotEmpty()) { "A message must not be empty" }
-        val message = Message(messages.size, turn, spans, quoting?.let(::quote))
+        require(quote == null || quote.messageId in messages.indices) { "No message with id ${quote?.messageId}" }
+        val message = Message(messages.size, turn, spans, quote)
         return copy(messages = messages + message)
     }
 }
