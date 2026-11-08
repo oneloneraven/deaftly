@@ -2,7 +2,13 @@ package com.ravendarque.deaftly.core.chat
 
 public enum class ParticipantId { A, B }
 
-public enum class ColourRole { Accent, PersonB }
+public enum class ColourRole {
+    Accent,
+    PersonB,
+    Teal,
+    Rose,
+    Berry,
+}
 
 public data class Participant(
     val id: ParticipantId,
@@ -16,6 +22,8 @@ public data class Participant(
             displayName?.let { trimmed ->
                 trimmed.substring(0, trimmed.offsetByCodePoints(0, 1)).uppercase()
             }
+
+    public fun namedOr(fallback: String): Participant = if (displayName == null) copy(name = fallback) else this
 
     public companion object {
         public fun defaultA(name: String? = null): Participant = Participant(ParticipantId.A, ColourRole.Accent, name)

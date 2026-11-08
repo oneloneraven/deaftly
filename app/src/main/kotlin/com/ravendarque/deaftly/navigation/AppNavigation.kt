@@ -11,6 +11,8 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.ravendarque.deaftly.AppContainer
+import com.ravendarque.deaftly.ui.chat.ChatScreen
+import com.ravendarque.deaftly.ui.chat.ChatViewModel
 import com.ravendarque.deaftly.ui.fill.FillScreen
 import com.ravendarque.deaftly.ui.fill.FillViewModel
 import com.ravendarque.deaftly.ui.home.HomeScreen
@@ -45,7 +47,10 @@ fun AppNavigation(container: AppContainer) {
                     )
                 }
                 entry<Route.Show> { PlaceholderEntry(it, backStack, body = it.text) }
-                entry<Route.Chat> { PlaceholderEntry(it, backStack) }
+                entry<Route.Chat> {
+                    val viewModel = viewModel<ChatViewModel>(factory = container.chatViewModelFactory)
+                    ChatScreen(viewModel, onEnd = { backStack.removeLastOrNull() })
+                }
                 entry<Route.Ocr> { PlaceholderEntry(it, backStack) }
                 entry<Route.Editor> { PlaceholderEntry(it, backStack) }
                 entry<Route.Settings> { PlaceholderEntry(it, backStack) }

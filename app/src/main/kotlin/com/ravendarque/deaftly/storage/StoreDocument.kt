@@ -20,7 +20,28 @@ data class StoreDocument(
 }
 
 @Serializable
-class SettingsDto
+data class SettingsDto(
+    val chatName: String? = null,
+    val chatColour: ParticipantColourDto? = null,
+)
+
+@Serializable
+enum class ParticipantColourDto {
+    @SerialName("accent")
+    Accent,
+
+    @SerialName("person-b")
+    PersonB,
+
+    @SerialName("teal")
+    Teal,
+
+    @SerialName("rose")
+    Rose,
+
+    @SerialName("berry")
+    Berry,
+}
 
 @Serializable
 data class TemplateDto(

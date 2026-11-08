@@ -40,4 +40,23 @@
     <string name="template_new_category">New category\u2026</string>
     <string name="template_category_name">Category name</string>
     <string name="template_category_save">Save category</string>
+    <string name="chat_end">End chat</string>
+    <string name="chat_and">&amp;</string>
+    <string name="chat_name_me">Me</string>
+    <string name="chat_name_them">Them</string>
+    <string name="chat_edit_participants">%1$s and %2$s. Change names and colours</string>
+    <string name="chat_empty">No messages yet</string>
+    <string name="participants_title">Who is chatting?</string>
+    <string name="participants_you">You</string>
+    <string name="participants_other">The other person</string>
+    <string name="participants_name_label">Name (optional)</string>
+    <string name="participants_name_default">Shown as \u201c%1$s\u201d if left blank</string>
+    <string name="participants_colour_selected">Colour: %1$s</string>
+    <string name="participants_colour_used_by">Used by %1$s</string>
+    <string name="participants_done">Done</string>
+    <string name="colour_indigo">Indigo</string>
+    <string name="colour_peach">Peach</string>
+    <string name="colour_teal">Teal</string>
+    <string name="colour_rose">Rose</string>
+    <string name="colour_berry">Berry</string>
 </resources>
