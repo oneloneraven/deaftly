@@ -1,3 +1,6 @@
+import com.android.build.api.artifact.SingleArtifact
+import com.ravendarque.deaftly.build.VerifyReleaseManifestTask
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
@@ -141,6 +144,18 @@ dependencies {
 
 roborazzi {
     outputDir.set(file("src/test/screenshots"))
+}
+
+androidComponents {
+    onVariants(selector().withBuildType("release")) { variant ->
+        val verify =
+            tasks.register<VerifyReleaseManifestTask>("verifyReleaseManifest") {
+                mergedManifest.set(variant.artifacts.get(SingleArtifact.MERGED_MANIFEST))
+                appNamespace.set(variant.namespace)
+                report.set(layout.buildDirectory.file("reports/verifyReleaseManifest/result.txt"))
+            }
+        tasks.named("check") { dependsOn(verify) }
+    }
 }
 
 tasks.named("check") {
