@@ -34,8 +34,9 @@ may be fakes.
 Every official Deaftly release is signed with the same key. Its fingerprint
 (a SHA-256 certificate fingerprint) is:
 
-<!-- TODO(#57): publish the SHA-256 signing-certificate fingerprint here. It is not recorded anywhere in the repository yet; the owner must read it from the release keystore. -->
-`TODO: fingerprint to be published`
+```text
+CD:70:A2:F4:8E:E6:1F:8D:90:31:91:CE:BF:D8:D0:D7:2B:D2:57:C9:11:D8:DC:10:0F:A6:FE:AD:F7:6A:53:EB
+```
 
 If you are comfortable with developer tools, you can check an APK against it
 with `apksigner verify --print-certs deaftly-1.0.0.apk` from the Android SDK
@@ -49,8 +50,8 @@ Deaftly does not update itself. When a new version is released:
 1. Download the new `.apk` from the Releases page, as above.
 2. Open it and tap **Update** or **Install**.
 
-The new version installs over the old one. Your templates, chats and
-settings are kept.
+The new version installs over the old one. Your templates and settings
+are kept.
 
 If Android says the app can't be installed because it conflicts with an
 existing package, or that the signatures don't match, stop. It means the file
