@@ -30,11 +30,12 @@ fun Participant.labelled(): Participant =
 fun ColourRole.label(): String =
     stringResource(
         when (this) {
-            ColourRole.Accent -> R.string.colour_violet
-            ColourRole.PersonB -> R.string.colour_peach
-            ColourRole.Teal -> R.string.colour_teal
-            ColourRole.Rose -> R.string.colour_rose
-            ColourRole.Forest -> R.string.colour_forest
+            ColourRole.Red -> R.string.colour_red
+            ColourRole.Orange -> R.string.colour_orange
+            ColourRole.Gold -> R.string.colour_gold
+            ColourRole.Green -> R.string.colour_green
+            ColourRole.Blue -> R.string.colour_blue
+            ColourRole.Indigo -> R.string.colour_indigo
         },
     )
 

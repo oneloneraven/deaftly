@@ -147,16 +147,16 @@ class ConversationTest {
     @Test
     fun participantsMustHaveDifferentColours() {
         assertFailsWith<IllegalArgumentException> {
-            Conversation(Participant.defaultA(), Participant.defaultB().copy(colour = ColourRole.Accent))
+            Conversation(Participant.defaultA(), Participant.defaultB().copy(colour = ColourRole.Indigo))
         }
     }
 
     @Test
     fun withParticipantReplacesOnlyThatSide() {
-        val updated = conversation().withParticipant(Participant(ParticipantId.B, ColourRole.Teal, "Sam"))
+        val updated = conversation().withParticipant(Participant(ParticipantId.B, ColourRole.Green, "Sam"))
         assertEquals("Me", updated.participantA.name)
         assertEquals("Sam", updated.participantB.name)
-        assertEquals(ColourRole.Teal, updated.participantB.colour)
+        assertEquals(ColourRole.Green, updated.participantB.colour)
     }
 
     @Test
@@ -173,7 +173,7 @@ class ConversationTest {
     @Test
     fun withParticipantRejectsTheOtherSidesColour() {
         assertFailsWith<IllegalArgumentException> {
-            conversation().withParticipant(Participant(ParticipantId.A, ColourRole.PersonB))
+            conversation().withParticipant(Participant(ParticipantId.A, ColourRole.Orange))
         }
     }
 }

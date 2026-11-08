@@ -3,11 +3,12 @@ package com.ravendarque.deaftly.core.chat
 public enum class ParticipantId { A, B }
 
 public enum class ColourRole {
-    Accent,
-    PersonB,
-    Teal,
-    Rose,
-    Forest,
+    Red,
+    Orange,
+    Gold,
+    Green,
+    Blue,
+    Indigo,
 }
 
 public data class Participant(
@@ -26,8 +27,8 @@ public data class Participant(
     public fun namedOr(fallback: String): Participant = if (displayName == null) copy(name = fallback) else this
 
     public companion object {
-        public fun defaultA(name: String? = null): Participant = Participant(ParticipantId.A, ColourRole.Accent, name)
+        public fun defaultA(name: String? = null): Participant = Participant(ParticipantId.A, ColourRole.Indigo, name)
 
-        public fun defaultB(name: String? = null): Participant = Participant(ParticipantId.B, ColourRole.PersonB, name)
+        public fun defaultB(name: String? = null): Participant = Participant(ParticipantId.B, ColourRole.Orange, name)
     }
 }

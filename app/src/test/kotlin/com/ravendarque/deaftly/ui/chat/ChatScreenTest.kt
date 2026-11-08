@@ -55,7 +55,7 @@ class ChatScreenTest {
     @get:Rule
     val composeRule = createAndroidComposeRule<ComponentActivity>()
 
-    private val settings = FakeSettingsRepository(ChatProfile("Alex", ColourRole.Teal))
+    private val settings = FakeSettingsRepository(ChatProfile("Alex", ColourRole.Green))
     private var ended = 0
     private var inserts = 0
     private lateinit var viewModel: ChatViewModel
@@ -124,11 +124,11 @@ class ChatScreenTest {
         show()
         header().performClick()
 
-        composeRule.onAllNodesWithContentDescription("Rose")[0].performClick()
+        composeRule.onAllNodesWithContentDescription("Red")[0].performClick()
         composeRule.onNodeWithText("Done").performClick()
         composeRule.waitForIdle()
 
-        assertEquals(ChatProfile("Alex", ColourRole.Rose), settings.saved)
+        assertEquals(ChatProfile("Alex", ColourRole.Red), settings.saved)
         composeRule.onNodeWithText("Who is chatting?").assertDoesNotExist()
     }
 

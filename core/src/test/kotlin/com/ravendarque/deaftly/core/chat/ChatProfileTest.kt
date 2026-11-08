@@ -8,24 +8,24 @@ class ChatProfileTest {
     @Test
     fun defaultProfileStartsWithTheAccentAndPersonBColours() {
         val conversation = ChatProfile().startConversation()
-        assertEquals(ColourRole.Accent, conversation.participantA.colour)
-        assertEquals(ColourRole.PersonB, conversation.participantB.colour)
+        assertEquals(ColourRole.Indigo, conversation.participantA.colour)
+        assertEquals(ColourRole.Orange, conversation.participantB.colour)
         assertNull(conversation.participantA.name)
         assertNull(conversation.participantB.name)
     }
 
     @Test
     fun savedNameAndColourAreAppliedToTheDeafUser() {
-        val conversation = ChatProfile(name = "Alex", colour = ColourRole.Teal).startConversation()
-        assertEquals(Participant(ParticipantId.A, ColourRole.Teal, "Alex"), conversation.participantA)
-        assertEquals(ColourRole.PersonB, conversation.participantB.colour)
+        val conversation = ChatProfile(name = "Alex", colour = ColourRole.Green).startConversation()
+        assertEquals(Participant(ParticipantId.A, ColourRole.Green, "Alex"), conversation.participantA)
+        assertEquals(ColourRole.Orange, conversation.participantB.colour)
     }
 
     @Test
     fun theOtherPersonGivesWayWhenTheSavedColourIsTheirDefault() {
-        val conversation = ChatProfile(colour = ColourRole.PersonB).startConversation()
-        assertEquals(ColourRole.PersonB, conversation.participantA.colour)
-        assertEquals(ColourRole.Accent, conversation.participantB.colour)
+        val conversation = ChatProfile(colour = ColourRole.Orange).startConversation()
+        assertEquals(ColourRole.Orange, conversation.participantA.colour)
+        assertEquals(ColourRole.Red, conversation.participantB.colour)
     }
 
     @Test

@@ -71,10 +71,10 @@ class ChatViewModelTest {
     @Test
     fun usesTheRememberedNameAndColourForTheDeafUser() =
         runTest {
-            val viewModel = viewModel(FakeSettingsRepository(ChatProfile("Alex", ColourRole.Teal)))
+            val viewModel = viewModel(FakeSettingsRepository(ChatProfile("Alex", ColourRole.Green)))
             collect(viewModel)
 
-            assertEquals(Participant(ParticipantId.A, ColourRole.Teal, "Alex"), viewModel.conversation().participantA)
+            assertEquals(Participant(ParticipantId.A, ColourRole.Green, "Alex"), viewModel.conversation().participantA)
             assertNull(viewModel.conversation().participantB.name)
         }
 
@@ -84,10 +84,10 @@ class ChatViewModelTest {
             val viewModel = viewModel()
             collect(viewModel)
 
-            viewModel.updateParticipant(Participant(ParticipantId.B, ColourRole.Forest, "Sam"))
+            viewModel.updateParticipant(Participant(ParticipantId.B, ColourRole.Blue, "Sam"))
 
             val conversation = viewModel.conversation()
-            assertEquals(Participant(ParticipantId.B, ColourRole.Forest, "Sam"), conversation.participantB)
+            assertEquals(Participant(ParticipantId.B, ColourRole.Blue, "Sam"), conversation.participantB)
             assertEquals(Participant.defaultA(), conversation.participantA)
         }
 
@@ -98,7 +98,7 @@ class ChatViewModelTest {
             collect(viewModel)
 
             assertFailsWith<IllegalArgumentException> {
-                viewModel.updateParticipant(Participant(ParticipantId.A, ColourRole.PersonB))
+                viewModel.updateParticipant(Participant(ParticipantId.A, ColourRole.Orange))
             }
         }
 
@@ -109,7 +109,7 @@ class ChatViewModelTest {
             val viewModel = viewModel(settings)
             collect(viewModel)
 
-            viewModel.updateParticipant(Participant(ParticipantId.A, ColourRole.Rose, "Alex"))
+            viewModel.updateParticipant(Participant(ParticipantId.A, ColourRole.Red, "Alex"))
 
             assertEquals(ChatProfile(), settings.saved)
         }
@@ -120,12 +120,12 @@ class ChatViewModelTest {
             val settings = FakeSettingsRepository()
             val viewModel = viewModel(settings)
             collect(viewModel)
-            viewModel.updateParticipant(Participant(ParticipantId.A, ColourRole.Rose, "Alex"))
-            viewModel.updateParticipant(Participant(ParticipantId.B, ColourRole.Forest, "Sam"))
+            viewModel.updateParticipant(Participant(ParticipantId.A, ColourRole.Red, "Alex"))
+            viewModel.updateParticipant(Participant(ParticipantId.B, ColourRole.Blue, "Sam"))
 
             viewModel.rememberOwnDefaults()
 
-            assertEquals(ChatProfile("Alex", ColourRole.Rose), settings.saved)
+            assertEquals(ChatProfile("Alex", ColourRole.Red), settings.saved)
         }
 
     @Test
@@ -134,7 +134,7 @@ class ChatViewModelTest {
             val settings = FakeSettingsRepository()
             val first = viewModel(settings)
             collect(first)
-            first.updateParticipant(Participant(ParticipantId.B, ColourRole.Forest, "Sam"))
+            first.updateParticipant(Participant(ParticipantId.B, ColourRole.Blue, "Sam"))
             first.rememberOwnDefaults()
 
             val second = viewModel(settings)
@@ -149,10 +149,10 @@ class ChatViewModelTest {
             val savedState = SavedStateHandle()
             val first = viewModel(savedState = savedState)
             collect(first)
-            first.updateParticipant(Participant(ParticipantId.A, ColourRole.Rose, "Alex"))
-            first.updateParticipant(Participant(ParticipantId.B, ColourRole.Forest, "Sam"))
+            first.updateParticipant(Participant(ParticipantId.A, ColourRole.Red, "Alex"))
+            first.updateParticipant(Participant(ParticipantId.B, ColourRole.Blue, "Sam"))
 
-            val restored = viewModel(FakeSettingsRepository(ChatProfile("Other", ColourRole.Teal)), savedState)
+            val restored = viewModel(FakeSettingsRepository(ChatProfile("Other", ColourRole.Green)), savedState)
             collect(restored)
 
             assertEquals(first.conversation(), restored.conversation())
@@ -260,7 +260,7 @@ class ChatViewModelTest {
             first.type("typing")
             first.display.cycleTextSize()
 
-            val restored = viewModel(FakeSettingsRepository(ChatProfile("Other", ColourRole.Teal)), savedState)
+            val restored = viewModel(FakeSettingsRepository(ChatProfile("Other", ColourRole.Green)), savedState)
             collect(restored)
 
             assertEquals(first.state.value, restored.state.value)
@@ -298,7 +298,7 @@ class ChatViewModelTest {
     @Test
     fun theFirstMessageUsesTheRememberedName() =
         runTest {
-            val viewModel = viewModel(FakeSettingsRepository(ChatProfile("Alex", ColourRole.Teal)), firstMessage = "Hello")
+            val viewModel = viewModel(FakeSettingsRepository(ChatProfile("Alex", ColourRole.Green)), firstMessage = "Hello")
             collect(viewModel)
 
             assertEquals("Alex", viewModel.conversation().participantA.name)

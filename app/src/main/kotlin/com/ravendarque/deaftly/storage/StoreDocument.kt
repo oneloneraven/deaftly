@@ -50,24 +50,30 @@ enum class ShowSchemeDto {
     YellowOnBlack,
 }
 
+@OptIn(ExperimentalSerializationApi::class)
 @Serializable
 enum class ParticipantColourDto {
-    @SerialName("accent")
-    Accent,
+    @SerialName("red")
+    @JsonNames("rose")
+    Red,
 
-    @SerialName("person-b")
-    PersonB,
+    @SerialName("orange")
+    @JsonNames("person-b")
+    Orange,
 
-    @SerialName("teal")
-    Teal,
+    @SerialName("gold")
+    Gold,
 
-    @SerialName("rose")
-    Rose,
+    @SerialName("green")
+    @JsonNames("teal", "forest", "berry")
+    Green,
 
-    @OptIn(ExperimentalSerializationApi::class)
-    @SerialName("forest")
-    @JsonNames("berry")
-    Forest,
+    @SerialName("blue")
+    Blue,
+
+    @SerialName("indigo")
+    @JsonNames("accent")
+    Indigo,
 }
 
 @Serializable

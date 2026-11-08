@@ -82,7 +82,7 @@ class ParticipantsSheetTest {
         composeRule.onAllNodesWithText("Name (optional)").assertCountEquals(2)
         composeRule.onNodeWithText("Shown as \u201cMe\u201d if left blank").assertExists()
         composeRule.onNodeWithText("Shown as \u201cThem\u201d if left blank").assertExists()
-        listOf("Violet", "Peach", "Teal", "Rose", "Forest").forEach { swatches(it).assertCountEquals(2) }
+        listOf("Indigo", "Orange", "Green", "Red", "Blue").forEach { swatches(it).assertCountEquals(2) }
         composeRule.onRoot().tryPerformAccessibilityChecks()
     }
 
@@ -109,12 +109,12 @@ class ParticipantsSheetTest {
     fun choosingAColourSelectsItForThatPersonOnly() {
         show()
 
-        swatches("Teal")[0].performClick()
+        swatches("Green")[0].performClick()
 
-        assertEquals(ColourRole.Teal, conversation.participantA.colour)
-        assertEquals(ColourRole.PersonB, conversation.participantB.colour)
-        swatches("Teal")[0].assertIsSelected()
-        swatches("Teal")[1].assertIsNotSelected()
+        assertEquals(ColourRole.Green, conversation.participantA.colour)
+        assertEquals(ColourRole.Orange, conversation.participantB.colour)
+        swatches("Green")[0].assertIsSelected()
+        swatches("Green")[1].assertIsNotSelected()
         composeRule.onRoot().tryPerformAccessibilityChecks()
     }
 
@@ -122,17 +122,17 @@ class ParticipantsSheetTest {
     fun theColourTheOtherPersonHasIsUnavailableAndSaysWhoUsesIt() {
         show(Conversation(Participant.defaultA("Alex"), Participant.defaultB("Sam")))
 
-        swatches("Peach")[0].assertIsNotEnabled().assert(hasState("Used by Sam"))
-        swatches("Violet")[1].assertIsNotEnabled().assert(hasState("Used by Alex"))
-        swatches("Teal")[0].assertIsEnabled()
+        swatches("Orange")[0].assertIsNotEnabled().assert(hasState("Used by Sam"))
+        swatches("Indigo")[1].assertIsNotEnabled().assert(hasState("Used by Alex"))
+        swatches("Green")[0].assertIsEnabled()
     }
 
     @Test
     fun theChosenColourIsNamedInTextAsWellAsShown() {
-        show(Conversation(Participant(ParticipantId.A, ColourRole.Rose), Participant.defaultB()))
+        show(Conversation(Participant(ParticipantId.A, ColourRole.Red), Participant.defaultB()))
 
-        composeRule.onNodeWithText("Colour: Rose").assertExists()
-        composeRule.onNodeWithText("Colour: Peach").assertExists()
+        composeRule.onNodeWithText("Colour: Red").assertExists()
+        composeRule.onNodeWithText("Colour: Orange").assertExists()
     }
 
     @Test

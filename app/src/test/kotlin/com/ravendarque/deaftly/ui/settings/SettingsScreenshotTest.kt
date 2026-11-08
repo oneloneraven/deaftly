@@ -24,7 +24,7 @@ class SettingsScreenshotTest {
     val composeRule = createComposeRule()
 
     private fun capture(dark: Boolean) {
-        val settings = FakeSettingsRepository(ChatProfile("Alex", ColourRole.Teal), ShowScheme.YellowOnBlack, ChatLayout.Split)
+        val settings = FakeSettingsRepository(ChatProfile("Alex", ColourRole.Green), ShowScheme.YellowOnBlack, ChatLayout.Split)
         val viewModel = SettingsViewModel(settings)
         composeRule.setContent { AppTheme(darkTheme = dark) { SettingsScreen(viewModel, onBack = {}) } }
         composeRule.waitForIdle()
