@@ -1,0 +1,145 @@
+package com.ravendarque.deaftly.ui.theme
+
+import androidx.compose.material3.ColorScheme
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
+import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.graphics.Color
+
+@Immutable
+data class DeaftlyColors(
+    val ground: Color,
+    val surface: Color,
+    val surfaceSunken: Color,
+    val ink: Color,
+    val inkSecondary: Color,
+    val inkMuted: Color,
+    val line: Color,
+    val lineStrong: Color,
+    val accent: Color,
+    val accentStrong: Color,
+    val accentSoft: Color,
+    val onAccent: Color,
+    val onAccentMuted: Color,
+    val onAccentSoft: Color,
+    val personA: Color,
+    val onPersonA: Color,
+    val personB: Color,
+    val onPersonB: Color,
+    val onPersonBMuted: Color,
+    val personBStrong: Color,
+    val onPersonBStrong: Color,
+    val highlight: Color,
+    val onHighlight: Color,
+    val error: Color,
+    val onError: Color,
+    val errorContainer: Color,
+    val onErrorContainer: Color,
+)
+
+val LightDeaftlyColors =
+    DeaftlyColors(
+        ground = Color(0xFFF7F6F2),
+        surface = Color(0xFFFFFFFF),
+        surfaceSunken = Color(0xFFECEAE4),
+        ink = Color(0xFF15151A),
+        inkSecondary = Color(0xFF45454F),
+        inkMuted = Color(0xFF5C5C66),
+        line = Color(0xFFE4E2DC),
+        lineStrong = Color(0xFFD6D3CB),
+        accent = Color(0xFF3D4ED8),
+        accentStrong = Color(0xFF2B39A8),
+        accentSoft = Color(0xFFE6E8FB),
+        onAccent = Color(0xFFFFFFFF),
+        onAccentMuted = Color(0xFFDCE0FF),
+        onAccentSoft = Color(0xFF3D4ED8),
+        personA = Color(0xFF3D4ED8),
+        onPersonA = Color(0xFFFFFFFF),
+        personB = Color(0xFFFFD9B0),
+        onPersonB = Color(0xFF2A1A06),
+        onPersonBMuted = Color(0xFF5E3A10),
+        personBStrong = Color(0xFFE08A2E),
+        onPersonBStrong = Color(0xFF2A1A06),
+        highlight = Color(0xFFFFE15C),
+        onHighlight = Color(0xFF15151A),
+        error = Color(0xFFB3261E),
+        onError = Color(0xFFFFFFFF),
+        errorContainer = Color(0xFFF9DEDC),
+        onErrorContainer = Color(0xFF410E0B),
+    )
+
+val DarkDeaftlyColors =
+    DeaftlyColors(
+        ground = Color(0xFF14141A),
+        surface = Color(0xFF1E1E26),
+        surfaceSunken = Color(0xFF2A2A34),
+        ink = Color(0xFFF1F0EC),
+        inkSecondary = Color(0xFFCFCFD6),
+        inkMuted = Color(0xFFA9A9B3),
+        line = Color(0xFF2E2E38),
+        lineStrong = Color(0xFF40404C),
+        accent = Color(0xFF9CA7FF),
+        accentStrong = Color(0xFFC3CAFF),
+        accentSoft = Color(0xFF26295C),
+        onAccent = Color(0xFF0F1235),
+        onAccentMuted = Color(0xFF1A1D4A),
+        onAccentSoft = Color(0xFF9CA7FF),
+        personA = Color(0xFF9CA7FF),
+        onPersonA = Color(0xFF0F1235),
+        personB = Color(0xFF5C3A17),
+        onPersonB = Color(0xFFFFE6CC),
+        onPersonBMuted = Color(0xFFFFD9B0),
+        personBStrong = Color(0xFFE08A2E),
+        onPersonBStrong = Color(0xFF2A1A06),
+        highlight = Color(0xFFFFE15C),
+        onHighlight = Color(0xFF15151A),
+        error = Color(0xFFF2B8B5),
+        onError = Color(0xFF601410),
+        errorContainer = Color(0xFF8C1D18),
+        onErrorContainer = Color(0xFFF9DEDC),
+    )
+
+val LocalDeaftlyColors = staticCompositionLocalOf { LightDeaftlyColors }
+
+fun DeaftlyColors.toMaterialColorScheme(dark: Boolean): ColorScheme {
+    val base = if (dark) darkColorScheme() else lightColorScheme()
+    return base.copy(
+        primary = accent,
+        onPrimary = onAccent,
+        primaryContainer = accentSoft,
+        onPrimaryContainer = onAccentSoft,
+        inversePrimary = (if (dark) LightDeaftlyColors else DarkDeaftlyColors).accent,
+        secondary = personBStrong,
+        onSecondary = onPersonBStrong,
+        secondaryContainer = personB,
+        onSecondaryContainer = onPersonB,
+        tertiary = highlight,
+        onTertiary = onHighlight,
+        tertiaryContainer = highlight,
+        onTertiaryContainer = onHighlight,
+        background = ground,
+        onBackground = ink,
+        surface = ground,
+        onSurface = ink,
+        surfaceVariant = surfaceSunken,
+        onSurfaceVariant = inkMuted,
+        surfaceTint = accent,
+        inverseSurface = ink,
+        inverseOnSurface = ground,
+        error = error,
+        onError = onError,
+        errorContainer = errorContainer,
+        onErrorContainer = onErrorContainer,
+        outline = lineStrong,
+        outlineVariant = line,
+        scrim = Color.Black,
+        surfaceBright = surface,
+        surfaceDim = ground,
+        surfaceContainerLowest = surface,
+        surfaceContainerLow = surface,
+        surfaceContainer = surface,
+        surfaceContainerHigh = surfaceSunken,
+        surfaceContainerHighest = surfaceSunken,
+    )
+}
