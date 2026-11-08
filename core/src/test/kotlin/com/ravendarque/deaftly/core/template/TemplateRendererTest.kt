@@ -215,4 +215,35 @@ class TemplateRendererTest {
         assertEquals("Hi", rendered.text)
         assertTrue(rendered.isComplete)
     }
+
+    @Test
+    fun valueSpansCoverEachFilledValueInTheRenderedText() {
+        val template = template("Hi {a}, I am {b}.", single("a"), single("b"))
+        val rendered = TemplateRenderer.render(template, TemplateFill().set("a", "Pat").set("b", " Sam "))
+        assertEquals("Hi Pat, I am Sam.", rendered.text)
+        assertEquals(listOf(TextSpan(3, 6), TextSpan(13, 16)), rendered.valueSpans)
+        assertEquals(listOf("Pat", "Sam"), rendered.valueSpans.map { rendered.text.substring(it.start, it.end) })
+    }
+
+    @Test
+    fun aRepeatableValueIsOneSpanOverTheWholeJoinedText() {
+        val template = template("Could I have {item} please?", repeatable("item"))
+        val fill = TemplateFill().add("item", "tea").add("item", "a scone").add("item", "jam")
+        val rendered = TemplateRenderer.render(template, fill)
+        assertEquals(listOf("tea, a scone and jam"), rendered.valueSpans.map { rendered.text.substring(it.start, it.end) })
+    }
+
+    @Test
+    fun spansDoNotDependOnTheValueAppearingEarlierInTheText() {
+        val template = template("Sam says {x}. Sam is {y}.", single("x"), single("y"))
+        val rendered = TemplateRenderer.render(template, TemplateFill().set("x", "Sam").set("y", "Sam"))
+        assertEquals(listOf(TextSpan(9, 12), TextSpan(21, 24)), rendered.valueSpans)
+    }
+
+    @Test
+    fun unfilledPlaceholdersAndPlainTextHaveNoSpans() {
+        val template = template("Hello {name}.", single("name"))
+        assertEquals(emptyList(), TemplateRenderer.render(template, TemplateFill()).valueSpans)
+        assertEquals(emptyList(), TemplateRenderer.render(template("Plain."), TemplateFill()).valueSpans)
+    }
 }

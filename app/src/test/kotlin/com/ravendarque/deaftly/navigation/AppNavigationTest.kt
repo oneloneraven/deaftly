@@ -268,6 +268,7 @@ class AppNavigationTest {
                 Route.TemplatePicker,
                 Route.TypeShow,
                 Route.Show("Hello"),
+                Route.Show("Hello Sam", listOf(HighlightRange(6, 9))),
                 Route.Chat(),
                 Route.Chat("Hello"),
                 Route.Editor("template-1"),

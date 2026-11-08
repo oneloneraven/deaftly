@@ -22,6 +22,7 @@ sealed interface Route : NavKey {
     @Serializable
     data class Show(
         val text: String = "",
+        val highlights: List<HighlightRange> = emptyList(),
     ) : Route
 
     @Serializable
@@ -43,6 +44,12 @@ sealed interface Route : NavKey {
     @Serializable
     data object Settings : Route
 }
+
+@Serializable
+data class HighlightRange(
+    val start: Int,
+    val end: Int,
+)
 
 @StringRes
 fun Route.titleRes(): Int =

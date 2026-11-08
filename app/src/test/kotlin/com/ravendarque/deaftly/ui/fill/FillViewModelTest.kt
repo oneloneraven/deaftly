@@ -130,6 +130,19 @@ class FillViewModelTest {
         }
 
     @Test
+    fun exposesTheRangesOfTheFilledValuesInTheRenderedText() =
+        runTest {
+            val viewModel = viewModel()
+            collect(viewModel)
+            viewModel.activate("name")
+            viewModel.choose("Sam")
+            viewModel.choose("write it down")
+
+            val state = viewModel.ready()
+            assertEquals(listOf("Sam", "write it down"), state.highlights.map { state.text.substring(it.start, it.end) })
+        }
+
+    @Test
     fun changingAFilledPlaceholderJustClosesTheSheet() =
         runTest {
             val viewModel = viewModel()

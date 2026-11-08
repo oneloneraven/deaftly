@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ravendarque.deaftly.R
+import com.ravendarque.deaftly.navigation.HighlightRange
 import com.ravendarque.deaftly.navigation.Route
 import com.ravendarque.deaftly.ui.components.DeaftlyIconButton
 import com.ravendarque.deaftly.ui.components.DeaftlyTopBar
@@ -50,7 +51,7 @@ fun FillScreen(
                     FillActions(
                         onBack = onBack,
                         onEdit = { onNavigate(Route.Editor(templateId)) },
-                        onShow = { if (onInsert != null) onInsert(current.text) else onNavigate(Route.Show(current.text)) },
+                        onShow = { if (onInsert != null) onInsert(current.text) else onNavigate(current.toShowRoute()) },
                         onActivate = viewModel::activate,
                         onDismiss = viewModel::dismiss,
                         onChoose = viewModel::choose,
@@ -118,3 +119,5 @@ fun FillContent(
     }
     state.active?.let { FillSheet(it, actions.onChoose, actions.onScan, actions.onDismiss) }
 }
+
+private fun FillUiState.Ready.toShowRoute() = Route.Show(text, highlights.map { HighlightRange(it.start, it.end) })
