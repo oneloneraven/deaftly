@@ -5,6 +5,7 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.int
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
@@ -44,7 +45,7 @@ class TemplateStoreSerializerTest {
 
             assertEquals(1, root.getValue("version").jsonPrimitive.int)
             assertEquals(builtIns.size, root.getValue("templates").jsonArray.size)
-            assertEquals(JsonObject(emptyMap()), root.getValue("settings"))
+            assertEquals(JsonObject(mapOf("firstRunDone" to JsonPrimitive(false))), root.getValue("settings"))
         }
 
     @Test

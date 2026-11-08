@@ -108,4 +108,16 @@ class DataStoreSettingsRepositoryTest {
 
             assertEquals(ChatLayout.Split, repository(backgroundScope).chatLayout.first())
         }
+
+    @Test
+    fun firstRunIsNotDoneUntilMarkedAndThenStaysDone() =
+        runTest {
+            val firstRun = Job()
+            val before = repository(CoroutineScope(firstRun))
+            assertEquals(false, before.firstRunDone.first())
+            before.setFirstRunDone()
+            firstRun.cancelAndJoin()
+
+            assertEquals(true, repository(backgroundScope).firstRunDone.first())
+        }
 }

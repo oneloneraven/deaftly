@@ -1,6 +1,12 @@
 package com.ravendarque.deaftly.navigation
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.produceState
+import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.EntryProviderScope
@@ -19,6 +25,8 @@ import com.ravendarque.deaftly.ui.editor.EditorScreen
 import com.ravendarque.deaftly.ui.editor.EditorViewModel
 import com.ravendarque.deaftly.ui.fill.FillScreen
 import com.ravendarque.deaftly.ui.fill.FillViewModel
+import com.ravendarque.deaftly.ui.firstrun.FirstRunScreen
+import com.ravendarque.deaftly.ui.firstrun.FirstRunViewModel
 import com.ravendarque.deaftly.ui.home.HomeScreen
 import com.ravendarque.deaftly.ui.home.HomeViewModel
 import com.ravendarque.deaftly.ui.ocr.OcrOutcome
@@ -27,11 +35,25 @@ import com.ravendarque.deaftly.ui.settings.SettingsScreen
 import com.ravendarque.deaftly.ui.settings.SettingsViewModel
 import com.ravendarque.deaftly.ui.show.ShowScreen
 import com.ravendarque.deaftly.ui.show.ShowViewModel
+import com.ravendarque.deaftly.ui.theme.Deaftly
 import com.ravendarque.deaftly.ui.typeshow.TypeShowScreen
+import kotlinx.coroutines.flow.first
 
 @Composable
 fun AppNavigation(container: AppContainer) {
-    val backStack = rememberNavBackStack(Route.Home)
+    val firstRunDone by produceState<Boolean?>(null) { value = container.settingsRepository.firstRunDone.first() }
+    when (val done = firstRunDone) {
+        null -> Box(Modifier.fillMaxSize().background(Deaftly.colors.ground))
+        else -> AppNavigationHost(container, if (done) Route.Home else Route.FirstRun)
+    }
+}
+
+@Composable
+private fun AppNavigationHost(
+    container: AppContainer,
+    start: Route,
+) {
+    val backStack = rememberNavBackStack(start)
     val insertIntoChat: (String) -> Unit = { text ->
         container.chatInsertions.offer(text)
         while (backStack.lastOrNull() !is Route.Chat && backStack.size > 1) backStack.removeLastOrNull()
@@ -47,6 +69,10 @@ fun AppNavigation(container: AppContainer) {
             ),
         entryProvider =
             entryProvider {
+                entry<Route.FirstRun> {
+                    val viewModel = viewModel<FirstRunViewModel>(factory = container.firstRunViewModelFactory)
+                    FirstRunScreen(viewModel, onDone = { backStack[backStack.lastIndex] = Route.Home })
+                }
                 entry<Route.Home> {
                     val viewModel = viewModel<HomeViewModel>(factory = container.homeViewModelFactory)
                     HomeScreen(viewModel, onNavigate = { backStack.add(it) })

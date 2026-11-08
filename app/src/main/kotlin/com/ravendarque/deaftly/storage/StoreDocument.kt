@@ -25,6 +25,7 @@ data class SettingsDto(
     val chatName: String? = null,
     val chatColour: ParticipantColourDto? = null,
     val chatLayout: ChatLayoutDto? = null,
+    val firstRunDone: Boolean = false,
 )
 
 @Serializable

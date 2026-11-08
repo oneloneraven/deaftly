@@ -10,9 +10,13 @@ public interface SettingsRepository {
 
     public val chatLayout: Flow<ChatLayout>
 
+    public val firstRunDone: Flow<Boolean>
+
     public suspend fun setShowScheme(scheme: ShowScheme)
 
     public suspend fun setChatProfile(profile: ChatProfile)
 
     public suspend fun setChatLayout(layout: ChatLayout)
+
+    public suspend fun setFirstRunDone()
 }
