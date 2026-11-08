@@ -461,4 +461,15 @@ class ChatScreenTest {
         composeRule.onNodeWithText("Hello, dear world").assertExists()
         assertEquals(4, conversation().messages.size)
     }
+
+    @Test
+    @Config(qualifiers = "w300dp-h1600dp")
+    fun onANarrowScreenTheToolbarWrapsInsteadOfClippingButtons() {
+        showOrdering()
+
+        listOf("Bold", "Italic", "Highlight", "Quote the latest message", "Insert template", "Send").forEach {
+            composeRule.onNodeWithContentDescription(it).assertIsDisplayed().assertWidthIsAtLeast(48.dp)
+        }
+        composeRule.onRoot().tryPerformAccessibilityChecks()
+    }
 }
