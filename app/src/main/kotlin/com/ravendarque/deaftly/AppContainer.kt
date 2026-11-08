@@ -12,6 +12,8 @@ import com.ravendarque.deaftly.storage.createTemplateStore
 import com.ravendarque.deaftly.templates.builtInTemplates
 import com.ravendarque.deaftly.ui.chat.ChatInsertions
 import com.ravendarque.deaftly.ui.chat.ChatViewModel
+import com.ravendarque.deaftly.ui.editor.EditorStrings
+import com.ravendarque.deaftly.ui.editor.EditorViewModel
 import com.ravendarque.deaftly.ui.fill.FillViewModel
 import com.ravendarque.deaftly.ui.home.HomeViewModel
 import com.ravendarque.deaftly.ui.show.ShowViewModel
@@ -32,6 +34,19 @@ class AppContainer(
     val homeViewModelFactory =
         viewModelFactory {
             initializer { HomeViewModel(templateRepository) }
+        }
+
+    fun editorViewModelFactory(templateId: String?) =
+        viewModelFactory {
+            initializer {
+                val resources = context.resources
+                val strings =
+                    EditorStrings(
+                        newPlaceholderName = resources.getString(R.string.editor_new_placeholder_name),
+                        copyTitle = { resources.getString(R.string.editor_copy_title, it) },
+                    )
+                EditorViewModel(templateId, templateRepository, createSavedStateHandle(), strings)
+            }
         }
 
     val showViewModelFactory =

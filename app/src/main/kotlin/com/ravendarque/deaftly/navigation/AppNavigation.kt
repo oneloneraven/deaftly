@@ -14,6 +14,9 @@ import com.ravendarque.deaftly.AppContainer
 import com.ravendarque.deaftly.ui.chat.ChatScreen
 import com.ravendarque.deaftly.ui.chat.ChatViewModel
 import com.ravendarque.deaftly.ui.chat.TemplatePickerScreen
+import com.ravendarque.deaftly.ui.editor.EditorExit
+import com.ravendarque.deaftly.ui.editor.EditorScreen
+import com.ravendarque.deaftly.ui.editor.EditorViewModel
 import com.ravendarque.deaftly.ui.fill.FillScreen
 import com.ravendarque.deaftly.ui.fill.FillViewModel
 import com.ravendarque.deaftly.ui.home.HomeScreen
@@ -88,7 +91,16 @@ fun AppNavigation(container: AppContainer) {
                     )
                 }
                 entry<Route.Ocr> { PlaceholderEntry(it, backStack) }
-                entry<Route.Editor> { PlaceholderEntry(it, backStack) }
+                entry<Route.Editor> { route ->
+                    val viewModel = viewModel<EditorViewModel>(factory = container.editorViewModelFactory(route.templateId))
+                    EditorScreen(viewModel) { exit ->
+                        if (exit is EditorExit.Copied) {
+                            backStack[backStack.lastIndex] = Route.Editor(exit.templateId)
+                        } else {
+                            backStack.removeLastOrNull()
+                        }
+                    }
+                }
                 entry<Route.Settings> { PlaceholderEntry(it, backStack) }
             },
     )
