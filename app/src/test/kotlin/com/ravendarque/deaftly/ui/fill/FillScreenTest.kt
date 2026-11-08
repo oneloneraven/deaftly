@@ -230,4 +230,75 @@ class FillScreenTest {
         chip("Pasta arrabbiata").assertState("Filled in")
         composeRule.onNodeWithText("Show").assertIsEnabled()
     }
+
+    private fun addMenuItem(
+        opener: () -> Unit,
+        name: String,
+    ) {
+        opener()
+        composeRule.onNodeWithText("Type it").performClick()
+        composeRule.onNode(hasSetTextAction()).performTextInput(name)
+        composeRule.onNode(hasSetTextAction()).performImeAction()
+        composeRule.waitForIdle()
+    }
+
+    private fun firstItem() = addMenuItem({ chip("Menu item").performClick() }, "Pasta arrabbiata")
+
+    private fun anotherItem(name: String) = addMenuItem({ composeRule.onNodeWithText("add more").performClick() }, name)
+
+    private val joined =
+        "Hi! I'm deaf. Could I have Pasta arrabbiata and Garlic bread please? " +
+            "If you have a question, please type it on my phone."
+
+    @Test
+    fun aRepeatableValueIsARemovableChipFollowedByAddMore() {
+        show("order-food")
+
+        firstItem()
+
+        chip("Pasta arrabbiata").assertState("Filled in")
+        composeRule.onNodeWithContentDescription("Remove Pasta arrabbiata").assertExists()
+        composeRule.onNodeWithText("add more").assertExists()
+        composeRule.onRoot().tryPerformAccessibilityChecks()
+    }
+
+    @Test
+    fun addMoreAddsAValueAndThePreviewJoinsThemInPlainEnglish() {
+        show("order-food")
+        firstItem()
+
+        anotherItem("Garlic bread")
+
+        chip("Garlic bread").assertState("Filled in")
+        composeRule.onNodeWithText(joined).assertExists()
+        composeRule.onNodeWithText("Show").assertIsEnabled()
+        composeRule.onRoot().tryPerformAccessibilityChecks()
+    }
+
+    @Test
+    fun removingAValueUpdatesThePreviewAndRemovingTheLastOneDisablesShow() {
+        show("order-food")
+        firstItem()
+        anotherItem("Garlic bread")
+
+        composeRule.onNodeWithContentDescription("Remove Pasta arrabbiata").performClick()
+        composeRule.onNodeWithText(joined.replace("Pasta arrabbiata and ", "")).assertExists()
+        composeRule.onNodeWithText("Pasta arrabbiata").assertDoesNotExist()
+
+        composeRule.onNodeWithContentDescription("Remove Garlic bread").performClick()
+        chip("Menu item").assertState("Empty")
+        composeRule.onNodeWithText("add more").assertDoesNotExist()
+        composeRule.onNodeWithText("Show").assertIsNotEnabled()
+    }
+
+    @Test
+    fun showPassesTheJoinedText() {
+        show("order-food")
+        firstItem()
+        anotherItem("Garlic bread")
+
+        composeRule.onNodeWithText("Show").performClick()
+
+        assertEquals(listOf<Route>(Route.Show(joined)), navigated)
+    }
 }

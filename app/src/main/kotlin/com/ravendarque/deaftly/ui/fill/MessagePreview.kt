@@ -12,6 +12,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.text
@@ -19,8 +20,10 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.ravendarque.deaftly.R
 import com.ravendarque.deaftly.core.template.Placeholder
 import com.ravendarque.deaftly.core.template.PlaceholderType
+import com.ravendarque.deaftly.ui.components.AddMoreChip
 import com.ravendarque.deaftly.ui.components.ChipState
 import com.ravendarque.deaftly.ui.components.ChipTone
 import com.ravendarque.deaftly.ui.components.PlaceholderChip
@@ -43,6 +46,12 @@ internal sealed interface PreviewToken {
         val filled: Boolean,
         override val gapBefore: Boolean,
         val suffix: String = "",
+        val removeIndex: Int? = null,
+    ) : PreviewToken
+
+    data class AddMore(
+        val placeholder: Placeholder,
+        override val gapBefore: Boolean,
     ) : PreviewToken
 }
 
@@ -56,7 +65,7 @@ internal fun previewTokens(parts: List<FillPart>): List<PreviewToken> {
                     val (space, word) = match.destructured
                     val previous = tokens.lastOrNull()
                     if (index == 0 && space.isEmpty() && previous is PreviewToken.Chip) {
-                        tokens[tokens.lastIndex] = previous.copy(suffix = word)
+                        tokens[tokens.lastIndex] = previous.copy(suffix = previous.suffix + word)
                     } else {
                         tokens += PreviewToken.Word(word, gapBefore = space.isNotEmpty())
                     }
@@ -65,23 +74,42 @@ internal fun previewTokens(parts: List<FillPart>): List<PreviewToken> {
             }
 
             is FillPart.Filled -> {
-                tokens += PreviewToken.Chip(part.placeholder, part.text, true, trailingSpace || tokens.lastOrNull() is PreviewToken.Chip)
+                tokens.addFilled(part, trailingSpace || (tokens.isNotEmpty() && tokens.last() !is PreviewToken.Word))
                 trailingSpace = false
             }
 
             is FillPart.Empty -> {
-                tokens +=
-                    PreviewToken.Chip(
-                        part.placeholder,
-                        part.placeholder.label,
-                        false,
-                        trailingSpace || tokens.lastOrNull() is PreviewToken.Chip,
-                    )
+                val gap = trailingSpace || (tokens.isNotEmpty() && tokens.last() !is PreviewToken.Word)
+                tokens += PreviewToken.Chip(part.placeholder, part.placeholder.label, false, gap)
                 trailingSpace = false
             }
         }
     }
     return tokens
+}
+
+private fun MutableList<PreviewToken>.addFilled(
+    part: FillPart.Filled,
+    gapBefore: Boolean,
+) {
+    if (!part.placeholder.repeatable) {
+        this += PreviewToken.Chip(part.placeholder, part.values.first(), true, gapBefore)
+        return
+    }
+    val last = part.values.lastIndex
+    part.values.forEachIndexed { index, value ->
+        if (index > 0 && index == last) this += PreviewToken.Word("and", gapBefore = true)
+        this +=
+            PreviewToken.Chip(
+                placeholder = part.placeholder,
+                label = value,
+                filled = true,
+                gapBefore = index > 0 || gapBefore,
+                suffix = if (index < last - 1) "," else "",
+                removeIndex = index,
+            )
+    }
+    this += PreviewToken.AddMore(part.placeholder, gapBefore = true)
 }
 
 @Composable
@@ -90,12 +118,12 @@ fun MessagePreview(
     text: String,
     activeKey: String?,
     onActivate: (String) -> Unit,
+    onRemove: (String, Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val tokens = remember(parts) { previewTokens(parts) }
     val gap = with(LocalDensity.current) { WordGap.toDp() }
     val wordStyle = MaterialTheme.typography.displaySmall
-    val chipStyle = wordStyle.copy(fontWeight = FontWeight.Bold)
     FlowRow(
         modifier =
             modifier
@@ -118,30 +146,49 @@ fun MessagePreview(
                 }
 
                 is PreviewToken.Chip -> {
-                    Row(modifier = spacing, verticalAlignment = Alignment.CenterVertically) {
-                        PlaceholderChip(
-                            label = token.label,
-                            onClick = { onActivate(token.placeholder.key) },
-                            state =
-                                when {
-                                    token.placeholder.key == activeKey -> ChipState.Focused
-                                    token.filled -> ChipState.Filled
-                                    else -> ChipState.Empty
-                                },
-                            tone = if (token.placeholder.type == PlaceholderType.Camera) ChipTone.PersonB else ChipTone.Accent,
-                            textStyle = chipStyle,
-                        )
-                        if (token.suffix.isNotEmpty()) {
-                            Text(
-                                text = token.suffix,
-                                style = wordStyle,
-                                color = Deaftly.colors.ink,
-                                modifier = Modifier.clearAndSetSemantics { },
-                            )
-                        }
-                    }
+                    ChipItem(token, activeKey, onActivate, onRemove, spacing)
+                }
+
+                is PreviewToken.AddMore -> {
+                    AddMoreChip(
+                        label = stringResource(R.string.fill_add_more),
+                        onClick = { onActivate(token.placeholder.key) },
+                        modifier = spacing,
+                        tone = token.placeholder.tone(),
+                    )
                 }
             }
+        }
+    }
+}
+
+private fun Placeholder.tone() = if (type == PlaceholderType.Camera) ChipTone.PersonB else ChipTone.Accent
+
+@Composable
+private fun ChipItem(
+    token: PreviewToken.Chip,
+    activeKey: String?,
+    onActivate: (String) -> Unit,
+    onRemove: (String, Int) -> Unit,
+    modifier: Modifier,
+) {
+    val style = MaterialTheme.typography.displaySmall
+    Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
+        PlaceholderChip(
+            label = token.label,
+            onClick = { onActivate(token.placeholder.key) },
+            state =
+                when {
+                    token.placeholder.key == activeKey -> ChipState.Focused
+                    token.filled -> ChipState.Filled
+                    else -> ChipState.Empty
+                },
+            tone = token.placeholder.tone(),
+            onRemove = token.removeIndex?.let { removeIndex -> { onRemove(token.placeholder.key, removeIndex) } },
+            textStyle = style.copy(fontWeight = FontWeight.Bold),
+        )
+        if (token.suffix.isNotEmpty()) {
+            Text(text = token.suffix, style = style, color = Deaftly.colors.ink, modifier = Modifier.clearAndSetSemantics { })
         }
     }
 }

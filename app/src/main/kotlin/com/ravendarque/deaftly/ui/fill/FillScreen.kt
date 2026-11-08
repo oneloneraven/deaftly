@@ -53,6 +53,7 @@ fun FillScreen(
                         onActivate = viewModel::activate,
                         onDismiss = viewModel::dismiss,
                         onChoose = viewModel::choose,
+                        onRemove = viewModel::remove,
                         onScan = { onNavigate(Route.Ocr) },
                     )
                 }
@@ -87,6 +88,7 @@ fun FillContent(
                     text = state.text,
                     activeKey = state.active?.placeholder?.key,
                     onActivate = actions.onActivate,
+                    onRemove = actions.onRemove,
                 )
                 Text(
                     text = stringResource(R.string.fill_hint),

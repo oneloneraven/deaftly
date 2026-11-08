@@ -28,7 +28,7 @@ sealed interface FillPart {
 
     data class Filled(
         val placeholder: Placeholder,
-        val text: String,
+        val values: List<String>,
     ) : FillPart
 
     data class Empty(
@@ -38,7 +38,7 @@ sealed interface FillPart {
 
 data class ActivePlaceholder(
     val placeholder: Placeholder,
-    val value: String?,
+    val values: List<String>,
 )
 
 sealed interface FillUiState {
@@ -87,10 +87,24 @@ class FillViewModel(
         val clean = value.trim()
         if (template != null && key != null && clean.isNotEmpty()) {
             val wasUnfilled = key in TemplateRenderer.render(template, fill.value).unfilledKeys
-            val after = fill.value.set(key, clean)
+            val before = fill.value
+            val after =
+                when {
+                    !template.placeholder(key).repeatable -> before.set(key, clean)
+                    clean in before.values(key) -> before
+                    else -> before.add(key, clean)
+                }
             update(template, after)
             setActive(if (wasUnfilled) TemplateRenderer.render(template, after).unfilledKeys.firstOrNull() else null)
         }
+    }
+
+    fun remove(
+        key: String,
+        index: Int,
+    ) {
+        val template = loaded.value?.template
+        if (template != null && index in fill.value.values(key).indices) update(template, fill.value.removeAt(key, index))
     }
 
     private fun update(
@@ -125,10 +139,10 @@ class FillViewModel(
                 val rendered = TemplateRenderer.render(template, fill)
                 FillUiState.Ready(
                     title = template.title,
-                    parts = rendered.parts.map { toPart(template, it) },
+                    parts = rendered.parts.map { toPart(template, fill, it) },
                     active =
                         activeKey?.takeIf { it in placeholderKeys(template) }?.let {
-                            ActivePlaceholder(template.placeholder(it), fill.value(it))
+                            ActivePlaceholder(template.placeholder(it), fill.values(it))
                         },
                     text = rendered.text,
                     canShow = rendered.isComplete,
@@ -139,6 +153,7 @@ class FillViewModel(
 
     private fun toPart(
         template: Template,
+        fill: TemplateFill,
         part: RenderedPart,
     ): FillPart =
         when (part) {
@@ -151,7 +166,14 @@ class FillViewModel(
             }
 
             is RenderedPart.Value -> {
-                FillPart.Filled(template.placeholder(part.key), part.text)
+                val placeholder = template.placeholder(part.key)
+                val values =
+                    if (placeholder.repeatable) {
+                        fill.values(part.key).map { it.trim() }.filter { it.isNotEmpty() }
+                    } else {
+                        listOf(part.text)
+                    }
+                FillPart.Filled(placeholder, values)
             }
         }
 
