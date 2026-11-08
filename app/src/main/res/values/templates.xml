@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="category_everyday">Everyday</string>
+    <string name="category_food_drink">Food &amp; drink</string>
+    <string name="category_health">Health</string>
+    <string name="category_travel">Travel</string>
+
+    <string name="template_check_in_title">Check in</string>
+    <string name="template_check_in_body">Hi! I\'m deaf. I\'d like to check in. My name is {name}. Please {how to reply}.</string>
+    <string name="template_order_food_title">Order food</string>
+    <string name="template_order_food_body">Hi! I\'m deaf. Could I have {menu item} please? If you have a question, please type it on my phone.</string>
+    <string name="template_explain_deaf_title">Explain I\'m deaf</string>
+    <string name="template_explain_deaf_body">I\'m deaf. I can\'t hear you. Please {how to reply}.</string>
+    <string name="template_ask_help_title">Ask for help</string>
+    <string name="template_ask_help_body">Excuse me. I\'m deaf. Can you help me find {thing}? Please {how to reply}.</string>
+    <string name="template_food_allergy_title">Food allergy</string>
+    <string name="template_food_allergy_body">I\'m deaf. I\'m allergic to {allergen}. Please check my food is safe. Please {how to reply}.</string>
+    <string name="template_doctor_title">At the doctor\'s</string>
+    <string name="template_doctor_body">Hi! I\'m deaf. I have an appointment at {time}. Please write down what the doctor says.</string>
+    <string name="template_pharmacy_title">Pharmacy</string>
+    <string name="template_pharmacy_body">Hi! I\'m deaf. I\'m collecting a prescription for {name}. Please {how to reply}.</string>
+    <string name="template_buy_ticket_title">Buy a ticket</string>
+    <string name="template_buy_ticket_body">Hi! I\'m deaf. I\'d like a ticket to {place}, please. Please {how to reply}.</string>
+    <string name="template_paying_title">Paying</string>
+    <string name="template_paying_body">I\'m deaf. Can I pay by {payment}? Please show me the total.</string>
+
+    <string name="placeholder_how_to_reply_label">How should they reply?</string>
+    <string-array name="placeholder_how_to_reply_options">
+        <item>type on my phone</item>
+        <item>type on your phone</item>
+        <item>write it down</item>
+        <item>point to the words</item>
+        <item>face me and speak clearly</item>
+    </string-array>
+    <string name="placeholder_name_label">Your name</string>
+    <string name="placeholder_menu_item_label">Menu item</string>
+    <string name="placeholder_thing_label">What are you looking for?</string>
+    <string-array name="placeholder_thing_options">
+        <item>the toilets</item>
+        <item>the exit</item>
+        <item>the lift</item>
+        <item>the till</item>
+        <item>a member of staff</item>
+    </string-array>
+    <string name="placeholder_allergen_label">Allergy</string>
+    <string-array name="placeholder_allergen_options">
+        <item>celery</item>
+        <item>gluten</item>
+        <item>crustaceans</item>
+        <item>eggs</item>
+        <item>fish</item>
+        <item>lupin</item>
+        <item>milk</item>
+        <item>molluscs</item>
+        <item>mustard</item>
+        <item>nuts</item>
+        <item>peanuts</item>
+        <item>sesame</item>
+        <item>soya</item>
+        <item>sulphites</item>
+    </string-array>
+    <string name="placeholder_time_label">Appointment time</string>
+    <string name="placeholder_place_label">Where to?</string>
+    <string name="placeholder_payment_label">How do you want to pay?</string>
+    <string-array name="placeholder_payment_options">
+        <item>card</item>
+        <item>cash</item>
+        <item>phone</item>
+    </string-array>
+</resources>
