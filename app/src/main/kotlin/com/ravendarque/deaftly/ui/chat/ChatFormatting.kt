@@ -9,6 +9,7 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import com.ravendarque.deaftly.core.chat.Span
 import com.ravendarque.deaftly.ui.theme.Deaftly
@@ -23,7 +24,7 @@ class ChatFormatting(
         when (style) {
             ChatSpanStyle.Bold -> SpanStyle(fontWeight = FontWeight.Bold)
             ChatSpanStyle.Italic -> SpanStyle(fontStyle = FontStyle.Italic)
-            ChatSpanStyle.Highlight -> SpanStyle(background = highlight, color = onHighlight)
+            ChatSpanStyle.Highlight -> SpanStyle(background = highlight, color = onHighlight, textDecoration = TextDecoration.Underline)
         }
 
     fun annotate(spans: List<Span>): AnnotatedString =

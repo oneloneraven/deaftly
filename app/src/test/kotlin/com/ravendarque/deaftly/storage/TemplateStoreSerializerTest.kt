@@ -156,7 +156,7 @@ class TemplateStoreSerializerTest {
     @Test
     fun roundTripsTheChatProfile() =
         runTest {
-            val document = seed.copy(settings = SettingsDto(chatName = "Alex", chatColour = ParticipantColourDto.PersonB))
+            val document = seed.copy(settings = SettingsDto(chatName = "Alex", chatColour = ParticipantColourDto.Orange))
 
             val settings =
                 Json
@@ -166,7 +166,7 @@ class TemplateStoreSerializerTest {
                     .jsonObject
 
             assertEquals("Alex", settings.getValue("chatName").jsonPrimitive.content)
-            assertEquals("person-b", settings.getValue("chatColour").jsonPrimitive.content)
+            assertEquals("orange", settings.getValue("chatColour").jsonPrimitive.content)
             assertEquals(document.settings, read(write(document)).settings)
         }
 
@@ -193,25 +193,36 @@ class TemplateStoreSerializerTest {
         }
 
     @Test
-    fun readsTheRetiredBerryColourAsForest() =
+    fun readsRetiredColourNamesAsTheirNewColours() =
         runTest {
-            val settings = read("""{"version":1,"templates":[],"settings":{"chatColour":"berry"}}""").settings
+            mapOf(
+                "accent" to ParticipantColourDto.Indigo,
+                "person-b" to ParticipantColourDto.Orange,
+                "rose" to ParticipantColourDto.Red,
+                "teal" to ParticipantColourDto.Green,
+                "forest" to ParticipantColourDto.Green,
+                "berry" to ParticipantColourDto.Green,
+            ).forEach { (stored, expected) ->
+                val settings = read("""{"version":1,"templates":[],"settings":{"chatColour":"$stored"}}""").settings
 
-            assertEquals(ParticipantColourDto.Forest, settings.chatColour)
+                assertEquals(expected, settings.chatColour, stored)
+            }
         }
 
     @Test
-    fun writesForestAsItsOwnName() =
+    fun writesEachColourAsItsOwnName() =
         runTest {
-            val document = seed.copy(settings = SettingsDto(chatColour = ParticipantColourDto.Forest))
+            ParticipantColourDto.entries.forEach { colour ->
+                val document = seed.copy(settings = SettingsDto(chatColour = colour))
 
-            val settings =
-                Json
-                    .parseToJsonElement(write(document))
-                    .jsonObject
-                    .getValue("settings")
-                    .jsonObject
+                val settings =
+                    Json
+                        .parseToJsonElement(write(document))
+                        .jsonObject
+                        .getValue("settings")
+                        .jsonObject
 
-            assertEquals("forest", settings.getValue("chatColour").jsonPrimitive.content)
+                assertEquals(colour.name.lowercase(), settings.getValue("chatColour").jsonPrimitive.content)
+            }
         }
 }

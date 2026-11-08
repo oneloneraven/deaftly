@@ -17,7 +17,7 @@ class DataStoreSettingsRepository(
 
     override val chatProfile: Flow<ChatProfile> =
         store.data
-            .map { ChatProfile(it.settings.chatName, it.settings.chatColour?.toDomain() ?: ColourRole.Accent) }
+            .map { ChatProfile(it.settings.chatName, it.settings.chatColour?.toDomain() ?: ColourRole.Indigo) }
             .distinctUntilChanged()
 
     override val chatLayout: Flow<ChatLayout> =
@@ -72,18 +72,20 @@ private fun ShowScheme.toDto(): ShowSchemeDto =
 
 private fun ParticipantColourDto.toDomain(): ColourRole =
     when (this) {
-        ParticipantColourDto.Accent -> ColourRole.Accent
-        ParticipantColourDto.PersonB -> ColourRole.PersonB
-        ParticipantColourDto.Teal -> ColourRole.Teal
-        ParticipantColourDto.Rose -> ColourRole.Rose
-        ParticipantColourDto.Forest -> ColourRole.Forest
+        ParticipantColourDto.Red -> ColourRole.Red
+        ParticipantColourDto.Orange -> ColourRole.Orange
+        ParticipantColourDto.Gold -> ColourRole.Gold
+        ParticipantColourDto.Green -> ColourRole.Green
+        ParticipantColourDto.Blue -> ColourRole.Blue
+        ParticipantColourDto.Indigo -> ColourRole.Indigo
     }
 
 private fun ColourRole.toDto(): ParticipantColourDto =
     when (this) {
-        ColourRole.Accent -> ParticipantColourDto.Accent
-        ColourRole.PersonB -> ParticipantColourDto.PersonB
-        ColourRole.Teal -> ParticipantColourDto.Teal
-        ColourRole.Rose -> ParticipantColourDto.Rose
-        ColourRole.Forest -> ParticipantColourDto.Forest
+        ColourRole.Red -> ParticipantColourDto.Red
+        ColourRole.Orange -> ParticipantColourDto.Orange
+        ColourRole.Gold -> ParticipantColourDto.Gold
+        ColourRole.Green -> ParticipantColourDto.Green
+        ColourRole.Blue -> ParticipantColourDto.Blue
+        ColourRole.Indigo -> ParticipantColourDto.Indigo
     }

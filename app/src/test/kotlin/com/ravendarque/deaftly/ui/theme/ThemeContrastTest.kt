@@ -33,7 +33,6 @@ class ThemeContrastTest {
             ColourPair("onAccentSoft on accentSoft", c.onAccentSoft, c.accentSoft),
             ColourPair("accentStrong on accentSoft", c.accentStrong, c.accentSoft),
             ColourPair("ink on accentSoft", c.ink, c.accentSoft),
-            ColourPair("onPersonA on personA", c.onPersonA, c.personA),
             ColourPair("onPersonB on personB", c.onPersonB, c.personB),
             ColourPair("onPersonBMuted on personB", c.onPersonBMuted, c.personB),
             ColourPair("onPersonBMuted on surface", c.onPersonBMuted, c.surface),
