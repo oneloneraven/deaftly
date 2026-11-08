@@ -1,7 +1,11 @@
 package com.ravendarque.deaftly.navigation
 
 import androidx.activity.ComponentActivity
+import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.hasClickAction
+import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.isSelectable
 import androidx.compose.ui.test.junit4.accessibility.enableAccessibilityChecks
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
@@ -14,8 +18,10 @@ import androidx.compose.ui.test.tryPerformAccessibilityChecks
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.ravendarque.deaftly.AppContainer
 import com.ravendarque.deaftly.R
+import com.ravendarque.deaftly.core.template.Template
 import com.ravendarque.deaftly.ui.chat.isMessageField
 import com.ravendarque.deaftly.ui.theme.AppTheme
+import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import org.junit.Rule
 import org.junit.Test
@@ -40,8 +46,8 @@ class AppNavigationTest {
         vararg args: Any,
     ) = composeRule.activity.getString(id, *args)
 
-    private fun showApp() {
-        composeRule.setContent { AppTheme { AppNavigation(AppContainer(composeRule.activity.applicationContext)) } }
+    private fun showApp(container: AppContainer = AppContainer(composeRule.activity.applicationContext)) {
+        composeRule.setContent { AppTheme { AppNavigation(container) } }
         composeRule.waitUntil(LOAD_TIMEOUT_MILLIS) {
             composeRule.onAllNodesWithText(text(R.string.home_category_all)).fetchSemanticsNodes().isNotEmpty()
         }
@@ -109,6 +115,72 @@ class AppNavigationTest {
 
         composeRule.onNodeWithText(text(R.string.chat_empty)).assertExists()
         composeRule.onNodeWithContentDescription("Me: Hello there").assertDoesNotExist()
+    }
+
+    private fun openChatWithAMessage() {
+        composeRule.onNodeWithText(text(R.string.home_start_chat)).performClick()
+        composeRule.waitUntil(LOAD_TIMEOUT_MILLIS) {
+            composeRule.onAllNodesWithText(text(R.string.chat_composer_hint)).fetchSemanticsNodes().isNotEmpty()
+        }
+        composeRule.onNode(isMessageField).performTextInput("Hello there")
+        composeRule.onNodeWithContentDescription(text(R.string.chat_send)).performClick()
+        composeRule.onNodeWithContentDescription("Me: Hello there").assertExists()
+    }
+
+    @Test
+    fun aFilledTemplateIsInsertedIntoTheComposerAndTheChatIsIntact() {
+        composeRule.enableAccessibilityChecks()
+        showApp()
+        openChatWithAMessage()
+        composeRule.onNode(isMessageField).performTextInput("Please wait. ")
+
+        composeRule.onNodeWithContentDescription(text(R.string.chat_insert_template)).performClick()
+        composeRule.onNodeWithText(text(R.string.chat_insert_template)).assertExists()
+        composeRule.onRoot().tryPerformAccessibilityChecks()
+        composeRule.onAllNodesWithText(text(R.string.template_explain_deaf_title))[0].performClick()
+        composeRule.onNodeWithText(text(R.string.fill_insert)).assertIsNotEnabled()
+        composeRule.onNode(hasText("how to reply") and hasClickAction()).performClick()
+        val option =
+            composeRule.activity.resources
+                .getStringArray(R.array.placeholder_how_to_reply_options)
+                .first()
+        composeRule.onNode(hasText(option) and isSelectable()).performClick()
+        composeRule.waitForIdle()
+        composeRule.onNodeWithText(text(R.string.fill_insert)).performClick()
+        composeRule.waitForIdle()
+
+        composeRule.onNodeWithContentDescription("Me: Hello there").assertExists()
+        composeRule.onNode(isMessageField).assert(hasText("Please wait. I'm deaf. I can't hear you. Please $option."))
+        composeRule.onNodeWithText(text(R.string.fill_insert)).assertDoesNotExist()
+        composeRule.onRoot().tryPerformAccessibilityChecks()
+    }
+
+    @Test
+    fun aTemplateWithoutPlaceholdersIsInsertedStraightFromThePicker() {
+        val container = AppContainer(composeRule.activity.applicationContext)
+        runBlocking { container.templateRepository.add(Template("thanks", "Say thanks", "Everyday", "Thank you very much.")) }
+        showApp(container)
+        openChatWithAMessage()
+
+        composeRule.onNodeWithContentDescription(text(R.string.chat_insert_template)).performClick()
+        composeRule.onAllNodesWithText("Say thanks")[0].performClick()
+        composeRule.waitForIdle()
+
+        composeRule.onNode(isMessageField).assert(hasText("Thank you very much."))
+        composeRule.onNodeWithContentDescription("Me: Hello there").assertExists()
+        composeRule.onNodeWithContentDescription("Me: Thank you very much.").assertDoesNotExist()
+    }
+
+    @Test
+    fun backFromThePickerReturnsToTheChatUntouched() {
+        showApp()
+        openChatWithAMessage()
+
+        composeRule.onNodeWithContentDescription(text(R.string.chat_insert_template)).performClick()
+        composeRule.onNodeWithContentDescription(text(R.string.back)).performClick()
+        composeRule.waitForIdle()
+
+        composeRule.onNodeWithContentDescription("Me: Hello there").assertExists()
     }
 
     @Test
@@ -195,6 +267,8 @@ class AppNavigationTest {
             listOf(
                 Route.Home,
                 Route.Fill("template-1"),
+                Route.Fill("template-1", forChat = true),
+                Route.TemplatePicker,
                 Route.TypeShow,
                 Route.Show("Hello"),
                 Route.Chat(),

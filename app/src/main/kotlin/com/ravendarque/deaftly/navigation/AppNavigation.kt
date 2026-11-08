@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
+import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
@@ -13,6 +14,7 @@ import androidx.navigation3.ui.NavDisplay
 import com.ravendarque.deaftly.AppContainer
 import com.ravendarque.deaftly.ui.chat.ChatScreen
 import com.ravendarque.deaftly.ui.chat.ChatViewModel
+import com.ravendarque.deaftly.ui.chat.TemplatePickerScreen
 import com.ravendarque.deaftly.ui.editor.EditorExit
 import com.ravendarque.deaftly.ui.editor.EditorScreen
 import com.ravendarque.deaftly.ui.editor.EditorViewModel
@@ -28,6 +30,10 @@ import com.ravendarque.deaftly.ui.typeshow.TypeShowScreen
 @Composable
 fun AppNavigation(container: AppContainer) {
     val backStack = rememberNavBackStack(Route.Home)
+    val insertIntoChat: (String) -> Unit = { text ->
+        container.chatInsertions.offer(text)
+        while (backStack.lastOrNull() !is Route.Chat && backStack.size > 1) backStack.removeLastOrNull()
+    }
 
     NavDisplay(
         backStack = backStack,
@@ -43,15 +49,7 @@ fun AppNavigation(container: AppContainer) {
                     val viewModel = viewModel<HomeViewModel>(factory = container.homeViewModelFactory)
                     HomeScreen(viewModel, onNavigate = { backStack.add(it) })
                 }
-                entry<Route.Fill> { route ->
-                    val viewModel = viewModel<FillViewModel>(factory = container.fillViewModelFactory(route.templateId))
-                    FillScreen(
-                        templateId = route.templateId,
-                        viewModel = viewModel,
-                        onNavigate = { backStack.add(it) },
-                        onBack = { backStack.removeLastOrNull() },
-                    )
-                }
+                templateEntries(container, backStack, insertIntoChat)
                 entry<Route.TypeShow> {
                     TypeShowScreen(
                         onShow = { backStack.add(Route.Show(it)) },
@@ -69,22 +67,52 @@ fun AppNavigation(container: AppContainer) {
                 }
                 entry<Route.Chat> { route ->
                     val viewModel = viewModel<ChatViewModel>(factory = container.chatViewModelFactory(route.firstMessage))
-                    ChatScreen(viewModel, onEnd = { backStack.removeLastOrNull() })
+                    ChatScreen(
+                        viewModel,
+                        onEnd = { backStack.removeLastOrNull() },
+                        onInsertTemplate = { backStack.add(Route.TemplatePicker) },
+                    )
                 }
                 entry<Route.Ocr> { PlaceholderEntry(it, backStack) }
-                entry<Route.Editor> { route ->
-                    val viewModel = viewModel<EditorViewModel>(factory = container.editorViewModelFactory(route.templateId))
-                    EditorScreen(viewModel) { exit ->
-                        if (exit is EditorExit.Copied) {
-                            backStack[backStack.lastIndex] = Route.Editor(exit.templateId)
-                        } else {
-                            backStack.removeLastOrNull()
-                        }
-                    }
-                }
                 entry<Route.Settings> { PlaceholderEntry(it, backStack) }
             },
     )
+}
+
+private fun EntryProviderScope<NavKey>.templateEntries(
+    container: AppContainer,
+    backStack: NavBackStack<NavKey>,
+    insertIntoChat: (String) -> Unit,
+) {
+    entry<Route.Fill> { route ->
+        val viewModel = viewModel<FillViewModel>(factory = container.fillViewModelFactory(route.templateId))
+        FillScreen(
+            templateId = route.templateId,
+            viewModel = viewModel,
+            onNavigate = { backStack.add(it) },
+            onBack = { backStack.removeLastOrNull() },
+            onInsert = if (route.forChat) insertIntoChat else null,
+        )
+    }
+    entry<Route.TemplatePicker> {
+        val viewModel = viewModel<HomeViewModel>(factory = container.homeViewModelFactory)
+        TemplatePickerScreen(
+            viewModel = viewModel,
+            onFill = { backStack.add(Route.Fill(it, forChat = true)) },
+            onInsert = insertIntoChat,
+            onBack = { backStack.removeLastOrNull() },
+        )
+    }
+    entry<Route.Editor> { route ->
+        val viewModel = viewModel<EditorViewModel>(factory = container.editorViewModelFactory(route.templateId))
+        EditorScreen(viewModel) { exit ->
+            if (exit is EditorExit.Copied) {
+                backStack[backStack.lastIndex] = Route.Editor(exit.templateId)
+            } else {
+                backStack.removeLastOrNull()
+            }
+        }
+    }
 }
 
 @Composable

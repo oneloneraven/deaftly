@@ -55,6 +55,7 @@ class ChatScreenTest {
 
     private val settings = FakeSettingsRepository(ChatProfile("Alex", ColourRole.Teal))
     private var ended = 0
+    private var inserts = 0
     private lateinit var viewModel: ChatViewModel
 
     @Before
@@ -64,7 +65,7 @@ class ChatScreenTest {
 
     private fun show(savedState: SavedStateHandle = SavedStateHandle()) {
         viewModel = ChatViewModel(settings, savedState)
-        composeRule.setContent { AppTheme { ChatScreen(viewModel, onEnd = { ended++ }) } }
+        composeRule.setContent { AppTheme { ChatScreen(viewModel, onEnd = { ended++ }, onInsertTemplate = { inserts++ }) } }
         composeRule.waitForIdle()
     }
 
@@ -432,6 +433,43 @@ class ChatScreenTest {
                 .quote
                 ?.text,
         )
+        composeRule.onRoot().tryPerformAccessibilityChecks()
+    }
+
+    @Test
+    fun theTemplateButtonAsksToPickATemplateWithoutLeavingTheDraft() {
+        showOrdering()
+        composeRule.onNode(isMessageField).performTextInput("Half typed")
+
+        composeRule.onNodeWithContentDescription("Insert template").assertWidthIsAtLeast(48.dp).performClick()
+
+        assertEquals(1, inserts)
+        assertEquals("Half typed", draft().text)
+    }
+
+    @Test
+    fun insertedTextAppearsInTheComposerAtTheCursorWithoutBeingSent() {
+        showOrdering()
+        composeRule.onNode(isMessageField).performTextInput("Hello world")
+        composeRule.onNode(isMessageField).performTextInputSelection(TextRange(5, 5))
+
+        composeRule.waitForIdle()
+        composeRule.runOnUiThread { viewModel.drafts.insertText(", dear") }
+        composeRule.waitForIdle()
+
+        assertEquals("Hello, dear world", draft().text)
+        composeRule.onNodeWithText("Hello, dear world").assertExists()
+        assertEquals(4, conversation().messages.size)
+    }
+
+    @Test
+    @Config(qualifiers = "w300dp-h1600dp")
+    fun onANarrowScreenTheToolbarWrapsInsteadOfClippingButtons() {
+        showOrdering()
+
+        listOf("Bold", "Italic", "Highlight", "Quote the latest message", "Insert template", "Send").forEach {
+            composeRule.onNodeWithContentDescription(it).assertIsDisplayed().assertWidthIsAtLeast(48.dp)
+        }
         composeRule.onRoot().tryPerformAccessibilityChecks()
     }
 }

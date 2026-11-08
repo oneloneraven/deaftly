@@ -151,7 +151,7 @@ private fun Wordmark(modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun SearchField(
+internal fun SearchField(
     query: String,
     onQueryChange: (String) -> Unit,
 ) {

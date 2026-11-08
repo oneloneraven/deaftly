@@ -86,7 +86,7 @@ class ChatScreenshotTest {
                 mapOf("conversation" to ChatCodec.encode(orderingConversation(turn)), "draft_a" to draft, "draft_b" to draft),
             )
         val viewModel = ChatViewModel(FakeSettingsRepository(), saved)
-        shot { AppTheme(darkTheme = dark) { ChatScreen(viewModel, onEnd = {}) } }
+        shot { AppTheme(darkTheme = dark) { ChatScreen(viewModel, onEnd = {}, onInsertTemplate = {}) } }
     }
 
     private fun formatted(dark: Boolean) {
@@ -98,12 +98,12 @@ class ChatScreenshotTest {
                 ),
             )
         val viewModel = ChatViewModel(FakeSettingsRepository(), saved)
-        shot { AppTheme(darkTheme = dark) { ChatScreen(viewModel, onEnd = {}) } }
+        shot { AppTheme(darkTheme = dark) { ChatScreen(viewModel, onEnd = {}, onInsertTemplate = {}) } }
     }
 
     private fun continuedFromShow(dark: Boolean) {
         val viewModel = ChatViewModel(FakeSettingsRepository(), SavedStateHandle(), "Hi! I'm deaf. Could I have a table for two, please?")
-        shot { AppTheme(darkTheme = dark) { ChatScreen(viewModel, onEnd = {}) } }
+        shot { AppTheme(darkTheme = dark) { ChatScreen(viewModel, onEnd = {}, onInsertTemplate = {}) } }
     }
 
     @Test

@@ -13,7 +13,11 @@ sealed interface Route : NavKey {
     @Serializable
     data class Fill(
         val templateId: String,
+        val forChat: Boolean = false,
     ) : Route
+
+    @Serializable
+    data object TemplatePicker : Route
 
     @Serializable
     data class Show(
@@ -45,6 +49,7 @@ fun Route.titleRes(): Int =
     when (this) {
         Route.Home -> R.string.app_name
         is Route.Fill -> R.string.route_fill
+        Route.TemplatePicker -> R.string.chat_insert_template
         is Route.Show -> R.string.route_show
         Route.TypeShow -> R.string.home_type_and_show
         is Route.Chat -> R.string.route_chat

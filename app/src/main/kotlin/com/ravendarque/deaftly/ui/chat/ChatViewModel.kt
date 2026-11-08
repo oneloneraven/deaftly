@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -38,6 +39,7 @@ class ChatViewModel(
     private val settings: SettingsRepository,
     private val savedState: SavedStateHandle,
     private val firstMessage: String? = null,
+    private val insertions: ChatInsertions = ChatInsertions(),
 ) : ViewModel() {
     private val conversation = MutableStateFlow(ChatCodec.decode(savedState[CONVERSATION_KEY]))
     private val textSize = MutableStateFlow(ChatTextSize.entries.getOrElse(savedState.get<Int>(TEXT_SIZE_KEY) ?: 0) { ChatTextSize.Normal })
@@ -49,6 +51,12 @@ class ChatViewModel(
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS), ChatUiState.Loading)
 
     init {
+        viewModelScope.launch {
+            insertions.text.filterNotNull().collect {
+                drafts.insertText(it)
+                insertions.consume()
+            }
+        }
         if (conversation.value == null) {
             viewModelScope.launch {
                 val started = opening(settings.chatProfile.first().startConversation())

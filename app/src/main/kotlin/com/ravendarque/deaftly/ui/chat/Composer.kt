@@ -6,6 +6,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
@@ -64,12 +66,14 @@ private const val QUOTE_LINES = 2
 private const val GLYPH_SP = 18
 
 data class ComposerActions(
+    val onInsertTemplate: () -> Unit,
     val onChange: (Composition) -> Unit,
     val onQuoteLatest: () -> Unit,
     val onRemoveQuote: () -> Unit,
     val onSend: () -> Unit,
 )
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun Composer(
     participant: Participant,
@@ -105,13 +109,16 @@ fun Composer(
         TurnPrompt(participant.id)
         draft.quote?.let { QuotePreview(it.text, colours.strong, actions.onRemoveQuote) }
         MessageField(state, participant.labelled().displayName.orEmpty(), colours.strong, send)
-        Row(
+        FlowRow(
             modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(Deaftly.spacing.space4),
+            verticalArrangement = Arrangement.spacedBy(Deaftly.spacing.space4),
+            itemVerticalAlignment = Alignment.CenterVertically,
         ) {
-            FormattingToolbar(state, draft, canQuote, actions, colours, Modifier.weight(1f))
-            SendButton(enabled = canSend, onClick = send, container = colours.strong, content = colours.onStrong)
+            FormattingButtons(state, draft, canQuote, actions, colours)
+            Box(Modifier.weight(1f), contentAlignment = Alignment.CenterEnd) {
+                SendButton(enabled = canSend, onClick = send, container = colours.strong, content = colours.onStrong)
+            }
         }
     }
 }
@@ -134,44 +141,49 @@ private fun TurnPrompt(id: ParticipantId) {
 }
 
 @Composable
-private fun FormattingToolbar(
+private fun FormattingButtons(
     state: ComposerState,
     draft: Draft,
     canQuote: Boolean,
     actions: ComposerActions,
     colours: ParticipantColours,
-    modifier: Modifier = Modifier,
 ) {
-    Row(modifier = modifier, horizontalArrangement = Arrangement.spacedBy(Deaftly.spacing.space4)) {
-        FormatButton(state, SpanStyle.Bold, R.string.chat_format_bold, colours) {
-            Text(
-                text = stringResource(R.string.chat_format_glyph_bold),
-                fontSize = GLYPH_SP.sp,
-                fontWeight = FontWeight.ExtraBold,
-                color = it,
-            )
-        }
-        FormatButton(state, SpanStyle.Italic, R.string.chat_format_italic, colours) {
-            Text(
-                text = stringResource(R.string.chat_format_glyph_italic),
-                fontSize = GLYPH_SP.sp,
-                fontStyle = FontStyle.Italic,
-                fontFamily = FontFamily.Serif,
-                color = it,
-            )
-        }
-        FormatButton(state, SpanStyle.Highlight, R.string.chat_format_highlight, colours) {
-            Icon(DeaftlyIcons.Highlight, contentDescription = null, modifier = Modifier.size(ToolbarIcon), tint = it)
-        }
-        ToolbarButton(
-            label = stringResource(R.string.chat_quote_latest),
-            selected = draft.quote != null,
-            enabled = canQuote || draft.quote != null,
-            colours = colours,
-            onClick = if (draft.quote != null) actions.onRemoveQuote else actions.onQuoteLatest,
-        ) {
-            Icon(DeaftlyIcons.Quote, contentDescription = null, modifier = Modifier.size(ToolbarIcon), tint = it)
-        }
+    FormatButton(state, SpanStyle.Bold, R.string.chat_format_bold, colours) {
+        Text(
+            text = stringResource(R.string.chat_format_glyph_bold),
+            fontSize = GLYPH_SP.sp,
+            fontWeight = FontWeight.ExtraBold,
+            color = it,
+        )
+    }
+    FormatButton(state, SpanStyle.Italic, R.string.chat_format_italic, colours) {
+        Text(
+            text = stringResource(R.string.chat_format_glyph_italic),
+            fontSize = GLYPH_SP.sp,
+            fontStyle = FontStyle.Italic,
+            fontFamily = FontFamily.Serif,
+            color = it,
+        )
+    }
+    FormatButton(state, SpanStyle.Highlight, R.string.chat_format_highlight, colours) {
+        Icon(DeaftlyIcons.Highlight, contentDescription = null, modifier = Modifier.size(ToolbarIcon), tint = it)
+    }
+    ToolbarButton(
+        label = stringResource(R.string.chat_quote_latest),
+        selected = draft.quote != null,
+        enabled = canQuote || draft.quote != null,
+        colours = colours,
+        onClick = if (draft.quote != null) actions.onRemoveQuote else actions.onQuoteLatest,
+    ) {
+        Icon(DeaftlyIcons.Quote, contentDescription = null, modifier = Modifier.size(ToolbarIcon), tint = it)
+    }
+    ToolbarButton(
+        label = stringResource(R.string.chat_insert_template),
+        selected = false,
+        colours = colours,
+        onClick = actions.onInsertTemplate,
+    ) {
+        Icon(DeaftlyIcons.Template, contentDescription = null, modifier = Modifier.size(ToolbarIcon), tint = it)
     }
 }
 

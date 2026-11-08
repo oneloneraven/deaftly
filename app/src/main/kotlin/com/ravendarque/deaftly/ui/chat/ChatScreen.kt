@@ -19,9 +19,10 @@ import com.ravendarque.deaftly.ui.theme.Deaftly
 fun ChatScreen(
     viewModel: ChatViewModel,
     onEnd: () -> Unit,
+    onInsertTemplate: () -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val composerActions = rememberComposerActions(viewModel)
+    val composerActions = rememberComposerActions(viewModel, onInsertTemplate)
     var editingParticipants by rememberSaveable { mutableStateOf(false) }
     when (val current = state) {
         ChatUiState.Loading -> {
@@ -75,9 +76,13 @@ fun ChatScreen(
 }
 
 @Composable
-private fun rememberComposerActions(viewModel: ChatViewModel): ComposerActions =
-    remember(viewModel) {
+private fun rememberComposerActions(
+    viewModel: ChatViewModel,
+    onInsertTemplate: () -> Unit,
+): ComposerActions =
+    remember(viewModel, onInsertTemplate) {
         ComposerActions(
+            onInsertTemplate = onInsertTemplate,
             onChange = viewModel.drafts::setComposition,
             onQuoteLatest = viewModel::quoteLatest,
             onRemoveQuote = { viewModel.drafts.setQuote(null) },

@@ -49,7 +49,7 @@ private val tileIcons = listOf(DeaftlyIcons.Home, DeaftlyIcons.Utensils)
 internal fun TemplateList(
     state: HomeUiState,
     actions: HomeActions,
-    onOpenOptions: (String) -> Unit,
+    onOpenOptions: ((String) -> Unit)?,
     modifier: Modifier = Modifier,
 ) {
     LazyColumn(
@@ -81,9 +81,13 @@ internal fun TemplateList(
                 title = template.title,
                 preview = template.preview.map(::toPreviewPart),
                 onClick = { actions.onNavigate(Route.Fill(template.id)) },
-                onLongClick = { onOpenOptions(template.id) },
+                onLongClick = onOpenOptions?.let { open -> { open(template.id) } },
                 onLongClickLabel = stringResource(R.string.template_options_label),
-                customActions = optionsActions(template, actions.onSetPinned) { onOpenOptions(template.id) },
+                customActions =
+                    onOpenOptions
+                        ?.let { open ->
+                            optionsActions(template, actions.onSetPinned) { open(template.id) }
+                        }.orEmpty(),
             )
         }
     }
@@ -93,7 +97,7 @@ internal fun TemplateList(
 private fun PinnedSection(
     pinned: List<HomeTemplate>,
     actions: HomeActions,
-    onOpenOptions: (String) -> Unit,
+    onOpenOptions: ((String) -> Unit)?,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(Deaftly.spacing.space12)) {
@@ -117,9 +121,10 @@ private fun PinnedSection(
                         onClick = { actions.onNavigate(Route.Fill(template.id)) },
                         modifier = Modifier.weight(1f).fillMaxHeight(),
                         tone = if (index % 2 == 0) TileTone.Accent else TileTone.PersonB,
-                        onLongClick = { onOpenOptions(template.id) },
+                        onLongClick = onOpenOptions?.let { open -> { open(template.id) } },
                         onLongClickLabel = stringResource(R.string.template_options_label),
-                        customActions = optionsActions(template, actions.onSetPinned) { onOpenOptions(template.id) },
+                        customActions =
+                            onOpenOptions?.let { open -> optionsActions(template, actions.onSetPinned) { open(template.id) } }.orEmpty(),
                     )
                 }
                 repeat(perRow - row.size) { Spacer(Modifier.weight(1f)) }
