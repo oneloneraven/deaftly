@@ -7,11 +7,13 @@ import android.graphics.Paint
 import android.os.Build
 import android.util.Log
 import androidx.test.platform.app.InstrumentationRegistry
+import com.ravendarque.deaftly.core.ocr.RecognitionFrame
 import com.ravendarque.deaftly.core.ocr.RecognitionResult
 import com.ravendarque.deaftly.core.ocr.TextRecogniser
 import com.ravendarque.deaftly.core.ocr.bench.BenchReport
 import com.ravendarque.deaftly.core.ocr.bench.ImageRun
 import com.ravendarque.deaftly.core.ocr.bench.OcrScorer
+import com.ravendarque.deaftly.core.ocr.bench.OrderMode
 import com.ravendarque.deaftly.core.ocr.bench.Stats
 import kotlinx.coroutines.runBlocking
 import java.io.File
@@ -21,6 +23,8 @@ class Candidate(
     val settings: Map<String, String>,
     val create: () -> TextRecogniser,
     val stageTimings: (TextRecogniser) -> Map<String, Double> = { emptyMap() },
+    val frameOf: (Fixture) -> RecognitionFrame = { it.frame },
+    val order: OrderMode = OrderMode.XY_CUT,
 )
 
 object OcrBenchmark {
@@ -43,17 +47,18 @@ object OcrBenchmark {
         val runs =
             candidate.create().use { recogniser ->
                 fixtures.map { fixture ->
+                    val frame = candidate.frameOf(fixture)
                     var result = RecognitionResult.EMPTY
-                    repeat(WARM_UPS) { result = runBlocking { recogniser.recognise(fixture.frame) } }
+                    repeat(WARM_UPS) { result = runBlocking { recogniser.recognise(frame) } }
                     val latencies =
                         List(TIMED_RUNS) {
                             val start = System.nanoTime()
-                            result = runBlocking { recogniser.recognise(fixture.frame) }
+                            result = runBlocking { recogniser.recognise(frame) }
                             (System.nanoTime() - start) / NANOS_PER_MILLI
                         }
                     candidate.stageTimings(recogniser).forEach { (stage, ms) -> stageSamples.getOrPut(stage) { mutableListOf() }.add(ms) }
                     if (overlays) writeOverlay(fixture, result, File(outputDirectory, "${candidate.name}-${fixture.truth.id}.jpg"))
-                    ImageRun(OcrScorer.score(fixture.truth, result), latencies)
+                    ImageRun(OcrScorer.score(fixture.truth, result, candidate.order), latencies)
                 }
             }
         val stages = stageSamples.entries.joinToString(", ") { "${it.key}=%.0f".format(Stats.median(it.value)) }

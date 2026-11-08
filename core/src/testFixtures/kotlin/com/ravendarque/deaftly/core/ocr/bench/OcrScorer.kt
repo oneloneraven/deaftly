@@ -58,7 +58,12 @@ public data class ImageScore(
     val ordered: TextErrors,
     val bag: TextErrors,
     val predictedText: String,
+    val orderPreserved: Boolean = true,
+    val xyCutOrderPreserved: Boolean = true,
+    val nativeOrderPreserved: Boolean = true,
 )
+
+public enum class OrderMode { XY_CUT, NATIVE }
 
 public object OcrScorer {
     public const val LINE_IOU: Double = 0.5
@@ -67,11 +72,17 @@ public object OcrScorer {
     public fun score(
         truth: GroundTruth,
         result: RecognitionResult,
+        order: OrderMode = OrderMode.XY_CUT,
     ): ImageScore {
-        val predicted = result.blocks.flatMap { it.lines }
+        val native = result.blocks.flatMap { it.lines }
+        val xyCut = ReadingOrder.sort(native) { it.corners ?: it.boundingBox.toQuad() }
+        val predicted = native
         val strict = match(truth.lines.map { it.polygon }, predicted, LINE_IOU)
         val referenceText = truth.lines.joinToString(" ") { it.text }
-        val orderedText = ReadingOrder.sort(predicted) { it.corners ?: it.boundingBox.toQuad() }.joinToString(" ") { it.text }
+        val nativePreserved = preserved(strict, native, native)
+        val xyCutPreserved = preserved(strict, xyCut, native)
+        val sequence = if (order == OrderMode.NATIVE) native else xyCut
+        val orderedText = sequence.joinToString(" ") { it.text }
         val (wordHits, wordTextHits) = matchWords(truth, predicted)
         return ImageScore(
             id = truth.id,
@@ -87,7 +98,19 @@ public object OcrScorer {
             ordered = TextErrors.of(referenceText, orderedText),
             bag = TextErrors.ofBag(referenceText, orderedText),
             predictedText = orderedText,
+            orderPreserved = if (order == OrderMode.NATIVE) nativePreserved else xyCutPreserved,
+            xyCutOrderPreserved = xyCutPreserved,
+            nativeOrderPreserved = nativePreserved,
         )
+    }
+
+    private fun preserved(
+        matches: Map<Int, Int>,
+        sequence: List<TextLine>,
+        native: List<TextLine>,
+    ): Boolean {
+        val positions = matches.toSortedMap().values.map { index -> sequence.indexOfFirst { it === native[index] } }
+        return positions.zipWithNext().all { (a, b) -> a < b }
     }
 
     private fun match(

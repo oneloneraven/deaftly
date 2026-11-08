@@ -17,6 +17,9 @@ public data class Aggregate(
     val truthWords: Int,
     val wordBoxHits: Int,
     val wordBoxAndTextHits: Int,
+    val orderPreservedImages: Int,
+    val xyCutOrderPreservedImages: Int,
+    val nativeOrderPreservedImages: Int,
     val medianLatencyMs: Double,
     val p95LatencyMs: Double,
 ) {
@@ -63,6 +66,9 @@ public class BenchReport(
             truthWords = scores.sumOf { it.truthWords },
             wordBoxHits = scores.sumOf { it.wordBoxHits },
             wordBoxAndTextHits = scores.sumOf { it.wordBoxAndTextHits },
+            orderPreservedImages = scores.count { it.orderPreserved },
+            xyCutOrderPreservedImages = scores.count { it.xyCutOrderPreserved },
+            nativeOrderPreservedImages = scores.count { it.nativeOrderPreserved },
             medianLatencyMs = Stats.median(latencies),
             p95LatencyMs = Stats.percentile(latencies, Stats.P95),
         )

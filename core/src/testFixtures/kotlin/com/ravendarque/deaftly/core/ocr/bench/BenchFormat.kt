@@ -34,6 +34,8 @@ public object BenchFormat {
             appendLine("| Line precision | ${percent(total.linePrecision)} (${total.matchedLines}/${total.predictedLines}) |")
             appendLine("| Word box recall (IoU >= 0.5) | ${percent(total.wordBoxRecall)} (${total.wordBoxHits}/${total.truthWords}) |")
             appendLine("| Word box recall with matching text | ${percent(total.wordBoxAndTextRecall)} |")
+            val orders = "${total.nativeOrderPreservedImages} / ${total.xyCutOrderPreservedImages} of ${total.images}"
+            appendLine("| Matched-line order equals ground truth, images (native / XY-cut) | $orders |")
             appendLine("| Latency median / p95 | ${ms(total.medianLatencyMs)} / ${ms(total.p95LatencyMs)} ms |")
             report.environment.forEach { (key, value) -> appendLine("| $key | $value |") }
             appendLine()
@@ -95,6 +97,8 @@ public object BenchFormat {
             "cerBagCaseInsensitive" to score.bag.charCaseInsensitive.rate,
             "werBag" to score.bag.wordCaseSensitive.rate,
             "werBagCaseInsensitive" to score.bag.wordCaseInsensitive.rate,
+            "nativeOrderPreserved" to score.nativeOrderPreserved,
+            "xyCutOrderPreserved" to score.xyCutOrderPreserved,
             "latenciesMs" to run.latenciesMs,
             "predictedText" to score.predictedText,
         )
@@ -111,6 +115,8 @@ public object BenchFormat {
             "cerOrderedCaseInsensitive" to aggregate.ordered.charCaseInsensitive.rate,
             "werOrdered" to aggregate.ordered.wordCaseSensitive.rate,
             "werOrderedCaseInsensitive" to aggregate.ordered.wordCaseInsensitive.rate,
+            "nativeOrderPreservedImages" to aggregate.nativeOrderPreservedImages,
+            "xyCutOrderPreservedImages" to aggregate.xyCutOrderPreservedImages,
             "lineRecall" to aggregate.lineRecall,
             "linePrecision" to aggregate.linePrecision,
             "wordBoxRecall" to aggregate.wordBoxRecall,
