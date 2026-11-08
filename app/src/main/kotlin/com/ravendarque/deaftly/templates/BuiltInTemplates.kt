@@ -88,7 +88,7 @@ private class BuiltInTemplateFactory(
                 R.string.template_pharmacy_title,
                 R.string.category_health,
                 R.string.template_pharmacy_body,
-                name,
+                placeholder("patient", R.string.placeholder_patient_label, PlaceholderType.Typing),
                 howToReply,
             ),
         )
