@@ -216,7 +216,7 @@ private tailrec fun Context.findActivity(): Activity? =
         else -> null
     }
 
-private fun ShowScheme.labelRes(): Int =
+internal fun ShowScheme.labelRes(): Int =
     when (this) {
         ShowScheme.BlackOnWhite -> R.string.show_scheme_black_on_white
         ShowScheme.WhiteOnBlack -> R.string.show_scheme_white_on_black

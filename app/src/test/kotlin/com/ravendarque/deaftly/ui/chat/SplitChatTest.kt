@@ -181,10 +181,13 @@ class SplitChatTest {
     }
 
     @Test
-    fun theEndButtonInTheTurnBarEndsTheChat() {
+    fun theEndButtonInTheTurnBarEndsTheChatAfterConfirmation() {
         showSplit()
 
         composeRule.onNodeWithContentDescription("End chat").assertWidthIsAtLeast(48.dp).performClick()
+        assertEquals(0, ended)
+        composeRule.onNodeWithText("The messages will be deleted.").assertIsDisplayed()
+        composeRule.onNodeWithText("End chat").performClick()
 
         assertEquals(1, ended)
     }

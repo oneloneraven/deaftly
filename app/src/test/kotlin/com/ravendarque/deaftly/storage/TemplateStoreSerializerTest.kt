@@ -175,4 +175,20 @@ class TemplateStoreSerializerTest {
         runTest {
             assertEquals(SettingsDto(), read("""{"version":1,"templates":[],"settings":{}}""").settings)
         }
+
+    @Test
+    fun roundTripsTheChatLayoutAsAStableName() =
+        runTest {
+            val document = seed.copy(settings = SettingsDto(chatLayout = ChatLayoutDto.Split))
+
+            val settings =
+                Json
+                    .parseToJsonElement(write(document))
+                    .jsonObject
+                    .getValue("settings")
+                    .jsonObject
+
+            assertEquals("split", settings.getValue("chatLayout").jsonPrimitive.content)
+            assertEquals(ChatLayoutDto.Split, read(write(document)).settings.chatLayout)
+        }
 }

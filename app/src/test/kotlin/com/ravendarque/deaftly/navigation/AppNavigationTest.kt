@@ -53,31 +53,6 @@ class AppNavigationTest {
         }
     }
 
-    private fun assertOnPlaceholder(title: String) {
-        composeRule.onNodeWithText(text(R.string.back)).assertExists()
-        composeRule.onNodeWithText(title).assertExists()
-    }
-
-    @Test
-    fun opensEachHomeDestinationAndReturnsWithTheBackButton() {
-        composeRule.enableAccessibilityChecks()
-        showApp()
-        val opens =
-            listOf(
-                { composeRule.onNodeWithContentDescription(text(R.string.route_settings)).performClick() } to R.string.route_settings,
-            )
-
-        opens.forEach { (open, title) ->
-            open()
-            assertOnPlaceholder(text(title))
-            composeRule.onRoot().tryPerformAccessibilityChecks()
-
-            composeRule.onNodeWithText(text(R.string.back)).performClick()
-            composeRule.onNodeWithText(text(R.string.home_start_chat)).assertExists()
-            composeRule.onNodeWithText(text(R.string.back)).assertDoesNotExist()
-        }
-    }
-
     @Test
     fun startChatOpensTheChatWithBothParticipantsAndEndingReturnsHome() {
         composeRule.enableAccessibilityChecks()
@@ -111,6 +86,8 @@ class AppNavigationTest {
         composeRule.onNodeWithContentDescription(text(R.string.chat_send)).performClick()
         composeRule.onNodeWithContentDescription("Me: Hello there").assertExists()
         composeRule.onNodeWithContentDescription(text(R.string.chat_end)).performClick()
+        composeRule.onNodeWithText(text(R.string.chat_end_title)).assertExists()
+        composeRule.onNodeWithText(text(R.string.chat_end_confirm)).performClick()
         openChat()
 
         composeRule.onNodeWithText(text(R.string.chat_empty)).assertExists()
@@ -234,6 +211,7 @@ class AppNavigationTest {
         composeRule.onNodeWithContentDescription(text(R.string.chat_turn_label)).assertExists()
         composeRule.onRoot().tryPerformAccessibilityChecks()
         composeRule.onNodeWithContentDescription(text(R.string.chat_end)).performClick()
+        composeRule.onNodeWithText(text(R.string.chat_end_confirm)).performClick()
         composeRule.onNodeWithContentDescription(text(R.string.show_close)).assertExists()
     }
 
@@ -253,11 +231,30 @@ class AppNavigationTest {
         showApp()
 
         composeRule.onNodeWithContentDescription(text(R.string.route_settings)).performClick()
-        composeRule.onNodeWithText(text(R.string.back)).assertExists()
+        composeRule.onNodeWithText(text(R.string.settings_layout_heading)).assertExists()
         composeRule.runOnUiThread { composeRule.activity.onBackPressedDispatcher.onBackPressed() }
         composeRule.waitForIdle()
 
-        composeRule.onNodeWithText(text(R.string.back)).assertDoesNotExist()
+        composeRule.onNodeWithText(text(R.string.settings_layout_heading)).assertDoesNotExist()
+        composeRule.onNodeWithText(text(R.string.home_start_chat)).assertExists()
+    }
+
+    @Test
+    fun settingsOpensFromHomeAndTheChosenLayoutDecidesHowTheNextChatOpens() {
+        composeRule.enableAccessibilityChecks()
+        showApp()
+        composeRule.onNodeWithContentDescription(text(R.string.route_settings)).performClick()
+        composeRule.onRoot().tryPerformAccessibilityChecks()
+
+        composeRule.onNodeWithText(text(R.string.settings_layout_split)).performClick()
+        composeRule.onNodeWithContentDescription(text(R.string.back)).performClick()
+        composeRule.onNodeWithText(text(R.string.home_start_chat)).performClick()
+        composeRule.waitUntil(LOAD_TIMEOUT_MILLIS) {
+            composeRule.onAllNodesWithText(text(R.string.chat_split_hint)).fetchSemanticsNodes().isNotEmpty()
+        }
+
+        composeRule.onNodeWithContentDescription(text(R.string.chat_layout_to_sides)).assertExists()
+        composeRule.onNodeWithContentDescription(text(R.string.chat_end)).performClick()
         composeRule.onNodeWithText(text(R.string.home_start_chat)).assertExists()
     }
 

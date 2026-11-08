@@ -43,7 +43,7 @@ class ChatViewModel(
     private val insertions: ChatInsertions = ChatInsertions(),
 ) : ViewModel() {
     private val conversation = MutableStateFlow(ChatCodec.decode(savedState[CONVERSATION_KEY]))
-    val display = ChatDisplay(savedState)
+    val display = ChatDisplay(savedState, settings, viewModelScope)
     val drafts = ChatDrafts(savedState) { conversation.value?.turn }
 
     val state: StateFlow<ChatUiState> =
@@ -58,8 +58,9 @@ class ChatViewModel(
                 insertions.consume()
             }
         }
-        if (conversation.value == null) {
-            viewModelScope.launch {
+        viewModelScope.launch {
+            display.restoreDefault()
+            if (conversation.value == null) {
                 val started = opening(settings.chatProfile.first().startConversation())
                 if (conversation.compareAndSet(null, started)) save(started)
             }

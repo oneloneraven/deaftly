@@ -60,6 +60,7 @@ data class SplitActions(
     val onSend: () -> Unit,
     val onSelectTurn: (ParticipantId) -> Unit,
     val onEnd: () -> Unit,
+    val onSwitchLayout: () -> Unit,
 )
 
 @Composable
@@ -71,7 +72,7 @@ fun SplitChat(
     Surface(modifier = modifier.fillMaxSize()) {
         Column(modifier = Modifier.safeDrawingPadding()) {
             Half(ParticipantId.B, state, actions, rotated = true, Modifier.weight(1f))
-            TurnBar(state, actions.onEnd)
+            TurnBar(state, actions)
             Half(ParticipantId.A, state, actions, rotated = false, Modifier.weight(1f))
         }
     }
@@ -202,7 +203,7 @@ private fun Waiting(
 @Composable
 private fun TurnBar(
     state: ChatUiState.Ready,
-    onEnd: () -> Unit,
+    actions: SplitActions,
 ) {
     val c = Deaftly.colors
     val active = state.conversation.activeParticipant.labelled()
@@ -222,7 +223,7 @@ private fun TurnBar(
                 Modifier
                     .size(BarTarget)
                     .clip(Deaftly.shapes.controlSmall)
-                    .clickable(role = Role.Button, onClick = onEnd)
+                    .clickable(role = Role.Button, onClick = actions.onEnd)
                     .semantics { contentDescription = endLabel },
             contentAlignment = Alignment.Center,
         ) {
@@ -242,6 +243,17 @@ private fun TurnBar(
                 overflow = TextOverflow.Ellipsis,
             )
         }
-        Box(Modifier.size(BarTarget))
+        val switchLabel = stringResource(R.string.chat_layout_to_sides)
+        Box(
+            modifier =
+                Modifier
+                    .size(BarTarget)
+                    .clip(Deaftly.shapes.controlSmall)
+                    .clickable(role = Role.Button, onClick = actions.onSwitchLayout)
+                    .semantics { contentDescription = switchLabel },
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(DeaftlyIcons.Sides, contentDescription = null, modifier = Modifier.size(20.dp), tint = c.ground)
+        }
     }
 }

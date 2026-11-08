@@ -1,5 +1,6 @@
 package com.ravendarque.deaftly.ui.chat
 
+import androidx.activity.ComponentActivity
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.semantics.SemanticsProperties
@@ -13,7 +14,7 @@ import androidx.compose.ui.test.assertWidthIsAtLeast
 import androidx.compose.ui.test.click
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.junit4.accessibility.enableAccessibilityChecks
-import androidx.compose.ui.test.junit4.v2.createComposeRule
+import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
@@ -36,6 +37,7 @@ import com.ravendarque.deaftly.core.chat.Quote
 import com.ravendarque.deaftly.core.chat.Span
 import com.ravendarque.deaftly.core.chat.SpanStyle
 import com.ravendarque.deaftly.core.chat.StyleRange
+import com.ravendarque.deaftly.core.settings.ChatLayout
 import com.ravendarque.deaftly.ui.theme.AppTheme
 import org.junit.Before
 import org.junit.Rule
@@ -51,7 +53,7 @@ import kotlin.test.assertNull
 @Config(qualifiers = "w390dp-h1600dp")
 class ChatScreenTest {
     @get:Rule
-    val composeRule = createComposeRule()
+    val composeRule = createAndroidComposeRule<ComponentActivity>()
 
     private val settings = FakeSettingsRepository(ChatProfile("Alex", ColourRole.Teal))
     private var ended = 0
@@ -471,5 +473,71 @@ class ChatScreenTest {
             composeRule.onNodeWithContentDescription(it).assertIsDisplayed().assertWidthIsAtLeast(48.dp)
         }
         composeRule.onRoot().tryPerformAccessibilityChecks()
+    }
+
+    private fun endConfirmation() = composeRule.onNodeWithText("The messages will be deleted.")
+
+    @Test
+    fun endingAChatWithMessagesAsksFirstAndKeepingItChangesNothing() {
+        showOrdering()
+
+        composeRule.onNodeWithContentDescription("End chat").performClick()
+
+        composeRule.onNodeWithText("End this chat?").assertIsDisplayed()
+        endConfirmation().assertIsDisplayed()
+        assertEquals(0, ended)
+        composeRule.onNodeWithText("Keep chatting").performClick()
+        endConfirmation().assertDoesNotExist()
+        assertEquals(0, ended)
+        assertEquals(4, conversation().messages.size)
+    }
+
+    @Test
+    fun confirmingTheEndLeavesTheChat() {
+        showOrdering()
+
+        composeRule.onNodeWithContentDescription("End chat").performClick()
+        composeRule.onRoot().tryPerformAccessibilityChecks()
+        composeRule.onNodeWithText("End chat").performClick()
+
+        assertEquals(1, ended)
+    }
+
+    @Test
+    fun systemBackAsksToEndAChatWithMessagesAndLeavesAnEmptyOneStraightAway() {
+        showOrdering()
+        composeRule.runOnUiThread { composeRule.activity.onBackPressedDispatcher.onBackPressed() }
+        composeRule.waitForIdle()
+
+        endConfirmation().assertIsDisplayed()
+        assertEquals(0, ended)
+    }
+
+    @Test
+    fun systemBackLeavesAnEmptyChatWithoutAsking() {
+        show()
+
+        composeRule.runOnUiThread { composeRule.activity.onBackPressedDispatcher.onBackPressed() }
+        composeRule.waitForIdle()
+
+        endConfirmation().assertDoesNotExist()
+        assertEquals(1, ended)
+    }
+
+    @Test
+    fun theHeaderSwitchesToTheSplitScreenLayoutAndRemembersTheChoice() {
+        showOrdering()
+
+        composeRule.onNodeWithContentDescription("Switch to split screen").assertWidthIsAtLeast(48.dp).performClick()
+        composeRule.waitForIdle()
+
+        assertEquals(ChatLayout.Split, (viewModel.state.value as ChatUiState.Ready).layout)
+        assertEquals(ChatLayout.Split, settings.savedLayout)
+        composeRule.onNodeWithText("WAITER\u2019S TURN").assertIsDisplayed()
+        composeRule.onNodeWithContentDescription("Switch to side-by-side chat").performClick()
+        composeRule.waitForIdle()
+        assertEquals(ChatLayout.Sides, (viewModel.state.value as ChatUiState.Ready).layout)
+        assertEquals(ChatLayout.Sides, settings.savedLayout)
+        assertEquals(4, conversation().messages.size)
     }
 }

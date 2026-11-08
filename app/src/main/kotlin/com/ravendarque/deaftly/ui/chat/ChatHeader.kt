@@ -36,14 +36,19 @@ import com.ravendarque.deaftly.ui.theme.colours
 private val HeaderTarget = 48.dp
 private val DividerWidth = 1.dp
 
+data class ChatHeaderActions(
+    val onEnd: () -> Unit,
+    val onEditParticipants: () -> Unit,
+    val onCycleTextSize: () -> Unit,
+    val onSwitchLayout: () -> Unit,
+)
+
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun ChatHeader(
     conversation: Conversation,
-    onEnd: () -> Unit,
-    onEditParticipants: () -> Unit,
     textSize: ChatTextSize,
-    onCycleTextSize: () -> Unit,
+    actions: ChatHeaderActions,
     modifier: Modifier = Modifier,
 ) {
     val left = conversation.participantB.labelled()
@@ -61,14 +66,14 @@ fun ChatHeader(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(Deaftly.spacing.space8),
     ) {
-        DeaftlyIconButton(DeaftlyIcons.Close, stringResource(R.string.chat_end), onEnd)
+        DeaftlyIconButton(DeaftlyIcons.Close, stringResource(R.string.chat_end), actions.onEnd)
         Box(
             modifier =
                 Modifier
                     .weight(1f)
                     .heightIn(min = HeaderTarget)
                     .clip(Deaftly.shapes.controlSmall)
-                    .clickable(role = Role.Button, onClick = onEditParticipants)
+                    .clickable(role = Role.Button, onClick = actions.onEditParticipants)
                     .semantics(mergeDescendants = true) { contentDescription = description },
             contentAlignment = Alignment.Center,
         ) {
@@ -81,7 +86,8 @@ fun ChatHeader(
                 HeaderPerson(right)
             }
         }
-        TextSizeButton(textSize, onCycleTextSize)
+        DeaftlyIconButton(DeaftlyIcons.Split, stringResource(R.string.chat_layout_to_split), actions.onSwitchLayout)
+        TextSizeButton(textSize, actions.onCycleTextSize)
     }
 }
 

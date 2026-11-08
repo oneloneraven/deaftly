@@ -23,6 +23,8 @@ import com.ravendarque.deaftly.ui.fill.FillViewModel
 import com.ravendarque.deaftly.ui.home.HomeScreen
 import com.ravendarque.deaftly.ui.home.HomeViewModel
 import com.ravendarque.deaftly.ui.placeholder.PlaceholderScreen
+import com.ravendarque.deaftly.ui.settings.SettingsScreen
+import com.ravendarque.deaftly.ui.settings.SettingsViewModel
 import com.ravendarque.deaftly.ui.show.ShowScreen
 import com.ravendarque.deaftly.ui.show.ShowViewModel
 import com.ravendarque.deaftly.ui.typeshow.TypeShowScreen
@@ -74,7 +76,10 @@ fun AppNavigation(container: AppContainer) {
                     )
                 }
                 entry<Route.Ocr> { PlaceholderEntry(it, backStack) }
-                entry<Route.Settings> { PlaceholderEntry(it, backStack) }
+                entry<Route.Settings> {
+                    val viewModel = viewModel<SettingsViewModel>(factory = container.settingsViewModelFactory)
+                    SettingsScreen(viewModel, onBack = { backStack.removeLastOrNull() })
+                }
             },
     )
 }
