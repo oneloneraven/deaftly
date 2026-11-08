@@ -49,7 +49,7 @@ fun OcrScreen(
                     fieldText = state.fieldText,
                     controlsEnabled = false,
                 ),
-            actions = OcrActions(onClose, viewModel::selectPhrase, viewModel::editText),
+            actions = OcrActions(onClose, viewModel::selectPhrase, viewModel::selectRange, viewModel::editText),
             viewfinder = { CameraViewfinder(viewModel::analyse, onUnavailable = { unavailable = true }, modifier = it) },
         )
     }
@@ -66,6 +66,7 @@ data class OcrContent(
 data class OcrActions(
     val onClose: () -> Unit,
     val onTapPhrase: (Long?) -> Unit,
+    val onSelectRange: (TextSelection) -> Unit,
     val onFieldChange: (String) -> Unit,
 )
 
@@ -80,7 +81,7 @@ fun OcrCameraContent(
     Box(modifier = Modifier.fillMaxSize().background(CameraColours.backdrop)) {
         Box(modifier = Modifier.fillMaxSize().semantics { contentDescription = cameraView }) {
             viewfinder(Modifier.fillMaxSize())
-            PhraseOverlay(content.phrases, content.selection, actions.onTapPhrase, Modifier.fillMaxSize())
+            PhraseOverlay(content.phrases, content.selection, actions.onTapPhrase, actions.onSelectRange, Modifier.fillMaxSize())
         }
         OcrTopBar(
             status = content.status,

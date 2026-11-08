@@ -12,6 +12,8 @@ import com.ravendarque.deaftly.core.ocr.RecognitionFrame
 import com.ravendarque.deaftly.core.ocr.RecognitionResult
 import com.ravendarque.deaftly.core.ocr.TextBlock
 import com.ravendarque.deaftly.core.ocr.TextLine
+import com.ravendarque.deaftly.core.ocr.TextSelection
+import com.ravendarque.deaftly.core.ocr.WordRef
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
@@ -175,6 +177,34 @@ class OcrViewModelTest {
 
         assertEquals(null, viewModel.state.value.selection)
         assertEquals("typed", viewModel.state.value.fieldText)
+    }
+
+    @Test
+    fun aDraggedRangeSetsTheSelectionAndTheTrayText() {
+        val viewModel = viewModel()
+        viewModel.awaitReady()
+        viewModel.analyse(frame(), null)
+        val phrase =
+            viewModel.state.value.phrases
+                .single()
+        val range = TextSelection(WordRef(phrase.id, 0), WordRef(phrase.id, 0))
+
+        viewModel.selectRange(range)
+
+        assertEquals(range, viewModel.state.value.selection)
+        assertEquals("Lasagne", viewModel.state.value.fieldText)
+    }
+
+    @Test
+    fun aRangeOverPhrasesThatAreGoneIsIgnored() {
+        val viewModel = viewModel()
+        viewModel.awaitReady()
+        viewModel.editText("kept")
+
+        viewModel.selectRange(TextSelection(WordRef(42, 0), WordRef(42, 1)))
+
+        assertEquals(null, viewModel.state.value.selection)
+        assertEquals("kept", viewModel.state.value.fieldText)
     }
 
     private companion object {

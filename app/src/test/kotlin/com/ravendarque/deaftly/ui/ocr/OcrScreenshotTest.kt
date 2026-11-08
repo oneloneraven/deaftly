@@ -7,6 +7,8 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.takahirom.roborazzi.captureRoboImage
 import com.ravendarque.deaftly.core.ocr.Phrase
 import com.ravendarque.deaftly.core.ocr.PhraseSelection
+import com.ravendarque.deaftly.core.ocr.TextSelection
+import com.ravendarque.deaftly.core.ocr.WordRef
 import com.ravendarque.deaftly.ui.theme.AppTheme
 import org.junit.Rule
 import org.junit.Test
@@ -47,17 +49,18 @@ class OcrScreenshotTest {
     private fun camera(
         dark: Boolean,
         picked: Phrase? = null,
+        range: TextSelection? = picked?.let(PhraseSelection::wholePhrase),
     ) = shot(dark) {
         OcrCameraContent(
             content =
                 OcrContent(
                     status = "Live",
                     phrases = menuPhrases,
-                    selection = picked?.let(PhraseSelection::wholePhrase),
-                    fieldText = picked?.text.orEmpty(),
+                    selection = range,
+                    fieldText = range?.let { PhraseSelection.text(menuPhrases, it) }.orEmpty(),
                     controlsEnabled = false,
                 ),
-            actions = OcrActions({}, {}, {}),
+            actions = OcrActions({}, {}, {}, {}),
             viewfinder = { FakeCamera(it) },
         )
     }
@@ -104,4 +107,16 @@ class OcrScreenshotTest {
     @Test
     @Config(fontScale = 2f)
     fun selectedPhraseLargeFontScale() = camera(dark = false, picked = menuPhrases[1])
+
+    private val acrossLines = TextSelection(WordRef(2, 1), WordRef(4, 1))
+
+    @Test
+    fun draggedRangeAcrossLinesLightTheme() = camera(dark = false, range = acrossLines)
+
+    @Test
+    fun draggedRangeAcrossLinesDarkTheme() = camera(dark = true, range = acrossLines)
+
+    @Test
+    @Config(fontScale = 2f)
+    fun draggedRangeAcrossLinesLargeFontScale() = camera(dark = false, range = acrossLines)
 }
