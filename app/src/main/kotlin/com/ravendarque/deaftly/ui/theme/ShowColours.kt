@@ -1,4 +1,4 @@
-package com.ravendarque.deaftly.ui.show
+package com.ravendarque.deaftly.ui.theme
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color

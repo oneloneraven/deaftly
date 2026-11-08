@@ -41,6 +41,8 @@ import androidx.core.view.WindowInsetsControllerCompat
 import com.ravendarque.deaftly.R
 import com.ravendarque.deaftly.ui.icons.DeaftlyIcons
 import com.ravendarque.deaftly.ui.theme.LocalDarkTheme
+import com.ravendarque.deaftly.ui.theme.ShowColours
+import com.ravendarque.deaftly.ui.theme.defaultShowColours
 
 private const val GESTURE_GAP_NANOS = 300_000_000L
 private val SwipeToLeave = 96.dp
