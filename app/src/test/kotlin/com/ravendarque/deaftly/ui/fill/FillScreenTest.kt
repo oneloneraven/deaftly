@@ -299,4 +299,25 @@ class FillScreenTest {
 
         assertEquals(listOf<Route>(Route.Show(joined)), navigated)
     }
+
+    @Test
+    fun whenInsertingIntoAChatTheMainButtonInsertsTheFilledMessage() {
+        val inserted = mutableListOf<String>()
+        val viewModel = FillViewModel("check-in", FakeTemplateRepository(fillTemplates), SavedStateHandle())
+        composeRule.setContent {
+            AppTheme {
+                FillScreen("check-in", viewModel, onNavigate = { navigated += it }, onBack = { backs++ }, onInsert = { inserted += it })
+            }
+        }
+        composeRule.waitForIdle()
+        composeRule.onNodeWithText("Show").assertDoesNotExist()
+        composeRule.onNodeWithText("Insert into chat").assertIsNotEnabled()
+
+        fillNameThenReply()
+        composeRule.onNodeWithText("Insert into chat").assertIsEnabled().performClick()
+
+        assertEquals(listOf("Hi! I'm deaf. I'd like to check in. My name is Sam. Please write it down."), inserted)
+        assertEquals(emptyList(), navigated)
+        composeRule.onRoot().tryPerformAccessibilityChecks()
+    }
 }

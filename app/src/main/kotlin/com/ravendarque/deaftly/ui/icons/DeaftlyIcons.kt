@@ -34,6 +34,21 @@ private fun strokeIcon(
             }
         }.build()
 
+private fun fillIcon(
+    name: String,
+    path: String,
+): ImageVector =
+    ImageVector
+        .Builder(
+            name = name,
+            defaultWidth = VIEWPORT.dp,
+            defaultHeight = VIEWPORT.dp,
+            viewportWidth = VIEWPORT,
+            viewportHeight = VIEWPORT,
+        ).apply {
+            addPath(pathData = PathParser().parsePathString(path).toNodes(), fill = SolidColor(Color.Black))
+        }.build()
+
 object DeaftlyIcons {
     val Back: ImageVector by lazy { strokeIcon("Back", "M15 18l-6-6 6-6") }
 
@@ -112,5 +127,26 @@ object DeaftlyIcons {
         strokeIcon("Utensils", "M7 3v8a2 2 0 0 0 2 2v8M11 3v8M7 7h4M17 3c-2 0-3 3-3 6s1 4 3 4v8")
     }
 
+    val Highlight: ImageVector by lazy {
+        strokeIcon(
+            "Highlight",
+            "M9 11l-6 6v3h9l3-3",
+            "M22 12l-4.6 4.6a2 2 0 0 1-2.8 0l-5.2-5.2a2 2 0 0 1 0-2.8L14 4",
+            "M3 21h18",
+        )
+    }
+
+    val Quote: ImageVector by lazy { fillIcon("Quote", "M4 18h5l2-4V6H4v8h3zM13 18h5l2-4V6h-7v8h3z") }
+
+    val Template: ImageVector by lazy {
+        strokeIcon("Template", "M6 4h12a3 3 0 0 1 3 3v10a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3V7a3 3 0 0 1 3-3z", "M7 9h10M7 13h6")
+    }
+
     val Trash: ImageVector by lazy { strokeIcon("Trash", "M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14") }
+
+    val Split: ImageVector by lazy {
+        strokeIcon("Split", "M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z", "M3 12h18")
+    }
+
+    val Sides: ImageVector by lazy { strokeIcon("Sides", "M4 5h11v6H4z", "M9 13h11v6H9z") }
 }

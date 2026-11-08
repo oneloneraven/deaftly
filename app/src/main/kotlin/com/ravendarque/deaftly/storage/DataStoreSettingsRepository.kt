@@ -3,6 +3,7 @@ package com.ravendarque.deaftly.storage
 import androidx.datastore.core.DataStore
 import com.ravendarque.deaftly.core.chat.ChatProfile
 import com.ravendarque.deaftly.core.chat.ColourRole
+import com.ravendarque.deaftly.core.settings.ChatLayout
 import com.ravendarque.deaftly.core.settings.SettingsRepository
 import com.ravendarque.deaftly.core.settings.ShowScheme
 import kotlinx.coroutines.flow.Flow
@@ -19,8 +20,15 @@ class DataStoreSettingsRepository(
             .map { ChatProfile(it.settings.chatName, it.settings.chatColour?.toDomain() ?: ColourRole.Accent) }
             .distinctUntilChanged()
 
+    override val chatLayout: Flow<ChatLayout> =
+        store.data.map { it.settings.chatLayout?.toDomain() ?: ChatLayout.Sides }.distinctUntilChanged()
+
     override suspend fun setShowScheme(scheme: ShowScheme) {
         store.updateData { document -> document.copy(settings = document.settings.copy(showScheme = scheme.toDto())) }
+    }
+
+    override suspend fun setChatLayout(layout: ChatLayout) {
+        store.updateData { document -> document.copy(settings = document.settings.copy(chatLayout = layout.toDto())) }
     }
 
     override suspend fun setChatProfile(profile: ChatProfile) {
@@ -35,6 +43,18 @@ class DataStoreSettingsRepository(
         }
     }
 }
+
+private fun ChatLayoutDto.toDomain(): ChatLayout =
+    when (this) {
+        ChatLayoutDto.Sides -> ChatLayout.Sides
+        ChatLayoutDto.Split -> ChatLayout.Split
+    }
+
+private fun ChatLayout.toDto(): ChatLayoutDto =
+    when (this) {
+        ChatLayout.Sides -> ChatLayoutDto.Sides
+        ChatLayout.Split -> ChatLayoutDto.Split
+    }
 
 private fun ShowSchemeDto.toDomain(): ShowScheme =
     when (this) {

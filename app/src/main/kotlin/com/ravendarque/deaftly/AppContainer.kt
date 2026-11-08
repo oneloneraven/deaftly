@@ -10,12 +10,14 @@ import com.ravendarque.deaftly.storage.DataStoreSettingsRepository
 import com.ravendarque.deaftly.storage.DataStoreTemplateRepository
 import com.ravendarque.deaftly.storage.createTemplateStore
 import com.ravendarque.deaftly.templates.builtInTemplates
+import com.ravendarque.deaftly.ui.chat.ChatInsertions
 import com.ravendarque.deaftly.ui.chat.ChatViewModel
 import com.ravendarque.deaftly.ui.editor.EditorStrings
 import com.ravendarque.deaftly.ui.editor.EditorViewModel
 import com.ravendarque.deaftly.ui.fill.FillViewModel
 import com.ravendarque.deaftly.ui.home.HomeViewModel
 import com.ravendarque.deaftly.ui.ocr.OcrOutcomes
+import com.ravendarque.deaftly.ui.settings.SettingsViewModel
 import com.ravendarque.deaftly.ui.show.ShowViewModel
 
 class AppContainer(
@@ -30,6 +32,7 @@ class AppContainer(
     val settingsRepository: SettingsRepository by lazy { DataStoreSettingsRepository(store) }
 
     val ocrOutcomes = OcrOutcomes()
+    val chatInsertions = ChatInsertions()
 
     val homeViewModelFactory =
         viewModelFactory {
@@ -54,9 +57,14 @@ class AppContainer(
             initializer { ShowViewModel(settingsRepository) }
         }
 
+    val settingsViewModelFactory =
+        viewModelFactory {
+            initializer { SettingsViewModel(settingsRepository) }
+        }
+
     fun chatViewModelFactory(firstMessage: String?) =
         viewModelFactory {
-            initializer { ChatViewModel(settingsRepository, createSavedStateHandle(), firstMessage) }
+            initializer { ChatViewModel(settingsRepository, createSavedStateHandle(), firstMessage, chatInsertions) }
         }
 
     fun fillViewModelFactory(templateId: String) =

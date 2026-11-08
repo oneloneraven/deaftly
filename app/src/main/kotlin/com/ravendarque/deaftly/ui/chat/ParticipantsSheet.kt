@@ -130,7 +130,7 @@ private fun ParticipantSection(
 }
 
 @Composable
-private fun NameField(
+internal fun NameField(
     value: String,
     placeholder: String,
     onValueChange: (String) -> Unit,
@@ -164,9 +164,9 @@ private fun NameField(
 }
 
 @Composable
-private fun ColourChoices(
+internal fun ColourChoices(
     selected: ColourRole,
-    takenBy: Participant,
+    takenBy: Participant?,
     onChoose: (ColourRole) -> Unit,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(Deaftly.spacing.space8)) {
@@ -175,11 +175,11 @@ private fun ColourChoices(
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             ColourRole.entries.forEach { role ->
-                val taken = role == takenBy.colour
+                val taken = role == takenBy?.colour
                 Swatch(
                     role = role,
                     selected = role == selected,
-                    takenBy = takenBy.displayName.takeIf { taken },
+                    takenBy = takenBy?.displayName.takeIf { taken },
                     onClick = { onChoose(role) },
                 )
             }

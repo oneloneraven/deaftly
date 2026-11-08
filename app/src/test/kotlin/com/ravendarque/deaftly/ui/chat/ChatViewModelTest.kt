@@ -3,9 +3,16 @@ package com.ravendarque.deaftly.ui.chat
 import androidx.lifecycle.SavedStateHandle
 import com.ravendarque.deaftly.core.chat.ChatProfile
 import com.ravendarque.deaftly.core.chat.ColourRole
+import com.ravendarque.deaftly.core.chat.Composition
 import com.ravendarque.deaftly.core.chat.Conversation
+import com.ravendarque.deaftly.core.chat.FormattedText
 import com.ravendarque.deaftly.core.chat.Participant
 import com.ravendarque.deaftly.core.chat.ParticipantId
+import com.ravendarque.deaftly.core.chat.Quote
+import com.ravendarque.deaftly.core.chat.Span
+import com.ravendarque.deaftly.core.chat.SpanStyle
+import com.ravendarque.deaftly.core.chat.StyleRange
+import com.ravendarque.deaftly.core.settings.ChatLayout
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
@@ -38,7 +45,12 @@ class ChatViewModelTest {
         settings: FakeSettingsRepository = FakeSettingsRepository(),
         savedState: SavedStateHandle = SavedStateHandle(),
         firstMessage: String? = null,
-    ) = ChatViewModel(settings, savedState, firstMessage)
+        insertions: ChatInsertions = ChatInsertions(),
+    ) = ChatViewModel(settings, savedState, firstMessage, insertions)
+
+    private fun ChatViewModel.type(text: String) = drafts.setComposition(Composition().withText(text, text.length, text.length))
+
+    private fun ChatViewModel.draft(): Draft = assertIs<ChatUiState.Ready>(state.value).draft
 
     private fun ChatViewModel.conversation(): Conversation = assertIs<ChatUiState.Ready>(state.value).conversation
 
@@ -162,14 +174,14 @@ class ChatViewModelTest {
             val viewModel = viewModel()
             collect(viewModel)
 
-            viewModel.setDraft("  Hello there  ")
+            viewModel.type("  Hello there  ")
             viewModel.send()
 
             val conversation = viewModel.conversation()
             assertEquals(listOf("Hello there"), conversation.messages.map { it.plainText })
             assertEquals(ParticipantId.A, conversation.messages.single().author)
             assertEquals(ParticipantId.A, conversation.turn)
-            assertEquals("", assertIs<ChatUiState.Ready>(viewModel.state.value).draft)
+            assertEquals("", assertIs<ChatUiState.Ready>(viewModel.state.value).draft.text)
         }
 
     @Test
@@ -178,7 +190,7 @@ class ChatViewModelTest {
             val viewModel = viewModel()
             collect(viewModel)
 
-            viewModel.setDraft("   ")
+            viewModel.type("   ")
             viewModel.send()
 
             assertEquals(0, viewModel.conversation().messages.size)
@@ -191,7 +203,7 @@ class ChatViewModelTest {
             collect(viewModel)
 
             viewModel.selectTurn(ParticipantId.B)
-            viewModel.setDraft("Hi")
+            viewModel.type("Hi")
             viewModel.send()
 
             assertEquals(
@@ -209,14 +221,14 @@ class ChatViewModelTest {
         runTest {
             val viewModel = viewModel()
             collect(viewModel)
-            viewModel.setDraft("from me")
+            viewModel.type("from me")
 
             viewModel.selectTurn(ParticipantId.B)
-            assertEquals("", assertIs<ChatUiState.Ready>(viewModel.state.value).draft)
-            viewModel.setDraft("from them")
+            assertEquals("", assertIs<ChatUiState.Ready>(viewModel.state.value).draft.text)
+            viewModel.type("from them")
             viewModel.selectTurn(ParticipantId.A)
 
-            assertEquals("from me", assertIs<ChatUiState.Ready>(viewModel.state.value).draft)
+            assertEquals("from me", assertIs<ChatUiState.Ready>(viewModel.state.value).draft.text)
         }
 
     @Test
@@ -228,11 +240,11 @@ class ChatViewModelTest {
             fun size() = assertIs<ChatUiState.Ready>(viewModel.state.value).textSize
 
             assertEquals(ChatTextSize.Normal, size())
-            viewModel.cycleTextSize()
+            viewModel.display.cycleTextSize()
             assertEquals(ChatTextSize.Large, size())
-            viewModel.cycleTextSize()
+            viewModel.display.cycleTextSize()
             assertEquals(ChatTextSize.Largest, size())
-            viewModel.cycleTextSize()
+            viewModel.display.cycleTextSize()
             assertEquals(ChatTextSize.Normal, size())
         }
 
@@ -242,17 +254,17 @@ class ChatViewModelTest {
             val savedState = SavedStateHandle()
             val first = viewModel(savedState = savedState)
             collect(first)
-            first.setDraft("one")
+            first.type("one")
             first.send()
             first.selectTurn(ParticipantId.B)
-            first.setDraft("typing")
-            first.cycleTextSize()
+            first.type("typing")
+            first.display.cycleTextSize()
 
             val restored = viewModel(FakeSettingsRepository(ChatProfile("Other", ColourRole.Teal)), savedState)
             collect(restored)
 
             assertEquals(first.state.value, restored.state.value)
-            assertEquals("typing", assertIs<ChatUiState.Ready>(restored.state.value).draft)
+            assertEquals("typing", assertIs<ChatUiState.Ready>(restored.state.value).draft.text)
         }
 
     @Test
@@ -261,7 +273,7 @@ class ChatViewModelTest {
             val settings = FakeSettingsRepository()
             val first = viewModel(settings)
             collect(first)
-            first.setDraft("gone soon")
+            first.type("gone soon")
             first.send()
 
             val second = viewModel(settings)
@@ -312,5 +324,249 @@ class ChatViewModelTest {
             collect(restored)
 
             assertEquals(1, restored.conversation().messages.size)
+        }
+
+    @Test
+    fun aSentMessageKeepsTheDraftsFormatting() =
+        runTest {
+            val viewModel = viewModel()
+            collect(viewModel)
+            viewModel.drafts.setComposition(
+                Composition(FormattedText("  Mild, no nuts  ", listOf(StyleRange(8, 15, SpanStyle.Bold)))),
+            )
+
+            viewModel.send()
+
+            val message = viewModel.conversation().messages.single()
+            assertEquals(listOf(Span("Mild, "), Span("no nuts", setOf(SpanStyle.Bold))), message.spans)
+        }
+
+    @Test
+    fun theFormattingOfADraftSurvivesRecreationFromSavedState() =
+        runTest {
+            val savedState = SavedStateHandle()
+            val first = viewModel(savedState = savedState)
+            collect(first)
+            first.drafts.setComposition(
+                Composition(FormattedText("Hello", listOf(StyleRange(0, 5, SpanStyle.Italic))), 1, 3, setOf(SpanStyle.Bold)),
+            )
+
+            val restored = viewModel(savedState = savedState)
+            collect(restored)
+
+            assertEquals(first.draft(), restored.draft())
+        }
+
+    @Test
+    fun aGarbledSavedDraftBecomesAnEmptyOne() =
+        runTest {
+            val savedState = SavedStateHandle(mapOf("draft_a" to "{\"text\":\"ab\",\"selectionStart\":9}"))
+            val viewModel = viewModel(savedState = savedState)
+            collect(viewModel)
+
+            assertEquals(Draft(), viewModel.draft())
+        }
+
+    @Test
+    fun quotingAMessageWaitsForTheNextMessageAndIsThenCleared() =
+        runTest {
+            val viewModel = viewModel(firstMessage = "Table for two, please")
+            collect(viewModel)
+
+            viewModel.quote(0, "for two")
+            assertEquals(Quote(0, "for two"), viewModel.draft().quote)
+            viewModel.type("Certainly")
+            viewModel.send()
+
+            assertEquals(
+                Quote(0, "for two"),
+                viewModel
+                    .conversation()
+                    .messages
+                    .last()
+                    .quote,
+            )
+            assertNull(viewModel.draft().quote)
+        }
+
+    @Test
+    fun quotingWithoutAnExcerptQuotesTheWholeMessage() =
+        runTest {
+            val viewModel = viewModel(firstMessage = "Table for two, please")
+            collect(viewModel)
+
+            viewModel.quote(0)
+
+            assertEquals(Quote(0, "Table for two, please"), viewModel.draft().quote)
+        }
+
+    @Test
+    fun aQuoteOfAnUnknownMessageIsIgnored() =
+        runTest {
+            val viewModel = viewModel()
+            collect(viewModel)
+
+            viewModel.quote(4)
+
+            assertNull(viewModel.draft().quote)
+        }
+
+    @Test
+    fun theQuoteBelongsToThePersonWhoChoseIt() =
+        runTest {
+            val viewModel = viewModel(firstMessage = "Table for two, please")
+            collect(viewModel)
+            viewModel.quote(0)
+
+            viewModel.selectTurn(ParticipantId.A)
+
+            assertNull(viewModel.draft().quote)
+        }
+
+    @Test
+    fun quotingTheLatestPicksTheOtherPersonsLastMessage() =
+        runTest {
+            val viewModel = viewModel()
+            collect(viewModel)
+            viewModel.type("first")
+            viewModel.send()
+            viewModel.selectTurn(ParticipantId.B)
+            viewModel.type("second")
+            viewModel.send()
+            viewModel.type("third")
+            viewModel.send()
+            viewModel.selectTurn(ParticipantId.A)
+
+            viewModel.quoteLatest()
+
+            assertEquals(Quote(2, "third"), viewModel.draft().quote)
+        }
+
+    @Test
+    fun removingTheQuoteDropsIt() =
+        runTest {
+            val viewModel = viewModel(firstMessage = "Hello")
+            collect(viewModel)
+            viewModel.quote(0)
+
+            viewModel.drafts.setQuote(null)
+
+            assertNull(viewModel.draft().quote)
+        }
+
+    @Test
+    fun aQuoteAloneIsNotEnoughToSend() =
+        runTest {
+            val viewModel = viewModel(firstMessage = "Hello")
+            collect(viewModel)
+            viewModel.quote(0)
+
+            viewModel.send()
+
+            assertEquals(1, viewModel.conversation().messages.size)
+        }
+
+    @Test
+    fun insertedTextReplacesTheSelectionInTheActiveDraft() =
+        runTest {
+            val viewModel = viewModel()
+            collect(viewModel)
+            viewModel.drafts.setComposition(Composition(FormattedText("Hello world")).select(6, 11))
+
+            viewModel.drafts.insertText("there")
+
+            assertEquals("Hello there", viewModel.draft().text)
+        }
+
+    @Test
+    fun anOfferedInsertionLandsAtTheCursorOfTheActiveDraftAndIsConsumed() =
+        runTest {
+            val insertions = ChatInsertions()
+            val viewModel = viewModel(insertions = insertions)
+            collect(viewModel)
+            viewModel.drafts.setComposition(Composition(FormattedText("Hello world")).select(5, 5))
+
+            insertions.offer(", dear")
+
+            assertEquals("Hello, dear world", viewModel.draft().text)
+            assertEquals(11, viewModel.draft().composition.selectionStart)
+            assertNull(insertions.text.value)
+        }
+
+    @Test
+    fun anInsertionIsNotSentOnItsOwn() =
+        runTest {
+            val insertions = ChatInsertions()
+            val viewModel = viewModel(insertions = insertions)
+            collect(viewModel)
+
+            insertions.offer("Table for two")
+
+            assertEquals(0, viewModel.conversation().messages.size)
+            assertEquals("Table for two", viewModel.draft().text)
+        }
+
+    @Test
+    fun theLayoutStartsAsSidesAndSurvivesRecreation() =
+        runTest {
+            val savedState = SavedStateHandle()
+            val first = viewModel(savedState = savedState)
+            collect(first)
+            assertEquals(ChatLayout.Sides, assertIs<ChatUiState.Ready>(first.state.value).layout)
+
+            first.display.chooseLayout(ChatLayout.Split)
+            val restored = viewModel(savedState = savedState)
+            collect(restored)
+
+            assertEquals(ChatLayout.Split, assertIs<ChatUiState.Ready>(restored.state.value).layout)
+        }
+
+    @Test
+    fun changingTheLayoutKeepsTheConversationAndDrafts() =
+        runTest {
+            val viewModel = viewModel()
+            collect(viewModel)
+            viewModel.type("half a thought")
+            val before = viewModel.conversation()
+
+            viewModel.display.chooseLayout(ChatLayout.Split)
+
+            assertEquals(before, viewModel.conversation())
+            assertEquals("half a thought", viewModel.draft().text)
+        }
+
+    @Test
+    fun aNewChatStartsInTheLayoutSavedInSettings() =
+        runTest {
+            val viewModel = viewModel(FakeSettingsRepository(layout = ChatLayout.Split))
+            collect(viewModel)
+
+            assertEquals(ChatLayout.Split, assertIs<ChatUiState.Ready>(viewModel.state.value).layout)
+        }
+
+    @Test
+    fun choosingALayoutInTheChatIsRememberedForNextTime() =
+        runTest {
+            val settings = FakeSettingsRepository()
+            val viewModel = viewModel(settings)
+            collect(viewModel)
+
+            viewModel.display.chooseLayout(ChatLayout.Split)
+
+            assertEquals(ChatLayout.Split, settings.savedLayout)
+        }
+
+    @Test
+    fun aRestoredChatKeepsItsOwnLayoutWhateverTheSettingsNowSay() =
+        runTest {
+            val savedState = SavedStateHandle()
+            val first = viewModel(FakeSettingsRepository(layout = ChatLayout.Split), savedState)
+            collect(first)
+            first.display.chooseLayout(ChatLayout.Sides)
+
+            val restored = viewModel(FakeSettingsRepository(layout = ChatLayout.Split), savedState)
+            collect(restored)
+
+            assertEquals(ChatLayout.Sides, assertIs<ChatUiState.Ready>(restored.state.value).layout)
         }
 }

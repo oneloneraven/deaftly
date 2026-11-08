@@ -31,6 +31,7 @@ fun FillScreen(
     viewModel: FillViewModel,
     onNavigate: (Route) -> Unit,
     onBack: () -> Unit,
+    onInsert: ((String) -> Unit)? = null,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     when (val current = state) {
@@ -45,11 +46,11 @@ fun FillScreen(
 
         is FillUiState.Ready -> {
             val actions =
-                remember(viewModel, templateId, current.text, current.active?.placeholder?.key, onNavigate, onBack) {
+                remember(viewModel, templateId, current.text, current.active?.placeholder?.key, onNavigate, onBack, onInsert) {
                     FillActions(
                         onBack = onBack,
                         onEdit = { onNavigate(Route.Editor(templateId)) },
-                        onShow = { onNavigate(Route.Show(current.text)) },
+                        onShow = { if (onInsert != null) onInsert(current.text) else onNavigate(Route.Show(current.text)) },
                         onActivate = viewModel::activate,
                         onDismiss = viewModel::dismiss,
                         onChoose = viewModel::choose,
@@ -57,7 +58,7 @@ fun FillScreen(
                         onScan = { current.active?.let { onNavigate(Route.Ocr(templateId, it.placeholder.key)) } },
                     )
                 }
-            FillContent(current, actions)
+            FillContent(current, actions, insertIntoChat = onInsert != null)
         }
     }
 }
@@ -66,6 +67,7 @@ fun FillScreen(
 fun FillContent(
     state: FillUiState.Ready,
     actions: FillActions,
+    insertIntoChat: Boolean = false,
 ) {
     Surface(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.safeDrawingPadding()) {
@@ -98,10 +100,10 @@ fun FillContent(
                 )
             }
             PrimaryButton(
-                text = stringResource(R.string.fill_show),
+                text = stringResource(if (insertIntoChat) R.string.fill_insert else R.string.fill_show),
                 onClick = actions.onShow,
                 enabled = state.canShow,
-                icon = DeaftlyIcons.Expand,
+                icon = if (insertIntoChat) DeaftlyIcons.Template else DeaftlyIcons.Expand,
                 modifier =
                     Modifier
                         .fillMaxWidth()

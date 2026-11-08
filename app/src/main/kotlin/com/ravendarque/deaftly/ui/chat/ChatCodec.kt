@@ -1,13 +1,16 @@
 package com.ravendarque.deaftly.ui.chat
 
 import com.ravendarque.deaftly.core.chat.ColourRole
+import com.ravendarque.deaftly.core.chat.Composition
 import com.ravendarque.deaftly.core.chat.Conversation
+import com.ravendarque.deaftly.core.chat.FormattedText
 import com.ravendarque.deaftly.core.chat.Message
 import com.ravendarque.deaftly.core.chat.Participant
 import com.ravendarque.deaftly.core.chat.ParticipantId
 import com.ravendarque.deaftly.core.chat.Quote
 import com.ravendarque.deaftly.core.chat.Span
 import com.ravendarque.deaftly.core.chat.SpanStyle
+import com.ravendarque.deaftly.core.chat.StyleRange
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
@@ -39,6 +42,24 @@ private data class SpanDto(
     val styles: Set<SpanStyle> = emptySet(),
 )
 
+@Serializable
+private data class DraftDto(
+    val text: String = "",
+    val ranges: List<RangeDto> = emptyList(),
+    val selectionStart: Int = 0,
+    val selectionEnd: Int = 0,
+    val typing: Set<SpanStyle>? = null,
+    val quoteId: Int? = null,
+    val quoteText: String? = null,
+)
+
+@Serializable
+private data class RangeDto(
+    val start: Int,
+    val end: Int,
+    val style: SpanStyle,
+)
+
 internal object ChatCodec {
     private val json = Json { ignoreUnknownKeys = true }
 
@@ -65,6 +86,35 @@ internal object ChatCodec {
                 )
             }.getOrNull()
         }
+
+    fun encodeDraft(draft: Draft): String =
+        json.encodeToString(
+            DraftDto.serializer(),
+            DraftDto(
+                text = draft.composition.text,
+                ranges =
+                    draft.composition.content.ranges
+                        .map { RangeDto(it.start, it.end, it.style) },
+                selectionStart = draft.composition.selectionStart,
+                selectionEnd = draft.composition.selectionEnd,
+                typing = draft.composition.typing,
+                quoteId = draft.quote?.messageId,
+                quoteText = draft.quote?.text,
+            ),
+        )
+
+    fun decodeDraft(encoded: String?): Draft =
+        encoded
+            ?.let {
+                runCatching {
+                    val dto = json.decodeFromString(DraftDto.serializer(), it)
+                    val content = FormattedText(dto.text, dto.ranges.map { range -> StyleRange(range.start, range.end, range.style) })
+                    Draft(
+                        composition = Composition(content, dto.selectionStart, dto.selectionEnd, dto.typing),
+                        quote = if (dto.quoteId != null && dto.quoteText != null) Quote(dto.quoteId, dto.quoteText) else null,
+                    )
+                }.getOrNull()
+            } ?: Draft()
 
     private fun Participant.toDto() = ParticipantDto(colour, name)
 

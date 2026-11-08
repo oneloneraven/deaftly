@@ -42,8 +42,8 @@ class BackStackRestorationTest {
 
         composeRule.activityRule.scenario.recreate()
 
-        composeRule.onNodeWithText(text(R.string.route_settings)).assertExists()
-        composeRule.onNodeWithText(text(R.string.back)).assertExists()
+        composeRule.onNodeWithText(text(R.string.settings_layout_heading)).assertExists()
+        composeRule.onNodeWithContentDescription(text(R.string.back)).assertExists()
     }
 
     @Test
