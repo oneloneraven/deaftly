@@ -38,6 +38,7 @@ class OcrScreenTest {
             AppTheme {
                 OcrCameraContent(
                     status = "Live",
+                    phrases = menuPhrases,
                     onClose = { closes++ },
                     controlsEnabled = false,
                     viewfinder = { FakeCamera(it) },

@@ -11,19 +11,21 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.core.view.WindowCompat
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ravendarque.deaftly.R
+import com.ravendarque.deaftly.core.ocr.Phrase
 import com.ravendarque.deaftly.ui.theme.CameraColours
-
-private val CameraBackdrop = CameraColours.backdrop
 
 @Composable
 fun OcrScreen(
+    viewModelFactory: ViewModelProvider.Factory,
     onClose: () -> Unit,
     onTypeInstead: () -> Unit,
 ) {
@@ -34,11 +36,14 @@ fun OcrScreen(
         unavailable = unavailable,
         actions = CameraGateActions(permission.request, permission.openSettings, onTypeInstead, onClose),
     ) {
+        val viewModel = viewModel<OcrViewModel>(factory = viewModelFactory)
+        val state by viewModel.state.collectAsStateWithLifecycle()
         OcrCameraContent(
-            status = stringResource(R.string.ocr_status_live),
+            status = stringResource(if (state.ready) R.string.ocr_status_live else R.string.ocr_status_starting),
+            phrases = state.phrases,
             onClose = onClose,
             controlsEnabled = false,
-            viewfinder = { CameraViewfinder(onUnavailable = { unavailable = true }, modifier = it) },
+            viewfinder = { CameraViewfinder(viewModel::analyse, onUnavailable = { unavailable = true }, modifier = it) },
         )
     }
 }
@@ -46,15 +51,17 @@ fun OcrScreen(
 @Composable
 fun OcrCameraContent(
     status: String,
+    phrases: List<Phrase>,
     onClose: () -> Unit,
     controlsEnabled: Boolean,
     viewfinder: @Composable (Modifier) -> Unit,
 ) {
     LightSystemBarIcons()
     val cameraView = stringResource(R.string.ocr_view_description)
-    Box(modifier = Modifier.fillMaxSize().background(CameraBackdrop)) {
+    Box(modifier = Modifier.fillMaxSize().background(CameraColours.backdrop)) {
         Box(modifier = Modifier.fillMaxSize().semantics { contentDescription = cameraView }) {
             viewfinder(Modifier.fillMaxSize())
+            PhraseOverlay(phrases, Modifier.fillMaxSize())
         }
         OcrTopBar(
             status = status,

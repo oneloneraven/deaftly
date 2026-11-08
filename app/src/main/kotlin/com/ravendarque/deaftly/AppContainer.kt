@@ -6,6 +6,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.ravendarque.deaftly.core.settings.SettingsRepository
 import com.ravendarque.deaftly.core.template.TemplateRepository
+import com.ravendarque.deaftly.ocr.paddle.PaddleOcrNcnnRecogniser
 import com.ravendarque.deaftly.storage.DataStoreSettingsRepository
 import com.ravendarque.deaftly.storage.DataStoreTemplateRepository
 import com.ravendarque.deaftly.storage.createTemplateStore
@@ -17,6 +18,7 @@ import com.ravendarque.deaftly.ui.editor.EditorViewModel
 import com.ravendarque.deaftly.ui.fill.FillViewModel
 import com.ravendarque.deaftly.ui.home.HomeViewModel
 import com.ravendarque.deaftly.ui.ocr.OcrOutcomes
+import com.ravendarque.deaftly.ui.ocr.OcrViewModel
 import com.ravendarque.deaftly.ui.settings.SettingsViewModel
 import com.ravendarque.deaftly.ui.show.ShowViewModel
 
@@ -33,6 +35,11 @@ class AppContainer(
 
     val ocrOutcomes = OcrOutcomes()
     val chatInsertions = ChatInsertions()
+
+    val ocrViewModelFactory =
+        viewModelFactory {
+            initializer { OcrViewModel { PaddleOcrNcnnRecogniser(context.applicationContext) } }
+        }
 
     val homeViewModelFactory =
         viewModelFactory {
