@@ -15,6 +15,7 @@ import com.ravendarque.deaftly.ui.editor.EditorStrings
 import com.ravendarque.deaftly.ui.editor.EditorViewModel
 import com.ravendarque.deaftly.ui.fill.FillViewModel
 import com.ravendarque.deaftly.ui.home.HomeViewModel
+import com.ravendarque.deaftly.ui.ocr.OcrOutcomes
 import com.ravendarque.deaftly.ui.show.ShowViewModel
 
 class AppContainer(
@@ -27,6 +28,8 @@ class AppContainer(
     val templateRepository: TemplateRepository by lazy { DataStoreTemplateRepository(store, builtIns) }
 
     val settingsRepository: SettingsRepository by lazy { DataStoreSettingsRepository(store) }
+
+    val ocrOutcomes = OcrOutcomes()
 
     val homeViewModelFactory =
         viewModelFactory {
@@ -58,6 +61,6 @@ class AppContainer(
 
     fun fillViewModelFactory(templateId: String) =
         viewModelFactory {
-            initializer { FillViewModel(templateId, templateRepository, createSavedStateHandle()) }
+            initializer { FillViewModel(templateId, templateRepository, createSavedStateHandle(), ocrOutcomes) }
         }
 }

@@ -1,7 +1,11 @@
 package com.ravendarque.deaftly.navigation
 
 import androidx.activity.ComponentActivity
+import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.hasClickAction
+import androidx.compose.ui.test.hasSetTextAction
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.accessibility.enableAccessibilityChecks
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
@@ -166,6 +170,23 @@ class AppNavigationTest {
     }
 
     @Test
+    fun scanTheMenuExplainsTheCameraAndTypeItInsteadReturnsToTheTypingField() {
+        composeRule.enableAccessibilityChecks()
+        showApp()
+        composeRule.onAllNodesWithText(text(R.string.template_order_food_title))[0].performClick()
+        composeRule.onNode(hasText("menu item") and hasClickAction()).performClick()
+
+        composeRule.onNodeWithText(text(R.string.fill_scan_menu)).performClick()
+
+        composeRule.onNodeWithText(text(R.string.ocr_permission_body)).assertExists()
+        composeRule.onRoot().tryPerformAccessibilityChecks()
+        composeRule.onNodeWithText(text(R.string.ocr_type_instead)).performClick()
+        composeRule.waitForIdle()
+        composeRule.onNodeWithText(text(R.string.ocr_permission_body)).assertDoesNotExist()
+        composeRule.onNode(hasSetTextAction()).assertIsFocused()
+    }
+
+    @Test
     fun tappingATemplateOpensFill() {
         showApp()
 
@@ -201,6 +222,7 @@ class AppNavigationTest {
                 Route.Chat("Hello"),
                 Route.Editor("template-1"),
                 Route.Editor(),
+                Route.Ocr("order-food", "menu item"),
                 Route.Settings,
             )
 

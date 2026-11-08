@@ -20,6 +20,8 @@ import com.ravendarque.deaftly.ui.fill.FillScreen
 import com.ravendarque.deaftly.ui.fill.FillViewModel
 import com.ravendarque.deaftly.ui.home.HomeScreen
 import com.ravendarque.deaftly.ui.home.HomeViewModel
+import com.ravendarque.deaftly.ui.ocr.OcrOutcome
+import com.ravendarque.deaftly.ui.ocr.OcrScreen
 import com.ravendarque.deaftly.ui.placeholder.PlaceholderScreen
 import com.ravendarque.deaftly.ui.show.ShowScreen
 import com.ravendarque.deaftly.ui.show.ShowViewModel
@@ -71,7 +73,7 @@ fun AppNavigation(container: AppContainer) {
                     val viewModel = viewModel<ChatViewModel>(factory = container.chatViewModelFactory(route.firstMessage))
                     ChatScreen(viewModel, onEnd = { backStack.removeLastOrNull() })
                 }
-                entry<Route.Ocr> { PlaceholderEntry(it, backStack) }
+                entry<Route.Ocr> { OcrEntry(it, container, backStack) }
                 entry<Route.Editor> { route ->
                     val viewModel = viewModel<EditorViewModel>(factory = container.editorViewModelFactory(route.templateId))
                     EditorScreen(viewModel) { exit ->
@@ -84,6 +86,21 @@ fun AppNavigation(container: AppContainer) {
                 }
                 entry<Route.Settings> { PlaceholderEntry(it, backStack) }
             },
+    )
+}
+
+@Composable
+private fun OcrEntry(
+    route: Route.Ocr,
+    container: AppContainer,
+    backStack: NavBackStack<NavKey>,
+) {
+    OcrScreen(
+        onClose = { backStack.removeLastOrNull() },
+        onTypeInstead = {
+            container.ocrOutcomes.post(OcrOutcome.TypeInstead(route.templateId, route.placeholderKey))
+            backStack.removeLastOrNull()
+        },
     )
 }
 

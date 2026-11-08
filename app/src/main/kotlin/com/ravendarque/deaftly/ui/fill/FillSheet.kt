@@ -92,7 +92,7 @@ fun ColumnScope.FillSheetContent(
                 }
 
                 PlaceholderType.Camera -> {
-                    CameraChoice(onScan, onChoose)
+                    CameraChoice(active.typeInstead, onScan, onChoose)
                 }
             }
         }
@@ -154,10 +154,11 @@ private fun OptionRow(
 
 @Composable
 private fun CameraChoice(
+    typeInstead: Boolean,
     onScan: () -> Unit,
     onChoose: (String) -> Unit,
 ) {
-    var typing by rememberSaveable { mutableStateOf(false) }
+    var typing by rememberSaveable(typeInstead) { mutableStateOf(typeInstead) }
     Row(horizontalArrangement = Arrangement.spacedBy(Deaftly.spacing.space12)) {
         ActionTile(
             stringResource(R.string.fill_scan_menu),

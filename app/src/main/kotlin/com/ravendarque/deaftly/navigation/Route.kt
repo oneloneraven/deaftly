@@ -29,7 +29,10 @@ sealed interface Route : NavKey {
     ) : Route
 
     @Serializable
-    data object Ocr : Route
+    data class Ocr(
+        val templateId: String,
+        val placeholderKey: String,
+    ) : Route
 
     @Serializable
     data class Editor(
@@ -48,7 +51,7 @@ fun Route.titleRes(): Int =
         is Route.Show -> R.string.route_show
         Route.TypeShow -> R.string.home_type_and_show
         is Route.Chat -> R.string.route_chat
-        Route.Ocr -> R.string.route_ocr
+        is Route.Ocr -> R.string.route_ocr
         is Route.Editor -> R.string.route_editor
         Route.Settings -> R.string.route_settings
     }
