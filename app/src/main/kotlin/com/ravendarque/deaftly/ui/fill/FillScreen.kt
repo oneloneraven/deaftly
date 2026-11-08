@@ -47,7 +47,7 @@ fun FillScreen(
 
         is FillUiState.Ready -> {
             val actions =
-                remember(viewModel, templateId, current.text, onNavigate, onBack, onInsert) {
+                remember(viewModel, templateId, current.text, current.active?.placeholder?.key, onNavigate, onBack, onInsert) {
                     FillActions(
                         onBack = onBack,
                         onEdit = { onNavigate(Route.Editor(templateId)) },
@@ -56,7 +56,7 @@ fun FillScreen(
                         onDismiss = viewModel::dismiss,
                         onChoose = viewModel::choose,
                         onRemove = viewModel::remove,
-                        onScan = { onNavigate(Route.Ocr) },
+                        onScan = { current.active?.let { onNavigate(Route.Ocr(templateId, it.placeholder.key)) } },
                     )
                 }
             FillContent(current, actions, insertIntoChat = onInsert != null)

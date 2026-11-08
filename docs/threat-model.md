@@ -10,8 +10,11 @@ change that adds or moves a trust boundary ([coding standards](coding-standards.
 - **Local storage**: templates and settings in the app's private DataStore
   file ([ADR-0005](adr/0005-store-templates-and-settings-with-datastore.md)).
   Chats are held in memory and discarded when they end.
-- **Camera**: frames go from CameraX to on-device text recognition and are
-  never stored.
+- **Camera**: the `CAMERA` permission is requested at runtime the first time
+  Read text opens, after a plain explanation, and the app works without it
+  (the user types instead). Frames go from CameraX to on-device text
+  recognition and are never stored. Freezing keeps one frame as a bitmap in
+  memory until the user unfreezes or leaves the screen.
 - **Android backup**: the template and settings store is included in the
   user's own Android backup and device transfer
   ([ADR-0008](adr/0008-allow-android-backup-of-templates-and-settings.md)).
@@ -24,7 +27,7 @@ change that adds or moves a trust boundary ([coding standards](coding-standards.
 
 | Boundary | Between | What crosses it | Controls |
 |---|---|---|---|
-| Camera → app | The physical world and the recogniser | Frames of whatever the camera sees, which may include other people's text or faces | Frames are processed in memory and never stored or logged; recognised text only enters a template when the user selects and confirms it |
+| Camera → app | The physical world and the recogniser | Frames of whatever the camera sees, which may include other people's text or faces | Camera access needs the runtime permission, which the user can refuse or revoke (the screen then offers typing or the app settings); the preview is bound to the screen and released on leaving; frames are processed in memory and never stored or logged, and a frozen frame is held in memory only while frozen; recognised text only enters a template when the user selects it and chooses Add to message |
 | Kotlin → native recogniser | The app's Kotlin code and the ncnn-based C++ recogniser (JNI) | Pixel buffers from CameraX and the bundled model files | Frames come only from CameraX or the fixture tests and are validated in Kotlin and again in the JNI entry point (positive size within a pixel cap, stride, rotation, buffer capacity), so oversized or inconsistent frames fail before any allocation or read; the models are bundled assets, never downloaded |
 | App → Android backup | The app's private storage and the user's backup transport | Templates and settings | Only the store is included, through explicit backup and data-extraction rules; the user controls backup in system settings; Android encrypts it |
 | Other apps → the app | Other apps on the device and Deaftly | Intents to exported components | Only the launcher activity is exported; no content providers, deep links or broadcast receivers |

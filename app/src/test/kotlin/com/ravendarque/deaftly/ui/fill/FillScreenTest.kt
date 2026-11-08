@@ -214,7 +214,7 @@ class FillScreenTest {
 
         composeRule.onNodeWithText("Scan the menu").performClick()
 
-        assertEquals(listOf<Route>(Route.Ocr), navigated)
+        assertEquals(listOf<Route>(Route.Ocr("order-food", "menu item")), navigated)
     }
 
     @Test
