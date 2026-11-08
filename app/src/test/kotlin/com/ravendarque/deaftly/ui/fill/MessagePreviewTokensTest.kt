@@ -37,7 +37,7 @@ class MessagePreviewTokensTest {
         assertEquals(
             listOf(
                 PreviewToken.Word("Name", false),
-                PreviewToken.Chip(name, "Your name", false, gapBefore = true, suffix = "."),
+                PreviewToken.Chip(name, "name", false, gapBefore = true, suffix = "."),
                 PreviewToken.Word("Please", true),
             ),
             tokens,
@@ -51,7 +51,7 @@ class MessagePreviewTokensTest {
         assertEquals(
             listOf(
                 PreviewToken.Chip(name, "Sam", true, gapBefore = false),
-                PreviewToken.Chip(reply, "How should they reply?", false, gapBefore = true),
+                PreviewToken.Chip(reply, "how to reply", false, gapBefore = true),
             ),
             tokens,
         )

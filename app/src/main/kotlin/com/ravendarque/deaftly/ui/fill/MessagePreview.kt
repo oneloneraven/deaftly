@@ -80,7 +80,7 @@ internal fun previewTokens(parts: List<FillPart>): List<PreviewToken> {
 
             is FillPart.Empty -> {
                 val gap = trailingSpace || (tokens.isNotEmpty() && tokens.last() !is PreviewToken.Word)
-                tokens += PreviewToken.Chip(part.placeholder, part.placeholder.label, false, gap)
+                tokens += PreviewToken.Chip(part.placeholder, part.placeholder.key, false, gap)
                 trailingSpace = false
             }
         }

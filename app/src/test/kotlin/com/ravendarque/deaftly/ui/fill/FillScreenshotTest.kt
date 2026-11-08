@@ -88,7 +88,7 @@ class FillScreenshotTest {
     }
 
     private fun openReplyChip() {
-        composeRule.onNodeWithText("How should they reply?").performClick()
+        composeRule.onNodeWithText("how to reply").performClick()
     }
 
     @Test
@@ -122,7 +122,7 @@ class FillScreenshotTest {
 
     private fun orderWithTwoItems() {
         listOf("Pasta arrabbiata", "Garlic bread").forEachIndexed { index, item ->
-            composeRule.onNodeWithText(if (index == 0) "Menu item" else "add more").performClick()
+            composeRule.onNodeWithText(if (index == 0) "menu item" else "add more").performClick()
             composeRule.onNodeWithText("Type it").performClick()
             composeRule.onNode(hasSetTextAction()).performTextInput(item)
             composeRule.onNode(hasSetTextAction()).performImeAction()
