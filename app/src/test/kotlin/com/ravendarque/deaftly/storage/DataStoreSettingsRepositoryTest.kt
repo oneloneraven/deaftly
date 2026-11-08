@@ -71,10 +71,10 @@ class DataStoreSettingsRepositoryTest {
             val repository = repository(backgroundScope)
 
             repository.setShowScheme(ShowScheme.WhiteOnBlack)
-            repository.setChatProfile(ChatProfile("Alex", ColourRole.Berry))
+            repository.setChatProfile(ChatProfile("Alex", ColourRole.Forest))
 
             assertEquals(ShowScheme.WhiteOnBlack, repository.showScheme.first())
-            assertEquals(ChatProfile("Alex", ColourRole.Berry), repository.chatProfile.first())
+            assertEquals(ChatProfile("Alex", ColourRole.Forest), repository.chatProfile.first())
         }
 
     @Test
@@ -82,7 +82,7 @@ class DataStoreSettingsRepositoryTest {
         runTest {
             val store = createTemplateStore(File(folder.root, "templates.json"), builtIns, backgroundScope)
 
-            DataStoreSettingsRepository(store).setChatProfile(ChatProfile("Alex", ColourRole.Berry))
+            DataStoreSettingsRepository(store).setChatProfile(ChatProfile("Alex", ColourRole.Forest))
 
             assertEquals(
                 builtIns,

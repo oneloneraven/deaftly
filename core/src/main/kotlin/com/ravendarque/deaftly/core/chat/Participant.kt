@@ -7,7 +7,7 @@ public enum class ColourRole {
     PersonB,
     Teal,
     Rose,
-    Berry,
+    Forest,
 }
 
 public data class Participant(

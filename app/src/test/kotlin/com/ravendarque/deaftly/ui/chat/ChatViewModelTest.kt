@@ -84,10 +84,10 @@ class ChatViewModelTest {
             val viewModel = viewModel()
             collect(viewModel)
 
-            viewModel.updateParticipant(Participant(ParticipantId.B, ColourRole.Berry, "Sam"))
+            viewModel.updateParticipant(Participant(ParticipantId.B, ColourRole.Forest, "Sam"))
 
             val conversation = viewModel.conversation()
-            assertEquals(Participant(ParticipantId.B, ColourRole.Berry, "Sam"), conversation.participantB)
+            assertEquals(Participant(ParticipantId.B, ColourRole.Forest, "Sam"), conversation.participantB)
             assertEquals(Participant.defaultA(), conversation.participantA)
         }
 
@@ -121,7 +121,7 @@ class ChatViewModelTest {
             val viewModel = viewModel(settings)
             collect(viewModel)
             viewModel.updateParticipant(Participant(ParticipantId.A, ColourRole.Rose, "Alex"))
-            viewModel.updateParticipant(Participant(ParticipantId.B, ColourRole.Berry, "Sam"))
+            viewModel.updateParticipant(Participant(ParticipantId.B, ColourRole.Forest, "Sam"))
 
             viewModel.rememberOwnDefaults()
 
@@ -134,7 +134,7 @@ class ChatViewModelTest {
             val settings = FakeSettingsRepository()
             val first = viewModel(settings)
             collect(first)
-            first.updateParticipant(Participant(ParticipantId.B, ColourRole.Berry, "Sam"))
+            first.updateParticipant(Participant(ParticipantId.B, ColourRole.Forest, "Sam"))
             first.rememberOwnDefaults()
 
             val second = viewModel(settings)
@@ -150,7 +150,7 @@ class ChatViewModelTest {
             val first = viewModel(savedState = savedState)
             collect(first)
             first.updateParticipant(Participant(ParticipantId.A, ColourRole.Rose, "Alex"))
-            first.updateParticipant(Participant(ParticipantId.B, ColourRole.Berry, "Sam"))
+            first.updateParticipant(Participant(ParticipantId.B, ColourRole.Forest, "Sam"))
 
             val restored = viewModel(FakeSettingsRepository(ChatProfile("Other", ColourRole.Teal)), savedState)
             collect(restored)

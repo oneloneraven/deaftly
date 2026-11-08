@@ -3,8 +3,10 @@ package com.ravendarque.deaftly.storage
 import com.ravendarque.deaftly.core.template.Placeholder
 import com.ravendarque.deaftly.core.template.PlaceholderType
 import com.ravendarque.deaftly.core.template.Template
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonNames
 
 const val STORE_VERSION = 1
 
@@ -62,8 +64,10 @@ enum class ParticipantColourDto {
     @SerialName("rose")
     Rose,
 
-    @SerialName("berry")
-    Berry,
+    @OptIn(ExperimentalSerializationApi::class)
+    @SerialName("forest")
+    @JsonNames("berry")
+    Forest,
 }
 
 @Serializable

@@ -82,7 +82,7 @@ class ParticipantsSheetTest {
         composeRule.onAllNodesWithText("Name (optional)").assertCountEquals(2)
         composeRule.onNodeWithText("Shown as \u201cMe\u201d if left blank").assertExists()
         composeRule.onNodeWithText("Shown as \u201cThem\u201d if left blank").assertExists()
-        listOf("Indigo", "Peach", "Teal", "Rose", "Berry").forEach { swatches(it).assertCountEquals(2) }
+        listOf("Violet", "Peach", "Teal", "Rose", "Forest").forEach { swatches(it).assertCountEquals(2) }
         composeRule.onRoot().tryPerformAccessibilityChecks()
     }
 
@@ -123,7 +123,7 @@ class ParticipantsSheetTest {
         show(Conversation(Participant.defaultA("Alex"), Participant.defaultB("Sam")))
 
         swatches("Peach")[0].assertIsNotEnabled().assert(hasState("Used by Sam"))
-        swatches("Indigo")[1].assertIsNotEnabled().assert(hasState("Used by Alex"))
+        swatches("Violet")[1].assertIsNotEnabled().assert(hasState("Used by Alex"))
         swatches("Teal")[0].assertIsEnabled()
     }
 
