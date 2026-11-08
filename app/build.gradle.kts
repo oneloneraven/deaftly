@@ -1,5 +1,6 @@
 import com.android.build.api.artifact.SingleArtifact
 import com.ravendarque.deaftly.guard.VerifyReleaseManifestTask
+import com.ravendarque.deaftly.nativelibs.FetchNcnnTask
 
 plugins {
     alias(libs.plugins.android.application)
@@ -13,6 +14,16 @@ val appVersionParts =
         "appVersion must be X.Y.Z with each part 0-999, not $appVersion"
     }.destructured.toList().map(String::toInt)
 val (appMajor, appMinor, appPatch) = appVersionParts
+
+val ncnnDist = rootProject.layout.projectDirectory.dir("third_party/ncnn/dist")
+
+val fetchNcnn =
+    tasks.register<FetchNcnnTask>("fetchNcnn") {
+        url.set("https://github.com/Tencent/ncnn/releases/download/20261020/ncnn-20261020-android.zip")
+        sha256.set("62a9edb493ceb42a5c9cbf2d3a79b3f44bff06c625134ffb64d183dcc42c25fc")
+        abis.set(listOf("arm64-v8a", "armeabi-v7a", "x86_64"))
+        outputDir.set(ncnnDist)
+    }
 
 val releaseKeystore = providers.environmentVariable("ANDROID_KEYSTORE_PATH")
 
@@ -32,6 +43,23 @@ android {
         versionName = appVersion
         versionCode = (appMajor * 1_000_000 + appMinor * 1_000 + appPatch).coerceAtLeast(1)
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        externalNativeBuild {
+            cmake {
+                arguments(
+                    "-DNCNN_ROOT=${ncnnDist.asFile.absolutePath}",
+                    "-DANDROID_STL=c++_static",
+                )
+            }
+        }
+    }
+
+    ndkVersion = "30.0.16248370"
+
+    externalNativeBuild {
+        cmake {
+            path = file("src/main/cpp/CMakeLists.txt")
+            version = "4.1.2"
+        }
     }
 
     signingConfigs {
@@ -46,7 +74,11 @@ android {
     }
 
     buildTypes {
+        debug {
+            ndk { abiFilters += listOf("arm64-v8a", "x86_64") }
+        }
         release {
+            ndk { abiFilters += listOf("arm64-v8a", "armeabi-v7a") }
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
@@ -115,6 +147,8 @@ android {
             )
         // Dependabot moves versions; a new upstream release must not fail unrelated PRs.
         disable += setOf("AndroidGradlePluginVersion", "GradleDependency", "NewerVersionAvailable", "OldTargetApi")
+        // ADR-0010: release APKs are arm64-v8a and armeabi-v7a only; ChromeOS translates them.
+        disable += "ChromeOsAbiSupport"
     }
 }
 
@@ -137,6 +171,7 @@ dependencies {
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.ui.tooling.preview)
+    implementation(libs.kotlinx.coroutines.android)
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 
@@ -145,6 +180,9 @@ dependencies {
     androidTestImplementation(libs.androidx.test.junit)
     androidTestImplementation(libs.androidx.test.runner)
     androidTestImplementation(libs.junit)
+    androidTestImplementation(libs.kotlin.test)
+    androidTestImplementation(libs.kotlinx.coroutines.test)
+    androidTestImplementation(testFixtures(project(":core")))
 
     testImplementation(platform(libs.androidx.compose.bom))
     testImplementation(libs.androidx.compose.ui.test.junit4)
@@ -178,3 +216,7 @@ androidComponents {
 tasks.named("check") {
     dependsOn("verifyRoborazziDebug", "assembleRelease")
 }
+
+tasks
+    .matching { it.name.startsWith("configureCMake") || it.name.startsWith("generateJsonModel") }
+    .configureEach { dependsOn(fetchNcnn) }

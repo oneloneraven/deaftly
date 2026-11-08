@@ -31,8 +31,13 @@ public data class TextLine(
     val confidence: Float? = null,
 )
 
+/**
+ * [corners] is the word's quadrilateral in the same order as [TextLine.corners]: top-left,
+ * top-right, bottom-right, bottom-left of the word as read, so it follows rotated text.
+ */
 public data class TextWord(
     val text: String,
     val boundingBox: BoundingBox,
     val confidence: Float? = null,
+    val corners: Quad? = null,
 )

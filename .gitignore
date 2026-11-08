@@ -25,3 +25,5 @@ build/
 local.properties
 *.jks
 *.keystore
+third_party/ncnn/dist/
+.cxx/
