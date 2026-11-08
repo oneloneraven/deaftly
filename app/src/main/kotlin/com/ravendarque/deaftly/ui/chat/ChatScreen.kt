@@ -1,5 +1,6 @@
 package com.ravendarque.deaftly.ui.chat
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -12,8 +13,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.ravendarque.deaftly.R
 import com.ravendarque.deaftly.core.settings.ChatLayout
+import com.ravendarque.deaftly.ui.editor.ConfirmDialog
+import com.ravendarque.deaftly.ui.editor.ConfirmSpec
 import com.ravendarque.deaftly.ui.theme.Deaftly
 
 @Composable
@@ -23,36 +28,64 @@ fun ChatScreen(
     onInsertTemplate: () -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val composerActions = rememberComposerActions(viewModel, onInsertTemplate)
-    var editingParticipants by rememberSaveable { mutableStateOf(false) }
     when (val current = state) {
-        ChatUiState.Loading -> {
-            Surface(modifier = Modifier.fillMaxSize()) {}
-        }
+        ChatUiState.Loading -> Surface(modifier = Modifier.fillMaxSize()) {}
+        is ChatUiState.Ready -> ChatContent(current, viewModel, onEnd, onInsertTemplate)
+    }
+}
 
-        is ChatUiState.Ready -> {
-            if (current.layout == ChatLayout.Split) {
-                SplitChat(current, rememberSplitActions(viewModel, onEnd))
-            } else {
-                SidesChat(
-                    current,
-                    viewModel,
-                    composerActions,
-                    onEnd,
-                    onEditParticipants = { editingParticipants = true },
-                )
-            }
-            if (editingParticipants) {
-                ParticipantsSheet(
-                    conversation = current.conversation,
-                    onChange = viewModel::updateParticipant,
-                    onDone = {
-                        viewModel.rememberOwnDefaults()
-                        editingParticipants = false
-                    },
-                )
-            }
-        }
+@Composable
+private fun ChatContent(
+    current: ChatUiState.Ready,
+    viewModel: ChatViewModel,
+    onEnd: () -> Unit,
+    onInsertTemplate: () -> Unit,
+) {
+    var editingParticipants by rememberSaveable { mutableStateOf(false) }
+    var confirmingEnd by rememberSaveable { mutableStateOf(false) }
+    val requestEnd = { if (current.conversation.messages.isEmpty()) onEnd() else confirmingEnd = true }
+    BackHandler(onBack = requestEnd)
+    if (current.layout == ChatLayout.Split) {
+        SplitChat(current, rememberSplitActions(viewModel, requestEnd))
+    } else {
+        SidesChat(
+            current,
+            viewModel,
+            rememberComposerActions(viewModel, onInsertTemplate),
+            ChatHeaderActions(
+                onEnd = requestEnd,
+                onEditParticipants = { editingParticipants = true },
+                onCycleTextSize = viewModel.display::cycleTextSize,
+                onSwitchLayout = { viewModel.display.chooseLayout(ChatLayout.Split) },
+            ),
+        )
+    }
+    if (editingParticipants) {
+        ParticipantsSheet(
+            conversation = current.conversation,
+            onChange = viewModel::updateParticipant,
+            onDone = {
+                viewModel.rememberOwnDefaults()
+                editingParticipants = false
+            },
+        )
+    }
+    if (confirmingEnd) {
+        ConfirmDialog(
+            spec =
+                ConfirmSpec(
+                    title = stringResource(R.string.chat_end_title),
+                    text = stringResource(R.string.chat_end_text),
+                    confirm = stringResource(R.string.chat_end_confirm),
+                    dismiss = stringResource(R.string.chat_end_keep),
+                    destructive = true,
+                ),
+            onConfirm = {
+                confirmingEnd = false
+                onEnd()
+            },
+            onDismiss = { confirmingEnd = false },
+        )
     }
 }
 
@@ -61,19 +94,12 @@ private fun SidesChat(
     current: ChatUiState.Ready,
     viewModel: ChatViewModel,
     composerActions: ComposerActions,
-    onEnd: () -> Unit,
-    onEditParticipants: () -> Unit,
+    headerActions: ChatHeaderActions,
 ) {
     val conversation = current.conversation
     Surface(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.safeDrawingPadding()) {
-            ChatHeader(
-                conversation = conversation,
-                onEnd = onEnd,
-                onEditParticipants = onEditParticipants,
-                textSize = current.textSize,
-                onCycleTextSize = viewModel.display::cycleTextSize,
-            )
+            ChatHeader(conversation, current.textSize, headerActions)
             MessageList(conversation, current.textSize, viewModel::quote, Modifier.weight(1f).fillMaxSize())
             Composer(
                 participant = conversation.activeParticipant,
@@ -102,6 +128,7 @@ private fun rememberSplitActions(
             onSend = viewModel::send,
             onSelectTurn = viewModel::selectTurn,
             onEnd = onEnd,
+            onSwitchLayout = { viewModel.display.chooseLayout(ChatLayout.Sides) },
         )
     }
 

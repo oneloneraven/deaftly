@@ -16,6 +16,7 @@ import com.ravendarque.deaftly.ui.editor.EditorStrings
 import com.ravendarque.deaftly.ui.editor.EditorViewModel
 import com.ravendarque.deaftly.ui.fill.FillViewModel
 import com.ravendarque.deaftly.ui.home.HomeViewModel
+import com.ravendarque.deaftly.ui.settings.SettingsViewModel
 import com.ravendarque.deaftly.ui.show.ShowViewModel
 
 class AppContainer(
@@ -52,6 +53,11 @@ class AppContainer(
     val showViewModelFactory =
         viewModelFactory {
             initializer { ShowViewModel(settingsRepository) }
+        }
+
+    val settingsViewModelFactory =
+        viewModelFactory {
+            initializer { SettingsViewModel(settingsRepository) }
         }
 
     fun chatViewModelFactory(firstMessage: String?) =

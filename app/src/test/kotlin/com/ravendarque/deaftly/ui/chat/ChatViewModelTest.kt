@@ -514,7 +514,7 @@ class ChatViewModelTest {
             collect(first)
             assertEquals(ChatLayout.Sides, assertIs<ChatUiState.Ready>(first.state.value).layout)
 
-            first.display.setLayout(ChatLayout.Split)
+            first.display.chooseLayout(ChatLayout.Split)
             val restored = viewModel(savedState = savedState)
             collect(restored)
 
@@ -529,9 +529,44 @@ class ChatViewModelTest {
             viewModel.type("half a thought")
             val before = viewModel.conversation()
 
-            viewModel.display.setLayout(ChatLayout.Split)
+            viewModel.display.chooseLayout(ChatLayout.Split)
 
             assertEquals(before, viewModel.conversation())
             assertEquals("half a thought", viewModel.draft().text)
+        }
+
+    @Test
+    fun aNewChatStartsInTheLayoutSavedInSettings() =
+        runTest {
+            val viewModel = viewModel(FakeSettingsRepository(layout = ChatLayout.Split))
+            collect(viewModel)
+
+            assertEquals(ChatLayout.Split, assertIs<ChatUiState.Ready>(viewModel.state.value).layout)
+        }
+
+    @Test
+    fun choosingALayoutInTheChatIsRememberedForNextTime() =
+        runTest {
+            val settings = FakeSettingsRepository()
+            val viewModel = viewModel(settings)
+            collect(viewModel)
+
+            viewModel.display.chooseLayout(ChatLayout.Split)
+
+            assertEquals(ChatLayout.Split, settings.savedLayout)
+        }
+
+    @Test
+    fun aRestoredChatKeepsItsOwnLayoutWhateverTheSettingsNowSay() =
+        runTest {
+            val savedState = SavedStateHandle()
+            val first = viewModel(FakeSettingsRepository(layout = ChatLayout.Split), savedState)
+            collect(first)
+            first.display.chooseLayout(ChatLayout.Sides)
+
+            val restored = viewModel(FakeSettingsRepository(layout = ChatLayout.Split), savedState)
+            collect(restored)
+
+            assertEquals(ChatLayout.Sides, assertIs<ChatUiState.Ready>(restored.state.value).layout)
         }
 }

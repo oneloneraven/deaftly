@@ -73,7 +73,7 @@ class ChatScreenshotTest {
         dark: Boolean,
     ) = shot {
         AppTheme(darkTheme = dark) {
-            Surface { ChatHeader(conversation, onEnd = {}, onEditParticipants = {}, textSize = ChatTextSize.Normal, onCycleTextSize = {}) }
+            Surface { ChatHeader(conversation, ChatTextSize.Normal, ChatHeaderActions({}, {}, {}, {})) }
         }
     }
 

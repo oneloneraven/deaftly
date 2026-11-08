@@ -9,6 +9,14 @@
     <string name="route_ocr">Read text</string>
     <string name="route_editor">Edit templates</string>
     <string name="route_settings">Settings</string>
+    <string name="settings_layout_heading">Default chat layout</string>
+    <string name="settings_layout_sides">Side by side</string>
+    <string name="settings_layout_sides_hint">Messages on the left and right. Swipe to change turn.</string>
+    <string name="settings_layout_split">Split screen</string>
+    <string name="settings_layout_split_hint">The top half is upside down for the person opposite.</string>
+    <string name="settings_me_heading">Me in chats</string>
+    <string name="settings_scheme_heading">Show mode colours</string>
+    <string name="settings_swatch_glyph">Aa</string>
     <string name="home_new_template">New template</string>
     <string name="home_search_label">Search templates</string>
     <string name="home_pinned">Pinned</string>
@@ -100,6 +108,12 @@
     <string name="chat_split_hint">Your turn \u2013 type here</string>
     <string name="chat_split_waiting">Waiting for %1$s\u2026</string>
     <string name="chat_split_my_turn">My turn</string>
+    <string name="chat_layout_to_split">Switch to split screen</string>
+    <string name="chat_layout_to_sides">Switch to side-by-side chat</string>
+    <string name="chat_end_title">End this chat?</string>
+    <string name="chat_end_text">The messages will be deleted.</string>
+    <string name="chat_end_confirm">End chat</string>
+    <string name="chat_end_keep">Keep chatting</string>
     <string name="chat_quote_action">Quote</string>
     <string name="chat_quote_remove">Remove quote</string>
     <string name="chat_quote_pending">Quoting: %1$s</string>
