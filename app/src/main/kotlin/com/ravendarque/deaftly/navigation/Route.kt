@@ -16,7 +16,9 @@ sealed interface Route : NavKey {
     ) : Route
 
     @Serializable
-    data object Show : Route
+    data class Show(
+        val text: String = "",
+    ) : Route
 
     @Serializable
     data object Chat : Route
@@ -25,7 +27,9 @@ sealed interface Route : NavKey {
     data object Ocr : Route
 
     @Serializable
-    data object Editor : Route
+    data class Editor(
+        val templateId: String? = null,
+    ) : Route
 
     @Serializable
     data object Settings : Route
@@ -36,9 +40,9 @@ fun Route.titleRes(): Int =
     when (this) {
         Route.Home -> R.string.app_name
         is Route.Fill -> R.string.route_fill
-        Route.Show -> R.string.route_show
+        is Route.Show -> R.string.route_show
         Route.Chat -> R.string.route_chat
         Route.Ocr -> R.string.route_ocr
-        Route.Editor -> R.string.route_editor
+        is Route.Editor -> R.string.route_editor
         Route.Settings -> R.string.route_settings
     }

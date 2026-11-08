@@ -1,11 +1,13 @@
 package com.ravendarque.deaftly
 
 import android.content.Context
+import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.ravendarque.deaftly.core.template.TemplateRepository
 import com.ravendarque.deaftly.storage.createTemplateRepository
 import com.ravendarque.deaftly.templates.builtInTemplates
+import com.ravendarque.deaftly.ui.fill.FillViewModel
 import com.ravendarque.deaftly.ui.home.HomeViewModel
 
 class AppContainer(
@@ -18,5 +20,10 @@ class AppContainer(
     val homeViewModelFactory =
         viewModelFactory {
             initializer { HomeViewModel(templateRepository) }
+        }
+
+    fun fillViewModelFactory(templateId: String) =
+        viewModelFactory {
+            initializer { FillViewModel(templateId, templateRepository, createSavedStateHandle()) }
         }
 }

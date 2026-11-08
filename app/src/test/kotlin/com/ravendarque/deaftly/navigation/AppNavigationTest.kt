@@ -73,7 +73,9 @@ class AppNavigationTest {
 
         composeRule.onAllNodesWithText(text(R.string.template_explain_deaf_title))[0].performClick()
 
-        assertOnPlaceholder(text(R.string.route_fill))
+        composeRule.onNodeWithContentDescription(text(R.string.back)).assertExists()
+        composeRule.onNodeWithText(text(R.string.fill_hint)).assertExists()
+        composeRule.onNodeWithText(text(R.string.fill_show)).assertExists()
     }
 
     @Test
@@ -91,7 +93,16 @@ class AppNavigationTest {
 
     @Test
     fun routesRoundTripThroughSerialisation() {
-        val routes: List<Route> = listOf(Route.Home, Route.Fill("template-1"), Route.Show, Route.Chat, Route.Editor, Route.Settings)
+        val routes: List<Route> =
+            listOf(
+                Route.Home,
+                Route.Fill("template-1"),
+                Route.Show("Hello"),
+                Route.Chat,
+                Route.Editor("template-1"),
+                Route.Editor(),
+                Route.Settings,
+            )
 
         routes.forEach { route ->
             val json = Json.encodeToString(Route.serializer(), route)

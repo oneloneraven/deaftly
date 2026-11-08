@@ -36,6 +36,7 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import com.ravendarque.deaftly.R
 import com.ravendarque.deaftly.ui.icons.DeaftlyIcons
@@ -156,6 +157,7 @@ fun PlaceholderChip(
     state: ChipState = ChipState.Filled,
     tone: ChipTone = ChipTone.Accent,
     onRemove: (() -> Unit)? = null,
+    textStyle: TextStyle = MaterialTheme.typography.labelLarge,
 ) {
     val interaction = remember { MutableInteractionSource() }
     val focusedByInput by interaction.collectIsFocusedAsState()
@@ -177,7 +179,7 @@ fun PlaceholderChip(
                     .padding(start = ChipPadding, end = if (removable) ChipIconGap else ChipPadding),
             contentAlignment = Alignment.Center,
         ) {
-            Text(text = label, style = MaterialTheme.typography.labelLarge, color = style.content)
+            Text(text = label, style = textStyle, color = style.content)
         }
         if (removable) {
             val removeLabel = stringResource(R.string.chip_remove, label)
@@ -206,6 +208,7 @@ fun AddMoreChip(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     tone: ChipTone = ChipTone.Accent,
+    textStyle: TextStyle = MaterialTheme.typography.labelLarge,
 ) {
     val style = chipStyle(ChipState.Empty, tone, focusedByInput = false)
     ChipFrame(style, modifier) {
@@ -225,7 +228,7 @@ fun AddMoreChip(
                 tint = style.content,
             )
             Spacer(Modifier.width(ChipIconGap))
-            Text(text = label, style = MaterialTheme.typography.labelLarge, color = style.content)
+            Text(text = label, style = textStyle, color = style.content)
         }
     }
 }

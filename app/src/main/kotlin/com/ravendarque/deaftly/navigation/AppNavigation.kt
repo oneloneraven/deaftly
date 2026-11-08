@@ -11,6 +11,8 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.ravendarque.deaftly.AppContainer
+import com.ravendarque.deaftly.ui.fill.FillScreen
+import com.ravendarque.deaftly.ui.fill.FillViewModel
 import com.ravendarque.deaftly.ui.home.HomeScreen
 import com.ravendarque.deaftly.ui.home.HomeViewModel
 import com.ravendarque.deaftly.ui.placeholder.PlaceholderScreen
@@ -33,8 +35,16 @@ fun AppNavigation(container: AppContainer) {
                     val viewModel = viewModel<HomeViewModel>(factory = container.homeViewModelFactory)
                     HomeScreen(viewModel, onNavigate = { backStack.add(it) })
                 }
-                entry<Route.Fill> { PlaceholderEntry(it, backStack) }
-                entry<Route.Show> { PlaceholderEntry(it, backStack) }
+                entry<Route.Fill> { route ->
+                    val viewModel = viewModel<FillViewModel>(factory = container.fillViewModelFactory(route.templateId))
+                    FillScreen(
+                        templateId = route.templateId,
+                        viewModel = viewModel,
+                        onNavigate = { backStack.add(it) },
+                        onBack = { backStack.removeLastOrNull() },
+                    )
+                }
+                entry<Route.Show> { PlaceholderEntry(it, backStack, body = it.text) }
                 entry<Route.Chat> { PlaceholderEntry(it, backStack) }
                 entry<Route.Ocr> { PlaceholderEntry(it, backStack) }
                 entry<Route.Editor> { PlaceholderEntry(it, backStack) }
@@ -47,6 +57,7 @@ fun AppNavigation(container: AppContainer) {
 private fun PlaceholderEntry(
     route: Route,
     backStack: NavBackStack<NavKey>,
+    body: String? = null,
 ) {
-    PlaceholderScreen(stringResource(route.titleRes()), onBack = { backStack.removeLastOrNull() })
+    PlaceholderScreen(stringResource(route.titleRes()), onBack = { backStack.removeLastOrNull() }, body = body)
 }
