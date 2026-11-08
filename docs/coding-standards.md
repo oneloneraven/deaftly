@@ -160,7 +160,8 @@ and the APK's size and startup.
 - **Nothing leaves the device unless a decision says so.** The template has
   no `INTERNET` permission, and adding one (or any other permission) needs an
   ADR and an update to the threat model and record of processing. Backups
-  and device transfer exclude all app data.
+  and device transfer include only the template store, through explicit rules
+  ([ADR-0008](adr/0008-allow-android-backup-of-templates-and-settings.md)).
 - **Never log user content**, at any level, in any build type. Log events
   and error types, not what the user wrote, said or captured.
 - **Export nothing but the launcher activity.** Every other component sets

@@ -27,7 +27,7 @@ class AppNavigationTest {
     @Test
     fun opensEachDestinationFromHomeAndReturnsWithTheBackButton() {
         composeRule.enableAccessibilityChecks()
-        composeRule.setContent { AppTheme { AppNavigation(AppContainer()) } }
+        composeRule.setContent { AppTheme { AppNavigation(AppContainer(composeRule.activity.applicationContext)) } }
 
         Route.entries.filter { it != Route.Home }.forEach { route ->
             val title = text(route.title)
@@ -43,7 +43,7 @@ class AppNavigationTest {
 
     @Test
     fun systemBackPopsTheStack() {
-        composeRule.setContent { AppTheme { AppNavigation(AppContainer()) } }
+        composeRule.setContent { AppTheme { AppNavigation(AppContainer(composeRule.activity.applicationContext)) } }
         val title = text(Route.Chat.title)
 
         composeRule.onNodeWithText(title).performClick()
