@@ -1,6 +1,7 @@
 package com.ravendarque.deaftly.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -142,5 +143,28 @@ fun PinnedTile(
             Text(text = title, style = MaterialTheme.typography.titleLarge, color = titleColour)
             Text(text = preview, style = MaterialTheme.typography.bodySmall, color = previewColour, maxLines = 2)
         }
+    }
+}
+
+@Composable
+fun HubCard(
+    label: String,
+    icon: ImageVector,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val shape = Deaftly.shapes.card
+    Column(
+        modifier =
+            modifier
+                .heightIn(min = TileMinHeight)
+                .clip(shape)
+                .background(Deaftly.colors.surface, shape)
+                .clickable(role = Role.Button, onClick = onClick)
+                .padding(Deaftly.spacing.space16),
+        verticalArrangement = Arrangement.spacedBy(Deaftly.spacing.space12),
+    ) {
+        Icon(imageVector = icon, contentDescription = null, modifier = Modifier.size(TileIconSize), tint = Deaftly.colors.ink)
+        Text(text = label, style = MaterialTheme.typography.titleMedium, color = Deaftly.colors.ink)
     }
 }

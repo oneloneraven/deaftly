@@ -4,12 +4,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -20,7 +18,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
@@ -32,7 +29,6 @@ import com.ravendarque.deaftly.ui.theme.Deaftly
 
 private val BarTarget = 48.dp
 private const val DOCK_GRADIENT_SOLID_FROM = 0.3f
-private const val DOCK_STACK_FONT_SCALE = 1.5f
 
 @Composable
 fun DeaftlyTopBar(
@@ -75,42 +71,28 @@ fun DeaftlyTopBar(
 }
 
 @Composable
-fun ActionDock(
-    start: @Composable (Modifier) -> Unit,
-    end: @Composable (Modifier) -> Unit,
+fun BottomDock(
     modifier: Modifier = Modifier,
-    below: (@Composable (Modifier) -> Unit)? = null,
+    content: @Composable ColumnScope.() -> Unit,
 ) {
     val ground = Deaftly.colors.ground
-    val stacked = LocalDensity.current.fontScale >= DOCK_STACK_FONT_SCALE
-    val frame =
-        modifier
-            .fillMaxWidth()
-            .background(
-                Brush.verticalGradient(
-                    0f to ground.copy(alpha = 0f),
-                    DOCK_GRADIENT_SOLID_FROM to ground,
-                    1f to ground,
+    Column(
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .background(
+                    Brush.verticalGradient(
+                        0f to ground.copy(alpha = 0f),
+                        DOCK_GRADIENT_SOLID_FROM to ground,
+                        1f to ground,
+                    ),
+                ).padding(
+                    start = Deaftly.spacing.space20,
+                    top = Deaftly.spacing.space14,
+                    end = Deaftly.spacing.space20,
+                    bottom = Deaftly.spacing.space24,
                 ),
-            ).padding(
-                start = Deaftly.spacing.space20,
-                top = Deaftly.spacing.space14,
-                end = Deaftly.spacing.space20,
-                bottom = Deaftly.spacing.space24,
-            )
-    Column(modifier = frame, verticalArrangement = Arrangement.spacedBy(Deaftly.spacing.space12)) {
-        if (stacked) {
-            start(Modifier.fillMaxWidth())
-            end(Modifier.fillMaxWidth())
-        } else {
-            Row(
-                modifier = Modifier.height(IntrinsicSize.Min),
-                horizontalArrangement = Arrangement.spacedBy(Deaftly.spacing.space12),
-            ) {
-                Box(Modifier.weight(1f)) { start(Modifier.fillMaxSize()) }
-                Box(Modifier.weight(1f)) { end(Modifier.fillMaxSize()) }
-            }
-        }
-        below?.invoke(Modifier.fillMaxWidth())
-    }
+        verticalArrangement = Arrangement.spacedBy(Deaftly.spacing.space12),
+        content = content,
+    )
 }

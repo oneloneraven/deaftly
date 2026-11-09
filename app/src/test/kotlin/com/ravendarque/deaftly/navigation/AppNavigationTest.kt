@@ -58,10 +58,27 @@ class AppNavigationTest {
     ) {
         if (!firstLaunch) runBlocking { container.settingsRepository.setFirstRunDone() }
         composeRule.setContent { AppTheme { AppNavigation(container) } }
-        val landing = if (firstLaunch) R.string.first_run_start else R.string.home_category_all
+        val landing = if (firstLaunch) R.string.first_run_start else R.string.hub_start_typing
         composeRule.waitUntil(LOAD_TIMEOUT_MILLIS) {
             composeRule.onAllNodesWithText(text(landing)).fetchSemanticsNodes().isNotEmpty()
         }
+    }
+
+    private fun openTemplates() {
+        composeRule.onNodeWithText(text(R.string.hub_use_template)).performClick()
+        composeRule.waitUntil(LOAD_TIMEOUT_MILLIS) {
+            composeRule.onAllNodesWithText(text(R.string.home_category_all)).fetchSemanticsNodes().isNotEmpty()
+        }
+    }
+
+    private fun assertOnHub() {
+        composeRule.onNodeWithText(text(R.string.hub_show_heading)).assertExists()
+        composeRule.onNodeWithText(text(R.string.hub_chat_heading)).assertExists()
+    }
+
+    private fun pressSystemBack() {
+        composeRule.runOnUiThread { composeRule.activity.onBackPressedDispatcher.onBackPressed() }
+        composeRule.waitForIdle()
     }
 
     @Test
@@ -71,12 +88,12 @@ class AppNavigationTest {
 
         composeRule.onNodeWithText(text(R.string.first_run_title)).assertExists()
         composeRule.onNodeWithText(text(R.string.first_run_privacy)).assertExists()
-        composeRule.onNodeWithText(text(R.string.home_category_all)).assertDoesNotExist()
+        composeRule.onNodeWithText(text(R.string.hub_start_typing)).assertDoesNotExist()
         composeRule.onRoot().tryPerformAccessibilityChecks()
 
         composeRule.onNodeWithText(text(R.string.first_run_start)).performClick()
         composeRule.waitUntil(LOAD_TIMEOUT_MILLIS) {
-            composeRule.onAllNodesWithText(text(R.string.home_category_all)).fetchSemanticsNodes().isNotEmpty()
+            composeRule.onAllNodesWithText(text(R.string.hub_start_typing)).fetchSemanticsNodes().isNotEmpty()
         }
         composeRule.onNodeWithText(text(R.string.first_run_title)).assertDoesNotExist()
 
@@ -94,7 +111,7 @@ class AppNavigationTest {
         composeRule.onNode(hasSetTextAction()).performTextInput("Sam")
         composeRule.onNodeWithText(text(R.string.first_run_start)).performClick()
         composeRule.waitUntil(LOAD_TIMEOUT_MILLIS) {
-            composeRule.onAllNodesWithText(text(R.string.home_category_all)).fetchSemanticsNodes().isNotEmpty()
+            composeRule.onAllNodesWithText(text(R.string.hub_start_typing)).fetchSemanticsNodes().isNotEmpty()
         }
 
         assertEquals("Sam", runBlocking { container.settingsRepository.chatProfile.first() }.name)
@@ -114,7 +131,7 @@ class AppNavigationTest {
         composeRule.enableAccessibilityChecks()
         showApp()
 
-        composeRule.onNodeWithText(text(R.string.home_start_chat)).performClick()
+        composeRule.onNodeWithText(text(R.string.hub_side_by_side)).performClick()
         composeRule.waitUntil(LOAD_TIMEOUT_MILLIS) {
             composeRule.onAllNodesWithText(text(R.string.chat_empty)).fetchSemanticsNodes().isNotEmpty()
         }
@@ -122,7 +139,7 @@ class AppNavigationTest {
         composeRule.onRoot().tryPerformAccessibilityChecks()
 
         composeRule.onNodeWithContentDescription(text(R.string.chat_end)).performClick()
-        composeRule.onNodeWithText(text(R.string.home_start_chat)).assertExists()
+        composeRule.onNodeWithText(text(R.string.hub_side_by_side)).assertExists()
         composeRule.onNodeWithText(text(R.string.chat_empty)).assertDoesNotExist()
     }
 
@@ -131,7 +148,7 @@ class AppNavigationTest {
         showApp()
 
         fun openChat() {
-            composeRule.onNodeWithText(text(R.string.home_start_chat)).performClick()
+            composeRule.onNodeWithText(text(R.string.hub_side_by_side)).performClick()
             composeRule.waitUntil(LOAD_TIMEOUT_MILLIS) {
                 composeRule.onAllNodesWithText(text(R.string.chat_composer_hint)).fetchSemanticsNodes().isNotEmpty()
             }
@@ -151,7 +168,7 @@ class AppNavigationTest {
     }
 
     private fun openChatWithAMessage() {
-        composeRule.onNodeWithText(text(R.string.home_start_chat)).performClick()
+        composeRule.onNodeWithText(text(R.string.hub_side_by_side)).performClick()
         composeRule.waitUntil(LOAD_TIMEOUT_MILLIS) {
             composeRule.onAllNodesWithText(text(R.string.chat_composer_hint)).fetchSemanticsNodes().isNotEmpty()
         }
@@ -217,8 +234,9 @@ class AppNavigationTest {
     }
 
     @Test
-    fun newTemplateOpensTheEditorAndCancelReturnsHome() {
+    fun newTemplateOpensTheEditorAndCancelReturnsToTemplates() {
         showApp()
+        openTemplates()
 
         composeRule.onNodeWithContentDescription(text(R.string.home_new_template)).performClick()
         composeRule.onNodeWithText(text(R.string.editor_title_new)).assertExists()
@@ -226,14 +244,14 @@ class AppNavigationTest {
         composeRule.waitForIdle()
 
         composeRule.onNodeWithText(text(R.string.editor_title_new)).assertDoesNotExist()
-        composeRule.onNodeWithText(text(R.string.home_start_chat)).assertExists()
+        composeRule.onNodeWithText(text(R.string.home_category_all)).assertExists()
     }
 
     @Test
     fun typeAndShowKeepsTheTextAfterReturningFromShowUntilCleared() {
         composeRule.enableAccessibilityChecks()
         showApp()
-        composeRule.onNodeWithText(text(R.string.home_type_and_show)).performClick()
+        composeRule.onNodeWithText(text(R.string.hub_start_typing)).performClick()
 
         composeRule.onNodeWithContentDescription(text(R.string.type_show_label)).performTextInput("Table for two")
         composeRule.onNodeWithText(text(R.string.fill_show)).performClick()
@@ -247,14 +265,14 @@ class AppNavigationTest {
         composeRule.onNodeWithText(text(R.string.type_show_placeholder)).assertExists()
         composeRule.onNodeWithText(text(R.string.fill_show)).assertIsNotEnabled()
         composeRule.onNodeWithContentDescription(text(R.string.back)).performClick()
-        composeRule.onNodeWithText(text(R.string.home_start_chat)).assertExists()
+        composeRule.onNodeWithText(text(R.string.hub_side_by_side)).assertExists()
     }
 
     @Test
     fun continueAsChatFromShowOpensTheChatWithTheShownMessageAsTheDeafUsersFirstTurn() {
         composeRule.enableAccessibilityChecks()
         showApp()
-        composeRule.onNodeWithText(text(R.string.home_type_and_show)).performClick()
+        composeRule.onNodeWithText(text(R.string.hub_start_typing)).performClick()
         composeRule.onNodeWithContentDescription(text(R.string.type_show_label)).performTextInput("Table for two")
         composeRule.onNodeWithText(text(R.string.fill_show)).performClick()
 
@@ -275,6 +293,7 @@ class AppNavigationTest {
     fun scanTheMenuExplainsTheCameraAndTypeItInsteadReturnsToTheTypingField() {
         composeRule.enableAccessibilityChecks()
         showApp()
+        openTemplates()
         composeRule.onAllNodesWithText(text(R.string.template_order_food_title))[0].performClick()
         composeRule.onNode(hasText("menu item") and hasClickAction()).performClick()
 
@@ -292,6 +311,7 @@ class AppNavigationTest {
     fun textAddedFromTheScannerFillsTheCameraPlaceholderOnReturning() {
         val container = AppContainer(composeRule.activity.applicationContext)
         showApp(container)
+        openTemplates()
         composeRule.onAllNodesWithText(text(R.string.template_order_food_title))[0].performClick()
         composeRule.onNode(hasText("menu item") and hasClickAction()).performClick()
         composeRule.onNodeWithText(text(R.string.fill_scan_menu)).performClick()
@@ -308,6 +328,7 @@ class AppNavigationTest {
     @Test
     fun tappingATemplateOpensFill() {
         showApp()
+        openTemplates()
 
         composeRule.onAllNodesWithText(text(R.string.template_explain_deaf_title))[0].performClick()
 
@@ -326,7 +347,7 @@ class AppNavigationTest {
         composeRule.waitForIdle()
 
         composeRule.onNodeWithText(text(R.string.settings_me_heading)).assertDoesNotExist()
-        composeRule.onNodeWithText(text(R.string.home_start_chat)).assertExists()
+        composeRule.onNodeWithText(text(R.string.hub_side_by_side)).assertExists()
     }
 
     @Test
@@ -338,14 +359,14 @@ class AppNavigationTest {
 
         composeRule.onNodeWithContentDescription(text(R.string.back)).performClick()
 
-        composeRule.onNodeWithText(text(R.string.home_start_chat)).assertExists()
+        composeRule.onNodeWithText(text(R.string.hub_side_by_side)).assertExists()
     }
 
     @Test
     fun faceToFaceContinuesSideBySideWithEachSentMessageFromTheDeafUserAndTheTurnPassedOn() {
         composeRule.enableAccessibilityChecks()
         showApp()
-        composeRule.onNodeWithText(text(R.string.home_face_to_face)).performClick()
+        composeRule.onNodeWithText(text(R.string.hub_face_to_face)).performClick()
         composeRule.waitForIdle()
         val field = composeRule.onNode(hasSetTextAction())
 
@@ -365,19 +386,19 @@ class AppNavigationTest {
         composeRule.onRoot().tryPerformAccessibilityChecks()
         composeRule.onNodeWithContentDescription(text(R.string.chat_end)).performClick()
         composeRule.onNodeWithText(text(R.string.chat_end_confirm)).performClick()
-        composeRule.onNodeWithText(text(R.string.home_face_to_face)).assertExists()
+        composeRule.onNodeWithText(text(R.string.hub_face_to_face)).assertExists()
     }
 
     @Test
     fun faceToFaceWithNothingSentClosesStraightAwayAndWithMessagesAsksFirst() {
         showApp()
-        composeRule.onNodeWithText(text(R.string.home_face_to_face)).performClick()
+        composeRule.onNodeWithText(text(R.string.hub_face_to_face)).performClick()
         composeRule.waitForIdle()
 
         composeRule.onNodeWithContentDescription(text(R.string.f2f_close)).performClick()
-        composeRule.onNodeWithText(text(R.string.home_face_to_face)).assertExists()
+        composeRule.onNodeWithText(text(R.string.hub_face_to_face)).assertExists()
 
-        composeRule.onNodeWithText(text(R.string.home_face_to_face)).performClick()
+        composeRule.onNodeWithText(text(R.string.hub_face_to_face)).performClick()
         composeRule.waitForIdle()
         composeRule.onNode(hasSetTextAction()).performTextInput("Hello")
         composeRule.onNodeWithContentDescription(text(R.string.chat_send)).performClick()
@@ -387,7 +408,81 @@ class AppNavigationTest {
         composeRule.onNodeWithContentDescription(text(R.string.f2f_close)).assertExists()
         composeRule.onNodeWithContentDescription(text(R.string.f2f_close)).performClick()
         composeRule.onNodeWithText(text(R.string.chat_end_confirm)).performClick()
-        composeRule.onNodeWithText(text(R.string.home_face_to_face)).assertExists()
+        composeRule.onNodeWithText(text(R.string.hub_face_to_face)).assertExists()
+    }
+
+    @Test
+    fun theHubOffersTheFourOptionsAndEachOpensItsScreenAndReturnsToTheHub() {
+        composeRule.enableAccessibilityChecks()
+        showApp()
+        assertOnHub()
+        composeRule.onRoot().tryPerformAccessibilityChecks()
+
+        composeRule.onNodeWithText(text(R.string.hub_start_typing)).performClick()
+        composeRule.onNodeWithContentDescription(text(R.string.type_show_label)).assertExists()
+        composeRule.onNodeWithContentDescription(text(R.string.back)).performClick()
+        assertOnHub()
+
+        openTemplates()
+        composeRule.onNodeWithText(text(R.string.templates_home)).performClick()
+        assertOnHub()
+
+        composeRule.onNodeWithText(text(R.string.hub_face_to_face)).performClick()
+        composeRule.onNodeWithContentDescription(text(R.string.f2f_close)).performClick()
+        assertOnHub()
+
+        composeRule.onNodeWithText(text(R.string.hub_side_by_side)).performClick()
+        composeRule.waitUntil(LOAD_TIMEOUT_MILLIS) {
+            composeRule.onAllNodesWithText(text(R.string.chat_empty)).fetchSemanticsNodes().isNotEmpty()
+        }
+        composeRule.onNodeWithContentDescription(text(R.string.chat_end)).performClick()
+        assertOnHub()
+    }
+
+    @Test
+    fun theTemplatesScreenHasHomeAndNoSettingsAndSystemBackReturnsToTheHub() {
+        composeRule.enableAccessibilityChecks()
+        showApp()
+        openTemplates()
+
+        composeRule.onNodeWithText(text(R.string.templates_home)).assertExists()
+        composeRule.onNodeWithContentDescription(text(R.string.route_settings)).assertDoesNotExist()
+        composeRule.onNodeWithContentDescription(text(R.string.home_new_template)).assertExists()
+        composeRule.onRoot().tryPerformAccessibilityChecks()
+
+        pressSystemBack()
+
+        assertOnHub()
+        assertTrue(!composeRule.activity.isFinishing)
+    }
+
+    @Test
+    fun systemBackFromTheHubLeavesTheApp() {
+        showApp()
+
+        pressSystemBack()
+
+        assertTrue(composeRule.activity.isFinishing)
+    }
+
+    @Test
+    fun showingATemplateReturnsToItsFillThenTemplatesThenTheHub() {
+        val container = AppContainer(composeRule.activity.applicationContext)
+        runBlocking { container.templateRepository.add(Template("thanks", "Say thanks", "Everyday", "Thank you very much.")) }
+        showApp(container)
+        openTemplates()
+        composeRule.onNode(hasSetTextAction()).performTextInput("thanks")
+
+        composeRule.onAllNodesWithText("Say thanks")[0].performClick()
+        composeRule.onNodeWithText(text(R.string.fill_show)).performClick()
+        composeRule.onNodeWithText(text(R.string.show_hint)).assertExists()
+        composeRule.onNodeWithContentDescription(text(R.string.show_close)).performClick()
+        composeRule.onNodeWithText(text(R.string.fill_show)).assertExists()
+        composeRule.onNodeWithContentDescription(text(R.string.back)).performClick()
+        composeRule.onNodeWithText(text(R.string.home_category_all)).assertExists()
+        composeRule.onNodeWithText(text(R.string.templates_home)).performClick()
+
+        assertOnHub()
     }
 
     @Test
@@ -395,6 +490,7 @@ class AppNavigationTest {
         val routes: List<Route> =
             listOf(
                 Route.Home,
+                Route.Templates,
                 Route.Fill("template-1"),
                 Route.Fill("template-1", forChat = true),
                 Route.TemplatePicker,

@@ -30,8 +30,9 @@ import com.ravendarque.deaftly.ui.fill.FillScreen
 import com.ravendarque.deaftly.ui.fill.FillViewModel
 import com.ravendarque.deaftly.ui.firstrun.FirstRunScreen
 import com.ravendarque.deaftly.ui.firstrun.FirstRunViewModel
-import com.ravendarque.deaftly.ui.home.HomeScreen
 import com.ravendarque.deaftly.ui.home.HomeViewModel
+import com.ravendarque.deaftly.ui.home.TemplatesScreen
+import com.ravendarque.deaftly.ui.hub.HubScreen
 import com.ravendarque.deaftly.ui.ocr.OcrOutcome
 import com.ravendarque.deaftly.ui.ocr.OcrScreen
 import com.ravendarque.deaftly.ui.settings.SettingsScreen
@@ -76,9 +77,10 @@ private fun AppNavigationHost(
                     val viewModel = viewModel<FirstRunViewModel>(factory = container.firstRunViewModelFactory)
                     FirstRunScreen(viewModel, onDone = { backStack[backStack.lastIndex] = Route.Home })
                 }
-                entry<Route.Home> {
+                entry<Route.Home> { HubScreen(onNavigate = { backStack.add(it) }) }
+                entry<Route.Templates> {
                     val viewModel = viewModel<HomeViewModel>(factory = container.homeViewModelFactory)
-                    HomeScreen(viewModel, onNavigate = { backStack.add(it) })
+                    TemplatesScreen(viewModel, onNavigate = { backStack.add(it) }, onHome = { backStack.removeLastOrNull() })
                 }
                 templateEntries(container, backStack, insertIntoChat)
                 entry<Route.TypeShow> {

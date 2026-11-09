@@ -6,6 +6,7 @@
     <string name="route_fill">Fill in a template</string>
     <string name="route_show">Show a message</string>
     <string name="route_chat">Chat</string>
+    <string name="route_templates">Templates</string>
     <string name="route_ocr">Read text</string>
     <string name="route_editor">Edit templates</string>
     <string name="route_settings">Settings</string>
@@ -26,7 +27,13 @@
     <string name="home_clear_search">Clear search</string>
     <string name="home_empty">No templates yet</string>
     <string name="home_type_and_show">Type &amp; show</string>
-    <string name="home_start_chat">Start chat</string>
+    <string name="templates_home">Home</string>
+    <string name="hub_show_heading">Show</string>
+    <string name="hub_chat_heading">Chat</string>
+    <string name="hub_start_typing">Start typing</string>
+    <string name="hub_use_template">Use a template</string>
+    <string name="hub_face_to_face">Face to face</string>
+    <string name="hub_side_by_side">Side by side</string>
     <string name="home_face_to_face">Face to face</string>
     <string name="chip_state_empty">Empty</string>
     <string name="chip_state_filled">Filled in</string>

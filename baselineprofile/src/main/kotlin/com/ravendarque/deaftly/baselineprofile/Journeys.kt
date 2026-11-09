@@ -18,7 +18,9 @@ private const val PLACEHOLDER_LABEL = "how to reply"
 private const val CHOICE_LABEL = "type on my phone"
 private const val SHOW_LABEL = "Show"
 private const val CLOSE_SHOW_DESCRIPTION = "Close show mode"
-private const val START_CHAT_LABEL = "Start chat"
+private const val SIDE_BY_SIDE_LABEL = "Side by side"
+private const val USE_TEMPLATE_LABEL = "Use a template"
+private const val TEMPLATES_HOME_LABEL = "Home"
 private const val EMPTY_CHAT_LABEL = "No messages yet"
 private const val FACE_TO_FACE_LABEL = "Face to face"
 private const val FACE_TO_FACE_HINT = "Type to the person opposite\u2026"
@@ -29,11 +31,11 @@ private fun MacrobenchmarkScope.waitForText(text: String) {
 
 fun MacrobenchmarkScope.waitForHome() {
     val deadline = System.currentTimeMillis() + WAIT_MILLIS
-    while (System.currentTimeMillis() < deadline && !device.hasObject(By.text(START_CHAT_LABEL))) {
+    while (System.currentTimeMillis() < deadline && !device.hasObject(By.text(SIDE_BY_SIDE_LABEL))) {
         device.findObject(By.text(GET_STARTED_LABEL))?.click()
         Thread.sleep(POLL_MILLIS)
     }
-    waitForText(START_CHAT_LABEL)
+    waitForText(SIDE_BY_SIDE_LABEL)
 }
 
 fun MacrobenchmarkScope.resetAppData() {
@@ -47,6 +49,8 @@ fun MacrobenchmarkScope.openHome() {
 }
 
 fun MacrobenchmarkScope.openTemplateAndShow() {
+    device.findObject(By.text(USE_TEMPLATE_LABEL)).click()
+    waitForText(TEMPLATE_TITLE)
     device.findObject(By.text(TEMPLATE_TITLE)).click()
     waitForText(SHOW_LABEL)
     device.findObject(By.text(PLACEHOLDER_LABEL)).click()
@@ -59,11 +63,13 @@ fun MacrobenchmarkScope.openTemplateAndShow() {
     device.findObject(By.desc(CLOSE_SHOW_DESCRIPTION)).click()
     device.wait(Until.hasObject(By.text(SHOW_LABEL)), WAIT_MILLIS)
     device.pressBack()
-    waitForText(START_CHAT_LABEL)
+    waitForText(TEMPLATES_HOME_LABEL)
+    device.findObject(By.text(TEMPLATES_HOME_LABEL)).click()
+    waitForText(SIDE_BY_SIDE_LABEL)
 }
 
 fun MacrobenchmarkScope.openChat() {
-    device.findObject(By.text(START_CHAT_LABEL)).click()
+    device.findObject(By.text(SIDE_BY_SIDE_LABEL)).click()
     waitForText(EMPTY_CHAT_LABEL)
 }
 
@@ -71,5 +77,5 @@ fun MacrobenchmarkScope.openFaceToFace() {
     device.findObject(By.text(FACE_TO_FACE_LABEL)).click()
     waitForText(FACE_TO_FACE_HINT)
     device.pressBack()
-    waitForText(START_CHAT_LABEL)
+    waitForText(SIDE_BY_SIDE_LABEL)
 }
