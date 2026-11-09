@@ -6,7 +6,8 @@ import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.ravendarque.deaftly.core.ocr.BoundingBox
 import com.ravendarque.deaftly.core.ocr.FakeTextRecogniser
-import com.ravendarque.deaftly.core.ocr.PhraseSelection
+import com.ravendarque.deaftly.core.ocr.OcrSelection
+import com.ravendarque.deaftly.core.ocr.Phrase
 import com.ravendarque.deaftly.core.ocr.PixelFormat
 import com.ravendarque.deaftly.core.ocr.RecognitionFrame
 import com.ravendarque.deaftly.core.ocr.RecognitionResult
@@ -37,7 +38,9 @@ class OcrViewModelTest {
     private val store = ViewModelStore()
     private val box = BoundingBox(10f, 10f, 60f, 20f)
     private val result = RecognitionResult(listOf(TextBlock(listOf(TextLine("Lasagne", box, corners = box.toQuad())), box)))
-    private val fake = FakeTextRecogniser(result)
+    private val lower = BoundingBox(10f, 40f, 60f, 50f)
+    private var scripted: RecognitionResult? = null
+    private val fake by lazy { FakeTextRecogniser(scripted ?: result) }
     private var captured = 0
 
     @BeforeTest
@@ -142,6 +145,20 @@ class OcrViewModelTest {
         )
     }
 
+    private val twoLines =
+        RecognitionResult(
+            listOf(
+                TextBlock(listOf(TextLine("Soup of the day", box, corners = box.toQuad())), box),
+                TextBlock(listOf(TextLine("Garlic bread", lower, corners = lower.toQuad())), lower),
+            ),
+        )
+
+    private fun OcrViewModel.analyseTwoLines(): List<Phrase> {
+        awaitReady()
+        analyse(frame(), null)
+        return state.value.phrases
+    }
+
     @Test
     fun tappingAPhraseSelectsItAndFillsTheTrayWithItsText() {
         val viewModel = viewModel()
@@ -151,39 +168,113 @@ class OcrViewModelTest {
             viewModel.state.value.phrases
                 .single()
 
-        viewModel.selectPhrase(phrase.id)
+        viewModel.togglePhrase(phrase.id)
 
         assertEquals("Lasagne", viewModel.state.value.fieldText)
-        assertEquals(PhraseSelection.wholePhrase(phrase), viewModel.state.value.selection)
+        assertEquals(OcrSelection().toggled(phrase), viewModel.state.value.selection)
     }
 
     @Test
-    fun tappingNothingClearsTheSelectionButKeepsTheEditedText() {
+    fun tappingLinesBuildsTheTextInTapOrderAndTappingAgainRemovesOne() {
+        scripted = twoLines
+        val viewModel = viewModel()
+        val (soup, bread) = viewModel.analyseTwoLines()
+
+        viewModel.togglePhrase(bread.id)
+        viewModel.togglePhrase(soup.id)
+        assertEquals("Garlic bread Soup of the day", viewModel.state.value.fieldText)
+
+        viewModel.togglePhrase(bread.id)
+        assertEquals("Soup of the day", viewModel.state.value.fieldText)
+        assertTrue(
+            viewModel.state.value.selection
+                .isTapped(soup.id),
+        )
+        assertFalse(
+            viewModel.state.value.selection
+                .isTapped(bread.id),
+        )
+    }
+
+    @Test
+    fun deselectingEveryLineEmptiesTheText() {
         val viewModel = viewModel()
         viewModel.awaitReady()
         viewModel.analyse(frame(), null)
-        viewModel.selectPhrase(
+        val id =
             viewModel.state.value.phrases
                 .single()
-                .id,
-        )
-        viewModel.editText("Lasagne verde")
+                .id
 
-        viewModel.selectPhrase(null)
+        viewModel.togglePhrase(id)
+        viewModel.togglePhrase(id)
 
-        assertEquals(null, viewModel.state.value.selection)
-        assertEquals("Lasagne verde", viewModel.state.value.fieldText)
+        assertEquals("", viewModel.state.value.fieldText)
+        assertTrue(viewModel.state.value.selection.isEmpty)
     }
 
     @Test
-    fun selectingAPhraseThatIsNotThereChangesNothingButTheSelection() {
+    fun aDragReplacesTheTappedLinesAndATapAfterwardsStartsAgain() {
+        scripted = twoLines
+        val viewModel = viewModel()
+        val (soup, bread) = viewModel.analyseTwoLines()
+        viewModel.togglePhrase(soup.id)
+
+        viewModel.selectRange(TextSelection(WordRef(bread.id, 0), WordRef(bread.id, 0)))
+
+        assertEquals("Garlic bread", viewModel.state.value.fieldText)
+        assertTrue(
+            viewModel.state.value.selection.lines
+                .isEmpty(),
+        )
+
+        viewModel.togglePhrase(soup.id)
+
+        assertEquals("Soup of the day", viewModel.state.value.fieldText)
+        assertEquals(null, viewModel.state.value.selection.range)
+    }
+
+    @Test
+    fun clearingEmptiesTheTextAndDeselectsEverything() {
+        scripted = twoLines
+        val viewModel = viewModel()
+        val (soup, bread) = viewModel.analyseTwoLines()
+        viewModel.togglePhrase(soup.id)
+        viewModel.togglePhrase(bread.id)
+
+        viewModel.clearText()
+
+        assertEquals("", viewModel.state.value.fieldText)
+        assertTrue(viewModel.state.value.selection.isEmpty)
+    }
+
+    @Test
+    fun clearingAlsoDropsATypedEditAndADraggedRange() {
+        val viewModel = viewModel()
+        viewModel.awaitReady()
+        viewModel.analyse(frame(), null)
+        val id =
+            viewModel.state.value.phrases
+                .single()
+                .id
+        viewModel.selectRange(TextSelection(WordRef(id, 0), WordRef(id, 0)))
+        viewModel.editText("Lasagne verde")
+
+        viewModel.clearText()
+
+        assertEquals("", viewModel.state.value.fieldText)
+        assertTrue(viewModel.state.value.selection.isEmpty)
+    }
+
+    @Test
+    fun selectingAPhraseThatIsNotThereChangesNothing() {
         val viewModel = viewModel()
         viewModel.awaitReady()
         viewModel.editText("typed")
 
-        viewModel.selectPhrase(99)
+        viewModel.togglePhrase(99)
 
-        assertEquals(null, viewModel.state.value.selection)
+        assertTrue(viewModel.state.value.selection.isEmpty)
         assertEquals("typed", viewModel.state.value.fieldText)
     }
 
@@ -199,7 +290,7 @@ class OcrViewModelTest {
 
         viewModel.selectRange(range)
 
-        assertEquals(range, viewModel.state.value.selection)
+        assertEquals(range, viewModel.state.value.selection.range)
         assertEquals("Lasagne", viewModel.state.value.fieldText)
     }
 
@@ -211,7 +302,7 @@ class OcrViewModelTest {
 
         viewModel.selectRange(TextSelection(WordRef(42, 0), WordRef(42, 1)))
 
-        assertEquals(null, viewModel.state.value.selection)
+        assertTrue(viewModel.state.value.selection.isEmpty)
         assertEquals("kept", viewModel.state.value.fieldText)
     }
 

@@ -1,10 +1,12 @@
 package com.ravendarque.deaftly.ui.home
 
 import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.filter
+import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.isSelectable
 import androidx.compose.ui.test.junit4.accessibility.enableAccessibilityChecks
@@ -61,6 +63,11 @@ class HomeScreenTest {
         composeRule.onNodeWithText("All").assertIsSelected()
         composeRule.onNodeWithText("Everyday").assertIsNotSelected()
         composeRule.onRoot().tryPerformAccessibilityChecks()
+    }
+
+    @Test
+    fun theWordmarkIsSpokenAsDeftlyWhileItStaysSpeltDeaftly() {
+        composeRule.onNodeWithText("deaftly").assert(hasContentDescription("deftly"))
     }
 
     @Test

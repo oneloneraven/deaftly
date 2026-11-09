@@ -25,6 +25,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.ravendarque.deaftly.R
+import com.ravendarque.deaftly.core.ocr.OcrSelection
 import com.ravendarque.deaftly.core.ocr.Phrase
 import com.ravendarque.deaftly.core.ocr.TextSelection
 import com.ravendarque.deaftly.ui.theme.CameraColours
@@ -61,9 +62,10 @@ fun OcrScreen(
             actions =
                 OcrActions(
                     onClose,
-                    viewModel::selectPhrase,
+                    viewModel::togglePhrase,
                     viewModel::selectRange,
                     viewModel::editText,
+                    viewModel::clearText,
                     viewModel::toggleFreeze,
                     viewModel::toggleTorch,
                     { onAdd(state.fieldText.trim()) },
@@ -83,7 +85,7 @@ fun OcrScreen(
 data class OcrContent(
     val status: String,
     val phrases: List<Phrase>,
-    val selection: TextSelection?,
+    val selection: OcrSelection,
     val fieldText: String,
     val fieldLabel: String? = null,
     val frozen: Boolean = false,
@@ -94,9 +96,10 @@ data class OcrContent(
 
 data class OcrActions(
     val onClose: () -> Unit,
-    val onTapPhrase: (Long?) -> Unit,
+    val onTapPhrase: (Long) -> Unit,
     val onSelectRange: (TextSelection) -> Unit,
     val onFieldChange: (String) -> Unit,
+    val onClearText: () -> Unit,
     val onToggleFreeze: () -> Unit,
     val onToggleTorch: () -> Unit,
     val onAdd: () -> Unit,
@@ -126,10 +129,10 @@ fun OcrCameraContent(
             modifier = Modifier.statusBarsPadding(),
         )
         OcrTray(
-            hint = stringResource(R.string.ocr_tray_hint),
             fieldLabel = content.fieldLabel ?: stringResource(R.string.ocr_tray_label),
             text = content.fieldText,
             onTextChange = actions.onFieldChange,
+            onClear = actions.onClearText,
             onAdd = actions.onAdd,
             modifier = Modifier.align(Alignment.BottomCenter),
         )

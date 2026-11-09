@@ -52,8 +52,9 @@
     <string name="ocr_open_settings">Open settings</string>
     <string name="ocr_unavailable_title">No camera found</string>
     <string name="ocr_unavailable_body">Deaftly can\u2019t find a camera on this phone. You can type it instead.</string>
-    <string name="ocr_tray_hint">Tap a phrase, or drag across words.</string>
+    <string name="ocr_tray_hint">Tap lines, or drag across words.</string>
     <string name="ocr_add">Add to message</string>
+    <string name="ocr_clear">Clear text</string>
     <string name="ocr_tray_label">Selected text</string>
     <string name="ocr_close">Close camera</string>
     <string name="ocr_status_live">Live</string>

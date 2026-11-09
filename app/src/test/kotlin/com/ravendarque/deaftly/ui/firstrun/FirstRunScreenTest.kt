@@ -3,7 +3,9 @@ package com.ravendarque.deaftly.ui.firstrun
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsSelected
+import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.junit4.accessibility.enableAccessibilityChecks
 import androidx.compose.ui.test.junit4.v2.createComposeRule
@@ -59,6 +61,16 @@ class FirstRunScreenTest {
         composeRule.onNodeWithText("Split screen").assertDoesNotExist()
         composeRule.onNodeWithText("Deaftly has no internet access. Your templates and chats never leave your phone.").assertExists()
         composeRule.onNodeWithText("Get started").assertExists()
+    }
+
+    @Test
+    fun theAppNameIsSpokenAsDeftlyWhileTheVisibleTextKeepsItsSpelling() {
+        show()
+
+        composeRule.onNodeWithText("Welcome to Deaftly").assert(hasContentDescription("Welcome to Deftly"))
+        composeRule
+            .onNodeWithText("Deaftly has no internet access. Your templates and chats never leave your phone.")
+            .assert(hasContentDescription("Deftly has no internet access. Your templates and chats never leave your phone."))
     }
 
     @Test
