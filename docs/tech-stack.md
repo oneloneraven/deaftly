@@ -21,7 +21,7 @@ The repository is set up with the `project-bootstrap` plugin, using the `core` m
 | Concern | Choice | Why |
 |---------|--------|-----|
 | Language | **Kotlin** | The standard language for Android. |
-| UI | **Jetpack Compose** (Material 3 as a base, themed to the mockups) | Declarative, and the current Android default. Supports the system font scale and handles the rotated split-screen layout (H9). |
+| UI | **Jetpack Compose** (Material 3 as a base, themed to the mockups) | Declarative, and the current Android default. Supports the system font scale and handles the rotated face-to-face half (H9). |
 | Architecture | Single-activity app, MVVM with unidirectional data flow (`ViewModel` + `StateFlow`) | Google's recommended pattern; easy to test. |
 | Navigation | **Jetpack Navigation 3** | Stable since November 2025 and built for Compose ([Android Developers Blog](https://android-developers.googleblog.com/2025/11/jetpack-navigation-3-is-stable.html)). |
 | Dependency injection | **Manual** (one `AppContainer`) | A handful of dependencies doesn't justify a framework (KISS). |

@@ -19,7 +19,6 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.ravendarque.deaftly.core.chat.ChatProfile
 import com.ravendarque.deaftly.core.chat.ColourRole
-import com.ravendarque.deaftly.core.settings.ChatLayout
 import com.ravendarque.deaftly.core.settings.ShowScheme
 import com.ravendarque.deaftly.ui.chat.FakeSettingsRepository
 import com.ravendarque.deaftly.ui.theme.AppTheme
@@ -38,7 +37,7 @@ class SettingsScreenTest {
     @get:Rule
     val composeRule = createComposeRule()
 
-    private val settings = FakeSettingsRepository(ChatProfile("Alex", ColourRole.Green), ShowScheme.WhiteOnBlack, ChatLayout.Sides)
+    private val settings = FakeSettingsRepository(ChatProfile("Alex", ColourRole.Green), ShowScheme.WhiteOnBlack)
     private var backs = 0
 
     @Before
@@ -49,27 +48,15 @@ class SettingsScreenTest {
         composeRule.waitForIdle()
     }
 
-    private fun hasState(selected: Boolean) = SemanticsMatcher.expectValue(SemanticsProperties.Selected, selected)
-
     @Test
     fun showsTheStoredChoices() {
-        composeRule.onNodeWithText("Side by side").assertIsSelected()
-        composeRule.onNodeWithText("Split screen").assert(hasState(false))
+        composeRule.onNodeWithText("Split screen").assertDoesNotExist()
         composeRule.onNodeWithText("White on black").assertIsSelected()
         composeRule
             .onNode(
                 hasSetTextAction(),
             ).assert(SemanticsMatcher.expectValue(SemanticsProperties.EditableText, AnnotatedString("Alex")))
         composeRule.onRoot().tryPerformAccessibilityChecks()
-    }
-
-    @Test
-    fun choosingTheDefaultLayoutSavesIt() {
-        composeRule.onNodeWithText("Split screen").performClick()
-        composeRule.waitForIdle()
-
-        assertEquals(ChatLayout.Split, settings.savedLayout)
-        composeRule.onNodeWithText("Split screen").assertIsSelected()
     }
 
     @Test

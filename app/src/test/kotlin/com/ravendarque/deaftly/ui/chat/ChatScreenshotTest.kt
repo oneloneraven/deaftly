@@ -16,7 +16,6 @@ import com.ravendarque.deaftly.core.chat.ColourRole
 import com.ravendarque.deaftly.core.chat.Conversation
 import com.ravendarque.deaftly.core.chat.Participant
 import com.ravendarque.deaftly.core.chat.ParticipantId
-import com.ravendarque.deaftly.core.settings.ChatLayout
 import com.ravendarque.deaftly.ui.components.SheetBody
 import com.ravendarque.deaftly.ui.components.SheetHandle
 import com.ravendarque.deaftly.ui.theme.AppTheme
@@ -73,7 +72,7 @@ class ChatScreenshotTest {
         dark: Boolean,
     ) = shot {
         AppTheme(darkTheme = dark) {
-            Surface { ChatHeader(conversation, ChatTextSize.Normal, ChatHeaderActions({}, {}, {}, {})) }
+            Surface { ChatHeader(conversation, ChatTextSize.Normal, ChatHeaderActions({}, {}, {})) }
         }
     }
 
@@ -102,20 +101,13 @@ class ChatScreenshotTest {
         shot { AppTheme(darkTheme = dark) { ChatScreen(viewModel, onEnd = {}, onInsertTemplate = {}) } }
     }
 
-    private fun split(
-        turn: ParticipantId,
-        dark: Boolean,
-    ) {
-        val saved =
-            SavedStateHandle(
-                mapOf("conversation" to ChatCodec.encode(splitConversation(turn)), "layout" to ChatLayout.Split.ordinal),
-            )
-        val viewModel = ChatViewModel(FakeSettingsRepository(), saved)
-        shot { AppTheme(darkTheme = dark) { ChatScreen(viewModel, onEnd = {}, onInsertTemplate = {}) } }
-    }
-
     private fun continuedFromShow(dark: Boolean) {
-        val viewModel = ChatViewModel(FakeSettingsRepository(), SavedStateHandle(), "Hi! I'm deaf. Could I have a table for two, please?")
+        val viewModel =
+            ChatViewModel(
+                FakeSettingsRepository(),
+                SavedStateHandle(),
+                ChatOpening(listOf("Hi! I'm deaf. Could I have a table for two, please?")),
+            )
         shot { AppTheme(darkTheme = dark) { ChatScreen(viewModel, onEnd = {}, onInsertTemplate = {}) } }
     }
 
@@ -128,16 +120,6 @@ class ChatScreenshotTest {
     @Test
     @Config(fontScale = 2f)
     fun formattingAndQuotesLargeFontScale() = formatted(dark = false)
-
-    @Test
-    fun splitHearingPersonsTurnLightTheme() = split(ParticipantId.B, dark = false)
-
-    @Test
-    fun splitDeafUsersTurnDarkTheme() = split(ParticipantId.A, dark = true)
-
-    @Test
-    @Config(fontScale = 2f)
-    fun splitHearingPersonsTurnLargeFontScale() = split(ParticipantId.B, dark = false)
 
     @Test
     fun continuedFromShowLightTheme() = continuedFromShow(dark = false)

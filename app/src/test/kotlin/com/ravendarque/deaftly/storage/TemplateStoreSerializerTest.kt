@@ -178,9 +178,18 @@ class TemplateStoreSerializerTest {
         }
 
     @Test
-    fun roundTripsTheChatLayoutAsAStableName() =
+    fun readsAStoredSplitLayoutSettingAndIgnoresIt() =
         runTest {
-            val document = seed.copy(settings = SettingsDto(chatLayout = ChatLayoutDto.Split))
+            val document =
+                read("""{"version":1,"templates":[],"settings":{"chatName":"Alex","chatLayout":"split","firstRunDone":true}}""")
+
+            assertEquals(SettingsDto(chatName = "Alex", firstRunDone = true), document.settings)
+        }
+
+    @Test
+    fun aStoredLayoutIsDroppedWhenTheStoreIsNextWritten() =
+        runTest {
+            val document = read("""{"version":1,"templates":[],"settings":{"chatLayout":"sides"}}""")
 
             val settings =
                 Json
@@ -189,8 +198,7 @@ class TemplateStoreSerializerTest {
                     .getValue("settings")
                     .jsonObject
 
-            assertEquals("split", settings.getValue("chatLayout").jsonPrimitive.content)
-            assertEquals(ChatLayoutDto.Split, read(write(document)).settings.chatLayout)
+            assertEquals(null, settings["chatLayout"])
         }
 
     @Test

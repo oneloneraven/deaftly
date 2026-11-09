@@ -37,7 +37,6 @@ import com.ravendarque.deaftly.core.chat.Quote
 import com.ravendarque.deaftly.core.chat.Span
 import com.ravendarque.deaftly.core.chat.SpanStyle
 import com.ravendarque.deaftly.core.chat.StyleRange
-import com.ravendarque.deaftly.core.settings.ChatLayout
 import com.ravendarque.deaftly.ui.theme.AppTheme
 import org.junit.Before
 import org.junit.Rule
@@ -522,22 +521,5 @@ class ChatScreenTest {
 
         endConfirmation().assertDoesNotExist()
         assertEquals(1, ended)
-    }
-
-    @Test
-    fun theHeaderSwitchesToTheSplitScreenLayoutAndRemembersTheChoice() {
-        showOrdering()
-
-        composeRule.onNodeWithContentDescription("Switch to split screen").assertWidthIsAtLeast(48.dp).performClick()
-        composeRule.waitForIdle()
-
-        assertEquals(ChatLayout.Split, (viewModel.state.value as ChatUiState.Ready).layout)
-        assertEquals(ChatLayout.Split, settings.savedLayout)
-        composeRule.onNodeWithText("WAITER\u2019S TURN").assertIsDisplayed()
-        composeRule.onNodeWithContentDescription("Switch to side-by-side chat").performClick()
-        composeRule.waitForIdle()
-        assertEquals(ChatLayout.Sides, (viewModel.state.value as ChatUiState.Ready).layout)
-        assertEquals(ChatLayout.Sides, settings.savedLayout)
-        assertEquals(4, conversation().messages.size)
     }
 }

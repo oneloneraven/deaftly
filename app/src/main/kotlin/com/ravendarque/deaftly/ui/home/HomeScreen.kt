@@ -95,6 +95,14 @@ fun HomeContent(
                         icon = DeaftlyIcons.Chat,
                     )
                 },
+                below = { modifier ->
+                    SecondaryButton(
+                        text = stringResource(R.string.home_face_to_face),
+                        onClick = { actions.onNavigate(Route.FaceToFace) },
+                        modifier = modifier,
+                        icon = DeaftlyIcons.FaceToFace,
+                    )
+                },
             )
         }
     }

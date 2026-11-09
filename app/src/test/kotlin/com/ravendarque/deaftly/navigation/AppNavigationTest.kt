@@ -21,7 +21,6 @@ import androidx.compose.ui.test.tryPerformAccessibilityChecks
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.ravendarque.deaftly.AppContainer
 import com.ravendarque.deaftly.R
-import com.ravendarque.deaftly.core.settings.ChatLayout
 import com.ravendarque.deaftly.core.template.Template
 import com.ravendarque.deaftly.ui.chat.isMessageField
 import com.ravendarque.deaftly.ui.ocr.OcrOutcome
@@ -93,14 +92,12 @@ class AppNavigationTest {
         showApp(container, firstLaunch = true)
 
         composeRule.onNode(hasSetTextAction()).performTextInput("Sam")
-        composeRule.onNodeWithText(text(R.string.settings_layout_split)).performClick()
         composeRule.onNodeWithText(text(R.string.first_run_start)).performClick()
         composeRule.waitUntil(LOAD_TIMEOUT_MILLIS) {
             composeRule.onAllNodesWithText(text(R.string.home_category_all)).fetchSemanticsNodes().isNotEmpty()
         }
 
         assertEquals("Sam", runBlocking { container.settingsRepository.chatProfile.first() }.name)
-        assertEquals(ChatLayout.Split, runBlocking { container.settingsRepository.chatLayout.first() })
         assertTrue(runBlocking { container.settingsRepository.firstRunDone.first() })
     }
 
@@ -324,35 +321,73 @@ class AppNavigationTest {
         showApp()
 
         composeRule.onNodeWithContentDescription(text(R.string.route_settings)).performClick()
-        composeRule.onNodeWithText(text(R.string.settings_layout_heading)).assertExists()
+        composeRule.onNodeWithText(text(R.string.settings_me_heading)).assertExists()
         composeRule.runOnUiThread { composeRule.activity.onBackPressedDispatcher.onBackPressed() }
         composeRule.waitForIdle()
 
-        composeRule.onNodeWithText(text(R.string.settings_layout_heading)).assertDoesNotExist()
+        composeRule.onNodeWithText(text(R.string.settings_me_heading)).assertDoesNotExist()
         composeRule.onNodeWithText(text(R.string.home_start_chat)).assertExists()
     }
 
     @Test
-    fun settingsOpensFromHomeAndTheChosenLayoutDecidesHowTheNextChatOpens() {
+    fun settingsOpensFromHomeAndBackReturnsHome() {
         composeRule.enableAccessibilityChecks()
-        val container = AppContainer(composeRule.activity.applicationContext)
-        showApp(container)
+        showApp()
         composeRule.onNodeWithContentDescription(text(R.string.route_settings)).performClick()
         composeRule.onRoot().tryPerformAccessibilityChecks()
 
-        composeRule.onNodeWithText(text(R.string.settings_layout_split)).performClick()
-        composeRule.waitUntil(LOAD_TIMEOUT_MILLIS) {
-            composeRule.onAllNodes(hasText(text(R.string.settings_layout_split)) and isSelected()).fetchSemanticsNodes().isNotEmpty()
-        }
         composeRule.onNodeWithContentDescription(text(R.string.back)).performClick()
-        composeRule.onNodeWithText(text(R.string.home_start_chat)).performClick()
+
+        composeRule.onNodeWithText(text(R.string.home_start_chat)).assertExists()
+    }
+
+    @Test
+    fun faceToFaceContinuesSideBySideWithEachSentMessageFromTheDeafUserAndTheTurnPassedOn() {
+        composeRule.enableAccessibilityChecks()
+        showApp()
+        composeRule.onNodeWithText(text(R.string.home_face_to_face)).performClick()
+        composeRule.waitForIdle()
+        val field = composeRule.onNode(hasSetTextAction())
+
+        field.performTextInput("Hello, I am deaf")
+        composeRule.onNodeWithContentDescription(text(R.string.chat_send)).performClick()
+        field.performTextInput("Could I have a coffee please")
+        composeRule.onNodeWithContentDescription(text(R.string.chat_send)).performClick()
+        field.performTextInput("And a")
+        composeRule.onNodeWithText(text(R.string.f2f_continue)).performClick()
         composeRule.waitUntil(LOAD_TIMEOUT_MILLIS) {
-            composeRule.onAllNodesWithText(text(R.string.chat_split_hint)).fetchSemanticsNodes().isNotEmpty()
+            composeRule.onAllNodesWithText(text(R.string.chat_turn_prompt_other)).fetchSemanticsNodes().isNotEmpty()
         }
 
-        composeRule.onNodeWithContentDescription(text(R.string.chat_layout_to_sides)).assertExists()
+        composeRule.onNodeWithContentDescription("Me: Hello, I am deaf").assertExists()
+        composeRule.onNodeWithContentDescription("Me: Could I have a coffee please").assertExists()
+        composeRule.onNodeWithContentDescription(text(R.string.chat_turn_label)).assertExists()
+        composeRule.onRoot().tryPerformAccessibilityChecks()
         composeRule.onNodeWithContentDescription(text(R.string.chat_end)).performClick()
-        composeRule.onNodeWithText(text(R.string.home_start_chat)).assertExists()
+        composeRule.onNodeWithText(text(R.string.chat_end_confirm)).performClick()
+        composeRule.onNodeWithText(text(R.string.home_face_to_face)).assertExists()
+    }
+
+    @Test
+    fun faceToFaceWithNothingSentClosesStraightAwayAndWithMessagesAsksFirst() {
+        showApp()
+        composeRule.onNodeWithText(text(R.string.home_face_to_face)).performClick()
+        composeRule.waitForIdle()
+
+        composeRule.onNodeWithContentDescription(text(R.string.f2f_close)).performClick()
+        composeRule.onNodeWithText(text(R.string.home_face_to_face)).assertExists()
+
+        composeRule.onNodeWithText(text(R.string.home_face_to_face)).performClick()
+        composeRule.waitForIdle()
+        composeRule.onNode(hasSetTextAction()).performTextInput("Hello")
+        composeRule.onNodeWithContentDescription(text(R.string.chat_send)).performClick()
+        composeRule.onNodeWithContentDescription(text(R.string.f2f_close)).performClick()
+        composeRule.onNodeWithText(text(R.string.chat_end_title)).assertExists()
+        composeRule.onNodeWithText(text(R.string.chat_end_keep)).performClick()
+        composeRule.onNodeWithContentDescription(text(R.string.f2f_close)).assertExists()
+        composeRule.onNodeWithContentDescription(text(R.string.f2f_close)).performClick()
+        composeRule.onNodeWithText(text(R.string.chat_end_confirm)).performClick()
+        composeRule.onNodeWithText(text(R.string.home_face_to_face)).assertExists()
     }
 
     @Test
@@ -367,7 +402,8 @@ class AppNavigationTest {
                 Route.Show("Hello"),
                 Route.Show("Hello Sam", listOf(HighlightRange(6, 9))),
                 Route.Chat(),
-                Route.Chat("Hello"),
+                Route.Chat(listOf("Hello", "Could I have a coffee"), "And a"),
+                Route.FaceToFace,
                 Route.Editor("template-1"),
                 Route.Editor(),
                 Route.Ocr("order-food", "menu item"),

@@ -40,7 +40,6 @@ data class ChatHeaderActions(
     val onEnd: () -> Unit,
     val onEditParticipants: () -> Unit,
     val onCycleTextSize: () -> Unit,
-    val onSwitchLayout: () -> Unit,
 )
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -86,7 +85,6 @@ fun ChatHeader(
                 HeaderPerson(right)
             }
         }
-        DeaftlyIconButton(DeaftlyIcons.Split, stringResource(R.string.chat_layout_to_split), actions.onSwitchLayout)
         TextSizeButton(textSize, actions.onCycleTextSize)
     }
 }

@@ -6,7 +6,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.takahirom.roborazzi.captureRoboImage
 import com.ravendarque.deaftly.core.chat.ChatProfile
 import com.ravendarque.deaftly.core.chat.ColourRole
-import com.ravendarque.deaftly.core.settings.ChatLayout
 import com.ravendarque.deaftly.core.settings.ShowScheme
 import com.ravendarque.deaftly.ui.chat.FakeSettingsRepository
 import com.ravendarque.deaftly.ui.theme.AppTheme
@@ -24,7 +23,7 @@ class SettingsScreenshotTest {
     val composeRule = createComposeRule()
 
     private fun capture(dark: Boolean) {
-        val settings = FakeSettingsRepository(ChatProfile("Alex", ColourRole.Green), ShowScheme.YellowOnBlack, ChatLayout.Split)
+        val settings = FakeSettingsRepository(ChatProfile("Alex", ColourRole.Green), ShowScheme.YellowOnBlack)
         val viewModel = SettingsViewModel(settings)
         composeRule.setContent { AppTheme(darkTheme = dark) { SettingsScreen(viewModel, onBack = {}) } }
         composeRule.waitForIdle()

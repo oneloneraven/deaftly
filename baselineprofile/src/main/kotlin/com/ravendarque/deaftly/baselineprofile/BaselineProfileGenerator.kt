@@ -17,6 +17,7 @@ class BaselineProfileGenerator {
             resetAppData()
             openHome()
             openTemplateAndShow()
+            openFaceToFace()
             openChat()
         }
     }

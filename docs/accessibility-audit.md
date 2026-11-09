@@ -30,7 +30,7 @@ Status "pass" means no finding at 1x and at 200%.
 | Type & show | Back, Clear message, Message to show field, Show | pass | Not separately checked beyond Show | pass |
 | Editor | Cancel, Save, Name, Category, category chips, Message, Placeholder, Delete placeholder, placeholder fields; discard dialog buttons | pass | Title wraps to two lines; all fields reachable | pass |
 | Chat, side by side | End chat, participants, layout switch, text size, composer, Bold, Italic, Highlight, Quote, Insert template, Send, turn control (label includes who is next) | pass | Header participants wrap; toolbar and turn control fit | pass |
-| Chat, split screen | Composer for each half, Send, My turn, End chat, layout switch | pass | Both halves fit | pass, one note (below) |
+| Chat, split screen (removed in #125, replaced by Face to face) | Composer for each half, Send, My turn, End chat, layout switch | pass | Both halves fit | pass, one note (below) |
 | Chat, participants sheet | Names, swatches (radio, checked), taken colours disabled, Done | pass | Not separately checked | pass |
 | Chat, end dialog | Keep chatting, End chat | pass | Not separately checked | pass |
 | Settings | Back, both layout options, name, swatches, three show-mode options | pass | Scrolls; no clipping | pass |

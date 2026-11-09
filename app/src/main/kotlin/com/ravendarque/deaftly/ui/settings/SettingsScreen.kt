@@ -36,7 +36,6 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ravendarque.deaftly.R
-import com.ravendarque.deaftly.core.settings.ChatLayout
 import com.ravendarque.deaftly.core.settings.ShowScheme
 import com.ravendarque.deaftly.ui.chat.ColourChoices
 import com.ravendarque.deaftly.ui.chat.NameField
@@ -83,20 +82,6 @@ private fun SettingsContent(
                 .padding(horizontal = Deaftly.spacing.space20, vertical = Deaftly.spacing.space8),
         verticalArrangement = Arrangement.spacedBy(Deaftly.spacing.space24),
     ) {
-        Section(stringResource(R.string.settings_layout_heading)) {
-            ChoiceRow(
-                selected = state.layout == ChatLayout.Sides,
-                label = stringResource(R.string.settings_layout_sides),
-                hint = stringResource(R.string.settings_layout_sides_hint),
-                onClick = { viewModel.setLayout(ChatLayout.Sides) },
-            )
-            ChoiceRow(
-                selected = state.layout == ChatLayout.Split,
-                label = stringResource(R.string.settings_layout_split),
-                hint = stringResource(R.string.settings_layout_split_hint),
-                onClick = { viewModel.setLayout(ChatLayout.Split) },
-            )
-        }
         Section(stringResource(R.string.settings_me_heading)) {
             NameField(
                 value = name,

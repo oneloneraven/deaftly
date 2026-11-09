@@ -33,17 +33,6 @@ fun orderingConversation(turn: ParticipantId = ParticipantId.B): Conversation =
         .append(styled("No problem. It will take about 15 minutes.", "15 minutes", SpanStyle.Highlight))
         .withTurn(turn)
 
-fun splitConversation(turn: ParticipantId): Conversation =
-    Conversation(
-        Participant(ParticipantId.A, ColourRole.Indigo, "Sam"),
-        Participant(ParticipantId.B, ColourRole.Orange, "Waiter"),
-    ).append(styled("Sure! Do you want it spicy or mild?", "spicy or mild", SpanStyle.Highlight))
-        .withTurn(ParticipantId.A)
-        .append(styled("Mild please. And no nuts, I'm allergic.", "no nuts", SpanStyle.Bold))
-        .withTurn(ParticipantId.B)
-        .append(styled("No problem. About 15 minutes.", "15 minutes", SpanStyle.Highlight))
-        .withTurn(turn)
-
 fun formattingConversation(): Conversation {
     val everything = "Mild please. And absolutely no nuts, I'm allergic."
     val from = everything.indexOf("absolutely no nuts")

@@ -12,7 +12,6 @@ import com.ravendarque.deaftly.core.chat.Quote
 import com.ravendarque.deaftly.core.chat.Span
 import com.ravendarque.deaftly.core.chat.SpanStyle
 import com.ravendarque.deaftly.core.chat.StyleRange
-import com.ravendarque.deaftly.core.settings.ChatLayout
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
@@ -45,8 +44,9 @@ class ChatViewModelTest {
         settings: FakeSettingsRepository = FakeSettingsRepository(),
         savedState: SavedStateHandle = SavedStateHandle(),
         firstMessage: String? = null,
+        draft: String = "",
         insertions: ChatInsertions = ChatInsertions(),
-    ) = ChatViewModel(settings, savedState, firstMessage, insertions)
+    ) = ChatViewModel(settings, savedState, ChatOpening(listOfNotNull(firstMessage), draft), insertions)
 
     private fun ChatViewModel.type(text: String) = drafts.setComposition(Composition().withText(text, text.length, text.length))
 
@@ -507,66 +507,41 @@ class ChatViewModelTest {
         }
 
     @Test
-    fun theLayoutStartsAsSidesAndSurvivesRecreation() =
+    fun anOpeningWithSeveralMessagesMakesEachOneFromTheDeafUserInOrderAndPassesTheTurn() =
         runTest {
-            val savedState = SavedStateHandle()
-            val first = viewModel(savedState = savedState)
-            collect(first)
-            assertEquals(ChatLayout.Sides, assertIs<ChatUiState.Ready>(first.state.value).layout)
-
-            first.display.chooseLayout(ChatLayout.Split)
-            val restored = viewModel(savedState = savedState)
-            collect(restored)
-
-            assertEquals(ChatLayout.Split, assertIs<ChatUiState.Ready>(restored.state.value).layout)
-        }
-
-    @Test
-    fun changingTheLayoutKeepsTheConversationAndDrafts() =
-        runTest {
-            val viewModel = viewModel()
-            collect(viewModel)
-            viewModel.type("half a thought")
-            val before = viewModel.conversation()
-
-            viewModel.display.chooseLayout(ChatLayout.Split)
-
-            assertEquals(before, viewModel.conversation())
-            assertEquals("half a thought", viewModel.draft().text)
-        }
-
-    @Test
-    fun aNewChatStartsInTheLayoutSavedInSettings() =
-        runTest {
-            val viewModel = viewModel(FakeSettingsRepository(layout = ChatLayout.Split))
+            val viewModel =
+                ChatViewModel(
+                    FakeSettingsRepository(),
+                    SavedStateHandle(),
+                    ChatOpening(listOf("Hello, I am deaf", "  ", "Could I have a coffee")),
+                    ChatInsertions(),
+                )
             collect(viewModel)
 
-            assertEquals(ChatLayout.Split, assertIs<ChatUiState.Ready>(viewModel.state.value).layout)
+            val conversation = viewModel.conversation()
+            assertEquals(listOf("Hello, I am deaf", "Could I have a coffee"), conversation.messages.map { it.plainText })
+            assertEquals(listOf(ParticipantId.A, ParticipantId.A), conversation.messages.map { it.author })
+            assertEquals(ParticipantId.B, conversation.turn)
         }
 
     @Test
-    fun choosingALayoutInTheChatIsRememberedForNextTime() =
+    fun anOpeningDraftGoesIntoTheDeafUsersComposer() =
         runTest {
-            val settings = FakeSettingsRepository()
-            val viewModel = viewModel(settings)
+            val viewModel = viewModel(firstMessage = "Hello", draft = "And a tea")
             collect(viewModel)
 
-            viewModel.display.chooseLayout(ChatLayout.Split)
-
-            assertEquals(ChatLayout.Split, settings.savedLayout)
+            val drafts = assertIs<ChatUiState.Ready>(viewModel.state.value).drafts
+            assertEquals("And a tea", drafts.getValue(ParticipantId.A).composition.text)
+            assertEquals("", drafts.getValue(ParticipantId.B).composition.text)
         }
 
     @Test
-    fun aRestoredChatKeepsItsOwnLayoutWhateverTheSettingsNowSay() =
+    fun anOpeningDraftWithNoMessagesLeavesTheTurnWithTheDeafUser() =
         runTest {
-            val savedState = SavedStateHandle()
-            val first = viewModel(FakeSettingsRepository(layout = ChatLayout.Split), savedState)
-            collect(first)
-            first.display.chooseLayout(ChatLayout.Sides)
+            val viewModel = viewModel(draft = "Half a thought")
+            collect(viewModel)
 
-            val restored = viewModel(FakeSettingsRepository(layout = ChatLayout.Split), savedState)
-            collect(restored)
-
-            assertEquals(ChatLayout.Sides, assertIs<ChatUiState.Ready>(restored.state.value).layout)
+            assertEquals(ParticipantId.A, viewModel.conversation().turn)
+            assertEquals("Half a thought", viewModel.draft().text)
         }
 }

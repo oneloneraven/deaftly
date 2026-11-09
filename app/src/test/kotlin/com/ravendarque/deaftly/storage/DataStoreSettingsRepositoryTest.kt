@@ -2,7 +2,6 @@ package com.ravendarque.deaftly.storage
 
 import com.ravendarque.deaftly.core.chat.ChatProfile
 import com.ravendarque.deaftly.core.chat.ColourRole
-import com.ravendarque.deaftly.core.settings.ChatLayout
 import com.ravendarque.deaftly.core.settings.ShowScheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -91,22 +90,6 @@ class DataStoreSettingsRepositoryTest {
                     .templates
                     .map { it.toDomain() },
             )
-        }
-
-    @Test
-    fun defaultsToTheSidesLayoutUntilOneIsChosen() =
-        runTest {
-            assertEquals(ChatLayout.Sides, repository(backgroundScope).chatLayout.first())
-        }
-
-    @Test
-    fun theChosenLayoutSurvivesAFreshStore() =
-        runTest {
-            val firstRun = Job()
-            repository(CoroutineScope(firstRun)).setChatLayout(ChatLayout.Split)
-            firstRun.cancelAndJoin()
-
-            assertEquals(ChatLayout.Split, repository(backgroundScope).chatLayout.first())
         }
 
     @Test

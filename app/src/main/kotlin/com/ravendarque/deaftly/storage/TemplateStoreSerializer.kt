@@ -13,6 +13,7 @@ private val storeJson =
     Json {
         encodeDefaults = true
         explicitNulls = false
+        ignoreUnknownKeys = true
     }
 
 class TemplateStoreSerializer(

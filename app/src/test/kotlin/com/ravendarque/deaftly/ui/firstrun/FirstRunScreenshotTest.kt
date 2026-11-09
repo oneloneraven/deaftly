@@ -5,7 +5,6 @@ import androidx.compose.ui.test.onRoot
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.takahirom.roborazzi.captureRoboImage
 import com.ravendarque.deaftly.core.chat.ColourRole
-import com.ravendarque.deaftly.core.settings.ChatLayout
 import com.ravendarque.deaftly.ui.theme.AppTheme
 import org.junit.Rule
 import org.junit.Test
@@ -24,10 +23,9 @@ class FirstRunScreenshotTest {
         composeRule.setContent {
             AppTheme(darkTheme = dark) {
                 FirstRunContent(
-                    state = FirstRunState("Alex", ColourRole.Green, ChatLayout.Sides),
+                    state = FirstRunState("Alex", ColourRole.Green),
                     onName = {},
                     onColour = {},
-                    onLayout = {},
                     onGetStarted = {},
                 )
             }

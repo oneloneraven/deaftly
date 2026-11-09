@@ -16,7 +16,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ravendarque.deaftly.R
-import com.ravendarque.deaftly.core.settings.ChatLayout
 import com.ravendarque.deaftly.ui.editor.ConfirmDialog
 import com.ravendarque.deaftly.ui.editor.ConfirmSpec
 import com.ravendarque.deaftly.ui.theme.Deaftly
@@ -45,21 +44,16 @@ private fun ChatContent(
     var confirmingEnd by rememberSaveable { mutableStateOf(false) }
     val requestEnd = { if (current.conversation.messages.isEmpty()) onEnd() else confirmingEnd = true }
     BackHandler(onBack = requestEnd)
-    if (current.layout == ChatLayout.Split) {
-        SplitChat(current, rememberSplitActions(viewModel, requestEnd))
-    } else {
-        SidesChat(
-            current,
-            viewModel,
-            rememberComposerActions(viewModel, onInsertTemplate),
-            ChatHeaderActions(
-                onEnd = requestEnd,
-                onEditParticipants = { editingParticipants = true },
-                onCycleTextSize = viewModel.display::cycleTextSize,
-                onSwitchLayout = { viewModel.display.chooseLayout(ChatLayout.Split) },
-            ),
-        )
-    }
+    SidesChat(
+        current,
+        viewModel,
+        rememberComposerActions(viewModel, onInsertTemplate),
+        ChatHeaderActions(
+            onEnd = requestEnd,
+            onEditParticipants = { editingParticipants = true },
+            onCycleTextSize = viewModel.display::cycleTextSize,
+        ),
+    )
     if (editingParticipants) {
         ParticipantsSheet(
             conversation = current.conversation,
@@ -116,21 +110,6 @@ private fun SidesChat(
         }
     }
 }
-
-@Composable
-private fun rememberSplitActions(
-    viewModel: ChatViewModel,
-    onEnd: () -> Unit,
-): SplitActions =
-    remember(viewModel, onEnd) {
-        SplitActions(
-            onChange = viewModel.drafts::setComposition,
-            onSend = viewModel::send,
-            onSelectTurn = viewModel::selectTurn,
-            onEnd = onEnd,
-            onSwitchLayout = { viewModel.display.chooseLayout(ChatLayout.Sides) },
-        )
-    }
 
 @Composable
 private fun rememberComposerActions(

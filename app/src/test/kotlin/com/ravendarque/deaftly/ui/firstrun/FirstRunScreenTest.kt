@@ -15,7 +15,6 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.tryPerformAccessibilityChecks
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.ravendarque.deaftly.core.settings.ChatLayout
 import com.ravendarque.deaftly.ui.theme.AppTheme
 import org.junit.Before
 import org.junit.Rule
@@ -47,7 +46,6 @@ class FirstRunScreenTest {
                     state = state,
                     onName = { state = state.copy(name = it) },
                     onColour = { state = state.copy(colour = it) },
-                    onLayout = { state = state.copy(layout = it) },
                     onGetStarted = { started++ },
                 )
             }
@@ -60,8 +58,7 @@ class FirstRunScreenTest {
         show()
 
         composeRule.onNodeWithText("Welcome to Deaftly").assertExists()
-        composeRule.onNodeWithText("Side by side").assertIsSelected()
-        composeRule.onNodeWithText("Split screen").assertExists()
+        composeRule.onNodeWithText("Split screen").assertDoesNotExist()
         composeRule.onNodeWithText("Deaftly has no internet access. Your templates and chats never leave your phone.").assertExists()
         composeRule.onNodeWithText("Get started").assertExists()
     }
@@ -93,10 +90,8 @@ class FirstRunScreenTest {
         show()
 
         composeRule.onNode(hasSetTextAction()).performTextInput("Sam")
-        composeRule.onNodeWithText("Split screen").performClick()
 
         assertEquals("Sam", state.name)
-        assertEquals(ChatLayout.Split, state.layout)
     }
 
     @Test

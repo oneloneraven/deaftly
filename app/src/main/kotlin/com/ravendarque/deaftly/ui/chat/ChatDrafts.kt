@@ -2,6 +2,7 @@ package com.ravendarque.deaftly.ui.chat
 
 import androidx.lifecycle.SavedStateHandle
 import com.ravendarque.deaftly.core.chat.Composition
+import com.ravendarque.deaftly.core.chat.FormattedText
 import com.ravendarque.deaftly.core.chat.ParticipantId
 import com.ravendarque.deaftly.core.chat.Quote
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -35,6 +36,15 @@ class ChatDrafts(
 
     fun setQuote(quote: Quote?) {
         update { it.copy(quote = quote) }
+    }
+
+    fun restore(
+        owner: ParticipantId,
+        text: String,
+    ) {
+        if (text.isBlank()) return
+        drafts.update { it + (owner to Draft(Composition(FormattedText(text)))) }
+        savedState[if (owner == ParticipantId.A) DRAFT_A_KEY else DRAFT_B_KEY] = ChatCodec.encodeDraft(drafts.value.getValue(owner))
     }
 
     fun clear() {

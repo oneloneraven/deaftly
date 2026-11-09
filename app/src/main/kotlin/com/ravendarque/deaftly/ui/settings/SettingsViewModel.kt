@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ravendarque.deaftly.core.chat.ChatProfile
 import com.ravendarque.deaftly.core.chat.ColourRole
-import com.ravendarque.deaftly.core.settings.ChatLayout
 import com.ravendarque.deaftly.core.settings.SettingsRepository
 import com.ravendarque.deaftly.core.settings.ShowScheme
 import kotlinx.coroutines.flow.SharingStarted
@@ -20,7 +19,6 @@ sealed interface SettingsUiState {
     data object Loading : SettingsUiState
 
     data class Ready(
-        val layout: ChatLayout,
         val profile: ChatProfile,
         val showScheme: ShowScheme?,
     ) : SettingsUiState
@@ -30,13 +28,9 @@ class SettingsViewModel(
     private val settings: SettingsRepository,
 ) : ViewModel() {
     val state: StateFlow<SettingsUiState> =
-        combine(settings.chatLayout, settings.chatProfile, settings.showScheme) { layout, profile, scheme ->
-            SettingsUiState.Ready(layout, profile, scheme)
+        combine(settings.chatProfile, settings.showScheme) { profile, scheme ->
+            SettingsUiState.Ready(profile, scheme)
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS), SettingsUiState.Loading)
-
-    fun setLayout(layout: ChatLayout) {
-        viewModelScope.launch { settings.setChatLayout(layout) }
-    }
 
     fun setName(name: String) {
         viewModelScope.launch { settings.setChatProfile(settings.chatProfile.first().copy(name = name)) }

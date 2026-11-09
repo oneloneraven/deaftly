@@ -20,6 +20,8 @@ private const val SHOW_LABEL = "Show"
 private const val CLOSE_SHOW_DESCRIPTION = "Close show mode"
 private const val START_CHAT_LABEL = "Start chat"
 private const val EMPTY_CHAT_LABEL = "No messages yet"
+private const val FACE_TO_FACE_LABEL = "Face to face"
+private const val FACE_TO_FACE_HINT = "Type to the person opposite\u2026"
 
 private fun MacrobenchmarkScope.waitForText(text: String) {
     check(device.wait(Until.hasObject(By.text(text)), WAIT_MILLIS)) { "Never saw \"$text\"" }
@@ -63,4 +65,11 @@ fun MacrobenchmarkScope.openTemplateAndShow() {
 fun MacrobenchmarkScope.openChat() {
     device.findObject(By.text(START_CHAT_LABEL)).click()
     waitForText(EMPTY_CHAT_LABEL)
+}
+
+fun MacrobenchmarkScope.openFaceToFace() {
+    device.findObject(By.text(FACE_TO_FACE_LABEL)).click()
+    waitForText(FACE_TO_FACE_HINT)
+    device.pressBack()
+    waitForText(START_CHAT_LABEL)
 }
