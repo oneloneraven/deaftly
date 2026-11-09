@@ -98,7 +98,7 @@
     <string name="f2f_close">End face to face</string>
     <string name="f2f_continue">Continue side by side</string>
     <string name="f2f_field">Your message</string>
-    <string name="f2f_hint">Type to the person opposite\u2026</string>
+    <string name="f2f_hint">Type your message\u2026</string>
     <string name="f2f_stranger_list">Your messages, upside down for the person opposite</string>
     <string name="f2f_live">Typing now: %1$s</string>
     <string name="f2f_welcome">Hello. I\u2019m deaf, so I\u2019m typing to you. Read along here.</string>

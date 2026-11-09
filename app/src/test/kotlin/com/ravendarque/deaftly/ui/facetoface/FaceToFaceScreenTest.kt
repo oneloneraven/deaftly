@@ -11,22 +11,26 @@ import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertCountEquals
+import androidx.compose.ui.test.assertHeightIsAtLeast
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.assertWidthIsAtLeast
 import androidx.compose.ui.test.click
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.junit4.accessibility.enableAccessibilityChecks
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onParent
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipeDown
 import androidx.compose.ui.test.tryPerformAccessibilityChecks
+import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.ravendarque.deaftly.ui.theme.AppTheme
 import org.junit.Before
@@ -168,6 +172,48 @@ class FaceToFaceScreenTest {
         send().assertIsNotEnabled()
         input().performTextInput("Hi")
         send().assertIsEnabled()
+    }
+
+    private fun assertSendFillsTheFieldsRightEdge() {
+        val frame = send().onParent().fetchSemanticsNode().boundsInRoot
+        val sendBounds = send().fetchSemanticsNode().boundsInRoot
+        val border = with(composeRule.density) { 2.dp.toPx() }
+        assertEquals(frame.top + border, sendBounds.top, 0.5f, "top")
+        assertEquals(frame.bottom - border, sendBounds.bottom, 0.5f, "bottom")
+        assertEquals(frame.right - border, sendBounds.right, 0.5f, "right")
+        send().assertWidthIsAtLeast(48.dp).assertHeightIsAtLeast(48.dp)
+    }
+
+    @Test
+    @Config(qualifiers = "w360dp-h780dp")
+    fun theHintFitsOnOneLineOnANarrowScreen() {
+        show()
+
+        val height =
+            composeRule
+                .onNodeWithText("Type your message…", useUnmergedTree = true)
+                .fetchSemanticsNode()
+                .boundsInRoot.height
+        assertTrue(height < with(composeRule.density) { 30.dp.toPx() }, "hint wrapped")
+    }
+
+    @Test
+    fun theSendButtonIsFlushWithTheFieldsBorderOnTopRightAndBottom() {
+        show()
+
+        assertSendFillsTheFieldsRightEdge()
+    }
+
+    @Test
+    fun theSendButtonStaysFlushAsTheFieldGrowsToItsLimit() {
+        show()
+        val before = send().fetchSemanticsNode().boundsInRoot.height
+
+        input().performTextInput("one two three four five six seven eight nine ten ".repeat(8))
+        composeRule.waitForIdle()
+
+        assertTrue(send().fetchSemanticsNode().boundsInRoot.height > before)
+        assertSendFillsTheFieldsRightEdge()
     }
 
     @Test

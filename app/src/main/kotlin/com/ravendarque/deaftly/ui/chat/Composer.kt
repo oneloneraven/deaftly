@@ -17,7 +17,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.input.KeyboardActionHandler
-import androidx.compose.foundation.text.input.TextFieldDecorator
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -51,6 +50,7 @@ import com.ravendarque.deaftly.core.chat.Participant
 import com.ravendarque.deaftly.core.chat.ParticipantId
 import com.ravendarque.deaftly.core.chat.SpanStyle
 import com.ravendarque.deaftly.core.settings.ChatTextSize
+import com.ravendarque.deaftly.ui.components.hintedFieldDecorator
 import com.ravendarque.deaftly.ui.icons.DeaftlyIcons
 import com.ravendarque.deaftly.ui.theme.Deaftly
 import com.ravendarque.deaftly.ui.theme.ParticipantColours
@@ -313,14 +313,6 @@ internal fun MessageField(
         lineLimits = TextFieldLineLimits.MultiLine(maxHeightInLines = MAX_LINES),
         keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences, imeAction = ImeAction.Send),
         onKeyboardAction = KeyboardActionHandler { onSend() },
-        decorator =
-            TextFieldDecorator { inner ->
-                Box(Modifier.heightIn(min = InputMinHeight), contentAlignment = Alignment.CenterStart) {
-                    if (state.field.text.isEmpty()) {
-                        Text(hint, style = textStyle, color = c.inkMuted)
-                    }
-                    inner()
-                }
-            },
+        decorator = hintedFieldDecorator(state.field.text.isEmpty(), hint, textStyle, c.inkMuted, InputMinHeight),
     )
 }

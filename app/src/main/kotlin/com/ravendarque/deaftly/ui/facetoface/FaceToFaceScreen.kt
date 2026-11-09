@@ -22,7 +22,6 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.input.KeyboardActionHandler
-import androidx.compose.foundation.text.input.TextFieldDecorator
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.clearText
@@ -40,13 +39,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
@@ -56,12 +58,13 @@ import androidx.compose.ui.semantics.traversalIndex
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ravendarque.deaftly.R
 import com.ravendarque.deaftly.navigation.Route
-import com.ravendarque.deaftly.ui.chat.SendButton
 import com.ravendarque.deaftly.ui.components.DeaftlyIconButton
+import com.ravendarque.deaftly.ui.components.hintedFieldDecorator
 import com.ravendarque.deaftly.ui.editor.ConfirmDialog
 import com.ravendarque.deaftly.ui.editor.ConfirmSpec
 import com.ravendarque.deaftly.ui.icons.DeaftlyIcons
@@ -74,7 +77,9 @@ private const val BAR_INDEX = 2f
 private const val MAX_FIELD_LINES = 4
 private const val SCROLL_TO_END = 1_000_000f
 private val BarTarget = 48.dp
-private val FieldMinHeight = 44.dp
+private val SendHeight = 48.dp
+private val SendWidth = 52.dp
+private const val DISABLED_ALPHA = 0.4f
 private val CaretWidth = 3.dp
 private val FieldBorder = 2.dp
 
@@ -249,42 +254,85 @@ private fun OwnHalf(
     val send = { if (canSend) onSend(field.text.toString()) }
     val shape = Deaftly.shapes.card
     val label = stringResource(R.string.f2f_field)
-    Row(
+    val textStyle = MaterialTheme.typography.bodyLarge
+    Box(
         modifier =
-            modifier
+            Modifier
                 .fillMaxWidth()
-                .semantics { isTraversalGroup = true }
                 .padding(Deaftly.spacing.space12)
-                .background(c.surface, shape)
+                .then(modifier)
+                .semantics { isTraversalGroup = true }
+                .clip(shape)
+                .background(c.surface)
                 .border(FieldBorder, c.accent, shape)
-                .padding(start = Deaftly.spacing.space14, top = Deaftly.spacing.space4, end = Deaftly.spacing.space4)
-                .padding(bottom = Deaftly.spacing.space4),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(Deaftly.spacing.space8),
+                .padding(FieldBorder),
     ) {
-        BasicTextField(
-            state = field,
-            modifier =
-                Modifier
-                    .weight(1f)
-                    .heightIn(min = FieldMinHeight)
-                    .focusRequester(focus)
-                    .semantics { contentDescription = label },
-            textStyle = MaterialTheme.typography.bodyLarge.copy(color = c.ink),
-            cursorBrush = SolidColor(c.accent),
-            lineLimits = TextFieldLineLimits.MultiLine(maxHeightInLines = MAX_FIELD_LINES),
-            keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences, imeAction = ImeAction.Send),
-            onKeyboardAction = KeyboardActionHandler { send() },
-            decorator =
-                TextFieldDecorator { inner ->
-                    Box(Modifier.heightIn(min = FieldMinHeight), contentAlignment = Alignment.CenterStart) {
-                        if (field.text.isEmpty()) {
-                            Text(stringResource(R.string.f2f_hint), style = MaterialTheme.typography.bodyLarge, color = c.inkMuted)
-                        }
-                        inner()
-                    }
-                },
+        FieldWithSend(
+            field = {
+                BasicTextField(
+                    state = field,
+                    modifier =
+                        Modifier
+                            .padding(start = Deaftly.spacing.space14, end = Deaftly.spacing.space8)
+                            .focusRequester(focus)
+                            .semantics { contentDescription = label },
+                    textStyle = textStyle.copy(color = c.ink),
+                    cursorBrush = SolidColor(c.accent),
+                    lineLimits = TextFieldLineLimits.MultiLine(maxHeightInLines = MAX_FIELD_LINES),
+                    keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences, imeAction = ImeAction.Send),
+                    onKeyboardAction = KeyboardActionHandler { send() },
+                    decorator =
+                        hintedFieldDecorator(
+                            isEmpty = field.text.isEmpty(),
+                            hint = stringResource(R.string.f2f_hint),
+                            textStyle = textStyle,
+                            hintColor = c.inkMuted,
+                            minHeight = SendHeight,
+                        ),
+                )
+            },
+            send = { SendSegment(enabled = canSend, onClick = send, container = c.accent, content = c.onAccent) },
         )
-        SendButton(enabled = canSend, onClick = send, container = c.accent, content = c.onAccent)
+    }
+}
+
+@Composable
+private fun FieldWithSend(
+    field: @Composable () -> Unit,
+    send: @Composable () -> Unit,
+) {
+    Layout(content = {
+        field()
+        send()
+    }) { measurables, constraints ->
+        val sendWidth = SendWidth.roundToPx()
+        val fieldPlaceable = measurables[0].measure(Constraints(maxWidth = constraints.maxWidth - sendWidth))
+        val height = maxOf(fieldPlaceable.height, SendHeight.roundToPx())
+        val sendPlaceable = measurables[1].measure(Constraints.fixed(sendWidth, height))
+        layout(constraints.maxWidth, height) {
+            fieldPlaceable.placeRelative(0, (height - fieldPlaceable.height) / 2)
+            sendPlaceable.placeRelative(constraints.maxWidth - sendWidth, 0)
+        }
+    }
+}
+
+@Composable
+private fun SendSegment(
+    enabled: Boolean,
+    onClick: () -> Unit,
+    container: Color,
+    content: Color,
+) {
+    val label = stringResource(R.string.chat_send)
+    Box(
+        modifier =
+            Modifier
+                .alpha(if (enabled) 1f else DISABLED_ALPHA)
+                .background(container)
+                .clickable(enabled = enabled, role = Role.Button, onClick = onClick)
+                .semantics { contentDescription = label },
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(DeaftlyIcons.Send, contentDescription = null, tint = content, modifier = Modifier.size(22.dp))
     }
 }
