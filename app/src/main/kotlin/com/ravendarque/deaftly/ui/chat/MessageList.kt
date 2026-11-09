@@ -29,6 +29,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.contentDescription
@@ -112,7 +113,6 @@ private fun ScriptMessage(
     val said = stringResource(R.string.chat_message_from, author.displayName.orEmpty(), message.plainText)
     val description = message.quote?.let { stringResource(R.string.chat_message_quoting, it.text, said) } ?: said
     val align = if (onRight) TextAlign.End else TextAlign.Start
-    val bar = @Composable { Box(Modifier.width(BarWidth).fillMaxHeight().background(colours.strong, RoundedCornerShape(BarWidth / 2))) }
     Row(
         modifier =
             Modifier
@@ -134,39 +134,58 @@ private fun ScriptMessage(
                 },
         horizontalArrangement = Arrangement.spacedBy(Deaftly.spacing.space12),
     ) {
-        if (!onRight) bar()
+        if (!onRight) SpeakerBar(colours.strong)
         Column(
             modifier = Modifier.weight(1f),
             horizontalAlignment = if (onRight) Alignment.End else Alignment.Start,
             verticalArrangement = Arrangement.spacedBy(Deaftly.spacing.space4),
         ) {
-            Text(
-                text = author.displayName.orEmpty().uppercase(),
-                color = colours.label,
-                style = MaterialTheme.typography.labelMedium.copy(letterSpacing = LABEL_TRACKING.em),
-                fontWeight = FontWeight.Medium,
-                textAlign = align,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
-            message.quote?.let {
-                Text(
-                    text = it.text,
-                    color = Deaftly.colors.inkMuted,
-                    style = chatTextStyle((textSize.sp * QUOTE_SIZE_RATIO).toInt()),
-                    textAlign = align,
-                    maxLines = QUOTE_MAX_LINES,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier =
-                        Modifier.fillMaxWidth().padding(
-                            if (onRight) PaddingValues(end = QuoteIndent) else PaddingValues(start = QuoteIndent),
-                        ),
-                )
-            }
-            SelectableText(message, colours, textSize, align, quoteLabel, onQuote)
+            NameLabel(author.displayName.orEmpty(), colours.label, align)
+            message.quote?.let { QuoteLine(it.text, textSize, align, onRight) }
+            SelectableText(message, colours, textSize, align, onQuote)
         }
-        if (onRight) bar()
+        if (onRight) SpeakerBar(colours.strong)
     }
+}
+
+@Composable
+private fun SpeakerBar(colour: Color) {
+    Box(Modifier.width(BarWidth).fillMaxHeight().background(colour, RoundedCornerShape(BarWidth / 2)))
+}
+
+@Composable
+private fun NameLabel(
+    name: String,
+    colour: Color,
+    align: TextAlign,
+) {
+    Text(
+        text = name.uppercase(),
+        color = colour,
+        style = MaterialTheme.typography.labelMedium.copy(letterSpacing = LABEL_TRACKING.em),
+        fontWeight = FontWeight.Medium,
+        textAlign = align,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
+    )
+}
+
+@Composable
+private fun QuoteLine(
+    text: String,
+    textSize: ChatTextSize,
+    align: TextAlign,
+    onRight: Boolean,
+) {
+    Text(
+        text = text,
+        color = Deaftly.colors.inkMuted,
+        style = chatTextStyle((textSize.sp * QUOTE_SIZE_RATIO).toInt()),
+        textAlign = align,
+        maxLines = QUOTE_MAX_LINES,
+        overflow = TextOverflow.Ellipsis,
+        modifier = Modifier.fillMaxWidth().padding(if (onRight) PaddingValues(end = QuoteIndent) else PaddingValues(start = QuoteIndent)),
+    )
 }
 
 @Composable
@@ -175,9 +194,9 @@ private fun SelectableText(
     colours: ParticipantColours,
     textSize: ChatTextSize,
     align: TextAlign,
-    quoteLabel: String,
     onQuote: ((messageId: Int, excerpt: String?) -> Unit)?,
 ) {
+    val quoteLabel = stringResource(R.string.chat_quote_action)
     val formatting = rememberChatFormatting()
     val selection = rememberSelectionState()
     CompositionLocalProvider(

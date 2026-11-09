@@ -241,11 +241,11 @@ class ChatViewModelTest {
             fun size() = assertIs<ChatUiState.Ready>(viewModel.state.value).textSize
 
             assertEquals(ChatTextSize.Medium, size())
-            viewModel.cycleTextSize()
+            viewModel.display.cycleTextSize()
             assertEquals(ChatTextSize.Large, size())
-            viewModel.cycleTextSize()
+            viewModel.display.cycleTextSize()
             assertEquals(ChatTextSize.Small, size())
-            viewModel.cycleTextSize()
+            viewModel.display.cycleTextSize()
             assertEquals(ChatTextSize.Medium, size())
         }
 
@@ -255,8 +255,8 @@ class ChatViewModelTest {
             val settings = FakeSettingsRepository()
             val first = viewModel(settings)
             collect(first)
-            first.cycleTextSize()
-            first.switchSides()
+            first.display.cycleTextSize()
+            first.display.switchSides()
 
             val next = viewModel(settings)
             collect(next)
@@ -275,9 +275,9 @@ class ChatViewModelTest {
             fun swapped() = assertIs<ChatUiState.Ready>(viewModel.state.value).sidesSwapped
 
             assertEquals(false, swapped())
-            viewModel.switchSides()
+            viewModel.display.switchSides()
             assertEquals(true, swapped())
-            viewModel.switchSides()
+            viewModel.display.switchSides()
             assertEquals(false, swapped())
         }
 
@@ -288,7 +288,7 @@ class ChatViewModelTest {
             collect(viewModel)
             val before = viewModel.conversation()
 
-            viewModel.switchSides()
+            viewModel.display.switchSides()
 
             assertEquals(before, viewModel.conversation())
         }
@@ -304,7 +304,7 @@ class ChatViewModelTest {
             first.send()
             first.selectTurn(ParticipantId.B)
             first.type("typing")
-            first.cycleTextSize()
+            first.display.cycleTextSize()
 
             val restored = viewModel(settings, savedState)
             collect(restored)

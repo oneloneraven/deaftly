@@ -3,6 +3,7 @@ package com.ravendarque.deaftly.ui.chat
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -68,14 +69,12 @@ class ChatScreenshotTest {
         }
     }
 
-    private fun header(
-        conversation: Conversation,
-        dark: Boolean,
-    ) = shot {
-        AppTheme(darkTheme = dark) {
-            Surface { ChatHeader(ChatTextSize.Medium, ChatHeaderActions({}, {}, {}, {})) }
+    private fun header(dark: Boolean) =
+        shot {
+            AppTheme(darkTheme = dark) {
+                Surface { ChatHeader(ChatTextSize.Medium, ChatHeaderActions({}, {}, {}, {})) }
+            }
         }
-    }
 
     private fun screen(
         turn: ParticipantId,
@@ -113,6 +112,23 @@ class ChatScreenshotTest {
         val saved = SavedStateHandle(mapOf("conversation" to ChatCodec.encode(scriptConversation(them, me, turn))))
         val viewModel = ChatViewModel(FakeSettingsRepository(textSize = size, sidesSwapped = swapped), saved)
         shot { AppTheme(darkTheme = dark) { ChatScreen(viewModel, onEnd = {}, onInsertTemplate = {}) } }
+    }
+
+    private fun switchOnly(
+        turn: ParticipantId,
+        dark: Boolean,
+        swapped: Boolean = false,
+    ) = shot {
+        AppTheme(darkTheme = dark) {
+            Surface {
+                TurnControl(
+                    conversation = scriptConversation(turn = turn),
+                    sidesSwapped = swapped,
+                    onSelect = {},
+                    modifier = Modifier.padding(Deaftly.spacing.space12),
+                )
+            }
+        }
     }
 
     private fun continuedFromShow(dark: Boolean) {
@@ -164,6 +180,36 @@ class ChatScreenshotTest {
     @Test
     @Config(fontScale = 2f)
     fun scriptLargeTextLargeFontScale() = script(dark = false, size = ChatTextSize.Large)
+
+    @Test
+    fun switchTurnOnRightLightTheme() = switchOnly(ParticipantId.A, dark = false)
+
+    @Test
+    fun switchTurnOnRightDarkTheme() = switchOnly(ParticipantId.A, dark = true)
+
+    @Test
+    @Config(fontScale = 2f)
+    fun switchTurnOnRightLargeFontScale() = switchOnly(ParticipantId.A, dark = false)
+
+    @Test
+    fun switchTurnOnLeftLightTheme() = switchOnly(ParticipantId.B, dark = false)
+
+    @Test
+    fun scriptTurnOnLeftLightTheme() = script(dark = false, turn = ParticipantId.B)
+
+    @Test
+    fun switchTurnOnLeftDarkTheme() = switchOnly(ParticipantId.B, dark = true)
+
+    @Test
+    fun scriptTurnOnLeftDarkTheme() = script(dark = true, turn = ParticipantId.B)
+
+    @Test
+    @Config(fontScale = 2f)
+    fun switchTurnOnLeftLargeFontScale() = switchOnly(ParticipantId.B, dark = false)
+
+    @Test
+    @Config(fontScale = 2f)
+    fun scriptTurnOnLeftLargeFontScale() = script(dark = false, turn = ParticipantId.B)
 
     @Test
     fun formattingAndQuotesLightTheme() = formatted(dark = false)
@@ -222,12 +268,12 @@ class ChatScreenshotTest {
     fun sheetWithNamesDarkTheme() = sheet(named, dark = true)
 
     @Test
-    fun headerWithDefaultsLightTheme() = header(defaults, dark = false)
+    fun headerLightTheme() = header(dark = false)
 
     @Test
-    fun headerWithNamesDarkTheme() = header(named, dark = true)
+    fun headerDarkTheme() = header(dark = true)
 
     @Test
     @Config(fontScale = 2f)
-    fun headerWithNamesLargeFontScale() = header(named, dark = false)
+    fun headerLargeFontScale() = header(dark = false)
 }

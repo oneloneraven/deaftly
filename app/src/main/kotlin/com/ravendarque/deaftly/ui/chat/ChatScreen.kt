@@ -51,8 +51,8 @@ private fun ChatContent(
         ChatHeaderActions(
             onEnd = requestEnd,
             onEditParticipants = { editingParticipants = true },
-            onCycleTextSize = viewModel::cycleTextSize,
-            onSwitchSides = viewModel::switchSides,
+            onCycleTextSize = viewModel.display::cycleTextSize,
+            onSwitchSides = viewModel.display::switchSides,
         ),
     )
     if (editingParticipants) {
@@ -112,6 +112,7 @@ private fun SidesChat(
             )
             TurnControl(
                 conversation = conversation,
+                sidesSwapped = current.sidesSwapped,
                 onSelect = viewModel::selectTurn,
                 modifier = Modifier.padding(Deaftly.spacing.space12),
             )
