@@ -99,6 +99,25 @@ class LiveRecognitionTest {
         }
 
     @Test
+    fun shapesAndLowConfidenceDetectionsNeverBecomePhrases() =
+        runTest {
+            val fake =
+                FakeTextRecogniser(
+                    result(
+                        line("Tea", box(0f, 10f, 30f, 20f)).copy(confidence = 0.95f),
+                        line("|", box(40f, 10f, 42f, 30f)).copy(confidence = 0.9f),
+                        line("-- ~", box(50f, 10f, 80f, 14f)).copy(confidence = 0.9f),
+                        line("lO0", box(10f, 40f, 40f, 50f)).copy(confidence = 0.1f),
+                        line("Coffee", box(0f, 60f, 40f, 70f)).copy(confidence = 0.9f),
+                    ),
+                )
+
+            val phrases = LiveRecognition(fake).process(frame(100, 100))
+
+            assertEquals(listOf("Tea", "Coffee"), phrases.map { it.text })
+        }
+
+    @Test
     fun aPhraseKeepsItsIdWhileItDriftsAndIsSmoothed() {
         val tracker = PhraseTracker(smoothing = 0.5f)
         val first = tracker.update(listOf(phrase("Tea", box(0f, 0f, 0.4f, 0.1f)))).single()
