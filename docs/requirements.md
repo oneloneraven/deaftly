@@ -78,7 +78,7 @@ Deaftly is an Android app that helps deaf people communicate quickly and with li
 | H1 | A single screen holds a conversation between two people, each with their own side of the screen for message bubbles. |
 | H2 | Each person has a colour (with a sensible default) and an optional name and avatar. |
 | H3 | Turns are switched with a swipe. The active side is always visually obvious. |
-| H9 | The user chooses the chat layout: **sides** (left/right bubbles, swipe to switch turns – H3) or **split screen** (top half rotated 180° for the person opposite, with a turn bar between the halves). The choice is remembered. *(Decision D5, step 3 mockups)* |
+| H9 | **Face to face** replaces the split-screen chat layout: the top half, rotated 180°, shows the deaf user's sent messages and the text being typed, live, in medium text for the person opposite; the bottom half is the deaf user's field and Send button. The stranger can scroll back without disturbing the keyboard. The user can continue side by side, which opens the chat with each sent message from the deaf user and the turn passed on. *(Decisions D38–D41, issue #125; supersedes D5)* |
 | H4 | Messages support simple formatting (bold, italic), highlighting, and quoting an earlier message. |
 | H5 | Bubbles are easy to read for both people, with an adjustable text size. |
 | H6 | Inserting a template into a chat turn is supported. |

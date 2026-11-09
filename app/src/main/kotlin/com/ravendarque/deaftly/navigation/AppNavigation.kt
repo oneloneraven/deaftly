@@ -17,12 +17,15 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.ravendarque.deaftly.AppContainer
+import com.ravendarque.deaftly.ui.chat.ChatOpening
 import com.ravendarque.deaftly.ui.chat.ChatScreen
 import com.ravendarque.deaftly.ui.chat.ChatViewModel
 import com.ravendarque.deaftly.ui.chat.TemplatePickerScreen
 import com.ravendarque.deaftly.ui.editor.EditorExit
 import com.ravendarque.deaftly.ui.editor.EditorScreen
 import com.ravendarque.deaftly.ui.editor.EditorViewModel
+import com.ravendarque.deaftly.ui.facetoface.FaceToFaceScreen
+import com.ravendarque.deaftly.ui.facetoface.FaceToFaceViewModel
 import com.ravendarque.deaftly.ui.fill.FillScreen
 import com.ravendarque.deaftly.ui.fill.FillViewModel
 import com.ravendarque.deaftly.ui.firstrun.FirstRunScreen
@@ -91,17 +94,10 @@ private fun AppNavigationHost(
                         highlights = route.highlights,
                         viewModel = viewModel,
                         onClose = { backStack.removeLastOrNull() },
-                        onContinueAsChat = { backStack.add(Route.Chat(route.text)) },
+                        onContinueAsChat = { backStack.add(Route.Chat(listOf(route.text))) },
                     )
                 }
-                entry<Route.Chat> { route ->
-                    val viewModel = viewModel<ChatViewModel>(factory = container.chatViewModelFactory(route.firstMessage))
-                    ChatScreen(
-                        viewModel,
-                        onEnd = { backStack.removeLastOrNull() },
-                        onInsertTemplate = { backStack.add(Route.TemplatePicker) },
-                    )
-                }
+                conversationEntries(container, backStack)
                 entry<Route.Ocr> { OcrEntry(it, container, backStack) }
                 entry<Route.Settings> {
                     val viewModel = viewModel<SettingsViewModel>(factory = container.settingsViewModelFactory)
@@ -109,6 +105,28 @@ private fun AppNavigationHost(
                 }
             },
     )
+}
+
+private fun EntryProviderScope<NavKey>.conversationEntries(
+    container: AppContainer,
+    backStack: NavBackStack<NavKey>,
+) {
+    entry<Route.FaceToFace> {
+        val viewModel = viewModel<FaceToFaceViewModel>(factory = container.faceToFaceViewModelFactory)
+        FaceToFaceScreen(
+            viewModel,
+            onEnd = { backStack.removeLastOrNull() },
+            onContinue = { backStack[backStack.lastIndex] = it },
+        )
+    }
+    entry<Route.Chat> { route ->
+        val viewModel = viewModel<ChatViewModel>(factory = container.chatViewModelFactory(ChatOpening(route.messages, route.draft)))
+        ChatScreen(
+            viewModel,
+            onEnd = { backStack.removeLastOrNull() },
+            onInsertTemplate = { backStack.add(Route.TemplatePicker) },
+        )
+    }
 }
 
 private fun EntryProviderScope<NavKey>.templateEntries(

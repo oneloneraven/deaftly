@@ -13,9 +13,11 @@ import com.ravendarque.deaftly.storage.DataStoreTemplateRepository
 import com.ravendarque.deaftly.storage.createTemplateStore
 import com.ravendarque.deaftly.templates.builtInTemplates
 import com.ravendarque.deaftly.ui.chat.ChatInsertions
+import com.ravendarque.deaftly.ui.chat.ChatOpening
 import com.ravendarque.deaftly.ui.chat.ChatViewModel
 import com.ravendarque.deaftly.ui.editor.EditorStrings
 import com.ravendarque.deaftly.ui.editor.EditorViewModel
+import com.ravendarque.deaftly.ui.facetoface.FaceToFaceViewModel
 import com.ravendarque.deaftly.ui.fill.FillViewModel
 import com.ravendarque.deaftly.ui.firstrun.FirstRunViewModel
 import com.ravendarque.deaftly.ui.home.HomeViewModel
@@ -78,6 +80,11 @@ class AppContainer(
             }
         }
 
+    val faceToFaceViewModelFactory =
+        viewModelFactory {
+            initializer { FaceToFaceViewModel(createSavedStateHandle()) }
+        }
+
     val showViewModelFactory =
         viewModelFactory {
             initializer { ShowViewModel(settingsRepository) }
@@ -93,9 +100,9 @@ class AppContainer(
             initializer { FirstRunViewModel(settingsRepository) }
         }
 
-    fun chatViewModelFactory(firstMessage: String?) =
+    fun chatViewModelFactory(opening: ChatOpening) =
         viewModelFactory {
-            initializer { ChatViewModel(settingsRepository, createSavedStateHandle(), firstMessage, chatInsertions) }
+            initializer { ChatViewModel(settingsRepository, createSavedStateHandle(), opening, chatInsertions) }
         }
 
     fun fillViewModelFactory(templateId: String) =

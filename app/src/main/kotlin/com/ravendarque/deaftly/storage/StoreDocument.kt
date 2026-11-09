@@ -26,18 +26,8 @@ data class SettingsDto(
     val showScheme: ShowSchemeDto? = null,
     val chatName: String? = null,
     val chatColour: ParticipantColourDto? = null,
-    val chatLayout: ChatLayoutDto? = null,
     val firstRunDone: Boolean = false,
 )
-
-@Serializable
-enum class ChatLayoutDto {
-    @SerialName("sides")
-    Sides,
-
-    @SerialName("split")
-    Split,
-}
 
 @Serializable
 enum class ShowSchemeDto {

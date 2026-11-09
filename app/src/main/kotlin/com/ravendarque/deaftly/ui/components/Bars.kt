@@ -79,6 +79,7 @@ fun ActionDock(
     start: @Composable (Modifier) -> Unit,
     end: @Composable (Modifier) -> Unit,
     modifier: Modifier = Modifier,
+    below: (@Composable (Modifier) -> Unit)? = null,
 ) {
     val ground = Deaftly.colors.ground
     val stacked = LocalDensity.current.fontScale >= DOCK_STACK_FONT_SCALE
@@ -97,18 +98,19 @@ fun ActionDock(
                 end = Deaftly.spacing.space20,
                 bottom = Deaftly.spacing.space24,
             )
-    if (stacked) {
-        Column(modifier = frame, verticalArrangement = Arrangement.spacedBy(Deaftly.spacing.space12)) {
+    Column(modifier = frame, verticalArrangement = Arrangement.spacedBy(Deaftly.spacing.space12)) {
+        if (stacked) {
             start(Modifier.fillMaxWidth())
             end(Modifier.fillMaxWidth())
+        } else {
+            Row(
+                modifier = Modifier.height(IntrinsicSize.Min),
+                horizontalArrangement = Arrangement.spacedBy(Deaftly.spacing.space12),
+            ) {
+                Box(Modifier.weight(1f)) { start(Modifier.fillMaxSize()) }
+                Box(Modifier.weight(1f)) { end(Modifier.fillMaxSize()) }
+            }
         }
-    } else {
-        Row(
-            modifier = frame.height(IntrinsicSize.Min),
-            horizontalArrangement = Arrangement.spacedBy(Deaftly.spacing.space12),
-        ) {
-            Box(Modifier.weight(1f)) { start(Modifier.fillMaxSize()) }
-            Box(Modifier.weight(1f)) { end(Modifier.fillMaxSize()) }
-        }
+        below?.invoke(Modifier.fillMaxWidth())
     }
 }

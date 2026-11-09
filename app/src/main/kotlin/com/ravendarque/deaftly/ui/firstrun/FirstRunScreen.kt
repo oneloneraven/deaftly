@@ -26,7 +26,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ravendarque.deaftly.R
 import com.ravendarque.deaftly.core.chat.ColourRole
-import com.ravendarque.deaftly.core.settings.ChatLayout
 import com.ravendarque.deaftly.ui.chat.ColourChoices
 import com.ravendarque.deaftly.ui.chat.NameField
 import com.ravendarque.deaftly.ui.components.PrimaryButton
@@ -47,7 +46,6 @@ fun FirstRunScreen(
         state = state,
         onName = viewModel::setName,
         onColour = viewModel::setColour,
-        onLayout = viewModel::setLayout,
         onGetStarted = { viewModel.getStarted(onDone) },
     )
 }
@@ -57,7 +55,6 @@ fun FirstRunContent(
     state: FirstRunState,
     onName: (String) -> Unit,
     onColour: (ColourRole) -> Unit,
-    onLayout: (ChatLayout) -> Unit,
     onGetStarted: () -> Unit,
 ) {
     Surface(modifier = Modifier.fillMaxSize()) {
@@ -91,7 +88,6 @@ fun FirstRunContent(
                     )
                     ColourChoices(selected = state.colour, takenBy = null, onChoose = onColour)
                 }
-                LayoutChoices(state.layout, onLayout)
                 PrivacyNote()
             }
             PrimaryButton(
@@ -104,27 +100,6 @@ fun FirstRunContent(
                         .padding(top = Deaftly.spacing.space8, bottom = Deaftly.spacing.space24),
             )
         }
-    }
-}
-
-@Composable
-private fun LayoutChoices(
-    layout: ChatLayout,
-    onLayout: (ChatLayout) -> Unit,
-) {
-    Section(stringResource(R.string.settings_layout_heading)) {
-        ChoiceRow(
-            selected = layout == ChatLayout.Sides,
-            label = stringResource(R.string.settings_layout_sides),
-            hint = stringResource(R.string.settings_layout_sides_hint),
-            onClick = { onLayout(ChatLayout.Sides) },
-        )
-        ChoiceRow(
-            selected = layout == ChatLayout.Split,
-            label = stringResource(R.string.settings_layout_split),
-            hint = stringResource(R.string.settings_layout_split_hint),
-            onClick = { onLayout(ChatLayout.Split) },
-        )
     }
 }
 

@@ -2,7 +2,6 @@ package com.ravendarque.deaftly.ui.firstrun
 
 import com.ravendarque.deaftly.core.chat.ChatProfile
 import com.ravendarque.deaftly.core.chat.ColourRole
-import com.ravendarque.deaftly.core.settings.ChatLayout
 import com.ravendarque.deaftly.ui.chat.FakeSettingsRepository
 import com.ravendarque.deaftly.ui.chat.PARTICIPANT_NAME_MAX_LENGTH
 import kotlinx.coroutines.Dispatchers
@@ -30,8 +29,8 @@ class FirstRunViewModelTest {
     private fun pending() = FakeSettingsRepository(firstRunDone = false)
 
     @Test
-    fun startsWithNoNameTheAccentColourAndSideBySide() {
-        assertEquals(FirstRunState("", ColourRole.Indigo, ChatLayout.Sides), FirstRunViewModel(pending()).state.value)
+    fun startsWithNoNameAndTheAccentColour() {
+        assertEquals(FirstRunState("", ColourRole.Indigo), FirstRunViewModel(pending()).state.value)
     }
 
     @Test
@@ -41,11 +40,9 @@ class FirstRunViewModelTest {
 
         viewModel.setName("Sam")
         viewModel.setColour(ColourRole.Green)
-        viewModel.setLayout(ChatLayout.Split)
 
-        assertEquals(FirstRunState("Sam", ColourRole.Green, ChatLayout.Split), viewModel.state.value)
+        assertEquals(FirstRunState("Sam", ColourRole.Green), viewModel.state.value)
         assertEquals(ChatProfile(), settings.saved)
-        assertEquals(ChatLayout.Sides, settings.savedLayout)
     }
 
     @Test
@@ -64,13 +61,11 @@ class FirstRunViewModelTest {
             val viewModel = FirstRunViewModel(settings)
             viewModel.setName("Sam")
             viewModel.setColour(ColourRole.Red)
-            viewModel.setLayout(ChatLayout.Split)
             var left = false
 
             viewModel.getStarted { left = true }
 
             assertEquals(ChatProfile("Sam", ColourRole.Red), settings.saved)
-            assertEquals(ChatLayout.Split, settings.savedLayout)
             assertTrue(settings.firstRunDone.first())
             assertTrue(left)
         }

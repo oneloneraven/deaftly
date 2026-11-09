@@ -2,7 +2,6 @@ package com.ravendarque.deaftly.ui.settings
 
 import com.ravendarque.deaftly.core.chat.ChatProfile
 import com.ravendarque.deaftly.core.chat.ColourRole
-import com.ravendarque.deaftly.core.settings.ChatLayout
 import com.ravendarque.deaftly.core.settings.ShowScheme
 import com.ravendarque.deaftly.ui.chat.FakeSettingsRepository
 import kotlinx.coroutines.Dispatchers
@@ -40,24 +39,12 @@ class SettingsViewModelTest {
     fun reportsTheStoredSettings() =
         runTest {
             val viewModel =
-                viewModel(FakeSettingsRepository(ChatProfile("Alex", ColourRole.Green), ShowScheme.YellowOnBlack, ChatLayout.Split))
+                viewModel(FakeSettingsRepository(ChatProfile("Alex", ColourRole.Green), ShowScheme.YellowOnBlack))
 
             assertEquals(
-                SettingsUiState.Ready(ChatLayout.Split, ChatProfile("Alex", ColourRole.Green), ShowScheme.YellowOnBlack),
+                SettingsUiState.Ready(ChatProfile("Alex", ColourRole.Green), ShowScheme.YellowOnBlack),
                 viewModel.ready(),
             )
-        }
-
-    @Test
-    fun choosingALayoutStoresIt() =
-        runTest {
-            val settings = FakeSettingsRepository()
-            val viewModel = viewModel(settings)
-
-            viewModel.setLayout(ChatLayout.Split)
-
-            assertEquals(ChatLayout.Split, settings.savedLayout)
-            assertEquals(ChatLayout.Split, viewModel.ready().layout)
         }
 
     @Test
