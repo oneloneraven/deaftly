@@ -7,6 +7,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.roborazzi)
+    alias(libs.plugins.androidx.baselineprofile)
 }
 
 val appVersion = providers.gradleProperty("appVersion").orElse("0.0.0").get()
@@ -42,6 +43,7 @@ android {
         minSdk = 26
         targetSdk = 36
         versionName = appVersion
+        manifestPlaceholders["profileInstallExported"] = "false"
         versionCode = (appMajor * 1_000_000 + appMinor * 1_000 + appPatch).coerceAtLeast(1)
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         externalNativeBuild {
@@ -76,6 +78,7 @@ android {
 
     buildTypes {
         debug {
+            applicationIdSuffix = ".debug"
             ndk { abiFilters += listOf("arm64-v8a", "x86_64") }
         }
         release {
@@ -165,6 +168,7 @@ dependencies {
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
+    implementation(libs.androidx.profileinstaller)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.viewmodel.navigation3)
     implementation(libs.androidx.navigation3.runtime)
@@ -179,6 +183,7 @@ dependencies {
     implementation(libs.androidx.datastore)
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.kotlinx.serialization.json)
+    baselineProfile(project(":baselineprofile"))
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 
@@ -204,11 +209,24 @@ dependencies {
     testImplementation(libs.roborazzi.junit.rule)
 }
 
+baselineProfile {
+    dexLayoutOptimization = true
+}
+
 roborazzi {
     outputDir.set(file("src/test/screenshots"))
 }
 
 androidComponents {
+    finalizeDsl { extension ->
+        extension.buildTypes
+            .filter { it.name == "benchmarkRelease" || it.name == "nonMinifiedRelease" }
+            .forEach {
+                it.applicationIdSuffix = ".benchmark"
+                it.ndk.abiFilters += "x86_64"
+                it.manifestPlaceholders["profileInstallExported"] = "true"
+            }
+    }
     onVariants(selector().withBuildType("release")) { variant ->
         val verify =
             tasks.register<VerifyReleaseManifestTask>("verifyReleaseManifest") {
