@@ -24,7 +24,7 @@ class FirstRunScreenshotTest {
         composeRule.setContent {
             AppTheme(darkTheme = dark) {
                 FirstRunContent(
-                    state = FirstRunState("Alex", ColourRole.Teal, ChatLayout.Sides),
+                    state = FirstRunState("Alex", ColourRole.Green, ChatLayout.Sides),
                     onName = {},
                     onColour = {},
                     onLayout = {},

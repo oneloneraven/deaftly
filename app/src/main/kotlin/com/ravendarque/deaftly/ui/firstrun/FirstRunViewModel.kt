@@ -15,7 +15,7 @@ import kotlinx.coroutines.launch
 
 data class FirstRunState(
     val name: String = "",
-    val colour: ColourRole = ColourRole.Accent,
+    val colour: ColourRole = ColourRole.Indigo,
     val layout: ChatLayout = ChatLayout.Sides,
 )
 

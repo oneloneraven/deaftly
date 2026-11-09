@@ -31,7 +31,7 @@ class FirstRunViewModelTest {
 
     @Test
     fun startsWithNoNameTheAccentColourAndSideBySide() {
-        assertEquals(FirstRunState("", ColourRole.Accent, ChatLayout.Sides), FirstRunViewModel(pending()).state.value)
+        assertEquals(FirstRunState("", ColourRole.Indigo, ChatLayout.Sides), FirstRunViewModel(pending()).state.value)
     }
 
     @Test
@@ -40,10 +40,10 @@ class FirstRunViewModelTest {
         val viewModel = FirstRunViewModel(settings)
 
         viewModel.setName("Sam")
-        viewModel.setColour(ColourRole.Teal)
+        viewModel.setColour(ColourRole.Green)
         viewModel.setLayout(ChatLayout.Split)
 
-        assertEquals(FirstRunState("Sam", ColourRole.Teal, ChatLayout.Split), viewModel.state.value)
+        assertEquals(FirstRunState("Sam", ColourRole.Green, ChatLayout.Split), viewModel.state.value)
         assertEquals(ChatProfile(), settings.saved)
         assertEquals(ChatLayout.Sides, settings.savedLayout)
     }
@@ -63,13 +63,13 @@ class FirstRunViewModelTest {
             val settings = pending()
             val viewModel = FirstRunViewModel(settings)
             viewModel.setName("Sam")
-            viewModel.setColour(ColourRole.Rose)
+            viewModel.setColour(ColourRole.Red)
             viewModel.setLayout(ChatLayout.Split)
             var left = false
 
             viewModel.getStarted { left = true }
 
-            assertEquals(ChatProfile("Sam", ColourRole.Rose), settings.saved)
+            assertEquals(ChatProfile("Sam", ColourRole.Red), settings.saved)
             assertEquals(ChatLayout.Split, settings.savedLayout)
             assertTrue(settings.firstRunDone.first())
             assertTrue(left)
@@ -83,7 +83,7 @@ class FirstRunViewModelTest {
             FirstRunViewModel(settings).getStarted {}
 
             assertTrue(settings.firstRunDone.first())
-            assertEquals(ChatProfile(null, ColourRole.Accent), settings.saved)
+            assertEquals(ChatProfile(null, ColourRole.Indigo), settings.saved)
         }
 
     @Test
