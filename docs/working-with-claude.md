@@ -23,11 +23,20 @@ One Sonnet-class subagent does all delegated work, one at a time.
 - **Long or open-ended work is split into sequential subagent runs.** The
   main session decides between them.
 - **Follow-ups go to the existing subagent**, not a new one.
-- **A subagent gets its own worktree whenever it writes code**, and it and
-  the main session never write the same files.
+- **Delegation is a choice, not a requirement.** The main session makes
+  small, clear fixes itself (a string, a shape, a few lines), because
+  briefing a subagent and checking its report costs more than the change.
+  Substantial work is delegated.
+- **A subagent that writes code works in the main checkout.** Only one
+  branch is in progress at a time, and reusing the checkout keeps builds
+  warm: a fresh worktree has to download native dependencies and rebuild
+  from scratch. While the subagent is running, the main session doesn't
+  write, commit or switch branches in the checkout.
 - **Briefs are self-contained**: the files involved, what done looks like,
   and the instruction to run slow commands (test suites, e2e) in the
-  foreground, never in the background.
+  foreground, never in the background. While working, the subagent runs
+  only the affected tests; it runs the full `./gradlew check` once before
+  pushing.
 - **The main session checks the subagent's results** (the diff, the real
   test output) before reporting them as done.
 
