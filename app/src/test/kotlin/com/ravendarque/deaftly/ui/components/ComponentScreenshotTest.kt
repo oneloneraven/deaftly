@@ -3,8 +3,11 @@ package com.ravendarque.deaftly.ui.components
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -159,9 +162,21 @@ class CardsScreenshotTest : ComponentScreenshotTest() {
 
 class HubCardsScreenshotTest : ComponentScreenshotTest() {
     override val content: @Composable () -> Unit = {
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            HubCard("Start typing", DeaftlyIcons.Type, onClick = {}, modifier = Modifier.weight(1f))
-            HubCard("Use a template", DeaftlyIcons.Template, onClick = {}, modifier = Modifier.weight(1f))
+        Row(modifier = Modifier.height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            HubCard(
+                "Start typing",
+                "Enter your own custom text",
+                DeaftlyIcons.Keyboard,
+                onClick = {},
+                modifier = Modifier.weight(1f).fillMaxHeight(),
+            )
+            HubCard(
+                "Use a template",
+                "Use a template and fill in the placeholders",
+                DeaftlyIcons.TemplateBlank,
+                onClick = {},
+                modifier = Modifier.weight(1f).fillMaxHeight(),
+            )
         }
     }
 }

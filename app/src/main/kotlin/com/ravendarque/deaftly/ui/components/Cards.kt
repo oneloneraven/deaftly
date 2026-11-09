@@ -1,30 +1,36 @@
 package com.ravendarque.deaftly.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.ravendarque.deaftly.ui.theme.Deaftly
@@ -44,6 +50,8 @@ enum class TileTone { Accent, PersonB }
 private const val NO_BREAK_SPACE = " "
 private val TileMinHeight = 132.dp
 private val TileIconSize = 26.dp
+private val HubIconDiscSize = 64.dp
+private val HubIconSize = 32.dp
 private val CardMinHeight = 48.dp
 
 @Composable
@@ -148,7 +156,8 @@ fun PinnedTile(
 
 @Composable
 fun HubCard(
-    label: String,
+    title: String,
+    description: String,
     icon: ImageVector,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -157,14 +166,32 @@ fun HubCard(
     Column(
         modifier =
             modifier
-                .heightIn(min = TileMinHeight)
                 .clip(shape)
                 .background(Deaftly.colors.surface, shape)
+                .border(1.dp, Deaftly.colors.line, shape)
                 .clickable(role = Role.Button, onClick = onClick)
-                .padding(Deaftly.spacing.space16),
+                .semantics { contentDescription = "$title. $description" }
+                .padding(horizontal = Deaftly.spacing.space16, vertical = Deaftly.spacing.space20),
+        horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(Deaftly.spacing.space12),
     ) {
-        Icon(imageVector = icon, contentDescription = null, modifier = Modifier.size(TileIconSize), tint = Deaftly.colors.ink)
-        Text(text = label, style = MaterialTheme.typography.titleMedium, color = Deaftly.colors.ink)
+        Box(
+            modifier = Modifier.size(HubIconDiscSize).background(Deaftly.colors.accentSoft, CircleShape),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(imageVector = icon, contentDescription = null, modifier = Modifier.size(HubIconSize), tint = Deaftly.colors.accent)
+        }
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(Deaftly.spacing.space4),
+        ) {
+            Text(text = title, style = MaterialTheme.typography.titleMedium, color = Deaftly.colors.ink, textAlign = TextAlign.Center)
+            Text(
+                text = description,
+                style = MaterialTheme.typography.bodyMedium,
+                color = Deaftly.colors.inkSecondary,
+                textAlign = TextAlign.Center,
+            )
+        }
     }
 }

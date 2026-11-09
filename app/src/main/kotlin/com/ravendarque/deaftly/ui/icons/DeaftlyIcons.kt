@@ -49,6 +49,23 @@ private fun fillIcon(
             addPath(pathData = PathParser().parsePathString(path).toNodes(), fill = SolidColor(Color.Black))
         }.build()
 
+private fun rectPath(
+    x: Int,
+    y: Int,
+    width: Int,
+    height: Int,
+    radius: Int,
+): String {
+    val straightWidth = width - 2 * radius
+    val straightHeight = height - 2 * radius
+    val corner = "a$radius $radius 0 0 1"
+    return "M${x + radius} ${y}h$straightWidth$corner $radius $radius" +
+        "v$straightHeight$corner -$radius $radius" +
+        "h-$straightWidth$corner -$radius -$radius" +
+        "v-$straightHeight$corner $radius -$radius" +
+        "z"
+}
+
 object DeaftlyIcons {
     val Back: ImageVector by lazy { strokeIcon("Back", "M15 18l-6-6 6-6") }
 
@@ -149,7 +166,31 @@ object DeaftlyIcons {
     val Trash: ImageVector by lazy { strokeIcon("Trash", "M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14") }
 
     val FaceToFace: ImageVector by lazy {
-        strokeIcon("FaceToFace", "M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z", "M3 12h18", "M12 7v2M12 15v2")
+        strokeIcon(
+            "FaceToFace",
+            rectPath(x = 6, y = 2, width = 12, height = 20, radius = 2),
+            "M6 12h12M12 9V5M10 7l2-2 2 2M12 15v4M10 17l2 2 2-2",
+        )
+    }
+
+    val Keyboard: ImageVector by lazy {
+        strokeIcon(
+            "Keyboard",
+            rectPath(x = 2, y = 6, width = 20, height = 12, radius = 2),
+            "M6 10h.01M10 10h.01M14 10h.01M18 10h.01M8 14h8",
+        )
+    }
+
+    val TemplateBlank: ImageVector by lazy {
+        strokeIcon("TemplateBlank", rectPath(x = 3, y = 4, width = 18, height = 16, radius = 2), "M7 9h10M7 14h2M11 14h2M15 14h2")
+    }
+
+    val SideBySide: ImageVector by lazy {
+        strokeIcon(
+            "SideBySide",
+            "M4 3h9a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H8l-3 3v-3H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z",
+            "M18 11h2a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-1v3l-3-3h-5a2 2 0 0 1-2-2v-2",
+        )
     }
 
     val Sides: ImageVector by lazy { strokeIcon("Sides", "M4 5h11v6H4z", "M9 13h11v6H9z") }

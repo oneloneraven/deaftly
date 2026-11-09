@@ -35,20 +35,21 @@ private const val STACK_FONT_SCALE = 1.5f
 
 private data class HubOption(
     val label: Int,
+    val description: Int,
     val icon: ImageVector,
     val route: Route,
 )
 
 private val showOptions =
     listOf(
-        HubOption(R.string.hub_start_typing, DeaftlyIcons.Type, Route.TypeShow),
-        HubOption(R.string.hub_use_template, DeaftlyIcons.Template, Route.Templates),
+        HubOption(R.string.hub_start_typing, R.string.hub_start_typing_description, DeaftlyIcons.Keyboard, Route.TypeShow),
+        HubOption(R.string.hub_use_template, R.string.hub_use_template_description, DeaftlyIcons.TemplateBlank, Route.Templates),
     )
 
 private val chatOptions =
     listOf(
-        HubOption(R.string.hub_face_to_face, DeaftlyIcons.FaceToFace, Route.FaceToFace),
-        HubOption(R.string.hub_side_by_side, DeaftlyIcons.Sides, Route.Chat()),
+        HubOption(R.string.hub_face_to_face, R.string.hub_face_to_face_description, DeaftlyIcons.FaceToFace, Route.FaceToFace),
+        HubOption(R.string.hub_side_by_side, R.string.hub_side_by_side_description, DeaftlyIcons.SideBySide, Route.Chat()),
     )
 
 @Composable
@@ -111,7 +112,8 @@ private fun Group(
             ) {
                 row.forEach { option ->
                     HubCard(
-                        label = stringResource(option.label),
+                        title = stringResource(option.label),
+                        description = stringResource(option.description),
                         icon = option.icon,
                         onClick = { onNavigate(option.route) },
                         modifier = Modifier.weight(1f).fillMaxHeight(),

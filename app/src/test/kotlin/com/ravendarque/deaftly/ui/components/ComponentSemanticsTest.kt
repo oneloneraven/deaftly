@@ -12,6 +12,7 @@ import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.assertContentDescriptionEquals
 import androidx.compose.ui.test.assertHasClickAction
 import androidx.compose.ui.test.assertHeightIsAtLeast
 import androidx.compose.ui.test.assertIsDisplayed
@@ -222,10 +223,12 @@ class ComponentSemanticsTest {
     @Test
     fun hubCardIsALabelledButtonWithAFullTouchTarget() {
         var clicks = 0
-        show { HubCard("Start typing", DeaftlyIcons.Type, onClick = { clicks++ }) }
+        show { HubCard("Start typing", "Enter your own custom text", DeaftlyIcons.Keyboard, onClick = { clicks++ }) }
 
         composeRule
             .onNodeWithText("Start typing")
+            .assertContentDescriptionEquals("Start typing. Enter your own custom text")
+            .assert(SemanticsMatcher.expectValue(SemanticsProperties.Role, Role.Button))
             .assertHasClickAction()
             .assertTouchTarget()
             .performClick()
