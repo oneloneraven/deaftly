@@ -1,7 +1,9 @@
 package com.ravendarque.deaftly.ui.ocr
 
 import androidx.compose.material3.Text
+import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.junit4.accessibility.enableAccessibilityChecks
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -64,6 +66,15 @@ class CameraGateTest {
         composeRule.onNodeWithText("Deaftly uses the camera to read text. Pictures never leave your phone.").assertIsDisplayed()
         composeRule.onNodeWithText("camera").assertDoesNotExist()
         composeRule.onRoot().tryPerformAccessibilityChecks()
+    }
+
+    @Test
+    fun theAppNameInTheExplanationIsSpokenAsDeftly() {
+        show(CameraAccess.NotAsked)
+
+        composeRule
+            .onNodeWithText("Deaftly uses the camera to read text. Pictures never leave your phone.")
+            .assert(hasContentDescription("Deftly uses the camera to read text. Pictures never leave your phone."))
     }
 
     @Test
