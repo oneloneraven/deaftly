@@ -8,6 +8,7 @@ import android.os.Build
 import android.util.Log
 import androidx.test.platform.app.InstrumentationRegistry
 import com.ravendarque.deaftly.core.ocr.RecognitionResult
+import com.ravendarque.deaftly.core.ocr.TextLineFilter
 import com.ravendarque.deaftly.core.ocr.TextRecogniser
 import com.ravendarque.deaftly.core.ocr.bench.BenchReport
 import com.ravendarque.deaftly.core.ocr.bench.ImageRun
@@ -53,7 +54,7 @@ object OcrBenchmark {
                         }
                     candidate.stageTimings(recogniser).forEach { (stage, ms) -> stageSamples.getOrPut(stage) { mutableListOf() }.add(ms) }
                     if (overlays) writeOverlay(fixture, result, File(outputDirectory, "${candidate.name}-${fixture.truth.id}.jpg"))
-                    ImageRun(OcrScorer.score(fixture.truth, result), latencies)
+                    ImageRun(OcrScorer.score(fixture.truth, TextLineFilter.filter(result)), latencies)
                 }
             }
         val stages = stageSamples.entries.joinToString(", ") { "${it.key}=%.0f".format(Stats.median(it.value)) }

@@ -23,7 +23,7 @@ public class LiveRecognition(
     ): List<DetectedPhrase> =
         result.blocks
             .flatMap { it.lines }
-            .filter { it.text.isNotBlank() }
+            .filter { TextLineFilter.isText(it) }
             .map { line ->
                 val quad = mapping.toViewport(line.corners ?: line.boundingBox.toQuad())
                 val words =
