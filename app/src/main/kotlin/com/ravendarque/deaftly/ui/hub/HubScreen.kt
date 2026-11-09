@@ -28,6 +28,7 @@ import com.ravendarque.deaftly.navigation.Route
 import com.ravendarque.deaftly.ui.components.DeaftlyIconButton
 import com.ravendarque.deaftly.ui.components.HubCard
 import com.ravendarque.deaftly.ui.components.Wordmark
+import com.ravendarque.deaftly.ui.components.spoken
 import com.ravendarque.deaftly.ui.icons.DeaftlyIcons
 import com.ravendarque.deaftly.ui.theme.Deaftly
 
@@ -65,6 +66,12 @@ fun HubScreen(onNavigate: (Route) -> Unit) {
                         .padding(horizontal = Deaftly.spacing.space20, vertical = Deaftly.spacing.space12),
                 verticalArrangement = Arrangement.spacedBy(Deaftly.spacing.space24),
             ) {
+                Text(
+                    text = stringResource(R.string.hub_welcome),
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = Deaftly.colors.inkSecondary,
+                    modifier = Modifier.spoken(stringResource(R.string.hub_welcome)),
+                )
                 Group(R.string.hub_show_heading, showOptions, onNavigate)
                 Group(R.string.hub_chat_heading, chatOptions, onNavigate)
             }

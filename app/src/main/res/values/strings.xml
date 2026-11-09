@@ -28,6 +28,7 @@
     <string name="home_empty">No templates yet</string>
     <string name="home_type_and_show">Type &amp; show</string>
     <string name="templates_home">Home</string>
+    <string name="hub_welcome">Welcome to Deaftly, an app to help you communicate with non-deaf people quickly and simply. Choose one of the following options to get started.</string>
     <string name="hub_show_heading">Show</string>
     <string name="hub_chat_heading">Chat</string>
     <string name="hub_start_typing">Start typing</string>

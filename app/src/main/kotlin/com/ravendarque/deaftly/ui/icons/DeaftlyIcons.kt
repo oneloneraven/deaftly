@@ -192,6 +192,4 @@ object DeaftlyIcons {
             "M18 11h2a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-1v3l-3-3h-5a2 2 0 0 1-2-2v-2",
         )
     }
-
-    val Sides: ImageVector by lazy { strokeIcon("Sides", "M4 5h11v6H4z", "M9 13h11v6H9z") }
 }
