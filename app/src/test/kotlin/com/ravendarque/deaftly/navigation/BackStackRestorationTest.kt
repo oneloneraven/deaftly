@@ -32,11 +32,31 @@ class BackStackRestorationTest {
         vararg args: Any,
     ) = composeRule.activity.getString(id, *args)
 
-    @Test
-    fun theBackStackSurvivesRecreation() {
+    private fun getStarted() {
+        composeRule.waitUntil(LOAD_TIMEOUT_MILLIS) {
+            composeRule.onAllNodesWithText(text(R.string.first_run_start)).fetchSemanticsNodes().isNotEmpty()
+        }
+        composeRule.onNodeWithText(text(R.string.first_run_start)).performClick()
         composeRule.waitUntil(LOAD_TIMEOUT_MILLIS) {
             composeRule.onAllNodesWithText(text(R.string.home_start_chat)).fetchSemanticsNodes().isNotEmpty()
         }
+    }
+
+    @Test
+    fun theWelcomeSurvivesRecreationUntilGetStartedIsPressed() {
+        composeRule.waitUntil(LOAD_TIMEOUT_MILLIS) {
+            composeRule.onAllNodesWithText(text(R.string.first_run_start)).fetchSemanticsNodes().isNotEmpty()
+        }
+
+        composeRule.activityRule.scenario.recreate()
+
+        composeRule.onNodeWithText(text(R.string.first_run_title)).assertExists()
+        composeRule.onNodeWithText(text(R.string.home_start_chat)).assertDoesNotExist()
+    }
+
+    @Test
+    fun theBackStackSurvivesRecreation() {
+        getStarted()
         composeRule.onNodeWithContentDescription(text(R.string.route_settings)).performClick()
         composeRule.onNodeWithText(text(R.string.route_settings)).assertExists()
 
@@ -48,9 +68,7 @@ class BackStackRestorationTest {
 
     @Test
     fun theChatParticipantsSurviveRecreation() {
-        composeRule.waitUntil(LOAD_TIMEOUT_MILLIS) {
-            composeRule.onAllNodesWithText(text(R.string.home_start_chat)).fetchSemanticsNodes().isNotEmpty()
-        }
+        getStarted()
         composeRule.onNodeWithText(text(R.string.home_start_chat)).performClick()
         composeRule.waitUntil(LOAD_TIMEOUT_MILLIS) {
             composeRule.onAllNodesWithText(text(R.string.chat_empty)).fetchSemanticsNodes().isNotEmpty()

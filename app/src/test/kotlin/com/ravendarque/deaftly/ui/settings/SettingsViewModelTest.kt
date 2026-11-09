@@ -40,10 +40,10 @@ class SettingsViewModelTest {
     fun reportsTheStoredSettings() =
         runTest {
             val viewModel =
-                viewModel(FakeSettingsRepository(ChatProfile("Alex", ColourRole.Teal), ShowScheme.YellowOnBlack, ChatLayout.Split))
+                viewModel(FakeSettingsRepository(ChatProfile("Alex", ColourRole.Green), ShowScheme.YellowOnBlack, ChatLayout.Split))
 
             assertEquals(
-                SettingsUiState.Ready(ChatLayout.Split, ChatProfile("Alex", ColourRole.Teal), ShowScheme.YellowOnBlack),
+                SettingsUiState.Ready(ChatLayout.Split, ChatProfile("Alex", ColourRole.Green), ShowScheme.YellowOnBlack),
                 viewModel.ready(),
             )
         }
@@ -63,13 +63,13 @@ class SettingsViewModelTest {
     @Test
     fun changingTheNameKeepsTheColourAndViceVersa() =
         runTest {
-            val settings = FakeSettingsRepository(ChatProfile("Alex", ColourRole.Teal))
+            val settings = FakeSettingsRepository(ChatProfile("Alex", ColourRole.Green))
             val viewModel = viewModel(settings)
 
             viewModel.setName("Sam")
-            assertEquals(ChatProfile("Sam", ColourRole.Teal), settings.saved)
-            viewModel.setColour(ColourRole.Rose)
-            assertEquals(ChatProfile("Sam", ColourRole.Rose), settings.saved)
+            assertEquals(ChatProfile("Sam", ColourRole.Green), settings.saved)
+            viewModel.setColour(ColourRole.Red)
+            assertEquals(ChatProfile("Sam", ColourRole.Red), settings.saved)
         }
 
     @Test

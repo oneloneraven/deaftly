@@ -17,11 +17,13 @@ class DataStoreSettingsRepository(
 
     override val chatProfile: Flow<ChatProfile> =
         store.data
-            .map { ChatProfile(it.settings.chatName, it.settings.chatColour?.toDomain() ?: ColourRole.Accent) }
+            .map { ChatProfile(it.settings.chatName, it.settings.chatColour?.toDomain() ?: ColourRole.Indigo) }
             .distinctUntilChanged()
 
     override val chatLayout: Flow<ChatLayout> =
         store.data.map { it.settings.chatLayout?.toDomain() ?: ChatLayout.Sides }.distinctUntilChanged()
+
+    override val firstRunDone: Flow<Boolean> = store.data.map { it.settings.firstRunDone }.distinctUntilChanged()
 
     override suspend fun setShowScheme(scheme: ShowScheme) {
         store.updateData { document -> document.copy(settings = document.settings.copy(showScheme = scheme.toDto())) }
@@ -29,6 +31,10 @@ class DataStoreSettingsRepository(
 
     override suspend fun setChatLayout(layout: ChatLayout) {
         store.updateData { document -> document.copy(settings = document.settings.copy(chatLayout = layout.toDto())) }
+    }
+
+    override suspend fun setFirstRunDone() {
+        store.updateData { document -> document.copy(settings = document.settings.copy(firstRunDone = true)) }
     }
 
     override suspend fun setChatProfile(profile: ChatProfile) {
@@ -72,18 +78,20 @@ private fun ShowScheme.toDto(): ShowSchemeDto =
 
 private fun ParticipantColourDto.toDomain(): ColourRole =
     when (this) {
-        ParticipantColourDto.Accent -> ColourRole.Accent
-        ParticipantColourDto.PersonB -> ColourRole.PersonB
-        ParticipantColourDto.Teal -> ColourRole.Teal
-        ParticipantColourDto.Rose -> ColourRole.Rose
-        ParticipantColourDto.Berry -> ColourRole.Berry
+        ParticipantColourDto.Red -> ColourRole.Red
+        ParticipantColourDto.Orange -> ColourRole.Orange
+        ParticipantColourDto.Gold -> ColourRole.Gold
+        ParticipantColourDto.Green -> ColourRole.Green
+        ParticipantColourDto.Blue -> ColourRole.Blue
+        ParticipantColourDto.Indigo -> ColourRole.Indigo
     }
 
 private fun ColourRole.toDto(): ParticipantColourDto =
     when (this) {
-        ColourRole.Accent -> ParticipantColourDto.Accent
-        ColourRole.PersonB -> ParticipantColourDto.PersonB
-        ColourRole.Teal -> ParticipantColourDto.Teal
-        ColourRole.Rose -> ParticipantColourDto.Rose
-        ColourRole.Berry -> ParticipantColourDto.Berry
+        ColourRole.Red -> ParticipantColourDto.Red
+        ColourRole.Orange -> ParticipantColourDto.Orange
+        ColourRole.Gold -> ParticipantColourDto.Gold
+        ColourRole.Green -> ParticipantColourDto.Green
+        ColourRole.Blue -> ParticipantColourDto.Blue
+        ColourRole.Indigo -> ParticipantColourDto.Indigo
     }

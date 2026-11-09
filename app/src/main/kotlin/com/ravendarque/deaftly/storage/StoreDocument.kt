@@ -3,8 +3,10 @@ package com.ravendarque.deaftly.storage
 import com.ravendarque.deaftly.core.template.Placeholder
 import com.ravendarque.deaftly.core.template.PlaceholderType
 import com.ravendarque.deaftly.core.template.Template
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonNames
 
 const val STORE_VERSION = 1
 
@@ -25,6 +27,7 @@ data class SettingsDto(
     val chatName: String? = null,
     val chatColour: ParticipantColourDto? = null,
     val chatLayout: ChatLayoutDto? = null,
+    val firstRunDone: Boolean = false,
 )
 
 @Serializable
@@ -48,22 +51,30 @@ enum class ShowSchemeDto {
     YellowOnBlack,
 }
 
+@OptIn(ExperimentalSerializationApi::class)
 @Serializable
 enum class ParticipantColourDto {
-    @SerialName("accent")
-    Accent,
+    @SerialName("red")
+    @JsonNames("rose")
+    Red,
 
-    @SerialName("person-b")
-    PersonB,
+    @SerialName("orange")
+    @JsonNames("person-b")
+    Orange,
 
-    @SerialName("teal")
-    Teal,
+    @SerialName("gold")
+    Gold,
 
-    @SerialName("rose")
-    Rose,
+    @SerialName("green")
+    @JsonNames("teal", "forest", "berry")
+    Green,
 
-    @SerialName("berry")
-    Berry,
+    @SerialName("blue")
+    Blue,
+
+    @SerialName("indigo")
+    @JsonNames("accent")
+    Indigo,
 }
 
 @Serializable

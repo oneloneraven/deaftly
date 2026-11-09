@@ -68,5 +68,6 @@ jobs:
             git tag -a "$version" -m "$version" "$(jq -r .sha <<< "$release")"
             git push "https://x-access-token:${APP_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "$version"
             gh release create "$version" --repo "$GITHUB_REPOSITORY" --title "$version" --generate-notes \
+              --notes "How to install and update Deaftly: https://github.com/${GITHUB_REPOSITORY}/blob/main/docs/install.md" \
               || echo "::warning::Tag $version pushed, but its GitHub Release wasn't created."
           done

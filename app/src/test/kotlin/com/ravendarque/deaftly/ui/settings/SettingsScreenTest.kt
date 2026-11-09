@@ -38,7 +38,7 @@ class SettingsScreenTest {
     @get:Rule
     val composeRule = createComposeRule()
 
-    private val settings = FakeSettingsRepository(ChatProfile("Alex", ColourRole.Teal), ShowScheme.WhiteOnBlack, ChatLayout.Sides)
+    private val settings = FakeSettingsRepository(ChatProfile("Alex", ColourRole.Green), ShowScheme.WhiteOnBlack, ChatLayout.Sides)
     private var backs = 0
 
     @Before
@@ -77,15 +77,15 @@ class SettingsScreenTest {
         composeRule.onNode(hasSetTextAction()).performTextReplacement("Sam")
         composeRule.waitForIdle()
 
-        assertEquals(ChatProfile("Sam", ColourRole.Teal), settings.saved)
+        assertEquals(ChatProfile("Sam", ColourRole.Green), settings.saved)
     }
 
     @Test
     fun pickingAColourKeepsTheName() {
-        composeRule.onAllNodesWithContentDescription("Rose")[0].performClick()
+        composeRule.onAllNodesWithContentDescription("Red")[0].performClick()
         composeRule.waitForIdle()
 
-        assertEquals(ChatProfile("Alex", ColourRole.Rose), settings.saved)
+        assertEquals(ChatProfile("Alex", ColourRole.Red), settings.saved)
     }
 
     @Test

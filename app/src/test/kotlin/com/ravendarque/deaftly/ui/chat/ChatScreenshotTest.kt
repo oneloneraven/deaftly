@@ -44,8 +44,8 @@ class ChatScreenshotTest {
     private val defaults = Conversation(Participant.defaultA(), Participant.defaultB())
     private val named =
         Conversation(
-            Participant(ParticipantId.A, ColourRole.Teal, "Alex"),
-            Participant(ParticipantId.B, ColourRole.Berry, "Sam"),
+            Participant(ParticipantId.A, ColourRole.Green, "Alex"),
+            Participant(ParticipantId.B, ColourRole.Blue, "Sam"),
         )
 
     private fun shot(content: @Composable () -> Unit) {

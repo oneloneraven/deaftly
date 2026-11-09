@@ -5,6 +5,7 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.int
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
@@ -44,7 +45,7 @@ class TemplateStoreSerializerTest {
 
             assertEquals(1, root.getValue("version").jsonPrimitive.int)
             assertEquals(builtIns.size, root.getValue("templates").jsonArray.size)
-            assertEquals(JsonObject(emptyMap()), root.getValue("settings"))
+            assertEquals(JsonObject(mapOf("firstRunDone" to JsonPrimitive(false))), root.getValue("settings"))
         }
 
     @Test
@@ -156,7 +157,7 @@ class TemplateStoreSerializerTest {
     @Test
     fun roundTripsTheChatProfile() =
         runTest {
-            val document = seed.copy(settings = SettingsDto(chatName = "Alex", chatColour = ParticipantColourDto.PersonB))
+            val document = seed.copy(settings = SettingsDto(chatName = "Alex", chatColour = ParticipantColourDto.Orange))
 
             val settings =
                 Json
@@ -166,7 +167,7 @@ class TemplateStoreSerializerTest {
                     .jsonObject
 
             assertEquals("Alex", settings.getValue("chatName").jsonPrimitive.content)
-            assertEquals("person-b", settings.getValue("chatColour").jsonPrimitive.content)
+            assertEquals("orange", settings.getValue("chatColour").jsonPrimitive.content)
             assertEquals(document.settings, read(write(document)).settings)
         }
 
@@ -190,5 +191,39 @@ class TemplateStoreSerializerTest {
 
             assertEquals("split", settings.getValue("chatLayout").jsonPrimitive.content)
             assertEquals(ChatLayoutDto.Split, read(write(document)).settings.chatLayout)
+        }
+
+    @Test
+    fun readsRetiredColourNamesAsTheirNewColours() =
+        runTest {
+            mapOf(
+                "accent" to ParticipantColourDto.Indigo,
+                "person-b" to ParticipantColourDto.Orange,
+                "rose" to ParticipantColourDto.Red,
+                "teal" to ParticipantColourDto.Green,
+                "forest" to ParticipantColourDto.Green,
+                "berry" to ParticipantColourDto.Green,
+            ).forEach { (stored, expected) ->
+                val settings = read("""{"version":1,"templates":[],"settings":{"chatColour":"$stored"}}""").settings
+
+                assertEquals(expected, settings.chatColour, stored)
+            }
+        }
+
+    @Test
+    fun writesEachColourAsItsOwnName() =
+        runTest {
+            ParticipantColourDto.entries.forEach { colour ->
+                val document = seed.copy(settings = SettingsDto(chatColour = colour))
+
+                val settings =
+                    Json
+                        .parseToJsonElement(write(document))
+                        .jsonObject
+                        .getValue("settings")
+                        .jsonObject
+
+                assertEquals(colour.name.lowercase(), settings.getValue("chatColour").jsonPrimitive.content)
+            }
         }
 }

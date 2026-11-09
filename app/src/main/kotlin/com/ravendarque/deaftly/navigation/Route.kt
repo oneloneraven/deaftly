@@ -46,6 +46,9 @@ sealed interface Route : NavKey {
 
     @Serializable
     data object Settings : Route
+
+    @Serializable
+    data object FirstRun : Route
 }
 
 @Serializable
@@ -66,4 +69,5 @@ fun Route.titleRes(): Int =
         is Route.Ocr -> R.string.route_ocr
         is Route.Editor -> R.string.route_editor
         Route.Settings -> R.string.route_settings
+        Route.FirstRun -> R.string.first_run_title
     }

@@ -17,6 +17,7 @@ import com.ravendarque.deaftly.ui.chat.ChatViewModel
 import com.ravendarque.deaftly.ui.editor.EditorStrings
 import com.ravendarque.deaftly.ui.editor.EditorViewModel
 import com.ravendarque.deaftly.ui.fill.FillViewModel
+import com.ravendarque.deaftly.ui.firstrun.FirstRunViewModel
 import com.ravendarque.deaftly.ui.home.HomeViewModel
 import com.ravendarque.deaftly.ui.ocr.FrameImage
 import com.ravendarque.deaftly.ui.ocr.OcrOutcomes
@@ -85,6 +86,11 @@ class AppContainer(
     val settingsViewModelFactory =
         viewModelFactory {
             initializer { SettingsViewModel(settingsRepository) }
+        }
+
+    val firstRunViewModelFactory =
+        viewModelFactory {
+            initializer { FirstRunViewModel(settingsRepository) }
         }
 
     fun chatViewModelFactory(firstMessage: String?) =
