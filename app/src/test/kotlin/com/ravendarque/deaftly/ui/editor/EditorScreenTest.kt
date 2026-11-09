@@ -1,7 +1,9 @@
 package com.ravendarque.deaftly.ui.editor
 
 import androidx.compose.ui.test.SemanticsNodeInteraction
+import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsSelected
+import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isSelectable
@@ -285,6 +287,9 @@ class EditorScreenTest {
 
         tap("Restore the original template")
         composeRule.onNodeWithText("Restore the original template?").assertExists()
+        composeRule
+            .onNodeWithText("This replaces your changes with the version that came with Deaftly.")
+            .assert(hasContentDescription("This replaces your changes with the version that came with Deftly."))
         composeRule.onRoot().tryPerformAccessibilityChecks()
         assertEquals("Changed", viewModel.draft.name)
 

@@ -41,6 +41,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.ravendarque.deaftly.ui.components.spoken
 import com.ravendarque.deaftly.ui.theme.Deaftly
 
 private val FieldMinHeight = 52.dp
@@ -219,7 +220,7 @@ fun ConfirmDialog(
         titleContentColor = c.ink,
         textContentColor = c.inkSecondary,
         title = { Text(spec.title) },
-        text = { Text(spec.text) },
+        text = { Text(spec.text, modifier = Modifier.spoken(spec.text)) },
         confirmButton = {
             TextButton(onClick = onConfirm, modifier = Modifier.heightIn(min = TargetSize)) {
                 Text(spec.confirm, color = if (spec.destructive) c.error else c.accentStrong, fontWeight = FontWeight.Bold)

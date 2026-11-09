@@ -42,6 +42,7 @@ import com.ravendarque.deaftly.ui.components.ActionDock
 import com.ravendarque.deaftly.ui.components.DeaftlyIconButton
 import com.ravendarque.deaftly.ui.components.InkButton
 import com.ravendarque.deaftly.ui.components.SecondaryButton
+import com.ravendarque.deaftly.ui.components.spoken
 import com.ravendarque.deaftly.ui.icons.DeaftlyIcons
 import com.ravendarque.deaftly.ui.theme.Deaftly
 
@@ -140,6 +141,7 @@ private fun Wordmark(modifier: Modifier = Modifier) {
         Text(
             text = stringResource(R.string.wordmark),
             style = MaterialTheme.typography.headlineLarge,
+            modifier = Modifier.spoken(stringResource(R.string.wordmark)),
         )
         Box(
             Modifier

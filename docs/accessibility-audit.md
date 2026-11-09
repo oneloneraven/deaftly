@@ -50,6 +50,10 @@ No defect was found that needs a code change in this branch. Notes:
 
 Every interactive control seen in the dumps is clickable or checkable with a label, so each is reachable as a Switch Access target in principle. Disabled controls (Show, Send, Add to message, taken colour swatches) are correctly exposed as disabled. A real Switch Access pass, with scanning and item-by-item focus, was not done.
 
+## Known limitations
+
+- The launcher label ("Deaftly", under the app icon and in the app switcher) is read by TalkBack as "deeftly". Android takes the label from a string resource and gives an app no way to attach a spoken form to it, so it can't be corrected. Inside the app, every place the name appears carries a content description that spells it "Deftly" for speech (#121). Braille displays still show the spelling "Deaftly", which is out of scope because the target audience is sighted deaf people.
+
 ## Not covered
 
 - TalkBack with a real user, including focus order, announcements and gestures. TalkBack was not installable on the emulator image.

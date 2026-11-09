@@ -27,6 +27,7 @@ import com.ravendarque.deaftly.R
 import com.ravendarque.deaftly.ui.components.DeaftlyTopBar
 import com.ravendarque.deaftly.ui.components.PrimaryButton
 import com.ravendarque.deaftly.ui.components.SecondaryButton
+import com.ravendarque.deaftly.ui.components.spoken
 import com.ravendarque.deaftly.ui.icons.DeaftlyIcons
 import com.ravendarque.deaftly.ui.theme.Deaftly
 
@@ -146,6 +147,7 @@ private fun CameraNotice(
                     style = MaterialTheme.typography.bodyLarge,
                     color = Deaftly.colors.inkSecondary,
                     textAlign = TextAlign.Center,
+                    modifier = Modifier.spoken(body),
                 )
             }
             Column(
