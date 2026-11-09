@@ -11,16 +11,20 @@ class FakeSettingsRepository(
     initial: ChatProfile = ChatProfile(),
     showScheme: ShowScheme? = null,
     layout: ChatLayout = ChatLayout.Sides,
+    firstRunDone: Boolean = true,
 ) : SettingsRepository {
     private val profile = MutableStateFlow(initial)
     private val scheme = MutableStateFlow(showScheme)
     private val layoutFlow = MutableStateFlow(layout)
+    private val firstRun = MutableStateFlow(firstRunDone)
 
     override val chatProfile: Flow<ChatProfile> = profile
 
     override val showScheme: Flow<ShowScheme?> = scheme
 
     override val chatLayout: Flow<ChatLayout> = layoutFlow
+
+    override val firstRunDone: Flow<Boolean> = firstRun
 
     val savedLayout: ChatLayout get() = layoutFlow.value
 
@@ -32,6 +36,10 @@ class FakeSettingsRepository(
 
     override suspend fun setChatLayout(layout: ChatLayout) {
         layoutFlow.value = layout
+    }
+
+    override suspend fun setFirstRunDone() {
+        firstRun.value = true
     }
 
     override suspend fun setShowScheme(scheme: ShowScheme) {

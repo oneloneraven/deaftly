@@ -28,7 +28,15 @@ class MainActivityTest {
     @Test
     fun showsHomeOpensAChatAndEndsItBackToHome() {
         val startChat = text(R.string.home_start_chat)
-        waitForText(startChat)
+        val getStarted = text(R.string.first_run_start)
+        composeRule.waitUntil(LOAD_TIMEOUT_MILLIS) {
+            composeRule.onAllNodesWithText(startChat).fetchSemanticsNodes().isNotEmpty() ||
+                composeRule.onAllNodesWithText(getStarted).fetchSemanticsNodes().isNotEmpty()
+        }
+        if (composeRule.onAllNodesWithText(getStarted).fetchSemanticsNodes().isNotEmpty()) {
+            composeRule.onNodeWithText(getStarted).performClick()
+            waitForText(startChat)
+        }
 
         composeRule.onNodeWithText(startChat).performClick()
         waitForText(text(R.string.chat_empty))

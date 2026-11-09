@@ -124,7 +124,7 @@ private fun SettingsContent(
 }
 
 @Composable
-private fun Section(
+internal fun Section(
     title: String,
     content: @Composable () -> Unit,
 ) {
@@ -140,7 +140,7 @@ private fun Section(
 }
 
 @Composable
-private fun ChoiceRow(
+internal fun ChoiceRow(
     selected: Boolean,
     label: String,
     hint: String?,

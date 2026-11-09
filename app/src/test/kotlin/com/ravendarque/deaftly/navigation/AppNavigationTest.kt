@@ -8,6 +8,7 @@ import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isSelectable
+import androidx.compose.ui.test.isSelected
 import androidx.compose.ui.test.junit4.accessibility.enableAccessibilityChecks
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
@@ -20,10 +21,12 @@ import androidx.compose.ui.test.tryPerformAccessibilityChecks
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.ravendarque.deaftly.AppContainer
 import com.ravendarque.deaftly.R
+import com.ravendarque.deaftly.core.settings.ChatLayout
 import com.ravendarque.deaftly.core.template.Template
 import com.ravendarque.deaftly.ui.chat.isMessageField
 import com.ravendarque.deaftly.ui.ocr.OcrOutcome
 import com.ravendarque.deaftly.ui.theme.AppTheme
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import org.junit.Rule
@@ -32,6 +35,7 @@ import org.junit.runner.RunWith
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 private const val LOAD_TIMEOUT_MILLIS = 10_000L
 
@@ -49,11 +53,63 @@ class AppNavigationTest {
         vararg args: Any,
     ) = composeRule.activity.getString(id, *args)
 
-    private fun showApp(container: AppContainer = AppContainer(composeRule.activity.applicationContext)) {
+    private fun showApp(
+        container: AppContainer = AppContainer(composeRule.activity.applicationContext),
+        firstLaunch: Boolean = false,
+    ) {
+        if (!firstLaunch) runBlocking { container.settingsRepository.setFirstRunDone() }
         composeRule.setContent { AppTheme { AppNavigation(container) } }
+        val landing = if (firstLaunch) R.string.first_run_start else R.string.home_category_all
+        composeRule.waitUntil(LOAD_TIMEOUT_MILLIS) {
+            composeRule.onAllNodesWithText(text(landing)).fetchSemanticsNodes().isNotEmpty()
+        }
+    }
+
+    @Test
+    fun theFirstLaunchShowsTheWelcomeAndGetStartedGoesHomeWithoutReturning() {
+        composeRule.enableAccessibilityChecks()
+        showApp(firstLaunch = true)
+
+        composeRule.onNodeWithText(text(R.string.first_run_title)).assertExists()
+        composeRule.onNodeWithText(text(R.string.first_run_privacy)).assertExists()
+        composeRule.onNodeWithText(text(R.string.home_category_all)).assertDoesNotExist()
+        composeRule.onRoot().tryPerformAccessibilityChecks()
+
+        composeRule.onNodeWithText(text(R.string.first_run_start)).performClick()
         composeRule.waitUntil(LOAD_TIMEOUT_MILLIS) {
             composeRule.onAllNodesWithText(text(R.string.home_category_all)).fetchSemanticsNodes().isNotEmpty()
         }
+        composeRule.onNodeWithText(text(R.string.first_run_title)).assertDoesNotExist()
+
+        composeRule.activity.onBackPressedDispatcher.onBackPressed()
+        composeRule.waitForIdle()
+        composeRule.onNodeWithText(text(R.string.first_run_title)).assertDoesNotExist()
+        assertTrue(composeRule.activity.isFinishing)
+    }
+
+    @Test
+    fun theWelcomeSavesTheChoicesAndIsNotShownAgain() {
+        val container = AppContainer(composeRule.activity.applicationContext)
+        showApp(container, firstLaunch = true)
+
+        composeRule.onNode(hasSetTextAction()).performTextInput("Sam")
+        composeRule.onNodeWithText(text(R.string.settings_layout_split)).performClick()
+        composeRule.onNodeWithText(text(R.string.first_run_start)).performClick()
+        composeRule.waitUntil(LOAD_TIMEOUT_MILLIS) {
+            composeRule.onAllNodesWithText(text(R.string.home_category_all)).fetchSemanticsNodes().isNotEmpty()
+        }
+
+        assertEquals("Sam", runBlocking { container.settingsRepository.chatProfile.first() }.name)
+        assertEquals(ChatLayout.Split, runBlocking { container.settingsRepository.chatLayout.first() })
+        assertTrue(runBlocking { container.settingsRepository.firstRunDone.first() })
+    }
+
+    @Test
+    fun laterLaunchesGoStraightToHome() {
+        showApp()
+
+        composeRule.onNodeWithText(text(R.string.first_run_title)).assertDoesNotExist()
+        composeRule.onNodeWithText(text(R.string.first_run_start)).assertDoesNotExist()
     }
 
     @Test
@@ -279,11 +335,15 @@ class AppNavigationTest {
     @Test
     fun settingsOpensFromHomeAndTheChosenLayoutDecidesHowTheNextChatOpens() {
         composeRule.enableAccessibilityChecks()
-        showApp()
+        val container = AppContainer(composeRule.activity.applicationContext)
+        showApp(container)
         composeRule.onNodeWithContentDescription(text(R.string.route_settings)).performClick()
         composeRule.onRoot().tryPerformAccessibilityChecks()
 
         composeRule.onNodeWithText(text(R.string.settings_layout_split)).performClick()
+        composeRule.waitUntil(LOAD_TIMEOUT_MILLIS) {
+            composeRule.onAllNodes(hasText(text(R.string.settings_layout_split)) and isSelected()).fetchSemanticsNodes().isNotEmpty()
+        }
         composeRule.onNodeWithContentDescription(text(R.string.back)).performClick()
         composeRule.onNodeWithText(text(R.string.home_start_chat)).performClick()
         composeRule.waitUntil(LOAD_TIMEOUT_MILLIS) {
@@ -312,6 +372,7 @@ class AppNavigationTest {
                 Route.Editor(),
                 Route.Ocr("order-food", "menu item"),
                 Route.Settings,
+                Route.FirstRun,
             )
 
         routes.forEach { route ->

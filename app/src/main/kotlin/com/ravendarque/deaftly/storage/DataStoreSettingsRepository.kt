@@ -23,12 +23,18 @@ class DataStoreSettingsRepository(
     override val chatLayout: Flow<ChatLayout> =
         store.data.map { it.settings.chatLayout?.toDomain() ?: ChatLayout.Sides }.distinctUntilChanged()
 
+    override val firstRunDone: Flow<Boolean> = store.data.map { it.settings.firstRunDone }.distinctUntilChanged()
+
     override suspend fun setShowScheme(scheme: ShowScheme) {
         store.updateData { document -> document.copy(settings = document.settings.copy(showScheme = scheme.toDto())) }
     }
 
     override suspend fun setChatLayout(layout: ChatLayout) {
         store.updateData { document -> document.copy(settings = document.settings.copy(chatLayout = layout.toDto())) }
+    }
+
+    override suspend fun setFirstRunDone() {
+        store.updateData { document -> document.copy(settings = document.settings.copy(firstRunDone = true)) }
     }
 
     override suspend fun setChatProfile(profile: ChatProfile) {
