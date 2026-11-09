@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ravendarque.deaftly.core.ocr.BoundingBox
 import com.ravendarque.deaftly.core.ocr.LiveRecognition
+import com.ravendarque.deaftly.core.ocr.OcrSelection
 import com.ravendarque.deaftly.core.ocr.Phrase
 import com.ravendarque.deaftly.core.ocr.PhraseSelection
 import com.ravendarque.deaftly.core.ocr.RecognitionFrame
@@ -20,7 +21,7 @@ import kotlinx.coroutines.runBlocking
 data class OcrUiState(
     val ready: Boolean = false,
     val phrases: List<Phrase> = emptyList(),
-    val selection: TextSelection? = null,
+    val selection: OcrSelection = OcrSelection(),
     val fieldText: String = "",
     val fieldLabel: String? = null,
     val freezeRequested: Boolean = false,
@@ -106,22 +107,26 @@ class OcrViewModel(
             null
         }
 
-    fun selectPhrase(id: Long?) {
+    fun togglePhrase(id: Long) {
         mutableState.update { state ->
-            val phrase = id?.let { wanted -> state.phrases.firstOrNull { it.id == wanted } }
+            val phrase = state.phrases.firstOrNull { it.id == id }
             if (phrase == null) {
-                state.copy(selection = null)
+                state
             } else {
-                state.copy(selection = PhraseSelection.wholePhrase(phrase), fieldText = phrase.text)
+                state.selection.toggled(phrase).let { state.copy(selection = it, fieldText = it.tappedText) }
             }
         }
     }
 
-    fun selectRange(selection: TextSelection) {
+    fun selectRange(range: TextSelection) {
         mutableState.update { state ->
-            val text = PhraseSelection.text(state.phrases, selection)
-            if (text == null) state else state.copy(selection = selection, fieldText = text)
+            val text = PhraseSelection.text(state.phrases, range)
+            if (text == null) state else state.copy(selection = state.selection.dragged(range), fieldText = text)
         }
+    }
+
+    fun clearText() {
+        mutableState.update { it.copy(selection = OcrSelection(), fieldText = "") }
     }
 
     fun editText(text: String) {

@@ -9,9 +9,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -20,19 +22,21 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.unit.dp
 import com.ravendarque.deaftly.R
 import com.ravendarque.deaftly.ui.components.PrimaryButton
 import com.ravendarque.deaftly.ui.icons.DeaftlyIcons
 import com.ravendarque.deaftly.ui.theme.Deaftly
 
 private const val MAX_LINES = 3
+private val ClearButtonSize = 48.dp
 
 @Composable
 fun OcrTray(
-    hint: String,
     fieldLabel: String,
     text: String,
     onTextChange: (String) -> Unit,
+    onClear: () -> Unit,
     onAdd: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -51,13 +55,13 @@ fun OcrTray(
                 ),
         verticalArrangement = Arrangement.spacedBy(Deaftly.spacing.space12),
     ) {
-        Text(text = hint, style = MaterialTheme.typography.bodySmall, color = c.inkMuted)
+        Text(text = stringResource(R.string.ocr_tray_hint), style = MaterialTheme.typography.bodySmall, color = c.inkMuted)
         OutlinedTextField(
             value = text,
             onValueChange = onTextChange,
             modifier = Modifier.fillMaxWidth(),
             label = { Text(fieldLabel) },
-            trailingIcon = { Icon(DeaftlyIcons.Edit, contentDescription = null) },
+            trailingIcon = { TrayTrailingIcon(hasText = text.isNotEmpty(), onClear = onClear) },
             maxLines = MAX_LINES,
             textStyle = MaterialTheme.typography.titleMedium,
             shape = Deaftly.shapes.control,
@@ -84,5 +88,19 @@ fun OcrTray(
             icon = DeaftlyIcons.Check,
             modifier = Modifier.fillMaxWidth(),
         )
+    }
+}
+
+@Composable
+private fun TrayTrailingIcon(
+    hasText: Boolean,
+    onClear: () -> Unit,
+) {
+    if (hasText) {
+        IconButton(onClick = onClear, modifier = Modifier.size(ClearButtonSize)) {
+            Icon(DeaftlyIcons.ClearCircle, contentDescription = stringResource(R.string.ocr_clear))
+        }
+    } else {
+        Icon(DeaftlyIcons.Edit, contentDescription = null)
     }
 }
