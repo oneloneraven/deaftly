@@ -57,7 +57,7 @@ class OcrScreenTest {
     val composeRule = createComposeRule()
 
     private var closes = 0
-    private val taps = mutableListOf<Long?>()
+    private val taps = mutableListOf<Long>()
     private val ranges = mutableListOf<TextSelection>()
     private var selection by mutableStateOf(OcrSelection())
     private var fieldText by mutableStateOf("")
@@ -88,9 +88,9 @@ class OcrScreenTest {
                             },
                             onTapPhrase = { id ->
                                 taps += id
-                                val phrase = menuPhrases.firstOrNull { it.id == id }
-                                selection = if (phrase == null) OcrSelection() else selection.toggled(phrase)
-                                if (phrase != null) fieldText = selection.tappedText
+                                val phrase = menuPhrases.first { it.id == id }
+                                selection = selection.toggled(phrase)
+                                fieldText = selection.tappedText
                             },
                             onFieldChange = { fieldText = it },
                             onClearText = {
@@ -154,7 +154,7 @@ class OcrScreenTest {
         composeRule.onNodeWithContentDescription(lasagne).performClick()
         composeRule.waitForIdle()
 
-        assertEquals(listOf<Long?>(6), taps)
+        assertEquals(listOf<Long>(6), taps)
         composeRule.onNodeWithContentDescription(lasagne).assertIsSelected()
         composeRule.onNodeWithContentDescription("Garlic bread 4.50").assertIsNotSelected()
         composeRule.onNode(hasSetTextAction()).assertTextContains(lasagne)
@@ -170,12 +170,12 @@ class OcrScreenTest {
         }
         composeRule.waitForIdle()
 
-        assertEquals(listOf<Long?>(6), taps)
+        assertEquals(listOf<Long>(6), taps)
         composeRule.onNodeWithContentDescription(lasagne).assertIsSelected()
     }
 
     @Test
-    fun tappingEmptySpaceClearsTheSelectionButKeepsTheText() {
+    fun tappingEmptySpaceChangesNothing() {
         show()
         composeRule.onNodeWithContentDescription(lasagne).performClick()
 
@@ -184,8 +184,8 @@ class OcrScreenTest {
         }
         composeRule.waitForIdle()
 
-        assertEquals(listOf<Long?>(6, null), taps)
-        composeRule.onNodeWithContentDescription(lasagne).assertIsNotSelected()
+        assertEquals(listOf<Long>(6), taps)
+        composeRule.onNodeWithContentDescription(lasagne).assertIsSelected()
         composeRule.onNode(hasSetTextAction()).assertTextContains(lasagne)
     }
 

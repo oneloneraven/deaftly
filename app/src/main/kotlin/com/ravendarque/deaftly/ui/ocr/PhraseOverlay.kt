@@ -60,7 +60,7 @@ private const val BOTTOM_RIGHT = 2
 fun PhraseOverlay(
     phrases: List<Phrase>,
     selection: OcrSelection,
-    onTapPhrase: (Long?) -> Unit,
+    onTapPhrase: (Long) -> Unit,
     onSelectRange: (TextSelection) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -82,7 +82,7 @@ fun PhraseOverlay(
 private fun Modifier.selectionGestures(
     phrases: List<Phrase>,
     selection: TextSelection?,
-    onTapPhrase: (Long?) -> Unit,
+    onTapPhrase: (Long) -> Unit,
     onSelectRange: (TextSelection) -> Unit,
 ): Modifier {
     val currentPhrases by rememberUpdatedState(phrases)
@@ -115,7 +115,7 @@ private fun Modifier.selectionGestures(
         detectTapGestures { at ->
             val hit =
                 PhraseHitTest.phraseAt(currentPhrases, at.toPoint(), size.width.toFloat(), size.height.toFloat(), TouchSlop.toPx())
-            currentTap(hit?.id)
+            hit?.let { currentTap(it.id) }
         }
     }
 }
@@ -124,7 +124,7 @@ private fun Modifier.selectionGestures(
 private fun PhraseNodes(
     phrases: List<Phrase>,
     selectedIds: Set<Long>,
-    onTapPhrase: (Long?) -> Unit,
+    onTapPhrase: (Long) -> Unit,
     width: Float,
     height: Float,
 ) {

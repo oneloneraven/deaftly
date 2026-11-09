@@ -96,7 +96,7 @@ data class OcrContent(
 
 data class OcrActions(
     val onClose: () -> Unit,
-    val onTapPhrase: (Long?) -> Unit,
+    val onTapPhrase: (Long) -> Unit,
     val onSelectRange: (TextSelection) -> Unit,
     val onFieldChange: (String) -> Unit,
     val onClearText: () -> Unit,

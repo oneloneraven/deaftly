@@ -107,13 +107,13 @@ class OcrViewModel(
             null
         }
 
-    fun togglePhrase(id: Long?) {
+    fun togglePhrase(id: Long) {
         mutableState.update { state ->
             val phrase = state.phrases.firstOrNull { it.id == id }
-            when {
-                id == null -> state.copy(selection = OcrSelection())
-                phrase == null -> state
-                else -> state.selection.toggled(phrase).let { state.copy(selection = it, fieldText = it.tappedText) }
+            if (phrase == null) {
+                state
+            } else {
+                state.selection.toggled(phrase).let { state.copy(selection = it, fieldText = it.tappedText) }
             }
         }
     }

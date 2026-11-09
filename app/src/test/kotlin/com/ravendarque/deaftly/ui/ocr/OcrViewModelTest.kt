@@ -267,24 +267,6 @@ class OcrViewModelTest {
     }
 
     @Test
-    fun tappingNothingClearsTheSelectionButKeepsTheEditedText() {
-        val viewModel = viewModel()
-        viewModel.awaitReady()
-        viewModel.analyse(frame(), null)
-        viewModel.togglePhrase(
-            viewModel.state.value.phrases
-                .single()
-                .id,
-        )
-        viewModel.editText("Lasagne verde")
-
-        viewModel.togglePhrase(null)
-
-        assertTrue(viewModel.state.value.selection.isEmpty)
-        assertEquals("Lasagne verde", viewModel.state.value.fieldText)
-    }
-
-    @Test
     fun selectingAPhraseThatIsNotThereChangesNothing() {
         val viewModel = viewModel()
         viewModel.awaitReady()
