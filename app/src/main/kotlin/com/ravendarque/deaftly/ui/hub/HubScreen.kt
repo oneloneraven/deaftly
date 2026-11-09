@@ -28,6 +28,7 @@ import com.ravendarque.deaftly.navigation.Route
 import com.ravendarque.deaftly.ui.components.DeaftlyIconButton
 import com.ravendarque.deaftly.ui.components.HubCard
 import com.ravendarque.deaftly.ui.components.Wordmark
+import com.ravendarque.deaftly.ui.components.spoken
 import com.ravendarque.deaftly.ui.icons.DeaftlyIcons
 import com.ravendarque.deaftly.ui.theme.Deaftly
 
@@ -35,20 +36,21 @@ private const val STACK_FONT_SCALE = 1.5f
 
 private data class HubOption(
     val label: Int,
+    val description: Int,
     val icon: ImageVector,
     val route: Route,
 )
 
 private val showOptions =
     listOf(
-        HubOption(R.string.hub_start_typing, DeaftlyIcons.Type, Route.TypeShow),
-        HubOption(R.string.hub_use_template, DeaftlyIcons.Template, Route.Templates),
+        HubOption(R.string.hub_start_typing, R.string.hub_start_typing_description, DeaftlyIcons.Keyboard, Route.TypeShow),
+        HubOption(R.string.hub_use_template, R.string.hub_use_template_description, DeaftlyIcons.TemplateBlank, Route.Templates),
     )
 
 private val chatOptions =
     listOf(
-        HubOption(R.string.hub_face_to_face, DeaftlyIcons.FaceToFace, Route.FaceToFace),
-        HubOption(R.string.hub_side_by_side, DeaftlyIcons.Sides, Route.Chat()),
+        HubOption(R.string.hub_face_to_face, R.string.hub_face_to_face_description, DeaftlyIcons.FaceToFace, Route.FaceToFace),
+        HubOption(R.string.hub_side_by_side, R.string.hub_side_by_side_description, DeaftlyIcons.SideBySide, Route.Chat()),
     )
 
 @Composable
@@ -64,6 +66,12 @@ fun HubScreen(onNavigate: (Route) -> Unit) {
                         .padding(horizontal = Deaftly.spacing.space20, vertical = Deaftly.spacing.space12),
                 verticalArrangement = Arrangement.spacedBy(Deaftly.spacing.space24),
             ) {
+                Text(
+                    text = stringResource(R.string.hub_welcome),
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = Deaftly.colors.inkSecondary,
+                    modifier = Modifier.spoken(stringResource(R.string.hub_welcome)),
+                )
                 Group(R.string.hub_show_heading, showOptions, onNavigate)
                 Group(R.string.hub_chat_heading, chatOptions, onNavigate)
             }
@@ -111,7 +119,8 @@ private fun Group(
             ) {
                 row.forEach { option ->
                     HubCard(
-                        label = stringResource(option.label),
+                        title = stringResource(option.label),
+                        description = stringResource(option.description),
                         icon = option.icon,
                         onClick = { onNavigate(option.route) },
                         modifier = Modifier.weight(1f).fillMaxHeight(),

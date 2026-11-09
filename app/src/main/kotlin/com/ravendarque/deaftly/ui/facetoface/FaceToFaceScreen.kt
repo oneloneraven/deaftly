@@ -166,7 +166,7 @@ private fun TopBar(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(Deaftly.spacing.space8),
         ) {
-            Icon(DeaftlyIcons.Sides, contentDescription = null, modifier = Modifier.size(20.dp), tint = Deaftly.colors.ink)
+            Icon(DeaftlyIcons.SideBySide, contentDescription = null, modifier = Modifier.size(20.dp), tint = Deaftly.colors.ink)
             Text(
                 text = stringResource(R.string.f2f_continue),
                 style = MaterialTheme.typography.labelLarge,
