@@ -71,6 +71,8 @@ object DeaftlyIcons {
 
     val Chevron: ImageVector by lazy { strokeIcon("Chevron", "M9 6l6 6-6 6") }
 
+    val Info: ImageVector by lazy { strokeIcon("Info", "M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18z", "M12 16v-4M12 8h.01") }
+
     val Close: ImageVector by lazy { strokeIcon("Close", "M6 6l12 12M18 6L6 18") }
 
     val ClearCircle: ImageVector by lazy { strokeIcon("ClearCircle", "M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18z", "M15 9l-6 6M9 9l6 6") }

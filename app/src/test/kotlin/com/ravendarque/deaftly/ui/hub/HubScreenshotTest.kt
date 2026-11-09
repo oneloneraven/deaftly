@@ -1,7 +1,11 @@
 package com.ravendarque.deaftly.ui.hub
 
+import androidx.compose.ui.test.isDialog
 import androidx.compose.ui.test.junit4.v2.createComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onRoot
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.takahirom.roborazzi.captureRoboImage
 import com.ravendarque.deaftly.ui.theme.AppTheme
@@ -23,6 +27,30 @@ class HubScreenshotTest {
         composeRule.waitForIdle()
         composeRule.onRoot().captureRoboImage()
     }
+
+    private fun captureDialog(
+        dark: Boolean,
+        option: String = "Face to face",
+    ) {
+        composeRule.setContent { AppTheme(darkTheme = dark) { HubScreen(onNavigate = {}) } }
+        composeRule.onNodeWithContentDescription("About $option").performScrollTo().performClick()
+        composeRule.waitForIdle()
+        composeRule.onNode(isDialog()).captureRoboImage()
+    }
+
+    @Test
+    fun dialogLightTheme() = captureDialog(dark = false)
+
+    @Test
+    fun dialogDarkTheme() = captureDialog(dark = true)
+
+    @Test
+    @Config(fontScale = 2f)
+    fun dialogLargeFontScale() = captureDialog(dark = false)
+
+    @Test
+    @Config(fontScale = 2f)
+    fun dialogLongestCopyLargeFontScale() = captureDialog(dark = false, option = "Use a template")
 
     @Test
     fun lightTheme() = capture(dark = false)

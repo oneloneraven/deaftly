@@ -35,10 +35,13 @@
     <string name="hub_use_template">Use a template</string>
     <string name="hub_face_to_face">Face to face</string>
     <string name="hub_side_by_side">Side by side</string>
-    <string name="hub_start_typing_description">Enter your own custom text</string>
-    <string name="hub_use_template_description">Use a template and fill in the placeholders</string>
-    <string name="hub_face_to_face_description">You keep hold of your phone and they read along opposite you</string>
-    <string name="hub_side_by_side_description">You pass the phone between you and take turns to type</string>
+    <string name="hub_start_typing_help">Type what you want to say, then show it full screen in large, clear text for the other person to read. Use this for anything you haven\u2019t saved as a template.</string>
+    <string name="hub_use_template_help">Templates are messages you use often, such as ordering a coffee or giving your name at reception. Pick one, fill in the parts that change each time, like a time or a name, then show it. You can type the details or read them from a sign or document with the camera.</string>
+    <string name="hub_face_to_face_help">For typing to someone opposite you while securely holding your phone. The keyboard faces you, while the text you type faces away from you so they can read along as you type. If they want to reply, you can switch to Side by side and pass them the phone.</string>
+    <string name="hub_side_by_side_help">For a back-and-forth conversation. You share one phone, passing it between you and taking turns to type. Each person\u2019s messages appear in their own colour, like a script, so it\u2019s easy to follow who said what. Flip the switch to change whose turn it is.</string>
+    <string name="hub_info">About %1$s</string>
+    <string name="hub_help_start">Start</string>
+    <string name="hub_help_close">Close</string>
     <string name="home_face_to_face">Face to face</string>
     <string name="chip_state_empty">Empty</string>
     <string name="chip_state_filled">Filled in</string>

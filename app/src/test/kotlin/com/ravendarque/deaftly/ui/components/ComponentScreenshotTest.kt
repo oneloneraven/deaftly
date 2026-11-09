@@ -165,16 +165,18 @@ class HubCardsScreenshotTest : ComponentScreenshotTest() {
         Row(modifier = Modifier.height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             HubCard(
                 "Start typing",
-                "Enter your own custom text",
                 DeaftlyIcons.Keyboard,
                 onClick = {},
+                infoLabel = "About Start typing",
+                onInfo = {},
                 modifier = Modifier.weight(1f).fillMaxHeight(),
             )
             HubCard(
                 "Use a template",
-                "Use a template and fill in the placeholders",
                 DeaftlyIcons.TemplateBlank,
                 onClick = {},
+                infoLabel = "About Use a template",
+                onInfo = {},
                 modifier = Modifier.weight(1f).fillMaxHeight(),
             )
         }

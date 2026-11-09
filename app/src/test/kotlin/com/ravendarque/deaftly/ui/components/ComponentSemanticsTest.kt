@@ -223,16 +223,33 @@ class ComponentSemanticsTest {
     @Test
     fun hubCardIsALabelledButtonWithAFullTouchTarget() {
         var clicks = 0
-        show { HubCard("Start typing", "Enter your own custom text", DeaftlyIcons.Keyboard, onClick = { clicks++ }) }
+        show { HubCard("Start typing", DeaftlyIcons.Keyboard, onClick = { clicks++ }, infoLabel = "About Start typing", onInfo = {}) }
 
         composeRule
             .onNodeWithText("Start typing")
-            .assertContentDescriptionEquals("Start typing. Enter your own custom text")
+            .assertContentDescriptionEquals("Start typing")
             .assert(SemanticsMatcher.expectValue(SemanticsProperties.Role, Role.Button))
             .assertHasClickAction()
             .assertTouchTarget()
             .performClick()
         assertEquals(1, clicks)
+    }
+
+    @Test
+    fun hubCardInfoButtonIsASeparateLabelledTouchTarget() {
+        var clicks = 0
+        var infos = 0
+        show {
+            HubCard("Start typing", DeaftlyIcons.Keyboard, onClick = { clicks++ }, infoLabel = "About Start typing", onInfo = { infos++ })
+        }
+
+        composeRule
+            .onNodeWithContentDescription("About Start typing")
+            .assert(SemanticsMatcher.expectValue(SemanticsProperties.Role, Role.Button))
+            .assertTouchTarget()
+            .performClick()
+        assertEquals(0, clicks)
+        assertEquals(1, infos)
     }
 
     @Test
