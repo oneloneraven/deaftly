@@ -39,12 +39,12 @@ import com.ravendarque.deaftly.R
 import com.ravendarque.deaftly.core.chat.Conversation
 import com.ravendarque.deaftly.core.chat.Message
 import com.ravendarque.deaftly.core.chat.ParticipantId
+import com.ravendarque.deaftly.core.settings.ChatTextSize
 import com.ravendarque.deaftly.ui.theme.Deaftly
 import com.ravendarque.deaftly.ui.theme.ParticipantColours
 import com.ravendarque.deaftly.ui.theme.colours
 
 private const val BUBBLE_MAX_WIDTH_FRACTION = 0.8f
-private const val LINE_HEIGHT_RATIO = 1.4f
 private const val QUOTE_SIZE_RATIO = 0.8f
 private val BubbleRadius = 22.dp
 private val TailRadius = 6.dp
@@ -135,7 +135,7 @@ private fun MessageBubble(
                     text = it.text,
                     bar = colours.onContainerMuted,
                     colour = colours.onContainerMuted,
-                    style = bubbleStyle((textSize.sp * QUOTE_SIZE_RATIO).toInt()),
+                    style = chatTextStyle((textSize.sp * QUOTE_SIZE_RATIO).toInt()),
                     maxLines = QUOTE_MAX_LINES,
                 )
             }
@@ -175,13 +175,10 @@ private fun SelectableText(
             Text(
                 text = formatting.annotate(message.spans),
                 color = colours.onContainer,
-                style = bubbleStyle(textSize.sp),
+                style = chatTextStyle(textSize.sp),
             )
         }
     }
 }
 
 private data object QuoteMenuKey
-
-@Composable
-private fun bubbleStyle(size: Int) = MaterialTheme.typography.bodyLarge.copy(fontSize = size.sp, lineHeight = (size * LINE_HEIGHT_RATIO).sp)

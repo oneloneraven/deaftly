@@ -37,7 +37,10 @@ import com.ravendarque.deaftly.core.chat.Quote
 import com.ravendarque.deaftly.core.chat.Span
 import com.ravendarque.deaftly.core.chat.SpanStyle
 import com.ravendarque.deaftly.core.chat.StyleRange
+import com.ravendarque.deaftly.core.settings.ChatTextSize
 import com.ravendarque.deaftly.ui.theme.AppTheme
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -73,10 +76,7 @@ class ChatScreenTest {
     private fun showOrdering(turn: ParticipantId = ParticipantId.B) =
         show(SavedStateHandle(mapOf("conversation" to ChatCodec.encode(orderingConversation(turn)))))
 
-    private fun header(
-        left: String = "Them",
-        right: String = "Alex",
-    ) = composeRule.onNodeWithContentDescription("$left and $right. Change names and colours")
+    private fun setup() = composeRule.onNodeWithContentDescription("Names and colours")
 
     private fun turnControl() = composeRule.onNodeWithContentDescription("Whose turn")
 
@@ -91,37 +91,50 @@ class ChatScreenTest {
     private fun conversation() = (viewModel.state.value as ChatUiState.Ready).conversation
 
     @Test
-    fun theHeaderShowsBothPeopleWithTheSavedNameForTheDeafUser() {
+    fun theHeaderOffersEndTextSizeSwitchSidesAndSetupAsFortyEightDpTargets() {
         show()
 
-        header().assertIsDisplayed()
+        listOf("End chat", "Change text size", "Switch sides", "Names and colours").forEach {
+            composeRule
+                .onNodeWithContentDescription(it)
+                .assertIsDisplayed()
+                .assertWidthIsAtLeast(48.dp)
+                .assertHeightIsAtLeast(48.dp)
+        }
         composeRule.onRoot().tryPerformAccessibilityChecks()
     }
 
     @Test
-    fun tappingTheHeaderOpensTheSheet() {
+    fun theHeaderNoLongerShowsTheParticipants() {
         show()
 
-        header().performClick()
+        composeRule.onNodeWithContentDescription("Them and Alex. Change names and colours").assertDoesNotExist()
+    }
+
+    @Test
+    fun theCogOpensTheSetupSheet() {
+        show()
+
+        setup().performClick()
 
         composeRule.onNodeWithText("Who is chatting?").assertIsDisplayed()
         composeRule.onRoot().tryPerformAccessibilityChecks()
     }
 
     @Test
-    fun namingTheOtherPersonUpdatesTheHeaderStraightAway() {
+    fun namingTheOtherPersonUpdatesTheConversation() {
         show()
-        header().performClick()
+        setup().performClick()
 
         composeRule.onAllNodes(isParticipantNameField)[1].performTextInput("Sam")
 
-        header(left = "Sam").assertExists()
+        assertEquals("Sam", conversation().participantB.name)
     }
 
     @Test
     fun finishingTheSheetRemembersTheDeafUsersColour() {
         show()
-        header().performClick()
+        setup().performClick()
 
         composeRule.onAllNodesWithContentDescription("Red")[0].performClick()
         composeRule.onNodeWithText("Done").performClick()
@@ -262,14 +275,34 @@ class ChatScreenTest {
     }
 
     @Test
-    fun theTextSizeButtonCyclesThroughThreeSizes() {
+    fun theTextSizeButtonCyclesThroughThreeSizesStartingAtMedium() {
         show()
         val button = { composeRule.onNodeWithContentDescription("Change text size") }
 
-        button().assert(hasState("Normal")).performClick()
+        button().assert(hasState("Medium")).performClick()
         button().assert(hasState("Large")).performClick()
-        button().assert(hasState("Largest")).performClick()
-        button().assert(hasState("Normal"))
+        button().assert(hasState("Small")).performClick()
+        button().assert(hasState("Medium"))
+    }
+
+    @Test
+    fun theTextSizeIsSavedToSettings() {
+        show()
+
+        composeRule.onNodeWithContentDescription("Change text size").performClick()
+        composeRule.waitForIdle()
+
+        assertEquals(ChatTextSize.Large, runBlocking { settings.chatTextSize.first() })
+    }
+
+    @Test
+    fun switchSidesIsSavedToSettings() {
+        show()
+
+        composeRule.onNodeWithContentDescription("Switch sides").performClick()
+        composeRule.waitForIdle()
+
+        assertEquals(true, runBlocking { settings.chatSidesSwapped.first() })
     }
 
     private fun hasSelected(value: Boolean) = SemanticsMatcher.expectValue(SemanticsProperties.Selected, value)

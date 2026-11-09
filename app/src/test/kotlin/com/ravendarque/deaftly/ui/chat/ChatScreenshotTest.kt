@@ -16,6 +16,7 @@ import com.ravendarque.deaftly.core.chat.ColourRole
 import com.ravendarque.deaftly.core.chat.Conversation
 import com.ravendarque.deaftly.core.chat.Participant
 import com.ravendarque.deaftly.core.chat.ParticipantId
+import com.ravendarque.deaftly.core.settings.ChatTextSize
 import com.ravendarque.deaftly.ui.components.SheetBody
 import com.ravendarque.deaftly.ui.components.SheetHandle
 import com.ravendarque.deaftly.ui.theme.AppTheme
@@ -72,7 +73,7 @@ class ChatScreenshotTest {
         dark: Boolean,
     ) = shot {
         AppTheme(darkTheme = dark) {
-            Surface { ChatHeader(conversation, ChatTextSize.Normal, ChatHeaderActions({}, {}, {})) }
+            Surface { ChatHeader(ChatTextSize.Medium, ChatHeaderActions({}, {}, {}, {})) }
         }
     }
 

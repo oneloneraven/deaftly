@@ -8,6 +8,7 @@ import com.ravendarque.deaftly.core.chat.Conversation
 import com.ravendarque.deaftly.core.chat.Participant
 import com.ravendarque.deaftly.core.chat.ParticipantId
 import com.ravendarque.deaftly.core.chat.RichText
+import com.ravendarque.deaftly.core.settings.ChatTextSize
 import com.ravendarque.deaftly.core.settings.SettingsRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -33,6 +34,7 @@ sealed interface ChatUiState {
     data class Ready(
         val conversation: Conversation,
         val textSize: ChatTextSize,
+        val sidesSwapped: Boolean,
         val drafts: Map<ParticipantId, Draft>,
     ) : ChatUiState {
         val draft: Draft get() = drafts[conversation.turn] ?: Draft()
@@ -46,12 +48,11 @@ class ChatViewModel(
     private val insertions: ChatInsertions = ChatInsertions(),
 ) : ViewModel() {
     private val conversation = MutableStateFlow(ChatCodec.decode(savedState[CONVERSATION_KEY]))
-    val display = ChatDisplay(savedState)
     val drafts = ChatDrafts(savedState) { conversation.value?.turn }
 
     val state: StateFlow<ChatUiState> =
-        combine(conversation, display.textSize, drafts.all) { conversation, textSize, drafts ->
-            if (conversation == null) ChatUiState.Loading else ChatUiState.Ready(conversation, textSize, drafts)
+        combine(conversation, settings.chatTextSize, settings.chatSidesSwapped, drafts.all) { conversation, textSize, swapped, drafts ->
+            if (conversation == null) ChatUiState.Loading else ChatUiState.Ready(conversation, textSize, swapped, drafts)
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS), ChatUiState.Loading)
 
     init {
@@ -79,6 +80,14 @@ class ChatViewModel(
     fun rememberOwnDefaults() {
         val own = conversation.value?.participantA ?: return
         viewModelScope.launch { settings.setChatProfile(ChatProfile(own.name, own.colour)) }
+    }
+
+    fun cycleTextSize() {
+        viewModelScope.launch { settings.setChatTextSize(settings.chatTextSize.first().next()) }
+    }
+
+    fun switchSides() {
+        viewModelScope.launch { settings.setChatSidesSwapped(!settings.chatSidesSwapped.first()) }
     }
 
     fun selectTurn(id: ParticipantId) {

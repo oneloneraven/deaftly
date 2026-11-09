@@ -3,6 +3,7 @@ package com.ravendarque.deaftly.storage
 import androidx.datastore.core.DataStore
 import com.ravendarque.deaftly.core.chat.ChatProfile
 import com.ravendarque.deaftly.core.chat.ColourRole
+import com.ravendarque.deaftly.core.settings.ChatTextSize
 import com.ravendarque.deaftly.core.settings.SettingsRepository
 import com.ravendarque.deaftly.core.settings.ShowScheme
 import kotlinx.coroutines.flow.Flow
@@ -21,12 +22,25 @@ class DataStoreSettingsRepository(
 
     override val firstRunDone: Flow<Boolean> = store.data.map { it.settings.firstRunDone }.distinctUntilChanged()
 
+    override val chatTextSize: Flow<ChatTextSize> =
+        store.data.map { it.settings.chatTextSize?.toDomain() ?: ChatTextSize.Default }.distinctUntilChanged()
+
+    override val chatSidesSwapped: Flow<Boolean> = store.data.map { it.settings.chatSidesSwapped }.distinctUntilChanged()
+
     override suspend fun setShowScheme(scheme: ShowScheme) {
         store.updateData { document -> document.copy(settings = document.settings.copy(showScheme = scheme.toDto())) }
     }
 
     override suspend fun setFirstRunDone() {
         store.updateData { document -> document.copy(settings = document.settings.copy(firstRunDone = true)) }
+    }
+
+    override suspend fun setChatTextSize(size: ChatTextSize) {
+        store.updateData { document -> document.copy(settings = document.settings.copy(chatTextSize = size.toDto())) }
+    }
+
+    override suspend fun setChatSidesSwapped(swapped: Boolean) {
+        store.updateData { document -> document.copy(settings = document.settings.copy(chatSidesSwapped = swapped)) }
     }
 
     override suspend fun setChatProfile(profile: ChatProfile) {
@@ -41,6 +55,20 @@ class DataStoreSettingsRepository(
         }
     }
 }
+
+private fun ChatTextSizeDto.toDomain(): ChatTextSize =
+    when (this) {
+        ChatTextSizeDto.Small -> ChatTextSize.Small
+        ChatTextSizeDto.Medium -> ChatTextSize.Medium
+        ChatTextSizeDto.Large -> ChatTextSize.Large
+    }
+
+private fun ChatTextSize.toDto(): ChatTextSizeDto =
+    when (this) {
+        ChatTextSize.Small -> ChatTextSizeDto.Small
+        ChatTextSize.Medium -> ChatTextSizeDto.Medium
+        ChatTextSize.Large -> ChatTextSizeDto.Large
+    }
 
 private fun ShowSchemeDto.toDomain(): ShowScheme =
     when (this) {

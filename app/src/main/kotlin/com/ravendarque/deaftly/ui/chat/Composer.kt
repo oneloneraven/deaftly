@@ -50,6 +50,7 @@ import com.ravendarque.deaftly.core.chat.Composition
 import com.ravendarque.deaftly.core.chat.Participant
 import com.ravendarque.deaftly.core.chat.ParticipantId
 import com.ravendarque.deaftly.core.chat.SpanStyle
+import com.ravendarque.deaftly.core.settings.ChatTextSize
 import com.ravendarque.deaftly.ui.icons.DeaftlyIcons
 import com.ravendarque.deaftly.ui.theme.Deaftly
 import com.ravendarque.deaftly.ui.theme.ParticipantColours
@@ -79,6 +80,7 @@ fun Composer(
     participant: Participant,
     draft: Draft,
     canQuote: Boolean,
+    textSize: ChatTextSize,
     actions: ComposerActions,
     modifier: Modifier = Modifier,
 ) {
@@ -108,7 +110,7 @@ fun Composer(
     ) {
         TurnPrompt(participant.id)
         draft.quote?.let { QuotePreview(it.text, colours.strong, actions.onRemoveQuote) }
-        MessageField(state, participant.labelled().displayName.orEmpty(), colours.strong, send)
+        MessageField(state, participant.labelled().displayName.orEmpty(), colours.strong, textSize.sp, send)
         FlowRow(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(Deaftly.spacing.space4),
@@ -293,18 +295,20 @@ internal fun MessageField(
     state: ComposerState,
     owner: String,
     cursor: Color,
+    textSizeSp: Int,
     onSend: () -> Unit,
     modifier: Modifier = Modifier,
     hint: String = stringResource(R.string.chat_composer_hint),
 ) {
     val c = Deaftly.colors
     val label = stringResource(R.string.chat_composer_label, owner)
+    val textStyle = chatTextStyle(textSizeSp)
     BasicTextField(
         state = state.field,
         modifier = modifier.fillMaxWidth().heightIn(min = InputMinHeight).semantics { contentDescription = label },
         inputTransformation = state.input,
         outputTransformation = state.output,
-        textStyle = MaterialTheme.typography.bodyLarge.copy(color = c.ink),
+        textStyle = textStyle.copy(color = c.ink),
         cursorBrush = SolidColor(cursor),
         lineLimits = TextFieldLineLimits.MultiLine(maxHeightInLines = MAX_LINES),
         keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences, imeAction = ImeAction.Send),
@@ -313,7 +317,7 @@ internal fun MessageField(
             TextFieldDecorator { inner ->
                 Box(Modifier.heightIn(min = InputMinHeight), contentAlignment = Alignment.CenterStart) {
                     if (state.field.text.isEmpty()) {
-                        Text(hint, style = MaterialTheme.typography.bodyLarge, color = c.inkMuted)
+                        Text(hint, style = textStyle, color = c.inkMuted)
                     }
                     inner()
                 }

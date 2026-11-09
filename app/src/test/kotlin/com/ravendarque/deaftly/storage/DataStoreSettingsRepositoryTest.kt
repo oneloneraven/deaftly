@@ -2,6 +2,7 @@ package com.ravendarque.deaftly.storage
 
 import com.ravendarque.deaftly.core.chat.ChatProfile
 import com.ravendarque.deaftly.core.chat.ColourRole
+import com.ravendarque.deaftly.core.settings.ChatTextSize
 import com.ravendarque.deaftly.core.settings.ShowScheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -102,5 +103,40 @@ class DataStoreSettingsRepositoryTest {
             firstRun.cancelAndJoin()
 
             assertEquals(true, repository(backgroundScope).firstRunDone.first())
+        }
+
+    @Test
+    fun theChatDisplayDefaultsToMediumTextWithSidesAsTheyWere() =
+        runTest {
+            val repository = repository(backgroundScope)
+
+            assertEquals(ChatTextSize.Medium, repository.chatTextSize.first())
+            assertEquals(false, repository.chatSidesSwapped.first())
+        }
+
+    @Test
+    fun theChatTextSizeAndSwappedSidesSurviveAFreshStore() =
+        runTest {
+            val firstRun = Job()
+            val before = repository(CoroutineScope(firstRun))
+            before.setChatTextSize(ChatTextSize.Large)
+            before.setChatSidesSwapped(true)
+            firstRun.cancelAndJoin()
+
+            val after = repository(backgroundScope)
+            assertEquals(ChatTextSize.Large, after.chatTextSize.first())
+            assertEquals(true, after.chatSidesSwapped.first())
+        }
+
+    @Test
+    fun theChatDisplaySettingsDoNotOverwriteTheProfile() =
+        runTest {
+            val repository = repository(backgroundScope)
+
+            repository.setChatProfile(ChatProfile("Alex", ColourRole.Blue))
+            repository.setChatTextSize(ChatTextSize.Small)
+            repository.setChatSidesSwapped(true)
+
+            assertEquals(ChatProfile("Alex", ColourRole.Blue), repository.chatProfile.first())
         }
 }

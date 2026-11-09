@@ -27,7 +27,21 @@ data class SettingsDto(
     val chatName: String? = null,
     val chatColour: ParticipantColourDto? = null,
     val firstRunDone: Boolean = false,
+    val chatTextSize: ChatTextSizeDto? = null,
+    val chatSidesSwapped: Boolean = false,
 )
+
+@Serializable
+enum class ChatTextSizeDto {
+    @SerialName("small")
+    Small,
+
+    @SerialName("medium")
+    Medium,
+
+    @SerialName("large")
+    Large,
+}
 
 @Serializable
 enum class ShowSchemeDto {

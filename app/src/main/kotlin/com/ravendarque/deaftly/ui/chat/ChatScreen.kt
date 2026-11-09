@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ravendarque.deaftly.R
+import com.ravendarque.deaftly.core.chat.ParticipantId
 import com.ravendarque.deaftly.ui.editor.ConfirmDialog
 import com.ravendarque.deaftly.ui.editor.ConfirmSpec
 import com.ravendarque.deaftly.ui.theme.Deaftly
@@ -51,7 +52,8 @@ private fun ChatContent(
         ChatHeaderActions(
             onEnd = requestEnd,
             onEditParticipants = { editingParticipants = true },
-            onCycleTextSize = viewModel.display::cycleTextSize,
+            onCycleTextSize = viewModel::cycleTextSize,
+            onSwitchSides = viewModel::switchSides,
         ),
     )
     if (editingParticipants) {
@@ -93,12 +95,19 @@ private fun SidesChat(
     val conversation = current.conversation
     Surface(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.safeDrawingPadding()) {
-            ChatHeader(conversation, current.textSize, headerActions)
-            MessageList(conversation, current.textSize, viewModel::quote, Modifier.weight(1f).fillMaxSize())
+            ChatHeader(current.textSize, headerActions)
+            MessageList(
+                conversation,
+                current.textSize,
+                viewModel::quote,
+                Modifier.weight(1f).fillMaxSize(),
+                reader = if (current.sidesSwapped) ParticipantId.B else ParticipantId.A,
+            )
             Composer(
                 participant = conversation.activeParticipant,
                 draft = current.draft,
                 canQuote = conversation.messages.isNotEmpty(),
+                textSize = current.textSize,
                 actions = composerActions,
                 modifier = Modifier.padding(horizontal = Deaftly.spacing.space12),
             )

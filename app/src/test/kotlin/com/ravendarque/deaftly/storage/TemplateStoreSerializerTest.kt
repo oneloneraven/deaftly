@@ -6,6 +6,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.boolean
 import kotlinx.serialization.json.int
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
@@ -45,7 +46,10 @@ class TemplateStoreSerializerTest {
 
             assertEquals(1, root.getValue("version").jsonPrimitive.int)
             assertEquals(builtIns.size, root.getValue("templates").jsonArray.size)
-            assertEquals(JsonObject(mapOf("firstRunDone" to JsonPrimitive(false))), root.getValue("settings"))
+            assertEquals(
+                JsonObject(mapOf("firstRunDone" to JsonPrimitive(false), "chatSidesSwapped" to JsonPrimitive(false))),
+                root.getValue("settings"),
+            )
         }
 
     @Test
@@ -175,6 +179,34 @@ class TemplateStoreSerializerTest {
     fun readsSettingsWithoutAChatProfile() =
         runTest {
             assertEquals(SettingsDto(), read("""{"version":1,"templates":[],"settings":{}}""").settings)
+        }
+
+    @Test
+    fun roundTripsTheChatTextSizeAndSwappedSides() =
+        runTest {
+            val document = seed.copy(settings = SettingsDto(chatTextSize = ChatTextSizeDto.Large, chatSidesSwapped = true))
+
+            val settings =
+                Json
+                    .parseToJsonElement(write(document))
+                    .jsonObject
+                    .getValue("settings")
+                    .jsonObject
+
+            assertEquals("large", settings.getValue("chatTextSize").jsonPrimitive.content)
+            assertEquals(true, settings.getValue("chatSidesSwapped").jsonPrimitive.boolean)
+            assertEquals(document.settings, read(write(document)).settings)
+        }
+
+    @Test
+    fun anOlderDocumentWithoutTheChatDisplaySettingsStillLoadsWithDefaults() =
+        runTest {
+            val settings =
+                read("""{"version":1,"templates":[],"settings":{"chatName":"Alex","chatColour":"green","firstRunDone":true}}""").settings
+
+            assertEquals(null, settings.chatTextSize)
+            assertEquals(false, settings.chatSidesSwapped)
+            assertEquals("Alex", settings.chatName)
         }
 
     @Test
