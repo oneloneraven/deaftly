@@ -1,16 +1,11 @@
 package com.ravendarque.deaftly.ui.home
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Icon
@@ -30,26 +25,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ravendarque.deaftly.R
 import com.ravendarque.deaftly.navigation.Route
-import com.ravendarque.deaftly.ui.components.ActionDock
+import com.ravendarque.deaftly.ui.components.BottomDock
 import com.ravendarque.deaftly.ui.components.DeaftlyIconButton
-import com.ravendarque.deaftly.ui.components.InkButton
 import com.ravendarque.deaftly.ui.components.SecondaryButton
-import com.ravendarque.deaftly.ui.components.spoken
 import com.ravendarque.deaftly.ui.icons.DeaftlyIcons
 import com.ravendarque.deaftly.ui.theme.Deaftly
 
 @Composable
-fun HomeScreen(
+fun TemplatesScreen(
     viewModel: HomeViewModel,
     onNavigate: (Route) -> Unit,
+    onHome: () -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val actions =
@@ -63,47 +55,30 @@ fun HomeScreen(
                 viewModel::setCategory,
             )
         }
-    HomeContent(state, actions)
+    TemplatesContent(state, actions, onHome)
 }
 
 @Composable
-fun HomeContent(
+fun TemplatesContent(
     state: HomeUiState,
     actions: HomeActions,
+    onHome: () -> Unit,
 ) {
     var optionsFor by rememberSaveable { mutableStateOf<String?>(null) }
     val optionsTemplate = (state.pinned + state.templates).firstOrNull { it.id == optionsFor }
     Surface(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.safeDrawingPadding()) {
-            Header(actions.onNavigate)
+            Header(onNewTemplate = { actions.onNavigate(Route.Editor()) })
             SearchField(state.query, actions.onQueryChange)
             TemplateList(state, actions, onOpenOptions = { optionsFor = it }, modifier = Modifier.weight(1f))
-            ActionDock(
-                start = { modifier ->
-                    InkButton(
-                        text = stringResource(R.string.home_type_and_show),
-                        onClick = { actions.onNavigate(Route.TypeShow) },
-                        modifier = modifier,
-                        icon = DeaftlyIcons.Type,
-                    )
-                },
-                end = { modifier ->
-                    SecondaryButton(
-                        text = stringResource(R.string.home_start_chat),
-                        onClick = { actions.onNavigate(Route.Chat()) },
-                        modifier = modifier,
-                        icon = DeaftlyIcons.Chat,
-                    )
-                },
-                below = { modifier ->
-                    SecondaryButton(
-                        text = stringResource(R.string.home_face_to_face),
-                        onClick = { actions.onNavigate(Route.FaceToFace) },
-                        modifier = modifier,
-                        icon = DeaftlyIcons.FaceToFace,
-                    )
-                },
-            )
+            BottomDock {
+                SecondaryButton(
+                    text = stringResource(R.string.templates_home),
+                    onClick = onHome,
+                    modifier = Modifier.fillMaxWidth(),
+                    icon = DeaftlyIcons.Home,
+                )
+            }
         }
     }
     if (optionsTemplate != null) {
@@ -118,7 +93,7 @@ fun HomeContent(
 }
 
 @Composable
-private fun Header(onNavigate: (Route) -> Unit) {
+private fun Header(onNewTemplate: () -> Unit) {
     Row(
         modifier =
             Modifier
@@ -131,32 +106,13 @@ private fun Header(onNavigate: (Route) -> Unit) {
                 ),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Wordmark(Modifier.weight(1f))
-        Row(horizontalArrangement = Arrangement.spacedBy(Deaftly.spacing.space4)) {
-            DeaftlyIconButton(DeaftlyIcons.Plus, stringResource(R.string.home_new_template), onClick = { onNavigate(Route.Editor()) })
-            DeaftlyIconButton(DeaftlyIcons.Settings, stringResource(R.string.route_settings), onClick = { onNavigate(Route.Settings) })
-        }
-    }
-}
-
-@Composable
-private fun Wordmark(modifier: Modifier = Modifier) {
-    Row(
-        verticalAlignment = Alignment.Bottom,
-        horizontalArrangement = Arrangement.spacedBy(2.dp),
-        modifier = modifier.semantics { heading() },
-    ) {
         Text(
-            text = stringResource(R.string.wordmark),
+            text = stringResource(R.string.route_templates),
             style = MaterialTheme.typography.headlineLarge,
-            modifier = Modifier.spoken(stringResource(R.string.wordmark)),
+            color = Deaftly.colors.ink,
+            modifier = Modifier.weight(1f).semantics { heading() },
         )
-        Box(
-            Modifier
-                .padding(bottom = Deaftly.spacing.space8)
-                .size(9.dp)
-                .background(Deaftly.colors.accent, CircleShape),
-        )
+        DeaftlyIconButton(DeaftlyIcons.Plus, stringResource(R.string.home_new_template), onClick = onNewTemplate)
     }
 }
 

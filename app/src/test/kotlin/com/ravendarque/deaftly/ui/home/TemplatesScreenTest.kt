@@ -1,12 +1,13 @@
 package com.ravendarque.deaftly.ui.home
 
 import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.filter
-import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.isSelectable
 import androidx.compose.ui.test.junit4.accessibility.enableAccessibilityChecks
@@ -37,18 +38,19 @@ import kotlin.test.assertTrue
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(qualifiers = "w390dp-h1600dp")
-class HomeScreenTest {
+class TemplatesScreenTest {
     @get:Rule
     val composeRule = createComposeRule()
 
     private val navigated = mutableListOf<Route>()
+    private var homes = 0
     private val repository = FakeTemplateRepository(homeTemplates)
 
     @Before
     fun setUp() {
         composeRule.enableAccessibilityChecks()
         val viewModel = HomeViewModel(repository)
-        composeRule.setContent { AppTheme { HomeScreen(viewModel, onNavigate = { navigated += it }) } }
+        composeRule.setContent { AppTheme { TemplatesScreen(viewModel, onNavigate = { navigated += it }, onHome = { homes++ }) } }
         composeRule.waitForIdle()
     }
 
@@ -63,11 +65,6 @@ class HomeScreenTest {
         composeRule.onNodeWithText("All").assertIsSelected()
         composeRule.onNodeWithText("Everyday").assertIsNotSelected()
         composeRule.onRoot().tryPerformAccessibilityChecks()
-    }
-
-    @Test
-    fun theWordmarkIsSpokenAsDeftlyWhileItStaysSpeltDeaftly() {
-        composeRule.onNodeWithText("deaftly").assert(hasContentDescription("deftly"))
     }
 
     @Test
@@ -127,19 +124,28 @@ class HomeScreenTest {
     }
 
     @Test
-    fun headerButtonsOpenTheEditorAndSettings() {
+    fun theTitleIsAHeadingAndTheNewTemplateButtonOpensTheEditor() {
+        composeRule
+            .onNodeWithText("Templates")
+            .assert(SemanticsMatcher.keyIsDefined(SemanticsProperties.Heading))
         composeRule.onNodeWithContentDescription("New template").performClick()
-        composeRule.onNodeWithContentDescription("Settings").performClick()
 
-        assertEquals(listOf<Route>(Route.Editor(), Route.Settings), navigated)
+        assertEquals(listOf<Route>(Route.Editor()), navigated)
     }
 
     @Test
-    fun dockButtonsOpenShowAndChat() {
-        composeRule.onNodeWithText("Type & show").performClick()
-        composeRule.onNodeWithText("Start chat").performClick()
+    fun settingsAndTheStartButtonsLiveOnTheHubNotHere() {
+        composeRule.onNodeWithContentDescription("Settings").assertDoesNotExist()
+        composeRule.onNodeWithText("deaftly").assertDoesNotExist()
+        composeRule.onNodeWithText("Start typing").assertDoesNotExist()
+    }
 
-        assertEquals(listOf<Route>(Route.TypeShow, Route.Chat()), navigated)
+    @Test
+    fun theHomeButtonReturnsToTheHub() {
+        composeRule.onNodeWithText("Home").performClick()
+
+        assertEquals(1, homes)
+        assertTrue(navigated.isEmpty())
     }
 
     private fun templateInRepository(id: String) = repository.snapshot.first { it.id == id }

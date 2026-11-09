@@ -1,6 +1,7 @@
 package com.ravendarque.deaftly.ui.components
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -206,20 +207,29 @@ class ComponentSemanticsTest {
     }
 
     @Test
-    fun dockRunsBothActions() {
-        var start = 0
-        var end = 0
+    fun dockHoldsItsContentAndRunsItsAction() {
+        var clicks = 0
         show {
-            ActionDock(
-                start = { InkButton("Type & show", onClick = { start++ }, modifier = it) },
-                end = { SecondaryButton("Start chat", onClick = { end++ }, modifier = it) },
-            )
+            BottomDock {
+                SecondaryButton("Home", onClick = { clicks++ }, modifier = Modifier.fillMaxWidth())
+            }
         }
 
-        composeRule.onNodeWithText("Type & show").performClick()
-        composeRule.onNodeWithText("Start chat").performClick()
-        assertEquals(1, start)
-        assertEquals(1, end)
+        composeRule.onNodeWithText("Home").assertTouchTarget().performClick()
+        assertEquals(1, clicks)
+    }
+
+    @Test
+    fun hubCardIsALabelledButtonWithAFullTouchTarget() {
+        var clicks = 0
+        show { HubCard("Start typing", DeaftlyIcons.Type, onClick = { clicks++ }) }
+
+        composeRule
+            .onNodeWithText("Start typing")
+            .assertHasClickAction()
+            .assertTouchTarget()
+            .performClick()
+        assertEquals(1, clicks)
     }
 
     @Test

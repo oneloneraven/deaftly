@@ -38,7 +38,7 @@ class BackStackRestorationTest {
         }
         composeRule.onNodeWithText(text(R.string.first_run_start)).performClick()
         composeRule.waitUntil(LOAD_TIMEOUT_MILLIS) {
-            composeRule.onAllNodesWithText(text(R.string.home_start_chat)).fetchSemanticsNodes().isNotEmpty()
+            composeRule.onAllNodesWithText(text(R.string.hub_side_by_side)).fetchSemanticsNodes().isNotEmpty()
         }
     }
 
@@ -51,7 +51,7 @@ class BackStackRestorationTest {
         composeRule.activityRule.scenario.recreate()
 
         composeRule.onNodeWithText(text(R.string.first_run_title)).assertExists()
-        composeRule.onNodeWithText(text(R.string.home_start_chat)).assertDoesNotExist()
+        composeRule.onNodeWithText(text(R.string.hub_side_by_side)).assertDoesNotExist()
     }
 
     @Test
@@ -69,7 +69,7 @@ class BackStackRestorationTest {
     @Test
     fun theChatParticipantsSurviveRecreation() {
         getStarted()
-        composeRule.onNodeWithText(text(R.string.home_start_chat)).performClick()
+        composeRule.onNodeWithText(text(R.string.hub_side_by_side)).performClick()
         composeRule.waitUntil(LOAD_TIMEOUT_MILLIS) {
             composeRule.onAllNodesWithText(text(R.string.chat_empty)).fetchSemanticsNodes().isNotEmpty()
         }

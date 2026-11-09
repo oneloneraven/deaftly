@@ -157,6 +157,15 @@ class CardsScreenshotTest : ComponentScreenshotTest() {
     }
 }
 
+class HubCardsScreenshotTest : ComponentScreenshotTest() {
+    override val content: @Composable () -> Unit = {
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            HubCard("Start typing", DeaftlyIcons.Type, onClick = {}, modifier = Modifier.weight(1f))
+            HubCard("Use a template", DeaftlyIcons.Template, onClick = {}, modifier = Modifier.weight(1f))
+        }
+    }
+}
+
 class BarsScreenshotTest : ComponentScreenshotTest() {
     override val content: @Composable () -> Unit = {
         DeaftlyTopBar(
@@ -171,9 +180,8 @@ class BarsScreenshotTest : ComponentScreenshotTest() {
             navigationLabel = "Cancel",
             trailing = { InkButton("Save", onClick = {}) },
         )
-        ActionDock(
-            start = { InkButton("Type & show", onClick = {}, modifier = it, icon = DeaftlyIcons.Type) },
-            end = { SecondaryButton("Start chat", onClick = {}, modifier = it, icon = DeaftlyIcons.Chat) },
-        )
+        BottomDock {
+            SecondaryButton("Home", onClick = {}, modifier = Modifier.fillMaxWidth(), icon = DeaftlyIcons.Home)
+        }
     }
 }

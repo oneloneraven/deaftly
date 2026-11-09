@@ -22,7 +22,8 @@ Status "pass" means no finding at 1x and at 200%.
 | Screen | Labels and actions | 48 dp targets | 200% font | Status |
 | --- | --- | --- | --- | --- |
 | First run | Name field, six colour swatches (radio, checked state), two layout options and Get started all labelled | pass (swatches 52 dp) | Scrolls; Get started stays docked; no clipping | pass |
-| Home | New template, Settings, search, template cards, category chips, Type & show, Start chat all labelled | pass | Pinned cards fill most of the screen; list and categories scroll; card previews truncate to two lines (non-essential) | pass |
+| Home hub | Settings, wordmark, "Show" and "Chat" group headings (headings), Start typing, Use a template, Face to face, Side by side all labelled | pass (cards 132 dp tall) | Cards stack one per row; scrolls; no clipping | pass |
+| Templates | "Templates" heading, New template, search, template cards, category chips, Home all labelled | pass | Pinned cards fill most of the screen; list and categories scroll; card previews truncate to two lines (non-essential) | pass |
 | Fill, empty and filled | Back, Edit template, placeholder chips (labelled with the placeholder name), Show (disabled until filled) | pass | Wraps cleanly | pass |
 | Fill, choices sheet and "Something else" | Each choice labelled; scrim exposes "Close sheet"; drag handle labelled | pass | Typing sheet fits | pass |
 | Fill, camera placeholder sheet | Scan the menu, Type it | pass | Not separately checked | pass |

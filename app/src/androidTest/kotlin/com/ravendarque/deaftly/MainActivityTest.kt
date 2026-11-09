@@ -26,23 +26,23 @@ class MainActivityTest {
     }
 
     @Test
-    fun showsHomeOpensAChatAndEndsItBackToHome() {
-        val startChat = text(R.string.home_start_chat)
+    fun showsTheHubOpensAChatAndEndsItBackToTheHub() {
+        val sideBySide = text(R.string.hub_side_by_side)
         val getStarted = text(R.string.first_run_start)
         composeRule.waitUntil(LOAD_TIMEOUT_MILLIS) {
-            composeRule.onAllNodesWithText(startChat).fetchSemanticsNodes().isNotEmpty() ||
+            composeRule.onAllNodesWithText(sideBySide).fetchSemanticsNodes().isNotEmpty() ||
                 composeRule.onAllNodesWithText(getStarted).fetchSemanticsNodes().isNotEmpty()
         }
         if (composeRule.onAllNodesWithText(getStarted).fetchSemanticsNodes().isNotEmpty()) {
             composeRule.onNodeWithText(getStarted).performClick()
-            waitForText(startChat)
+            waitForText(sideBySide)
         }
 
-        composeRule.onNodeWithText(startChat).performClick()
+        composeRule.onNodeWithText(sideBySide).performClick()
         waitForText(text(R.string.chat_empty))
 
         composeRule.onNodeWithContentDescription(text(R.string.chat_end)).performClick()
-        waitForText(startChat)
+        waitForText(sideBySide)
         composeRule.onNodeWithText(text(R.string.chat_empty)).assertDoesNotExist()
     }
 }
