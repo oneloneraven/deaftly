@@ -102,6 +102,19 @@ class ChatScreenshotTest {
         shot { AppTheme(darkTheme = dark) { ChatScreen(viewModel, onEnd = {}, onInsertTemplate = {}) } }
     }
 
+    private fun script(
+        dark: Boolean,
+        size: ChatTextSize = ChatTextSize.Medium,
+        swapped: Boolean = false,
+        turn: ParticipantId = ParticipantId.A,
+        them: ColourRole = ColourRole.Gold,
+        me: ColourRole = ColourRole.Blue,
+    ) {
+        val saved = SavedStateHandle(mapOf("conversation" to ChatCodec.encode(scriptConversation(them, me, turn))))
+        val viewModel = ChatViewModel(FakeSettingsRepository(textSize = size, sidesSwapped = swapped), saved)
+        shot { AppTheme(darkTheme = dark) { ChatScreen(viewModel, onEnd = {}, onInsertTemplate = {}) } }
+    }
+
     private fun continuedFromShow(dark: Boolean) {
         val viewModel =
             ChatViewModel(
@@ -111,6 +124,46 @@ class ChatScreenshotTest {
             )
         shot { AppTheme(darkTheme = dark) { ChatScreen(viewModel, onEnd = {}, onInsertTemplate = {}) } }
     }
+
+    @Test
+    fun scriptLightTheme() = script(dark = false)
+
+    @Test
+    fun scriptDarkTheme() = script(dark = true)
+
+    @Test
+    @Config(fontScale = 2f)
+    fun scriptLargeFontScale() = script(dark = false)
+
+    @Test
+    fun scriptSwappedLightTheme() = script(dark = false, swapped = true, them = ColourRole.Green, me = ColourRole.Indigo)
+
+    @Test
+    fun scriptSwappedDarkTheme() = script(dark = true, swapped = true, them = ColourRole.Green, me = ColourRole.Indigo)
+
+    @Test
+    @Config(fontScale = 2f)
+    fun scriptSwappedLargeFontScale() = script(dark = false, swapped = true, them = ColourRole.Green, me = ColourRole.Indigo)
+
+    @Test
+    fun scriptSmallTextLightTheme() = script(dark = false, size = ChatTextSize.Small)
+
+    @Test
+    fun scriptSmallTextDarkTheme() = script(dark = true, size = ChatTextSize.Small)
+
+    @Test
+    @Config(fontScale = 2f)
+    fun scriptSmallTextLargeFontScale() = script(dark = false, size = ChatTextSize.Small)
+
+    @Test
+    fun scriptLargeTextLightTheme() = script(dark = false, size = ChatTextSize.Large)
+
+    @Test
+    fun scriptLargeTextDarkTheme() = script(dark = true, size = ChatTextSize.Large)
+
+    @Test
+    @Config(fontScale = 2f)
+    fun scriptLargeTextLargeFontScale() = script(dark = false, size = ChatTextSize.Large)
 
     @Test
     fun formattingAndQuotesLightTheme() = formatted(dark = false)

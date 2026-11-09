@@ -6,6 +6,7 @@ import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertHeightIsAtLeast
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
@@ -16,6 +17,7 @@ import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.junit4.accessibility.enableAccessibilityChecks
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
@@ -171,6 +173,61 @@ class ChatScreenTest {
         composeRule.onNodeWithContentDescription("Sam: Mild please. And no nuts, I'm allergic.", substring = true).assertIsDisplayed()
         composeRule.onNodeWithContentDescription("Waiter: No problem. It will take about 15 minutes.").assertIsDisplayed()
         composeRule.onRoot().tryPerformAccessibilityChecks()
+    }
+
+    private fun nameLabel(
+        name: String,
+        index: Int = 0,
+    ) = composeRule.onAllNodesWithText(name.uppercase(), useUnmergedTree = true)[index]
+
+    private fun isOnRight(name: String): Boolean {
+        val rootWidth =
+            composeRule
+                .onRoot()
+                .fetchSemanticsNode()
+                .boundsInRoot.width
+        return nameLabel(name)
+            .fetchSemanticsNode()
+            .boundsInRoot.center.x > rootWidth / 2
+    }
+
+    @Test
+    fun eachMessageIsAScriptLineWithAnUppercaseNameLabelOnTheSpeakersSide() {
+        showOrdering()
+
+        assertEquals(true, isOnRight("Sam"))
+        assertEquals(false, isOnRight("Waiter"))
+        composeRule.onRoot().tryPerformAccessibilityChecks()
+    }
+
+    @Test
+    fun switchingSidesMirrorsTheScript() {
+        showOrdering()
+
+        composeRule.onNodeWithContentDescription("Switch sides").performClick()
+        composeRule.waitForIdle()
+
+        assertEquals(false, isOnRight("Sam"))
+        assertEquals(true, isOnRight("Waiter"))
+        composeRule.onRoot().tryPerformAccessibilityChecks()
+    }
+
+    @Test
+    fun switchedSidesAreRememberedByTheNextChat() {
+        settings.apply { runBlocking { setChatSidesSwapped(true) } }
+        showOrdering()
+
+        assertEquals(false, isOnRight("Sam"))
+    }
+
+    @Test
+    fun aQuoteShowsAsAMutedLineAboveTheMessageText() {
+        showOrdering()
+
+        composeRule.onAllNodesWithText("spicy or mild?", useUnmergedTree = true).assertCountEquals(1)
+        composeRule
+            .onNodeWithContentDescription("Replying to \u201cspicy or mild?\u201d. Sam: Mild please. And no nuts, I'm allergic.")
+            .assertIsDisplayed()
     }
 
     @Test

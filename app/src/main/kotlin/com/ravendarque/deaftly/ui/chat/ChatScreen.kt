@@ -16,7 +16,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ravendarque.deaftly.R
-import com.ravendarque.deaftly.core.chat.ParticipantId
 import com.ravendarque.deaftly.ui.editor.ConfirmDialog
 import com.ravendarque.deaftly.ui.editor.ConfirmSpec
 import com.ravendarque.deaftly.ui.theme.Deaftly
@@ -99,9 +98,9 @@ private fun SidesChat(
             MessageList(
                 conversation,
                 current.textSize,
+                current.sidesSwapped,
                 viewModel::quote,
                 Modifier.weight(1f).fillMaxSize(),
-                reader = if (current.sidesSwapped) ParticipantId.B else ParticipantId.A,
             )
             Composer(
                 participant = conversation.activeParticipant,

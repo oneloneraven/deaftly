@@ -24,7 +24,7 @@ class ParticipantColoursTest {
         assertEquals(
             ColourRole.entries.size,
             ColourRole.entries
-                .map { it.colours().container }
+                .map { it.colours(dark = false).container }
                 .toSet()
                 .size,
         )
@@ -35,12 +35,22 @@ class ParticipantColoursTest {
         val failures =
             ColourRole.entries
                 .flatMap { role ->
-                    val colours = role.colours()
+                    val colours = role.colours(dark = false)
                     listOf(
                         "$role text" to contrast(colours.onContainer, colours.container),
                         "$role quote" to contrast(colours.onContainerMuted, colours.container),
                         "$role send" to contrast(colours.onStrong, colours.strong),
                     )
+                }.filter { (_, ratio) -> ratio < WcagContrast.AA_NORMAL_TEXT }
+        assertTrue(failures.isEmpty(), "Below 4.5:1: $failures")
+    }
+
+    @Test
+    fun theNameLabelMeetsFourPointFiveToOneOnTheGroundInBothThemes() {
+        val failures =
+            listOf(false to LightDeaftlyColors.ground, true to DarkDeaftlyColors.ground)
+                .flatMap { (dark, ground) ->
+                    ColourRole.entries.map { role -> "$role dark=$dark" to contrast(role.colours(dark).label, ground) }
                 }.filter { (_, ratio) -> ratio < WcagContrast.AA_NORMAL_TEXT }
         assertTrue(failures.isEmpty(), "Below 4.5:1: $failures")
     }
