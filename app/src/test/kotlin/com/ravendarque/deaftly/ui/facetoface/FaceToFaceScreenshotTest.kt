@@ -54,4 +54,38 @@ class FaceToFaceScreenshotTest {
 
     @Test
     fun emptyLightTheme() = capture(dark = false, messages = emptyList(), typing = "")
+
+    private val fourLines =
+        "Could we have a table for two by the window, please? We are celebrating a birthday and would love " +
+            "somewhere quiet, with a high chair if you have one, and the vegetarian menu as well."
+
+    @Test
+    fun fieldEmptyLightTheme() = capture(dark = false, typing = "")
+
+    @Test
+    fun fieldEmptyDarkTheme() = capture(dark = true, typing = "")
+
+    @Test
+    @Config(fontScale = 2f)
+    fun fieldEmptyLargeFontScale() = capture(dark = false, typing = "")
+
+    @Test
+    fun fieldOneLineLightTheme() = capture(dark = false, typing = "Table for two")
+
+    @Test
+    fun fieldOneLineDarkTheme() = capture(dark = true, typing = "Table for two")
+
+    @Test
+    @Config(fontScale = 2f)
+    fun fieldOneLineLargeFontScale() = capture(dark = false, typing = "Table for two")
+
+    @Test
+    fun fieldFourLinesLightTheme() = capture(dark = false, typing = fourLines)
+
+    @Test
+    fun fieldFourLinesDarkTheme() = capture(dark = true, typing = fourLines)
+
+    @Test
+    @Config(fontScale = 2f)
+    fun fieldFourLinesLargeFontScale() = capture(dark = false, typing = fourLines)
 }
