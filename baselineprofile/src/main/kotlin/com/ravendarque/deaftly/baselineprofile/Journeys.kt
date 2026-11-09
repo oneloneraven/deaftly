@@ -1,10 +1,12 @@
 package com.ravendarque.deaftly.baselineprofile
 
 import androidx.benchmark.macro.MacrobenchmarkScope
+import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.Until
 
-const val TARGET_PACKAGE = "com.ravendarque.deaftly"
+val TARGET_PACKAGE: String
+    get() = requireNotNull(InstrumentationRegistry.getArguments().getString("targetAppId")) { "targetAppId was not passed to the runner" }
 
 private const val WAIT_MILLIS = 5_000L
 private const val TEMPLATE_TITLE = "Explain I'm deaf"

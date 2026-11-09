@@ -78,6 +78,7 @@ android {
 
     buildTypes {
         debug {
+            applicationIdSuffix = ".debug"
             ndk { abiFilters += listOf("arm64-v8a", "x86_64") }
         }
         release {
@@ -221,6 +222,7 @@ androidComponents {
         extension.buildTypes
             .filter { it.name == "benchmarkRelease" || it.name == "nonMinifiedRelease" }
             .forEach {
+                it.applicationIdSuffix = ".benchmark"
                 it.ndk.abiFilters += "x86_64"
                 it.manifestPlaceholders["profileInstallExported"] = "true"
             }

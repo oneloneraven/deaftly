@@ -46,6 +46,13 @@ baselineProfile {
     useConnectedDevices = false
 }
 
+androidComponents {
+    onVariants { variant ->
+        val loader = variant.artifacts.getBuiltArtifactsLoader()
+        variant.instrumentationRunnerArguments.put("targetAppId", variant.testedApks.map { loader.load(it)?.applicationId })
+    }
+}
+
 dependencies {
     implementation(libs.androidx.test.junit)
     implementation(libs.androidx.test.uiautomator)
