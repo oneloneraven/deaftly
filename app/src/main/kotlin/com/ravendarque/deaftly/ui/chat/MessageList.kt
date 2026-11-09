@@ -3,14 +3,17 @@ package com.ravendarque.deaftly.ui.chat
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.contextmenu.builder.item
@@ -26,6 +29,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.contentDescription
@@ -33,31 +37,34 @@ import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.traversalIndex
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.compose.ui.unit.em
 import com.ravendarque.deaftly.R
 import com.ravendarque.deaftly.core.chat.Conversation
 import com.ravendarque.deaftly.core.chat.Message
-import com.ravendarque.deaftly.core.chat.ParticipantId
+import com.ravendarque.deaftly.core.settings.ChatTextSize
 import com.ravendarque.deaftly.ui.theme.Deaftly
 import com.ravendarque.deaftly.ui.theme.ParticipantColours
 import com.ravendarque.deaftly.ui.theme.colours
 
-private const val BUBBLE_MAX_WIDTH_FRACTION = 0.8f
-private const val LINE_HEIGHT_RATIO = 1.4f
 private const val QUOTE_SIZE_RATIO = 0.8f
-private val BubbleRadius = 22.dp
-private val TailRadius = 6.dp
 private const val QUOTE_MAX_LINES = 3
-private const val SELECTION_ALPHA = 0.4f
+private const val SELECTION_ALPHA = 0.3f
+private const val LABEL_TRACKING = 0.04f
+private val BarWidth = 4.dp
+private val DividerHeight = 1.dp
+private val QuoteIndent = 12.dp
 
 @Composable
 fun MessageList(
     conversation: Conversation,
     textSize: ChatTextSize,
+    sidesSwapped: Boolean,
     onQuote: ((messageId: Int, excerpt: String?) -> Unit)?,
     modifier: Modifier = Modifier,
-    reader: ParticipantId = ParticipantId.A,
 ) {
     val listState = rememberLazyListState()
     val count = conversation.messages.size
@@ -77,71 +84,108 @@ fun MessageList(
     LazyColumn(
         modifier = modifier.semantics { isTraversalGroup = true },
         state = listState,
-        contentPadding = PaddingValues(horizontal = Deaftly.spacing.space14, vertical = Deaftly.spacing.space16),
-        verticalArrangement = Arrangement.spacedBy(Deaftly.spacing.space10, Alignment.Bottom),
+        contentPadding = PaddingValues(horizontal = Deaftly.spacing.space16, vertical = Deaftly.spacing.space8),
+        verticalArrangement = Arrangement.Bottom,
     ) {
-        items(conversation.messages, key = { it.id }) { message ->
-            MessageBubble(message, conversation, textSize, reader, onQuote)
+        itemsIndexed(conversation.messages, key = { _, message -> message.id }) { index, message ->
+            if (index > 0) MessageDivider()
+            ScriptMessage(message, conversation, textSize, message.author.isOnRight(sidesSwapped), onQuote)
         }
     }
 }
 
 @Composable
-private fun MessageBubble(
+private fun MessageDivider() {
+    Box(Modifier.fillMaxWidth().height(DividerHeight).background(Deaftly.colors.line))
+}
+
+@Composable
+private fun ScriptMessage(
     message: Message,
     conversation: Conversation,
     textSize: ChatTextSize,
-    reader: ParticipantId,
+    onRight: Boolean,
     onQuote: ((messageId: Int, excerpt: String?) -> Unit)?,
 ) {
-    val own = message.author == reader
     val author = conversation.participant(message.author).labelled()
     val colours = author.colour.colours()
     val quoteLabel = stringResource(R.string.chat_quote_action)
-    val shape =
-        RoundedCornerShape(
-            topStart = BubbleRadius,
-            topEnd = BubbleRadius,
-            bottomEnd = if (own) TailRadius else BubbleRadius,
-            bottomStart = if (own) BubbleRadius else TailRadius,
-        )
     val said = stringResource(R.string.chat_message_from, author.displayName.orEmpty(), message.plainText)
     val description = message.quote?.let { stringResource(R.string.chat_message_quoting, it.text, said) } ?: said
-    BoxWithConstraints(Modifier.fillMaxWidth()) {
+    val align = if (onRight) TextAlign.End else TextAlign.Start
+    Row(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .height(IntrinsicSize.Min)
+                .padding(vertical = Deaftly.spacing.space8)
+                .semantics(mergeDescendants = true) {
+                    contentDescription = description
+                    traversalIndex = message.id.toFloat()
+                    if (onQuote != null) {
+                        customActions =
+                            listOf(
+                                CustomAccessibilityAction(quoteLabel) {
+                                    onQuote(message.id, null)
+                                    true
+                                },
+                            )
+                    }
+                },
+        horizontalArrangement = Arrangement.spacedBy(Deaftly.spacing.space12),
+    ) {
+        if (!onRight) SpeakerBar(colours.strong)
         Column(
-            modifier =
-                Modifier
-                    .align(if (own) Alignment.CenterEnd else Alignment.CenterStart)
-                    .widthIn(max = maxWidth * BUBBLE_MAX_WIDTH_FRACTION)
-                    .background(colours.container, shape)
-                    .padding(horizontal = Deaftly.spacing.space16, vertical = Deaftly.spacing.space12)
-                    .semantics(mergeDescendants = true) {
-                        contentDescription = description
-                        traversalIndex = message.id.toFloat()
-                        if (onQuote != null) {
-                            customActions =
-                                listOf(
-                                    CustomAccessibilityAction(quoteLabel) {
-                                        onQuote(message.id, null)
-                                        true
-                                    },
-                                )
-                        }
-                    },
-            verticalArrangement = Arrangement.spacedBy(Deaftly.spacing.space8),
+            modifier = Modifier.weight(1f),
+            horizontalAlignment = if (onRight) Alignment.End else Alignment.Start,
+            verticalArrangement = Arrangement.spacedBy(Deaftly.spacing.space4),
         ) {
-            message.quote?.let {
-                QuoteBlock(
-                    text = it.text,
-                    bar = colours.onContainerMuted,
-                    colour = colours.onContainerMuted,
-                    style = bubbleStyle((textSize.sp * QUOTE_SIZE_RATIO).toInt()),
-                    maxLines = QUOTE_MAX_LINES,
-                )
-            }
-            SelectableText(message, colours, textSize, quoteLabel, onQuote)
+            NameLabel(author.displayName.orEmpty(), colours.label, align)
+            message.quote?.let { QuoteLine(it.text, textSize, align, onRight) }
+            SelectableText(message, colours, textSize, align, onQuote)
         }
+        if (onRight) SpeakerBar(colours.strong)
     }
+}
+
+@Composable
+private fun SpeakerBar(colour: Color) {
+    Box(Modifier.width(BarWidth).fillMaxHeight().background(colour, RoundedCornerShape(BarWidth / 2)))
+}
+
+@Composable
+private fun NameLabel(
+    name: String,
+    colour: Color,
+    align: TextAlign,
+) {
+    Text(
+        text = name.uppercase(),
+        color = colour,
+        style = MaterialTheme.typography.labelMedium.copy(letterSpacing = LABEL_TRACKING.em),
+        fontWeight = FontWeight.Medium,
+        textAlign = align,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
+    )
+}
+
+@Composable
+private fun QuoteLine(
+    text: String,
+    textSize: ChatTextSize,
+    align: TextAlign,
+    onRight: Boolean,
+) {
+    Text(
+        text = text,
+        color = Deaftly.colors.inkMuted,
+        style = chatTextStyle((textSize.sp * QUOTE_SIZE_RATIO).toInt()),
+        textAlign = align,
+        maxLines = QUOTE_MAX_LINES,
+        overflow = TextOverflow.Ellipsis,
+        modifier = Modifier.fillMaxWidth().padding(if (onRight) PaddingValues(end = QuoteIndent) else PaddingValues(start = QuoteIndent)),
+    )
 }
 
 @Composable
@@ -149,15 +193,14 @@ private fun SelectableText(
     message: Message,
     colours: ParticipantColours,
     textSize: ChatTextSize,
-    quoteLabel: String,
+    align: TextAlign,
     onQuote: ((messageId: Int, excerpt: String?) -> Unit)?,
 ) {
+    val quoteLabel = stringResource(R.string.chat_quote_action)
     val formatting = rememberChatFormatting()
     val selection = rememberSelectionState()
-    val selectionColours = LocalTextSelectionColors.current
     CompositionLocalProvider(
-        LocalTextSelectionColors provides
-            TextSelectionColors(selectionColours.handleColor, colours.onContainer.copy(alpha = SELECTION_ALPHA)),
+        LocalTextSelectionColors provides TextSelectionColors(colours.label, colours.label.copy(alpha = SELECTION_ALPHA)),
     ) {
         SelectionContainer(
             state = selection,
@@ -174,14 +217,13 @@ private fun SelectableText(
         ) {
             Text(
                 text = formatting.annotate(message.spans),
-                color = colours.onContainer,
-                style = bubbleStyle(textSize.sp),
+                color = Deaftly.colors.ink,
+                style = chatTextStyle(textSize.sp),
+                textAlign = align,
+                modifier = Modifier.fillMaxWidth(),
             )
         }
     }
 }
 
 private data object QuoteMenuKey
-
-@Composable
-private fun bubbleStyle(size: Int) = MaterialTheme.typography.bodyLarge.copy(fontSize = size.sp, lineHeight = (size * LINE_HEIGHT_RATIO).sp)

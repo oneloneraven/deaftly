@@ -12,6 +12,7 @@ import com.ravendarque.deaftly.core.chat.Quote
 import com.ravendarque.deaftly.core.chat.Span
 import com.ravendarque.deaftly.core.chat.SpanStyle
 import com.ravendarque.deaftly.core.chat.StyleRange
+import com.ravendarque.deaftly.core.settings.ChatTextSize
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
@@ -232,27 +233,72 @@ class ChatViewModelTest {
         }
 
     @Test
-    fun theTextSizeCyclesThroughThreeSizesAndBack() =
+    fun theTextSizeStartsMediumAndCyclesThroughThreeSizesAndBack() =
         runTest {
             val viewModel = viewModel()
             collect(viewModel)
 
             fun size() = assertIs<ChatUiState.Ready>(viewModel.state.value).textSize
 
-            assertEquals(ChatTextSize.Normal, size())
+            assertEquals(ChatTextSize.Medium, size())
             viewModel.display.cycleTextSize()
             assertEquals(ChatTextSize.Large, size())
             viewModel.display.cycleTextSize()
-            assertEquals(ChatTextSize.Largest, size())
+            assertEquals(ChatTextSize.Small, size())
             viewModel.display.cycleTextSize()
-            assertEquals(ChatTextSize.Normal, size())
+            assertEquals(ChatTextSize.Medium, size())
         }
 
     @Test
-    fun messagesTurnTextSizeAndDraftsSurviveRecreationFromSavedState() =
+    fun theTextSizeAndSidesAreSavedInSettingsAndRememberedByTheNextChat() =
         runTest {
+            val settings = FakeSettingsRepository()
+            val first = viewModel(settings)
+            collect(first)
+            first.display.cycleTextSize()
+            first.display.switchSides()
+
+            val next = viewModel(settings)
+            collect(next)
+
+            val state = assertIs<ChatUiState.Ready>(next.state.value)
+            assertEquals(ChatTextSize.Large, state.textSize)
+            assertEquals(true, state.sidesSwapped)
+        }
+
+    @Test
+    fun sidesStartAsTheyWereAndSwitchBackAndForth() =
+        runTest {
+            val viewModel = viewModel()
+            collect(viewModel)
+
+            fun swapped() = assertIs<ChatUiState.Ready>(viewModel.state.value).sidesSwapped
+
+            assertEquals(false, swapped())
+            viewModel.display.switchSides()
+            assertEquals(true, swapped())
+            viewModel.display.switchSides()
+            assertEquals(false, swapped())
+        }
+
+    @Test
+    fun switchingSidesChangesNeitherTheTurnNorTheMessages() =
+        runTest {
+            val viewModel = viewModel(firstMessage = "Hello")
+            collect(viewModel)
+            val before = viewModel.conversation()
+
+            viewModel.display.switchSides()
+
+            assertEquals(before, viewModel.conversation())
+        }
+
+    @Test
+    fun messagesTurnAndDraftsSurviveRecreationFromSavedState() =
+        runTest {
+            val settings = FakeSettingsRepository()
             val savedState = SavedStateHandle()
-            val first = viewModel(savedState = savedState)
+            val first = viewModel(settings, savedState)
             collect(first)
             first.type("one")
             first.send()
@@ -260,7 +306,7 @@ class ChatViewModelTest {
             first.type("typing")
             first.display.cycleTextSize()
 
-            val restored = viewModel(FakeSettingsRepository(ChatProfile("Other", ColourRole.Green)), savedState)
+            val restored = viewModel(settings, savedState)
             collect(restored)
 
             assertEquals(first.state.value, restored.state.value)

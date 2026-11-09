@@ -1,5 +1,6 @@
 package com.ravendarque.deaftly.navigation
 
+import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -73,12 +74,13 @@ class BackStackRestorationTest {
         composeRule.waitUntil(LOAD_TIMEOUT_MILLIS) {
             composeRule.onAllNodesWithText(text(R.string.chat_empty)).fetchSemanticsNodes().isNotEmpty()
         }
-        composeRule.onNodeWithContentDescription(text(R.string.chat_edit_participants, "Them", "Me")).performClick()
+        composeRule.onNodeWithContentDescription(text(R.string.chat_setup)).performClick()
         composeRule.onAllNodes(isParticipantNameField)[1].performTextInput("Sam")
         composeRule.onNodeWithText(text(R.string.participants_done)).performClick()
 
         composeRule.activityRule.scenario.recreate()
 
-        composeRule.onNodeWithContentDescription(text(R.string.chat_edit_participants, "Sam", "Me")).assertExists()
+        composeRule.onNodeWithContentDescription(text(R.string.chat_setup)).performClick()
+        composeRule.onAllNodes(isParticipantNameField)[1].assertTextContains("Sam")
     }
 }

@@ -52,6 +52,7 @@ private fun ChatContent(
             onEnd = requestEnd,
             onEditParticipants = { editingParticipants = true },
             onCycleTextSize = viewModel.display::cycleTextSize,
+            onSwitchSides = viewModel.display::switchSides,
         ),
     )
     if (editingParticipants) {
@@ -93,17 +94,25 @@ private fun SidesChat(
     val conversation = current.conversation
     Surface(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.safeDrawingPadding()) {
-            ChatHeader(conversation, current.textSize, headerActions)
-            MessageList(conversation, current.textSize, viewModel::quote, Modifier.weight(1f).fillMaxSize())
+            ChatHeader(current.textSize, headerActions)
+            MessageList(
+                conversation,
+                current.textSize,
+                current.sidesSwapped,
+                viewModel::quote,
+                Modifier.weight(1f).fillMaxSize(),
+            )
             Composer(
                 participant = conversation.activeParticipant,
                 draft = current.draft,
                 canQuote = conversation.messages.isNotEmpty(),
+                textSize = current.textSize,
                 actions = composerActions,
                 modifier = Modifier.padding(horizontal = Deaftly.spacing.space12),
             )
             TurnControl(
                 conversation = conversation,
+                sidesSwapped = current.sidesSwapped,
                 onSelect = viewModel::selectTurn,
                 modifier = Modifier.padding(Deaftly.spacing.space12),
             )

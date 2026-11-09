@@ -10,9 +10,17 @@ public interface SettingsRepository {
 
     public val firstRunDone: Flow<Boolean>
 
+    public val chatTextSize: Flow<ChatTextSize>
+
+    public val chatSidesSwapped: Flow<Boolean>
+
     public suspend fun setShowScheme(scheme: ShowScheme)
 
     public suspend fun setChatProfile(profile: ChatProfile)
 
     public suspend fun setFirstRunDone()
+
+    public suspend fun setChatTextSize(size: ChatTextSize)
+
+    public suspend fun setChatSidesSwapped(swapped: Boolean)
 }

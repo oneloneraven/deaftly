@@ -127,7 +127,7 @@ class AppNavigationTest {
     }
 
     @Test
-    fun startChatOpensTheChatWithBothParticipantsAndEndingReturnsHome() {
+    fun startChatOpensTheChatAndEndingReturnsHome() {
         composeRule.enableAccessibilityChecks()
         showApp()
 
@@ -135,7 +135,7 @@ class AppNavigationTest {
         composeRule.waitUntil(LOAD_TIMEOUT_MILLIS) {
             composeRule.onAllNodesWithText(text(R.string.chat_empty)).fetchSemanticsNodes().isNotEmpty()
         }
-        composeRule.onNodeWithContentDescription(text(R.string.chat_edit_participants, "Them", "Me")).assertExists()
+        composeRule.onNodeWithContentDescription(text(R.string.chat_setup)).assertExists()
         composeRule.onRoot().tryPerformAccessibilityChecks()
 
         composeRule.onNodeWithContentDescription(text(R.string.chat_end)).performClick()

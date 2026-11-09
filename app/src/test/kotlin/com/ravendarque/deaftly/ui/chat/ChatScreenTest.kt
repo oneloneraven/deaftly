@@ -1,21 +1,26 @@
 package com.ravendarque.deaftly.ui.chat
 
 import androidx.activity.ComponentActivity
-import androidx.compose.ui.geometry.Offset
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.hapticfeedback.HapticFeedback
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertHeightIsAtLeast
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertWidthIsAtLeast
-import androidx.compose.ui.test.click
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.junit4.accessibility.enableAccessibilityChecks
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
@@ -37,7 +42,10 @@ import com.ravendarque.deaftly.core.chat.Quote
 import com.ravendarque.deaftly.core.chat.Span
 import com.ravendarque.deaftly.core.chat.SpanStyle
 import com.ravendarque.deaftly.core.chat.StyleRange
+import com.ravendarque.deaftly.core.settings.ChatTextSize
 import com.ravendarque.deaftly.ui.theme.AppTheme
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -46,6 +54,7 @@ import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
@@ -57,6 +66,13 @@ class ChatScreenTest {
     private val settings = FakeSettingsRepository(ChatProfile("Alex", ColourRole.Green))
     private var ended = 0
     private var inserts = 0
+    private val haptics = mutableListOf<HapticFeedbackType>()
+    private val recordingHaptics =
+        object : HapticFeedback {
+            override fun performHapticFeedback(hapticFeedbackType: HapticFeedbackType) {
+                haptics += hapticFeedbackType
+            }
+        }
     private lateinit var viewModel: ChatViewModel
 
     @Before
@@ -66,62 +82,72 @@ class ChatScreenTest {
 
     private fun show(savedState: SavedStateHandle = SavedStateHandle()) {
         viewModel = ChatViewModel(settings, savedState)
-        composeRule.setContent { AppTheme { ChatScreen(viewModel, onEnd = { ended++ }, onInsertTemplate = { inserts++ }) } }
+        composeRule.setContent {
+            CompositionLocalProvider(LocalHapticFeedback provides recordingHaptics) {
+                AppTheme { ChatScreen(viewModel, onEnd = { ended++ }, onInsertTemplate = { inserts++ }) }
+            }
+        }
         composeRule.waitForIdle()
     }
 
     private fun showOrdering(turn: ParticipantId = ParticipantId.B) =
         show(SavedStateHandle(mapOf("conversation" to ChatCodec.encode(orderingConversation(turn)))))
 
-    private fun header(
-        left: String = "Them",
-        right: String = "Alex",
-    ) = composeRule.onNodeWithContentDescription("$left and $right. Change names and colours")
+    private fun setup() = composeRule.onNodeWithContentDescription("Names and colours")
 
     private fun turnControl() = composeRule.onNodeWithContentDescription("Whose turn")
 
-    private fun tapSide(fraction: Float) = turnControl().performTouchInput { click(Offset(width * fraction, centerY)) }
-
-    private fun tapLeft() = tapSide(0.25f)
-
-    private fun tapRight() = tapSide(0.75f)
+    private fun tapName(name: String) = composeRule.onNodeWithText(name).performClick()
 
     private fun hasState(text: String) = SemanticsMatcher.expectValue(SemanticsProperties.StateDescription, text)
 
     private fun conversation() = (viewModel.state.value as ChatUiState.Ready).conversation
 
     @Test
-    fun theHeaderShowsBothPeopleWithTheSavedNameForTheDeafUser() {
+    fun theHeaderOffersEndTextSizeSwitchSidesAndSetupAsFortyEightDpTargets() {
         show()
 
-        header().assertIsDisplayed()
+        listOf("End chat", "Change text size", "Switch sides", "Names and colours").forEach {
+            composeRule
+                .onNodeWithContentDescription(it)
+                .assertIsDisplayed()
+                .assertWidthIsAtLeast(48.dp)
+                .assertHeightIsAtLeast(48.dp)
+        }
         composeRule.onRoot().tryPerformAccessibilityChecks()
     }
 
     @Test
-    fun tappingTheHeaderOpensTheSheet() {
+    fun theHeaderNoLongerShowsTheParticipants() {
         show()
 
-        header().performClick()
+        composeRule.onNodeWithContentDescription("Them and Alex. Change names and colours").assertDoesNotExist()
+    }
+
+    @Test
+    fun theCogOpensTheSetupSheet() {
+        show()
+
+        setup().performClick()
 
         composeRule.onNodeWithText("Who is chatting?").assertIsDisplayed()
         composeRule.onRoot().tryPerformAccessibilityChecks()
     }
 
     @Test
-    fun namingTheOtherPersonUpdatesTheHeaderStraightAway() {
+    fun namingTheOtherPersonUpdatesTheConversation() {
         show()
-        header().performClick()
+        setup().performClick()
 
         composeRule.onAllNodes(isParticipantNameField)[1].performTextInput("Sam")
 
-        header(left = "Sam").assertExists()
+        assertEquals("Sam", conversation().participantB.name)
     }
 
     @Test
     fun finishingTheSheetRemembersTheDeafUsersColour() {
         show()
-        header().performClick()
+        setup().performClick()
 
         composeRule.onAllNodesWithContentDescription("Red")[0].performClick()
         composeRule.onNodeWithText("Done").performClick()
@@ -146,7 +172,7 @@ class ChatScreenTest {
 
         composeRule.onNodeWithText("No messages yet").assertIsDisplayed()
         composeRule.onNodeWithText("Type your message").assertIsDisplayed()
-        turnControl().assert(hasState("Alex"))
+        turnControl().assert(hasState("Alex\u2019s turn"))
     }
 
     @Test
@@ -160,12 +186,67 @@ class ChatScreenTest {
         composeRule.onRoot().tryPerformAccessibilityChecks()
     }
 
+    private fun nameLabel(
+        name: String,
+        index: Int = 0,
+    ) = composeRule.onAllNodesWithText(name.uppercase(), useUnmergedTree = true)[index]
+
+    private fun isOnRight(name: String): Boolean {
+        val rootWidth =
+            composeRule
+                .onRoot()
+                .fetchSemanticsNode()
+                .boundsInRoot.width
+        return nameLabel(name)
+            .fetchSemanticsNode()
+            .boundsInRoot.center.x > rootWidth / 2
+    }
+
+    @Test
+    fun eachMessageIsAScriptLineWithAnUppercaseNameLabelOnTheSpeakersSide() {
+        showOrdering()
+
+        assertEquals(true, isOnRight("Sam"))
+        assertEquals(false, isOnRight("Waiter"))
+        composeRule.onRoot().tryPerformAccessibilityChecks()
+    }
+
+    @Test
+    fun switchingSidesMirrorsTheScript() {
+        showOrdering()
+
+        composeRule.onNodeWithContentDescription("Switch sides").performClick()
+        composeRule.waitForIdle()
+
+        assertEquals(false, isOnRight("Sam"))
+        assertEquals(true, isOnRight("Waiter"))
+        composeRule.onRoot().tryPerformAccessibilityChecks()
+    }
+
+    @Test
+    fun switchedSidesAreRememberedByTheNextChat() {
+        settings.apply { runBlocking { setChatSidesSwapped(true) } }
+        showOrdering()
+
+        assertEquals(false, isOnRight("Sam"))
+    }
+
+    @Test
+    fun aQuoteShowsAsAMutedLineAboveTheMessageText() {
+        showOrdering()
+
+        composeRule.onAllNodesWithText("spicy or mild?", useUnmergedTree = true).assertCountEquals(1)
+        composeRule
+            .onNodeWithContentDescription("Replying to \u201cspicy or mild?\u201d. Sam: Mild please. And no nuts, I'm allergic.")
+            .assertIsDisplayed()
+    }
+
     @Test
     fun theHearingPersonsTurnPromptsThemToReply() {
         showOrdering(ParticipantId.B)
 
         composeRule.onNodeWithText("Your turn – type your reply here").assertIsDisplayed()
-        turnControl().assert(hasState("Waiter"))
+        turnControl().assert(hasState("Waiter\u2019s turn"))
     }
 
     @Test
@@ -180,19 +261,19 @@ class ChatScreenTest {
     fun tappingTheOtherSideSwitchesTheTurnAndThePrompt() {
         showOrdering(ParticipantId.A)
 
-        tapLeft()
+        tapName("Waiter")
         composeRule.waitForIdle()
 
         assertEquals(ParticipantId.B, conversation().turn)
         composeRule.onNodeWithText("Your turn – type your reply here").assertIsDisplayed()
-        turnControl().assert(hasState("Waiter"))
+        turnControl().assert(hasState("Waiter\u2019s turn"))
     }
 
     @Test
     fun tappingTheActiveSideDoesNothing() {
         showOrdering(ParticipantId.B)
 
-        tapLeft()
+        tapName("Waiter")
 
         assertEquals(ParticipantId.B, conversation().turn)
     }
@@ -214,7 +295,7 @@ class ChatScreenTest {
     fun aTinySwipeSnapsBack() {
         showOrdering(ParticipantId.B)
 
-        turnControl().performTouchInput { swipeRight(startX = centerX - width / 4, endX = centerX - width / 4 + width / 12) }
+        turnControl().performTouchInput { swipeRight(startX = centerX - width / 4, endX = centerX - width / 4 + width / 6) }
         composeRule.waitForIdle()
 
         assertEquals(ParticipantId.B, conversation().turn)
@@ -228,6 +309,98 @@ class ChatScreenTest {
         composeRule.waitForIdle()
 
         assertEquals(ParticipantId.A, conversation().turn)
+    }
+
+    private fun centreX(text: String) =
+        composeRule
+            .onNodeWithText(text)
+            .fetchSemanticsNode()
+            .boundsInRoot.center.x
+
+    private fun rootCentreX() =
+        composeRule
+            .onRoot()
+            .fetchSemanticsNode()
+            .boundsInRoot.center.x
+
+    @Test
+    fun theSwitchSitsBetweenTheNamesWithTheOtherPersonOnTheLeftAndTheDeafUserOnTheRight() {
+        showOrdering()
+
+        assertTrue(centreX("Waiter") < rootCentreX())
+        assertTrue(centreX("Sam") > rootCentreX())
+        composeRule.onNodeWithText("Swipe to Waiter").assertDoesNotExist()
+        composeRule.onRoot().tryPerformAccessibilityChecks()
+    }
+
+    @Test
+    fun switchingSidesMirrorsTheNamesAroundTheSwitch() {
+        showOrdering()
+
+        composeRule.onNodeWithContentDescription("Switch sides").performClick()
+        composeRule.waitForIdle()
+
+        assertTrue(centreX("Waiter") > rootCentreX())
+        assertTrue(centreX("Sam") < rootCentreX())
+    }
+
+    @Test
+    fun theActiveNameIsMarkedSelectedAndTheOtherIsNot() {
+        showOrdering(ParticipantId.B)
+
+        composeRule.onNodeWithText("Waiter").assert(hasSelected(true))
+        composeRule.onNodeWithText("Sam").assert(hasSelected(false))
+    }
+
+    @Test
+    fun theNamesAreFortyEightDpTargets() {
+        showOrdering()
+
+        listOf("Waiter", "Sam").forEach { composeRule.onNodeWithText(it).assertHeightIsAtLeast(48.dp) }
+        turnControl().assertHeightIsAtLeast(48.dp).assertWidthIsAtLeast(96.dp)
+    }
+
+    @Test
+    fun theTurnIsAnnouncedPolitelyAsTheNamesTurn() {
+        showOrdering(ParticipantId.A)
+
+        turnControl().assert(SemanticsMatcher.expectValue(SemanticsProperties.LiveRegion, LiveRegionMode.Polite))
+        tapName("Waiter")
+        composeRule.waitForIdle()
+        turnControl().assert(hasState("Waiter\u2019s turn"))
+    }
+
+    @Test
+    fun aLongNameIsCutShortButTheFullNameIsStillReadOut() {
+        val long = "A very long name indeed for a waiter"
+        val ordering = orderingConversation(ParticipantId.B)
+        val renamed = ordering.withParticipant(ordering.participantB.copy(name = long))
+        show(SavedStateHandle(mapOf("conversation" to ChatCodec.encode(renamed))))
+
+        composeRule.onNodeWithText(long).assertExists()
+        turnControl().assert(hasState("$long\u2019s turn"))
+        composeRule.onRoot().tryPerformAccessibilityChecks()
+    }
+
+    @Test
+    fun everySwitchOfTurnGivesAHapticTick() {
+        showOrdering(ParticipantId.B)
+
+        tapName("Sam")
+        tapName("Waiter")
+        turnControl().performTouchInput { swipeRight(startX = centerX - width / 4, endX = centerX + width / 3) }
+        composeRule.waitForIdle()
+
+        assertEquals(List(3) { HapticFeedbackType.SegmentTick }, haptics)
+    }
+
+    @Test
+    fun tappingTheActiveNameGivesNoHapticTick() {
+        showOrdering(ParticipantId.B)
+
+        tapName("Waiter")
+
+        assertEquals(emptyList(), haptics)
     }
 
     @Test
@@ -252,24 +425,44 @@ class ChatScreenTest {
         show()
         composeRule.onNode(hasSetTextAction()).performTextInput("half a thought")
 
-        tapLeft()
+        tapName("Them")
         composeRule.waitForIdle()
         composeRule.onNodeWithText("half a thought").assertDoesNotExist()
-        tapRight()
+        tapName("Alex")
         composeRule.waitForIdle()
 
         composeRule.onNodeWithText("half a thought").assertIsDisplayed()
     }
 
     @Test
-    fun theTextSizeButtonCyclesThroughThreeSizes() {
+    fun theTextSizeButtonCyclesThroughThreeSizesStartingAtMedium() {
         show()
         val button = { composeRule.onNodeWithContentDescription("Change text size") }
 
-        button().assert(hasState("Normal")).performClick()
+        button().assert(hasState("Medium")).performClick()
         button().assert(hasState("Large")).performClick()
-        button().assert(hasState("Largest")).performClick()
-        button().assert(hasState("Normal"))
+        button().assert(hasState("Small")).performClick()
+        button().assert(hasState("Medium"))
+    }
+
+    @Test
+    fun theTextSizeIsSavedToSettings() {
+        show()
+
+        composeRule.onNodeWithContentDescription("Change text size").performClick()
+        composeRule.waitForIdle()
+
+        assertEquals(ChatTextSize.Large, runBlocking { settings.chatTextSize.first() })
+    }
+
+    @Test
+    fun switchSidesIsSavedToSettings() {
+        show()
+
+        composeRule.onNodeWithContentDescription("Switch sides").performClick()
+        composeRule.waitForIdle()
+
+        assertEquals(true, runBlocking { settings.chatSidesSwapped.first() })
     }
 
     private fun hasSelected(value: Boolean) = SemanticsMatcher.expectValue(SemanticsProperties.Selected, value)

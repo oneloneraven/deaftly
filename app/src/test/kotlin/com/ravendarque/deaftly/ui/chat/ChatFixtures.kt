@@ -33,6 +33,24 @@ fun orderingConversation(turn: ParticipantId = ParticipantId.B): Conversation =
         .append(styled("No problem. It will take about 15 minutes.", "15 minutes", SpanStyle.Highlight))
         .withTurn(turn)
 
+fun scriptConversation(
+    them: ColourRole = ColourRole.Gold,
+    me: ColourRole = ColourRole.Blue,
+    turn: ParticipantId = ParticipantId.A,
+): Conversation =
+    Conversation(
+        Participant(ParticipantId.A, me, "Sam"),
+        Participant(ParticipantId.B, them, "Waiter"),
+    ).withTurn(ParticipantId.B)
+        .append(RichText.spans("Good evening. Are you ready to order?"))
+        .withTurn(ParticipantId.A)
+        .append(styled("Yes please. I'm deaf, so I'll type. Could I have the pasta arrabbiata?", "pasta arrabbiata", SpanStyle.Bold))
+        .withTurn(ParticipantId.B)
+        .append(styled("Of course. Do you want it spicy or mild?", "spicy or mild", SpanStyle.Highlight))
+        .withTurn(ParticipantId.A)
+        .append(RichText.spans("Mild please. And no nuts, I'm allergic."), quote = Quote(2, "spicy or mild?"))
+        .withTurn(turn)
+
 fun formattingConversation(): Conversation {
     val everything = "Mild please. And absolutely no nuts, I'm allergic."
     val from = everything.indexOf("absolutely no nuts")

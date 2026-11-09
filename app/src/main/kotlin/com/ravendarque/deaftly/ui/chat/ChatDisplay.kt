@@ -1,21 +1,25 @@
 package com.ravendarque.deaftly.ui.chat
 
-import androidx.lifecycle.SavedStateHandle
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.update
-
-private const val TEXT_SIZE_KEY = "text_size"
+import com.ravendarque.deaftly.core.settings.ChatTextSize
+import com.ravendarque.deaftly.core.settings.SettingsRepository
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 
 class ChatDisplay(
-    private val savedState: SavedStateHandle,
+    private val settings: SettingsRepository,
+    private val scope: CoroutineScope,
 ) {
-    private val size = MutableStateFlow(ChatTextSize.entries.getOrElse(savedState.get<Int>(TEXT_SIZE_KEY) ?: 0) { ChatTextSize.Normal })
+    val textSize: Flow<ChatTextSize> = settings.chatTextSize
 
-    val textSize: StateFlow<ChatTextSize> = size
+    val sidesSwapped: Flow<Boolean> = settings.chatSidesSwapped
 
     fun cycleTextSize() {
-        size.update { it.next() }
-        savedState[TEXT_SIZE_KEY] = size.value.ordinal
+        scope.launch { settings.setChatTextSize(settings.chatTextSize.first().next()) }
+    }
+
+    fun switchSides() {
+        scope.launch { settings.setChatSidesSwapped(!settings.chatSidesSwapped.first()) }
     }
 }
