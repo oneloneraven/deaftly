@@ -30,6 +30,7 @@ import com.ravendarque.deaftly.core.settings.ChatLayout
 import com.ravendarque.deaftly.ui.chat.ColourChoices
 import com.ravendarque.deaftly.ui.chat.NameField
 import com.ravendarque.deaftly.ui.components.PrimaryButton
+import com.ravendarque.deaftly.ui.components.spoken
 import com.ravendarque.deaftly.ui.icons.DeaftlyIcons
 import com.ravendarque.deaftly.ui.settings.ChoiceRow
 import com.ravendarque.deaftly.ui.settings.Section
@@ -75,7 +76,7 @@ fun FirstRunContent(
                         text = stringResource(R.string.first_run_title),
                         style = MaterialTheme.typography.headlineLarge,
                         color = Deaftly.colors.ink,
-                        modifier = Modifier.semantics { heading() },
+                        modifier = Modifier.spoken(stringResource(R.string.first_run_title)).semantics { heading() },
                     )
                     Text(
                         text = stringResource(R.string.first_run_intro),
@@ -150,6 +151,7 @@ private fun PrivacyNote() {
             text = stringResource(R.string.first_run_privacy),
             style = MaterialTheme.typography.bodyMedium,
             color = Deaftly.colors.ink,
+            modifier = Modifier.spoken(stringResource(R.string.first_run_privacy)),
         )
     }
 }
