@@ -43,6 +43,7 @@ android {
         minSdk = 26
         targetSdk = 36
         versionName = appVersion
+        manifestPlaceholders["profileInstallExported"] = "false"
         versionCode = (appMajor * 1_000_000 + appMinor * 1_000 + appPatch).coerceAtLeast(1)
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         externalNativeBuild {
@@ -219,7 +220,10 @@ androidComponents {
     finalizeDsl { extension ->
         extension.buildTypes
             .filter { it.name == "benchmarkRelease" || it.name == "nonMinifiedRelease" }
-            .forEach { it.ndk.abiFilters += "x86_64" }
+            .forEach {
+                it.ndk.abiFilters += "x86_64"
+                it.manifestPlaceholders["profileInstallExported"] = "true"
+            }
     }
     onVariants(selector().withBuildType("release")) { variant ->
         val verify =

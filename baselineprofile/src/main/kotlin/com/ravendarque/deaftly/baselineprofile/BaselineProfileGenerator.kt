@@ -14,6 +14,7 @@ class BaselineProfileGenerator {
     @Test
     fun generate() {
         rule.collect(packageName = TARGET_PACKAGE, includeInStartupProfile = true) {
+            resetAppData()
             openHome()
             openTemplateAndShow()
             openChat()

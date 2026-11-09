@@ -25,6 +25,13 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- Only the launcher activity is exported. Benchmark builds export this receiver so adb can install a profile. -->
+        <receiver
+            android:name="androidx.profileinstaller.ProfileInstallReceiver"
+            android:exported="${profileInstallExported}"
+            tools:ignore="MissingClass"
+            tools:replace="android:exported" />
     </application>
 
 </manifest>
