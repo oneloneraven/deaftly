@@ -56,6 +56,8 @@ object DeaftlyIcons {
 
     val Close: ImageVector by lazy { strokeIcon("Close", "M6 6l12 12M18 6L6 18") }
 
+    val ClearCircle: ImageVector by lazy { strokeIcon("ClearCircle", "M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18z", "M15 9l-6 6M9 9l6 6") }
+
     val Plus: ImageVector by lazy { strokeIcon("Plus", "M12 5v14M5 12h14") }
 
     val Edit: ImageVector by lazy { strokeIcon("Edit", "M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z") }

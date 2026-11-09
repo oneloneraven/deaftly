@@ -30,9 +30,9 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.ravendarque.deaftly.core.ocr.DragGeometry
+import com.ravendarque.deaftly.core.ocr.OcrSelection
 import com.ravendarque.deaftly.core.ocr.Phrase
 import com.ravendarque.deaftly.core.ocr.PhraseHitTest
-import com.ravendarque.deaftly.core.ocr.PhraseSelection
 import com.ravendarque.deaftly.core.ocr.Point
 import com.ravendarque.deaftly.core.ocr.Quad
 import com.ravendarque.deaftly.core.ocr.SelectedRun
@@ -59,14 +59,15 @@ private const val BOTTOM_RIGHT = 2
 @Composable
 fun PhraseOverlay(
     phrases: List<Phrase>,
-    selection: TextSelection?,
+    selection: OcrSelection,
     onTapPhrase: (Long?) -> Unit,
     onSelectRange: (TextSelection) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val runs = selection?.let { PhraseSelection.runs(phrases, it) }.orEmpty()
-    BoxWithConstraints(modifier = modifier.selectionGestures(phrases, selection, onTapPhrase, onSelectRange)) {
-        Highlights(phrases, runs, Modifier.matchParentSize())
+    val runs = selection.runs(phrases)
+    val handleRange = selection.handleRange(phrases)
+    BoxWithConstraints(modifier = modifier.selectionGestures(phrases, handleRange, onTapPhrase, onSelectRange)) {
+        Highlights(phrases, runs, handleRange != null, Modifier.matchParentSize())
         PhraseNodes(
             phrases,
             runs.map { it.phrase.id }.toSet(),
@@ -156,6 +157,7 @@ private fun PhraseNodes(
 private fun Highlights(
     phrases: List<Phrase>,
     runs: List<SelectedRun>,
+    handles: Boolean,
     modifier: Modifier,
 ) {
     val outline = Deaftly.colors.highlight.copy(alpha = OUTLINE_ALPHA)
@@ -171,8 +173,10 @@ private fun Highlights(
             drawPath(path, accent.copy(alpha = FILL_ALPHA))
             drawPath(path, accent, style = stroke)
         }
-        runs.firstOrNull()?.let { handle(it.start, accent, handleFill) }
-        runs.lastOrNull()?.let { handle(it.end, accent, handleFill) }
+        if (handles) {
+            runs.firstOrNull()?.let { handle(it.start, accent, handleFill) }
+            runs.lastOrNull()?.let { handle(it.end, accent, handleFill) }
+        }
     }
 }
 

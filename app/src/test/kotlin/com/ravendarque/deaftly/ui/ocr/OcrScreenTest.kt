@@ -7,6 +7,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.assertHeightIsAtLeast
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
@@ -15,9 +16,11 @@ import androidx.compose.ui.test.assertIsOff
 import androidx.compose.ui.test.assertIsOn
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.assertTextContains
+import androidx.compose.ui.test.assertWidthIsAtLeast
 import androidx.compose.ui.test.click
 import androidx.compose.ui.test.down
 import androidx.compose.ui.test.hasClickAction
+import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.accessibility.enableAccessibilityChecks
@@ -31,7 +34,9 @@ import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.tryPerformAccessibilityChecks
 import androidx.compose.ui.test.up
+import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.ravendarque.deaftly.core.ocr.OcrSelection
 import com.ravendarque.deaftly.core.ocr.PhraseSelection
 import com.ravendarque.deaftly.core.ocr.TextSelection
 import com.ravendarque.deaftly.core.ocr.WordRef
@@ -54,7 +59,7 @@ class OcrScreenTest {
     private var closes = 0
     private val taps = mutableListOf<Long?>()
     private val ranges = mutableListOf<TextSelection>()
-    private var selection by mutableStateOf<TextSelection?>(null)
+    private var selection by mutableStateOf(OcrSelection())
     private var fieldText by mutableStateOf("")
     private var label by mutableStateOf<String?>(null)
     private var frozen by mutableStateOf(false)
@@ -78,16 +83,20 @@ class OcrScreenTest {
                             onClose = { closes++ },
                             onSelectRange = { range ->
                                 ranges += range
-                                selection = range
+                                selection = selection.dragged(range)
                                 fieldText = PhraseSelection.text(menuPhrases, range).orEmpty()
                             },
                             onTapPhrase = { id ->
                                 taps += id
                                 val phrase = menuPhrases.firstOrNull { it.id == id }
-                                selection = phrase?.let(PhraseSelection::wholePhrase)
-                                if (phrase != null) fieldText = phrase.text
+                                selection = if (phrase == null) OcrSelection() else selection.toggled(phrase)
+                                if (phrase != null) fieldText = selection.tappedText
                             },
                             onFieldChange = { fieldText = it },
+                            onClearText = {
+                                selection = OcrSelection()
+                                fieldText = ""
+                            },
                             onToggleFreeze = {
                                 freezes++
                                 frozen = !frozen
@@ -116,7 +125,7 @@ class OcrScreenTest {
         composeRule.onNodeWithContentDescription("Close camera").assertIsDisplayed()
         composeRule.onNodeWithContentDescription("Torch").assertDoesNotExist()
         composeRule.onNodeWithContentDescription("Freeze camera").assertIsOff()
-        composeRule.onNodeWithText("Tap a phrase, or drag across words.").assertIsDisplayed()
+        composeRule.onNodeWithText("Tap lines, or drag across words.").assertIsDisplayed()
         composeRule.onRoot().tryPerformAccessibilityChecks()
     }
 
@@ -178,6 +187,121 @@ class OcrScreenTest {
         assertEquals(listOf<Long?>(6, null), taps)
         composeRule.onNodeWithContentDescription(lasagne).assertIsNotSelected()
         composeRule.onNode(hasSetTextAction()).assertTextContains(lasagne)
+    }
+
+    @Test
+    fun tappingSeveralLinesSelectsEachAndJoinsTheirTextInTapOrder() {
+        show()
+
+        composeRule.onNodeWithContentDescription("Garlic bread 4.50").performClick()
+        composeRule.onNodeWithContentDescription(lasagne).performClick()
+        composeRule.waitForIdle()
+
+        composeRule.onNodeWithContentDescription("Garlic bread 4.50").assertIsSelected()
+        composeRule.onNodeWithContentDescription(lasagne).assertIsSelected()
+        composeRule.onNodeWithContentDescription("Pasta arrabbiata 12.50").assertIsNotSelected()
+        composeRule.onNode(hasSetTextAction()).assertTextContains("Garlic bread 4.50 $lasagne")
+        composeRule.onRoot().tryPerformAccessibilityChecks()
+    }
+
+    @Test
+    fun activatingASelectedLineNodeAgainDeselectsItAndRemovesItsText() {
+        show()
+        composeRule.onNodeWithContentDescription(lasagne).performClick()
+        composeRule.onNodeWithContentDescription("Garlic bread 4.50").performClick()
+
+        composeRule.onNodeWithContentDescription(lasagne).performClick()
+        composeRule.waitForIdle()
+
+        composeRule.onNodeWithContentDescription(lasagne).assertIsNotSelected()
+        composeRule.onNodeWithContentDescription("Garlic bread 4.50").assertIsSelected()
+        composeRule.onNode(hasSetTextAction()).assertTextContains("Garlic bread 4.50")
+        assertEquals("Garlic bread 4.50", fieldText)
+    }
+
+    @Test
+    fun tappingLinesOnTheCameraViewTogglesThemToo() {
+        show()
+
+        composeRule.onNodeWithContentDescription("Camera view").performTouchInput {
+            click(Offset(width * 0.5f, height * 0.452f))
+            click(Offset(width * 0.5f, height * 0.562f))
+        }
+        composeRule.waitForIdle()
+
+        assertEquals("$lasagne Garlic bread 4.50", fieldText)
+    }
+
+    @Test
+    fun aDragAfterTappingLinesReplacesTheTappedSelection() {
+        show()
+        composeRule.onNodeWithContentDescription(lasagne).performClick()
+        composeRule.onNodeWithContentDescription("Garlic bread 4.50").performClick()
+
+        composeRule.onNodeWithContentDescription("Camera view").performTouchInput {
+            down(centre(1, 1, width, height))
+            moveTo(centre(3, 0, width, height))
+            up()
+        }
+        composeRule.waitForIdle()
+
+        composeRule.onNodeWithContentDescription(lasagne).assertIsNotSelected()
+        composeRule.onNodeWithContentDescription("Garlic bread 4.50").assertIsNotSelected()
+        composeRule.onNode(hasSetTextAction()).assertTextContains("arrabbiata 12.50 tomato, garlic, chilli Spaghetti")
+    }
+
+    @Test
+    fun theClearButtonIsHiddenWhileTheFieldIsEmpty() {
+        show()
+
+        composeRule.onNodeWithContentDescription("Clear text").assertDoesNotExist()
+
+        composeRule.onNodeWithContentDescription(lasagne).performClick()
+        composeRule.waitForIdle()
+
+        composeRule.onNodeWithContentDescription("Clear text").assertIsDisplayed()
+    }
+
+    @Test
+    fun theClearButtonHasAnAccessibleLabelAndAFortyEightDpTarget() {
+        show()
+        composeRule.onNodeWithContentDescription(lasagne).performClick()
+        composeRule.waitForIdle()
+
+        composeRule
+            .onNode(hasContentDescription("Clear text") and hasClickAction())
+            .assertWidthIsAtLeast(48.dp)
+            .assertHeightIsAtLeast(48.dp)
+        composeRule.onRoot().tryPerformAccessibilityChecks()
+    }
+
+    @Test
+    fun theClearButtonEmptiesTheFieldAndDeselectsEveryLine() {
+        show()
+        composeRule.onNodeWithContentDescription(lasagne).performClick()
+        composeRule.onNodeWithContentDescription("Garlic bread 4.50").performClick()
+
+        composeRule.onNodeWithContentDescription("Clear text").performClick()
+        composeRule.waitForIdle()
+
+        assertEquals("", fieldText)
+        composeRule.onNodeWithContentDescription(lasagne).assertIsNotSelected()
+        composeRule.onNodeWithContentDescription("Garlic bread 4.50").assertIsNotSelected()
+        composeRule.onNodeWithContentDescription("Clear text").assertDoesNotExist()
+        composeRule.onNodeWithText("Add to message").assertIsNotEnabled()
+    }
+
+    @Test
+    fun theClearButtonAlsoShowsForTypedText() {
+        show()
+
+        composeRule.onNode(hasSetTextAction()).performTextReplacement("Hello")
+        composeRule.waitForIdle()
+
+        composeRule.onNodeWithContentDescription("Clear text").performClick()
+        composeRule.waitForIdle()
+
+        assertEquals("", fieldText)
     }
 
     @Test

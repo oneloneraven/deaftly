@@ -5,6 +5,7 @@ import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onRoot
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.takahirom.roborazzi.captureRoboImage
+import com.ravendarque.deaftly.core.ocr.OcrSelection
 import com.ravendarque.deaftly.core.ocr.Phrase
 import com.ravendarque.deaftly.core.ocr.PhraseSelection
 import com.ravendarque.deaftly.core.ocr.TextSelection
@@ -48,23 +49,25 @@ class OcrScreenshotTest {
 
     private fun camera(
         dark: Boolean,
-        picked: Phrase? = null,
-        range: TextSelection? = picked?.let(PhraseSelection::wholePhrase),
+        picked: List<Phrase> = emptyList(),
+        range: TextSelection? = null,
         frozen: Boolean = false,
         torch: Boolean? = null,
     ) = shot(dark) {
+        val selection =
+            range?.let { OcrSelection().dragged(it) } ?: picked.fold(OcrSelection()) { chosen, phrase -> chosen.toggled(phrase) }
         OcrCameraContent(
             content =
                 OcrContent(
                     status = if (frozen) "Frozen" else "Live",
                     phrases = menuPhrases,
-                    selection = range,
-                    fieldText = range?.let { PhraseSelection.text(menuPhrases, it) }.orEmpty(),
+                    selection = selection,
+                    fieldText = range?.let { PhraseSelection.text(menuPhrases, it) } ?: selection.tappedText,
                     frozen = frozen,
                     frozenImage = if (frozen) fakeFrameImage() else null,
                     torch = torch,
                 ),
-            actions = OcrActions({}, {}, {}, {}, {}, {}, {}),
+            actions = OcrActions({}, {}, {}, {}, {}, {}, {}, {}),
             viewfinder = { FakeCamera(it) },
         )
     }
@@ -103,14 +106,26 @@ class OcrScreenshotTest {
     fun cameraLargeFontScale() = camera(dark = false)
 
     @Test
-    fun selectedPhraseLightTheme() = camera(dark = false, picked = menuPhrases[1])
+    fun selectedPhraseLightTheme() = camera(dark = false, picked = listOf(menuPhrases[1]))
 
     @Test
-    fun selectedPhraseDarkTheme() = camera(dark = true, picked = menuPhrases[1])
+    fun selectedPhraseDarkTheme() = camera(dark = true, picked = listOf(menuPhrases[1]))
 
     @Test
     @Config(fontScale = 2f)
-    fun selectedPhraseLargeFontScale() = camera(dark = false, picked = menuPhrases[1])
+    fun selectedPhraseLargeFontScale() = camera(dark = false, picked = listOf(menuPhrases[1]))
+
+    private val twoLines = listOf(menuPhrases[5], menuPhrases[1])
+
+    @Test
+    fun twoTappedLinesLightTheme() = camera(dark = false, picked = twoLines)
+
+    @Test
+    fun twoTappedLinesDarkTheme() = camera(dark = true, picked = twoLines)
+
+    @Test
+    @Config(fontScale = 2f)
+    fun twoTappedLinesLargeFontScale() = camera(dark = false, picked = twoLines)
 
     private val acrossLines = TextSelection(WordRef(2, 1), WordRef(4, 1))
 
@@ -125,10 +140,10 @@ class OcrScreenshotTest {
     fun draggedRangeAcrossLinesLargeFontScale() = camera(dark = false, range = acrossLines)
 
     @Test
-    fun frozenWithTorchOnLightTheme() = camera(dark = false, picked = menuPhrases[3], frozen = true, torch = true)
+    fun frozenWithTorchOnLightTheme() = camera(dark = false, picked = listOf(menuPhrases[3]), frozen = true, torch = true)
 
     @Test
-    fun frozenWithTorchOnDarkTheme() = camera(dark = true, picked = menuPhrases[3], frozen = true, torch = true)
+    fun frozenWithTorchOnDarkTheme() = camera(dark = true, picked = listOf(menuPhrases[3]), frozen = true, torch = true)
 
     @Test
     @Config(fontScale = 2f)
