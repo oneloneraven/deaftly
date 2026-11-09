@@ -16,6 +16,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -36,25 +40,27 @@ private const val STACK_FONT_SCALE = 1.5f
 
 private data class HubOption(
     val label: Int,
-    val description: Int,
+    val help: Int,
     val icon: ImageVector,
     val route: Route,
 )
 
 private val showOptions =
     listOf(
-        HubOption(R.string.hub_start_typing, R.string.hub_start_typing_description, DeaftlyIcons.Keyboard, Route.TypeShow),
-        HubOption(R.string.hub_use_template, R.string.hub_use_template_description, DeaftlyIcons.TemplateBlank, Route.Templates),
+        HubOption(R.string.hub_start_typing, R.string.hub_start_typing_help, DeaftlyIcons.Keyboard, Route.TypeShow),
+        HubOption(R.string.hub_use_template, R.string.hub_use_template_help, DeaftlyIcons.TemplateBlank, Route.Templates),
     )
 
 private val chatOptions =
     listOf(
-        HubOption(R.string.hub_face_to_face, R.string.hub_face_to_face_description, DeaftlyIcons.FaceToFace, Route.FaceToFace),
-        HubOption(R.string.hub_side_by_side, R.string.hub_side_by_side_description, DeaftlyIcons.SideBySide, Route.Chat()),
+        HubOption(R.string.hub_face_to_face, R.string.hub_face_to_face_help, DeaftlyIcons.FaceToFace, Route.FaceToFace),
+        HubOption(R.string.hub_side_by_side, R.string.hub_side_by_side_help, DeaftlyIcons.SideBySide, Route.Chat()),
     )
 
 @Composable
 fun HubScreen(onNavigate: (Route) -> Unit) {
+    var helpLabel by rememberSaveable { mutableStateOf<Int?>(null) }
+    val helpOption = (showOptions + chatOptions).firstOrNull { it.label == helpLabel }
     Surface(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.safeDrawingPadding()) {
             Header(onSettings = { onNavigate(Route.Settings) })
@@ -72,10 +78,22 @@ fun HubScreen(onNavigate: (Route) -> Unit) {
                     color = Deaftly.colors.inkSecondary,
                     modifier = Modifier.spoken(stringResource(R.string.hub_welcome)),
                 )
-                Group(R.string.hub_show_heading, showOptions, onNavigate)
-                Group(R.string.hub_chat_heading, chatOptions, onNavigate)
+                Group(R.string.hub_show_heading, showOptions, onNavigate, onHelp = { helpLabel = it.label })
+                Group(R.string.hub_chat_heading, chatOptions, onNavigate, onHelp = { helpLabel = it.label })
             }
         }
+    }
+    helpOption?.let { option ->
+        HubHelpDialog(
+            title = stringResource(option.label),
+            help = stringResource(option.help),
+            icon = option.icon,
+            onStart = {
+                helpLabel = null
+                onNavigate(option.route)
+            },
+            onDismiss = { helpLabel = null },
+        )
     }
 }
 
@@ -103,6 +121,7 @@ private fun Group(
     heading: Int,
     options: List<HubOption>,
     onNavigate: (Route) -> Unit,
+    onHelp: (HubOption) -> Unit,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(Deaftly.spacing.space12)) {
         Text(
@@ -118,11 +137,13 @@ private fun Group(
                 horizontalArrangement = Arrangement.spacedBy(Deaftly.spacing.space12),
             ) {
                 row.forEach { option ->
+                    val title = stringResource(option.label)
                     HubCard(
-                        title = stringResource(option.label),
-                        description = stringResource(option.description),
+                        title = title,
                         icon = option.icon,
                         onClick = { onNavigate(option.route) },
+                        infoLabel = stringResource(R.string.hub_info, title),
+                        onInfo = { onHelp(option) },
                         modifier = Modifier.weight(1f).fillMaxHeight(),
                     )
                 }

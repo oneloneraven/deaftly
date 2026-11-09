@@ -33,6 +33,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import com.ravendarque.deaftly.ui.icons.DeaftlyIcons
 import com.ravendarque.deaftly.ui.theme.Deaftly
 
 sealed interface PreviewPart {
@@ -52,6 +53,8 @@ private val TileMinHeight = 132.dp
 private val TileIconSize = 26.dp
 private val HubIconDiscSize = 64.dp
 private val HubIconSize = 32.dp
+private val HubInfoTarget = 48.dp
+private val HubInfoGlyph = 20.dp
 private val CardMinHeight = 48.dp
 
 @Composable
@@ -157,41 +160,54 @@ fun PinnedTile(
 @Composable
 fun HubCard(
     title: String,
-    description: String,
     icon: ImageVector,
     onClick: () -> Unit,
+    infoLabel: String,
+    onInfo: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val shape = Deaftly.shapes.card
-    Column(
+    Box(
         modifier =
             modifier
                 .clip(shape)
                 .background(Deaftly.colors.surface, shape)
-                .border(1.dp, Deaftly.colors.line, shape)
-                .clickable(role = Role.Button, onClick = onClick)
-                .semantics { contentDescription = "$title. $description" }
-                .padding(horizontal = Deaftly.spacing.space16, vertical = Deaftly.spacing.space20),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(Deaftly.spacing.space12),
+                .border(1.dp, Deaftly.colors.line, shape),
     ) {
+        Column(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .clickable(role = Role.Button, onClick = onClick)
+                    .semantics { contentDescription = title }
+                    .padding(horizontal = Deaftly.spacing.space16, vertical = Deaftly.spacing.space20),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(Deaftly.spacing.space12),
+        ) {
+            HubIconDisc(icon)
+            Text(text = title, style = MaterialTheme.typography.titleMedium, color = Deaftly.colors.ink, textAlign = TextAlign.Center)
+        }
         Box(
-            modifier = Modifier.size(HubIconDiscSize).background(Deaftly.colors.accentSoft, CircleShape),
+            modifier =
+                Modifier
+                    .align(Alignment.TopEnd)
+                    .size(HubInfoTarget)
+                    .clip(CircleShape)
+                    .clickable(role = Role.Button, onClick = onInfo)
+                    .semantics { contentDescription = infoLabel },
             contentAlignment = Alignment.Center,
         ) {
-            Icon(imageVector = icon, contentDescription = null, modifier = Modifier.size(HubIconSize), tint = Deaftly.colors.accent)
+            Icon(DeaftlyIcons.Info, contentDescription = null, modifier = Modifier.size(HubInfoGlyph), tint = Deaftly.colors.inkSecondary)
         }
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(Deaftly.spacing.space4),
-        ) {
-            Text(text = title, style = MaterialTheme.typography.titleMedium, color = Deaftly.colors.ink, textAlign = TextAlign.Center)
-            Text(
-                text = description,
-                style = MaterialTheme.typography.bodyMedium,
-                color = Deaftly.colors.inkSecondary,
-                textAlign = TextAlign.Center,
-            )
-        }
+    }
+}
+
+@Composable
+fun HubIconDisc(icon: ImageVector) {
+    Box(
+        modifier = Modifier.size(HubIconDiscSize).background(Deaftly.colors.accentSoft, CircleShape),
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(imageVector = icon, contentDescription = null, modifier = Modifier.size(HubIconSize), tint = Deaftly.colors.accent)
     }
 }
