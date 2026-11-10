@@ -8,7 +8,7 @@ fun EditorDraft.withBody(value: TextFieldValue): EditorDraft {
     val text = kept?.text ?: value.text
     val start = kept?.cursor ?: value.selection.start
     val end = kept?.cursor ?: value.selection.end
-    val edited = copy(body = text, selectionStart = start, selectionEnd = end).dropMissingSelection()
+    val edited = copy(body = text, selectionStart = start, selectionEnd = end).dropUnusedPlaceholders().dropMissingSelection()
     val token = if (start == end) TemplateEditing.tokenAt(text, start) else null
     return token?.let { edited.select(it.key) } ?: edited
 }
@@ -81,6 +81,11 @@ fun EditorDraft.deleteSelected(): EditorDraft {
         keyInput = "",
         selectionVersion = selectionVersion + 1,
     )
+}
+
+private fun EditorDraft.dropUnusedPlaceholders(): EditorDraft {
+    val used = TemplateEditing.keys(body).toSet()
+    return if (placeholders.all { it.key in used }) this else copy(placeholders = placeholders.filter { it.key in used })
 }
 
 private fun EditorDraft.dropMissingSelection(): EditorDraft =
