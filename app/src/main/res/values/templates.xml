@@ -11,6 +11,8 @@
     <string name="template_order_food_body">Hi! I\'m deaf. Could I have {menu item} please? If you have a question, please type it on my phone.</string>
     <string name="template_explain_deaf_title">Explain I\'m deaf</string>
     <string name="template_explain_deaf_body">I\'m deaf. I can\'t hear you. Please {how to reply}.</string>
+    <string name="template_bsl_interpreter_title">BSL interpreter</string>
+    <string name="template_bsl_interpreter_body">Hi! I\'m deaf. My name is {name}. I should have a BSL interpreter booked. Are they here yet? Please {how to reply}.</string>
     <string name="template_ask_help_title">Ask for help</string>
     <string name="template_ask_help_body">Excuse me. I\'m deaf. Can you help me find {thing}? Please {how to reply}.</string>
     <string name="template_food_allergy_title">Food allergy</string>

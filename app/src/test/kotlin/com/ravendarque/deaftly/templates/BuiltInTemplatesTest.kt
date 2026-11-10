@@ -10,6 +10,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RuntimeEnvironment
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 @RunWith(AndroidJUnit4::class)
@@ -37,6 +38,7 @@ class BuiltInTemplatesTest {
             BuiltInIds.ORDER_FOOD,
             BuiltInIds.ASK_HELP,
             BuiltInIds.EXPLAIN_DEAF,
+            BuiltInIds.BSL_INTERPRETER,
             BuiltInIds.DOCTOR,
             BuiltInIds.PHARMACY,
             BuiltInIds.BUY_TICKET,
@@ -106,6 +108,22 @@ class BuiltInTemplatesTest {
                 .options.size,
         )
         assertEquals(listOf("card", "cash", "phone"), byId(BuiltInIds.PAYING).placeholders.getValue("payment").options)
+    }
+
+    @Test
+    fun theBslInterpreterTemplateFollowsExplainImDeafAndIsNotPinned() {
+        val ids = templates.map { it.id }
+        val interpreter = byId(BuiltInIds.BSL_INTERPRETER)
+
+        assertEquals(ids.indexOf(BuiltInIds.EXPLAIN_DEAF) + 1, ids.indexOf(BuiltInIds.BSL_INTERPRETER))
+        assertEquals("BSL interpreter", interpreter.title)
+        assertEquals("Everyday", interpreter.category)
+        assertEquals(
+            "Hi! I'm deaf. My name is {name}. I should have a BSL interpreter booked. Are they here yet? Please {how to reply}.",
+            interpreter.body,
+        )
+        assertEquals(setOf("name", "how to reply"), interpreter.placeholders.keys)
+        assertFalse(interpreter.pinned)
     }
 
     @Test
