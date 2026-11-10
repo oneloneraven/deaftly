@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FilledIconButton
@@ -135,7 +134,7 @@ fun AccentIconButton(
         onClick = onClick,
         modifier = modifier.size(IconButtonSize),
         enabled = enabled,
-        shape = CircleShape,
+        shape = Deaftly.shapes.controlSmall,
         colors =
             IconButtonDefaults.filledIconButtonColors(
                 containerColor = Deaftly.colors.accent,
