@@ -242,30 +242,57 @@ class ChatScreenTest {
     }
 
     @Test
-    fun theHearingPersonsTurnPromptsThemToReply() {
-        showOrdering(ParticipantId.B)
+    fun theHearingPersonsPromptShowsUntilTheyHaveSent() {
+        show(SavedStateHandle(mapOf("conversation" to ChatCodec.encode(deafUserHasSpoken()))))
 
         composeRule.onNodeWithText("Your turn – type your reply here").assertIsDisplayed()
         turnControl().assert(hasState("Waiter\u2019s turn"))
     }
 
     @Test
-    fun theDeafUsersTurnShowsTheNeutralPromptInstead() {
+    fun theHearingPersonsPromptIsGoneOnceTheyHaveSent() {
+        showOrdering(ParticipantId.B)
+
+        composeRule.onNodeWithText("Your turn – type your reply here").assertDoesNotExist()
+        turnControl().assert(hasState("Waiter\u2019s turn"))
+    }
+
+    @Test
+    fun theDeafUsersPromptGoesOnceTheyHaveSent() {
         showOrdering(ParticipantId.A)
 
-        composeRule.onNodeWithText("Type your message").assertIsDisplayed()
+        composeRule.onNodeWithText("Type your message").assertDoesNotExist()
         composeRule.onNodeWithText("Your turn – type your reply here").assertDoesNotExist()
     }
 
     @Test
-    fun tappingTheOtherSideSwitchesTheTurnAndThePrompt() {
+    fun sendingTheFirstMessageHidesThatPersonsPromptAndLeavesTheOthersAlone() {
+        show()
+        composeRule.onNodeWithText("Type your message").assertIsDisplayed()
+
+        composeRule.onNode(isMessageField).performTextInput("Hello")
+        composeRule.onNodeWithContentDescription("Send").performClick()
+        composeRule.waitForIdle()
+        composeRule.onNodeWithText("Type your message").assertDoesNotExist()
+
+        composeRule.runOnUiThread { viewModel.selectTurn(ParticipantId.B) }
+        composeRule.waitForIdle()
+        composeRule.onNodeWithText("Your turn – type your reply here").assertIsDisplayed()
+
+        composeRule.onNode(isMessageField).performTextInput("Hi")
+        composeRule.onNodeWithContentDescription("Send").performClick()
+        composeRule.waitForIdle()
+        composeRule.onNodeWithText("Your turn – type your reply here").assertDoesNotExist()
+    }
+
+    @Test
+    fun tappingTheOtherSideSwitchesTheTurnAndAnnouncesIt() {
         showOrdering(ParticipantId.A)
 
         tapName("Waiter")
         composeRule.waitForIdle()
 
         assertEquals(ParticipantId.B, conversation().turn)
-        composeRule.onNodeWithText("Your turn – type your reply here").assertIsDisplayed()
         turnControl().assert(hasState("Waiter\u2019s turn"))
     }
 
