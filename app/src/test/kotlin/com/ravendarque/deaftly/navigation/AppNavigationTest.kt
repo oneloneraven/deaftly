@@ -4,6 +4,7 @@ import androidx.activity.ComponentActivity
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsFocused
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.hasClickAction
@@ -43,6 +44,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 private const val LOAD_TIMEOUT_MILLIS = 10_000L
+private const val EXTRA_TEMPLATES = 12
 
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
@@ -211,6 +213,20 @@ class AppNavigationTest {
         composeRule.onNode(isMessageField).assert(hasText("Please wait. I'm deaf. I can't hear you. Please $option."))
         composeRule.onNodeWithText(text(R.string.fill_insert)).assertDoesNotExist()
         composeRule.onRoot().tryPerformAccessibilityChecks()
+    }
+
+    @Test
+    fun templatesOpensAtTheTopOfALongList() {
+        val container = appContainer()
+        runBlocking {
+            repeat(EXTRA_TEMPLATES) { container.templateRepository.add(Template("extra-$it", "Extra $it", "Everyday", "Extra $it.")) }
+        }
+        showApp(container)
+
+        openTemplates()
+
+        composeRule.onNodeWithText(text(R.string.home_category_all)).assertIsDisplayed()
+        composeRule.onNodeWithText(text(R.string.templates_add_new)).assertDoesNotExist()
     }
 
     @Test
