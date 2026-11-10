@@ -104,6 +104,7 @@ private fun SidesChat(
             )
             Composer(
                 participant = conversation.activeParticipant,
+                hasSent = conversation.messages.any { it.author == conversation.turn },
                 draft = current.draft,
                 textSize = current.textSize,
                 actions = composerActions,
