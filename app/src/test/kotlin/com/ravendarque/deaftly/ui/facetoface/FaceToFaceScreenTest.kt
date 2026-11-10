@@ -4,6 +4,7 @@ import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.delete
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.semantics.SemanticsNode
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.getOrNull
@@ -271,6 +272,19 @@ class FaceToFaceScreenTest {
         assertTrue(field < list, "field $field before list $list")
         assertTrue(list < bar, "list $list before bar $bar")
         assertEquals(bar, continueButton)
+    }
+
+    @Test
+    fun theHeaderBarSitsBetweenTheStrangersPaneAndTheFieldAndThePaneRunsToTheTopEdge() {
+        show(listOf("Hello"))
+
+        val list = strangerList().fetchSemanticsNode().boundsInRoot
+        val bar = composeRule.onNodeWithText("Continue side by side").fetchSemanticsNode().boundsInRoot
+        val field = input().fetchSemanticsNode().boundsInRoot
+
+        assertEquals(0f, list.top)
+        assertTrue(list.bottom <= bar.top, "pane ${list.bottom} above bar ${bar.top}")
+        assertTrue(bar.bottom <= field.top, "bar ${bar.bottom} above field ${field.top}")
     }
 
     @Test
