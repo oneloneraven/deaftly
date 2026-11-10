@@ -8,16 +8,18 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonNames
 
-const val STORE_VERSION = 1
+const val STORE_VERSION = 2
 
 @Serializable
 data class StoreDocument(
     val version: Int,
     val templates: List<TemplateDto>,
     val settings: SettingsDto,
+    val builtInsReceived: Map<String, String> = emptyMap(),
 ) {
     companion object {
-        fun seeded(builtIns: List<Template>): StoreDocument = StoreDocument(STORE_VERSION, builtIns.map(Template::toDto), SettingsDto())
+        fun seeded(builtIns: List<Template>): StoreDocument =
+            StoreDocument(STORE_VERSION, emptyList(), SettingsDto()).reconcileBuiltIns(builtIns)
     }
 }
 
