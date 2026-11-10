@@ -69,7 +69,6 @@ private const val GLYPH_SP = 18
 data class ComposerActions(
     val onInsertTemplate: () -> Unit,
     val onChange: (Composition) -> Unit,
-    val onQuoteLatest: () -> Unit,
     val onRemoveQuote: () -> Unit,
     val onSend: () -> Unit,
 )
@@ -79,7 +78,6 @@ data class ComposerActions(
 fun Composer(
     participant: Participant,
     draft: Draft,
-    canQuote: Boolean,
     textSize: ChatTextSize,
     actions: ComposerActions,
     modifier: Modifier = Modifier,
@@ -117,7 +115,7 @@ fun Composer(
             verticalArrangement = Arrangement.spacedBy(Deaftly.spacing.space4),
             itemVerticalAlignment = Alignment.CenterVertically,
         ) {
-            FormattingButtons(state, draft, canQuote, actions, colours)
+            FormattingButtons(state, actions, colours)
             Box(Modifier.weight(1f), contentAlignment = Alignment.CenterEnd) {
                 SendButton(enabled = canSend, onClick = send, container = colours.strong, content = colours.onStrong)
             }
@@ -145,8 +143,6 @@ private fun TurnPrompt(id: ParticipantId) {
 @Composable
 private fun FormattingButtons(
     state: ComposerState,
-    draft: Draft,
-    canQuote: Boolean,
     actions: ComposerActions,
     colours: ParticipantColours,
 ) {
@@ -169,15 +165,6 @@ private fun FormattingButtons(
     }
     FormatButton(state, SpanStyle.Highlight, R.string.chat_format_highlight, colours) {
         Icon(DeaftlyIcons.Highlight, contentDescription = null, modifier = Modifier.size(ToolbarIcon), tint = it)
-    }
-    ToolbarButton(
-        label = stringResource(R.string.chat_quote_latest),
-        selected = draft.quote != null,
-        enabled = canQuote || draft.quote != null,
-        colours = colours,
-        onClick = if (draft.quote != null) actions.onRemoveQuote else actions.onQuoteLatest,
-    ) {
-        Icon(DeaftlyIcons.Quote, contentDescription = null, modifier = Modifier.size(ToolbarIcon), tint = it)
     }
     ToolbarButton(
         label = stringResource(R.string.chat_insert_template),

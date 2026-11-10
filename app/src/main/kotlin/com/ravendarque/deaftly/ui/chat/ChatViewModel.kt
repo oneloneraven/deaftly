@@ -96,12 +96,6 @@ class ChatViewModel(
         drafts.setQuote(current.quote(messageId, excerpt))
     }
 
-    fun quoteLatest() {
-        val current = conversation.value ?: return
-        val latest = current.messages.lastOrNull { it.author != current.turn } ?: current.messages.lastOrNull() ?: return
-        quote(latest.id)
-    }
-
     fun send() {
         val current = conversation.value
         val draft = current?.let { drafts.all.value[it.turn] }

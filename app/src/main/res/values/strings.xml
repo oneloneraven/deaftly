@@ -147,7 +147,6 @@
     <string name="chat_format_glyph_italic">I</string>
     <string name="chat_format_on">On</string>
     <string name="chat_format_off">Off</string>
-    <string name="chat_quote_latest">Quote the latest message</string>
     <string name="chat_insert_template">Insert template</string>
     <string name="chat_end_title">End this chat?</string>
     <string name="chat_end_text">The messages will be deleted.</string>
