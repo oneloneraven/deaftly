@@ -82,6 +82,14 @@ private class BuiltInTemplateFactory(
                 R.string.category_health,
                 R.string.template_doctor_body,
                 placeholder("time", R.string.placeholder_time_label, PlaceholderType.Typing),
+                placeholder(
+                    "how I communicate",
+                    R.string.placeholder_how_i_communicate_label,
+                    PlaceholderType.Choices,
+                    R.array.placeholder_how_i_communicate_options,
+                    repeatable = true,
+                ),
+                howToReply,
             ),
             template(
                 BuiltInIds.PHARMACY,
