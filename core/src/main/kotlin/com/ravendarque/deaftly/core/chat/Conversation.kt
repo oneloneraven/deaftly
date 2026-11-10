@@ -46,8 +46,27 @@ public data class Conversation(
         quote: Quote? = null,
     ): Conversation {
         require(spans.isNotEmpty()) { "A message must not be empty" }
-        require(quote == null || quote.messageId in messages.indices) { "No message with id ${quote?.messageId}" }
+        require(quote?.messageId == null || quote.messageId in messages.indices) { "No message with id ${quote?.messageId}" }
         val message = Message(messages.size, turn, spans, quote)
         return copy(messages = messages + message)
     }
+
+    public fun deleteMessage(id: Int): Conversation {
+        if (id !in messages.indices) return this
+        val kept =
+            messages.filterNot { it.id == id }.mapIndexed { index, message ->
+                message.copy(id = index, quote = message.quote?.let { reindexed(it, id) })
+            }
+        return copy(messages = kept)
+    }
+
+    private fun reindexed(
+        quote: Quote,
+        deletedId: Int,
+    ): Quote =
+        when (val quoted = quote.messageId) {
+            null -> quote
+            deletedId -> quote.copy(messageId = null)
+            else -> if (quoted < deletedId) quote else quote.copy(messageId = quoted - 1)
+        }
 }

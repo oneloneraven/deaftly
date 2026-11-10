@@ -481,6 +481,67 @@ class ChatViewModelTest {
             assertNull(viewModel.draft().quote)
         }
 
+    private fun TestScope.twoMessages(): ChatViewModel {
+        val viewModel = viewModel(firstMessage = "first")
+        collect(viewModel)
+        viewModel.type("second")
+        viewModel.send()
+        return viewModel
+    }
+
+    @Test
+    fun deletingAMessageRemovesItStraightAwayAndRenumbersTheRest() =
+        runTest {
+            val viewModel = twoMessages()
+
+            viewModel.deleteMessage(0)
+
+            assertEquals(listOf("second"), viewModel.conversation().messages.map { it.plainText })
+            assertEquals(listOf(0), viewModel.conversation().messages.map { it.id })
+        }
+
+    @Test
+    fun deletingAnUnknownMessageDoesNothing() =
+        runTest {
+            val viewModel = twoMessages()
+
+            viewModel.deleteMessage(9)
+
+            assertEquals(2, viewModel.conversation().messages.size)
+        }
+
+    @Test
+    fun deletingTheQuotedMessageClearsThePendingQuote() =
+        runTest {
+            val viewModel = twoMessages()
+            viewModel.quote(0)
+
+            viewModel.deleteMessage(0)
+
+            assertNull(viewModel.draft().quote)
+        }
+
+    @Test
+    fun deletingAnEarlierMessageKeepsThePendingQuotePointingAtItsMessage() =
+        runTest {
+            val viewModel = twoMessages()
+            viewModel.quote(1)
+
+            viewModel.deleteMessage(0)
+
+            assertEquals(Quote(0, "second"), viewModel.draft().quote)
+            viewModel.type("reply")
+            viewModel.send()
+            assertEquals(
+                Quote(0, "second"),
+                viewModel
+                    .conversation()
+                    .messages
+                    .last()
+                    .quote,
+            )
+        }
+
     @Test
     fun aQuoteAloneIsNotEnoughToSend() =
         runTest {

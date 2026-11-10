@@ -1,7 +1,7 @@
 package com.ravendarque.deaftly.core.chat
 
 public data class Quote(
-    val messageId: Int,
+    val messageId: Int?,
     val text: String,
 )
 

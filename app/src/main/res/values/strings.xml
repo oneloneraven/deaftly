@@ -161,7 +161,10 @@
     <string name="chat_end_text">The messages will be deleted.</string>
     <string name="chat_end_confirm">End chat</string>
     <string name="chat_end_keep">Keep chatting</string>
+    <string name="chat_copy_action">Copy</string>
     <string name="chat_quote_action">Quote</string>
+    <string name="chat_delete_action">Delete</string>
+    <string name="chat_message_actions">Message actions</string>
     <string name="chat_quote_remove">Remove quote</string>
     <string name="chat_quote_pending">Quoting: %1$s</string>
     <string name="editor_title_new">New template</string>

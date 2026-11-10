@@ -99,7 +99,7 @@ private fun SidesChat(
                 conversation,
                 current.textSize,
                 current.sidesSwapped,
-                viewModel::quote,
+                MessageActions(onQuote = { viewModel.quote(it) }, onDelete = viewModel::deleteMessage),
                 Modifier.weight(1f).fillMaxSize(),
             )
             Composer(

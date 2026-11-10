@@ -176,4 +176,49 @@ class ConversationTest {
             conversation().withParticipant(Participant(ParticipantId.A, ColourRole.Orange))
         }
     }
+
+    private fun threeMessages() =
+        conversation()
+            .append(text("one"))
+            .switchTurn()
+            .append(text("two"))
+            .switchTurn()
+            .append(text("three"), quote = Quote(1, "two"))
+
+    @Test
+    fun deleteMessageRemovesItAndRenumbersTheRest() {
+        val deleted = threeMessages().deleteMessage(0)
+
+        assertEquals(listOf("two", "three"), deleted.messages.map { it.plainText })
+        assertEquals(listOf(0, 1), deleted.messages.map { it.id })
+        assertEquals(listOf(ParticipantId.B, ParticipantId.A), deleted.messages.map { it.author })
+    }
+
+    @Test
+    fun deleteMessageFollowsQuotesOfLaterMessagesToTheirNewPosition() {
+        val deleted = threeMessages().deleteMessage(0)
+
+        assertEquals(Quote(0, "two"), deleted.messages.last().quote)
+    }
+
+    @Test
+    fun aQuoteOfADeletedMessageKeepsItsTextButLosesItsLink() {
+        val deleted = threeMessages().deleteMessage(1)
+
+        assertEquals(Quote(null, "two"), deleted.messages.last().quote)
+    }
+
+    @Test
+    fun deletingAnUnknownMessageChangesNothing() {
+        val conversation = threeMessages()
+
+        assertSame(conversation, conversation.deleteMessage(7))
+    }
+
+    @Test
+    fun appendAcceptsAQuoteWhoseMessageIsGone() {
+        val conversation = threeMessages().deleteMessage(1).append(text("four"), quote = Quote(null, "two"))
+
+        assertEquals(Quote(null, "two"), conversation.messages.last().quote)
+    }
 }

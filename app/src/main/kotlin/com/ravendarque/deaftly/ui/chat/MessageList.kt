@@ -1,6 +1,9 @@
 package com.ravendarque.deaftly.ui.chat
 
+import android.content.ClipData
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,45 +19,51 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.contextmenu.builder.item
-import androidx.compose.foundation.text.contextmenu.modifier.appendTextContextMenuComponents
-import androidx.compose.foundation.text.selection.LocalTextSelectionColors
-import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.foundation.text.selection.TextSelectionColors
-import androidx.compose.foundation.text.selection.rememberSelectionState
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.ClipEntry
+import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.isTraversalGroup
+import androidx.compose.ui.semantics.onLongClick
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.traversalIndex
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import com.ravendarque.deaftly.R
 import com.ravendarque.deaftly.core.chat.Conversation
 import com.ravendarque.deaftly.core.chat.Message
+import com.ravendarque.deaftly.core.chat.Participant
 import com.ravendarque.deaftly.core.settings.ChatTextSize
 import com.ravendarque.deaftly.ui.theme.Deaftly
 import com.ravendarque.deaftly.ui.theme.ParticipantColours
 import com.ravendarque.deaftly.ui.theme.colours
+import kotlinx.coroutines.launch
 
 private const val QUOTE_SIZE_RATIO = 0.8f
 private const val QUOTE_MAX_LINES = 3
-private const val SELECTION_ALPHA = 0.3f
 private const val LABEL_TRACKING = 0.04f
 private val BarWidth = 4.dp
 private val BarGap = 12.dp
@@ -68,7 +77,7 @@ fun MessageList(
     conversation: Conversation,
     textSize: ChatTextSize,
     sidesSwapped: Boolean,
-    onQuote: ((messageId: Int, excerpt: String?) -> Unit)?,
+    actions: MessageActions,
     modifier: Modifier = Modifier,
 ) {
     val listState = rememberLazyListState()
@@ -94,7 +103,7 @@ fun MessageList(
     ) {
         itemsIndexed(conversation.messages, key = { _, message -> message.id }) { index, message ->
             if (index > 0) MessageDivider()
-            ScriptMessage(message, conversation, textSize, message.author.isOnRight(sidesSwapped), onQuote)
+            ScriptMessage(message, conversation, textSize, message.author.isOnRight(sidesSwapped), actions)
         }
     }
 }
@@ -110,33 +119,61 @@ private fun ScriptMessage(
     conversation: Conversation,
     textSize: ChatTextSize,
     onRight: Boolean,
-    onQuote: ((messageId: Int, excerpt: String?) -> Unit)?,
+    actions: MessageActions,
 ) {
+    var menuOpen by remember { mutableStateOf(false) }
+    val commands = rememberMessageCommands(message, actions)
+    val menuLabel = stringResource(R.string.chat_message_actions)
     val author = conversation.participant(message.author).labelled()
-    val colours = author.colour.colours()
-    val quoteLabel = stringResource(R.string.chat_quote_action)
     val said = stringResource(R.string.chat_message_from, author.displayName.orEmpty(), message.plainText)
     val description = message.quote?.let { stringResource(R.string.chat_message_quoting, it.text, said) } ?: said
+    Box {
+        ScriptLine(
+            message = message,
+            author = author,
+            textSize = textSize,
+            onRight = onRight,
+            modifier =
+                Modifier
+                    .pointerInput(Unit) { detectTapGestures(onLongPress = { menuOpen = true }) }
+                    .semantics(mergeDescendants = true) {
+                        contentDescription = description
+                        traversalIndex = message.id.toFloat()
+                        onLongClick(menuLabel) {
+                            menuOpen = true
+                            true
+                        }
+                        customActions =
+                            commands.map { command ->
+                                CustomAccessibilityAction(command.label) {
+                                    command.run()
+                                    true
+                                }
+                            }
+                    },
+        )
+        Box(Modifier.align(if (onRight) Alignment.TopEnd else Alignment.TopStart)) {
+            MessageMenu(expanded = menuOpen, commands = commands, onDismiss = { menuOpen = false })
+        }
+    }
+}
+
+@Composable
+private fun ScriptLine(
+    message: Message,
+    author: Participant,
+    textSize: ChatTextSize,
+    onRight: Boolean,
+    modifier: Modifier,
+) {
+    val colours = author.colour.colours()
     val align = if (onRight) TextAlign.End else TextAlign.Start
     Row(
         modifier =
-            Modifier
+            modifier
                 .fillMaxWidth()
                 .height(IntrinsicSize.Min)
-                .padding(vertical = Deaftly.spacing.space8)
-                .semantics(mergeDescendants = true) {
-                    contentDescription = description
-                    traversalIndex = message.id.toFloat()
-                    if (onQuote != null) {
-                        customActions =
-                            listOf(
-                                CustomAccessibilityAction(quoteLabel) {
-                                    onQuote(message.id, null)
-                                    true
-                                },
-                            )
-                    }
-                },
+                .padding(vertical = Deaftly.spacing.space8),
         horizontalArrangement = Arrangement.spacedBy(BarGap),
     ) {
         if (!onRight) SpeakerBar(colours.strong)
@@ -147,7 +184,7 @@ private fun ScriptMessage(
         ) {
             NameLabel(author.displayName.orEmpty(), colours.label, align, SpeechPoint(colours.strong, onRight))
             message.quote?.let { QuoteLine(it.text, textSize, align, onRight) }
-            SelectableText(message, colours, textSize, align, onQuote)
+            MessageText(message, textSize, align)
         }
         if (onRight) SpeakerBar(colours.strong)
     }
@@ -223,41 +260,17 @@ private fun QuoteLine(
 }
 
 @Composable
-private fun SelectableText(
+private fun MessageText(
     message: Message,
-    colours: ParticipantColours,
     textSize: ChatTextSize,
     align: TextAlign,
-    onQuote: ((messageId: Int, excerpt: String?) -> Unit)?,
 ) {
-    val quoteLabel = stringResource(R.string.chat_quote_action)
     val formatting = rememberChatFormatting()
-    val selection = rememberSelectionState()
-    CompositionLocalProvider(
-        LocalTextSelectionColors provides TextSelectionColors(colours.label, colours.label.copy(alpha = SELECTION_ALPHA)),
-    ) {
-        SelectionContainer(
-            state = selection,
-            modifier =
-                Modifier.appendTextContextMenuComponents {
-                    if (onQuote != null) {
-                        item(QuoteMenuKey, quoteLabel) {
-                            onQuote(message.id, selection.selectedTexts.joinToString("") { it.text })
-                            selection.clear()
-                            close()
-                        }
-                    }
-                },
-        ) {
-            Text(
-                text = formatting.annotate(message.spans),
-                color = Deaftly.colors.ink,
-                style = chatTextStyle(textSize.sp),
-                textAlign = align,
-                modifier = Modifier.fillMaxWidth(),
-            )
-        }
-    }
+    Text(
+        text = formatting.annotate(message.spans),
+        color = Deaftly.colors.ink,
+        style = chatTextStyle(textSize.sp),
+        textAlign = align,
+        modifier = Modifier.fillMaxWidth(),
+    )
 }
-
-private data object QuoteMenuKey

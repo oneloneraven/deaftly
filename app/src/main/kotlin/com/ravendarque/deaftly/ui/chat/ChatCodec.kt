@@ -111,7 +111,7 @@ internal object ChatCodec {
                     val content = FormattedText(dto.text, dto.ranges.map { range -> StyleRange(range.start, range.end, range.style) })
                     Draft(
                         composition = Composition(content, dto.selectionStart, dto.selectionEnd, dto.typing),
-                        quote = if (dto.quoteId != null && dto.quoteText != null) Quote(dto.quoteId, dto.quoteText) else null,
+                        quote = dto.quoteText?.let { Quote(dto.quoteId, it) },
                     )
                 }.getOrNull()
             } ?: Draft()
@@ -125,6 +125,6 @@ internal object ChatCodec {
             id = id,
             author = author,
             spans = spans.map { Span(it.text, it.styles) },
-            quote = if (quoteId != null && quoteText != null) Quote(quoteId, quoteText) else null,
+            quote = quoteText?.let { Quote(quoteId, it) },
         )
 }
