@@ -31,8 +31,8 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ravendarque.deaftly.R
 import com.ravendarque.deaftly.navigation.Route
+import com.ravendarque.deaftly.ui.components.AccentIconButton
 import com.ravendarque.deaftly.ui.components.BottomDock
-import com.ravendarque.deaftly.ui.components.DeaftlyIconButton
 import com.ravendarque.deaftly.ui.components.SecondaryButton
 import com.ravendarque.deaftly.ui.editor.ConfirmDialog
 import com.ravendarque.deaftly.ui.editor.ConfirmSpec
@@ -73,11 +73,18 @@ fun TemplatesContent(
     val optionsTemplate = all.firstOrNull { it.id == optionsFor }
     val deletingTemplate = all.firstOrNull { it.id == deleting }
     val listActions = actions.copy(onDelete = { deleting = it })
+    val newTemplate = { actions.onNavigate(Route.Editor()) }
     Surface(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.safeDrawingPadding()) {
-            Header(onNewTemplate = { actions.onNavigate(Route.Editor()) })
+            Header(onNewTemplate = newTemplate)
             SearchField(state.query, actions.onQueryChange)
-            TemplateList(state, listActions, onOpenOptions = { optionsFor = it }, modifier = Modifier.weight(1f))
+            TemplateList(
+                state,
+                listActions,
+                onOpenOptions = { optionsFor = it },
+                modifier = Modifier.weight(1f),
+                onAddTemplate = newTemplate,
+            )
             BottomDock {
                 SecondaryButton(
                     text = stringResource(R.string.templates_home),
@@ -106,15 +113,8 @@ fun TemplatesContent(
         )
     }
     deletingTemplate?.let { template ->
-        ConfirmDialog(
-            spec =
-                ConfirmSpec(
-                    title = stringResource(R.string.editor_delete_title),
-                    text = stringResource(R.string.editor_delete_text, template.title),
-                    confirm = stringResource(R.string.editor_delete_confirm),
-                    dismiss = stringResource(R.string.editor_dialog_cancel),
-                    destructive = true,
-                ),
+        DeleteTemplateDialog(
+            template = template,
             onConfirm = {
                 actions.onDelete(template.id)
                 deleting = null
@@ -122,6 +122,26 @@ fun TemplatesContent(
             onDismiss = { deleting = null },
         )
     }
+}
+
+@Composable
+private fun DeleteTemplateDialog(
+    template: HomeTemplate,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    ConfirmDialog(
+        spec =
+            ConfirmSpec(
+                title = stringResource(R.string.editor_delete_title),
+                text = stringResource(R.string.editor_delete_text, template.title),
+                confirm = stringResource(R.string.editor_delete_confirm),
+                dismiss = stringResource(R.string.editor_dialog_cancel),
+                destructive = true,
+            ),
+        onConfirm = onConfirm,
+        onDismiss = onDismiss,
+    )
 }
 
 @Composable
@@ -144,7 +164,7 @@ private fun Header(onNewTemplate: () -> Unit) {
             color = Deaftly.colors.ink,
             modifier = Modifier.weight(1f).semantics { heading() },
         )
-        DeaftlyIconButton(DeaftlyIcons.Plus, stringResource(R.string.home_new_template), onClick = onNewTemplate)
+        AccentIconButton(DeaftlyIcons.Plus, stringResource(R.string.home_new_template), onClick = onNewTemplate)
     }
 }
 

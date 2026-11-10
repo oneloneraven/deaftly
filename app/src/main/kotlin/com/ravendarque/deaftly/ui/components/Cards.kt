@@ -7,6 +7,7 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
@@ -21,6 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
@@ -34,6 +36,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.ravendarque.deaftly.ui.icons.DeaftlyIcons
 import com.ravendarque.deaftly.ui.theme.Deaftly
 
@@ -57,6 +60,7 @@ private val HubIconSize = 32.dp
 private val HubInfoTarget = 48.dp
 private val HubInfoGlyph = 20.dp
 private val CardMinHeight = 48.dp
+private val AddIconSize = 22.sp
 
 @Composable
 fun ListCard(
@@ -88,6 +92,41 @@ fun ListCard(
     ) {
         Text(text = title, style = MaterialTheme.typography.titleMedium, color = Deaftly.colors.ink)
         Text(text = previewText, style = MaterialTheme.typography.bodySmall, color = Deaftly.colors.inkSecondary)
+    }
+}
+
+@Composable
+fun AddCard(
+    label: String,
+    icon: ImageVector,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val shape = Deaftly.shapes.cardSmall
+    Row(
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .heightIn(min = CardMinHeight)
+                .clip(shape)
+                .background(Deaftly.colors.surface, shape)
+                .clickable(role = Role.Button, onClick = onClick)
+                .padding(horizontal = Deaftly.spacing.space16, vertical = Deaftly.spacing.space14),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(Deaftly.spacing.space12),
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            modifier =
+                Modifier.size(
+                    with(LocalDensity.current) {
+                        AddIconSize.toDp()
+                    },
+                ),
+            tint = Deaftly.colors.accentStrong,
+        )
+        Text(text = label, style = MaterialTheme.typography.titleMedium, color = Deaftly.colors.accentStrong)
     }
 }
 

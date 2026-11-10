@@ -1,12 +1,16 @@
 package com.ravendarque.deaftly.ui.home
 
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.assertHasClickAction
+import androidx.compose.ui.test.assertHeightIsAtLeast
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.assertIsSelected
+import androidx.compose.ui.test.assertWidthIsAtLeast
 import androidx.compose.ui.test.filter
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.isSelectable
@@ -22,6 +26,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.tryPerformAccessibilityChecks
+import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.ravendarque.deaftly.navigation.Route
 import com.ravendarque.deaftly.ui.theme.AppTheme
@@ -131,6 +136,28 @@ class TemplatesScreenTest {
         composeRule.onNodeWithContentDescription("New template").performClick()
 
         assertEquals(listOf<Route>(Route.Editor()), navigated)
+    }
+
+    @Test
+    fun theAddRowEndsTheListAndOpensANewTemplate() {
+        composeRule.onNodeWithText("Add new template").assertExists().assertHasClickAction()
+        composeRule.onRoot().tryPerformAccessibilityChecks()
+
+        composeRule.onNodeWithText("Add new template").performClick()
+
+        assertEquals(listOf<Route>(Route.Editor()), navigated)
+    }
+
+    @Test
+    fun theHeaderButtonAndTheAddRowAreBothFocusableButtons() {
+        val button = SemanticsMatcher.expectValue(SemanticsProperties.Role, Role.Button)
+        composeRule
+            .onNodeWithContentDescription(
+                "New template",
+            ).assertHasClickAction()
+            .assertHeightIsAtLeast(48.dp)
+            .assertWidthIsAtLeast(48.dp)
+        composeRule.onNodeWithText("Add new template").assert(button)
     }
 
     @Test
