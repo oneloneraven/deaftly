@@ -6,6 +6,7 @@ import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.junit4.accessibility.enableAccessibilityChecks
@@ -23,10 +24,13 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.ravendarque.deaftly.core.chat.ChatProfile
 import com.ravendarque.deaftly.core.chat.ColourRole
 import com.ravendarque.deaftly.core.settings.ShowScheme
+import com.ravendarque.deaftly.core.settings.ThemeMode
 import com.ravendarque.deaftly.core.template.Template
 import com.ravendarque.deaftly.ui.chat.FakeSettingsRepository
 import com.ravendarque.deaftly.ui.home.FakeTemplateRepository
 import com.ravendarque.deaftly.ui.theme.AppTheme
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -103,6 +107,25 @@ class SettingsScreenTest {
         assertEquals(listOf(builtIn), templates.snapshot)
         composeRule.onNodeWithText("Restore built-in templates").assertIsNotEnabled()
         composeRule.onRoot().tryPerformAccessibilityChecks()
+    }
+
+    @Test
+    fun appearanceOffersSystemLightAndDarkWithSystemSelectedByDefault() {
+        listOf("System", "Light", "Dark").forEach { composeRule.onNodeWithText(it).performScrollTo().assertIsDisplayed() }
+
+        composeRule.onNodeWithText("System").assertIsSelected()
+        composeRule.onNodeWithText("Dark").assertIsNotSelected()
+        composeRule.onRoot().tryPerformAccessibilityChecks()
+    }
+
+    @Test
+    fun choosingDarkSavesItAndSelectsIt() {
+        composeRule.onNodeWithText("Dark").performScrollTo().performClick()
+        composeRule.waitForIdle()
+
+        assertEquals(ThemeMode.Dark, runBlocking { settings.themeMode.first() })
+        composeRule.onNodeWithText("Dark").assertIsSelected()
+        composeRule.onNodeWithText("System").assertIsNotSelected()
     }
 
     @Test

@@ -6,6 +6,7 @@ import com.ravendarque.deaftly.core.chat.ColourRole
 import com.ravendarque.deaftly.core.settings.ChatTextSize
 import com.ravendarque.deaftly.core.settings.SettingsRepository
 import com.ravendarque.deaftly.core.settings.ShowScheme
+import com.ravendarque.deaftly.core.settings.ThemeMode
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -27,6 +28,9 @@ class DataStoreSettingsRepository(
 
     override val chatSidesSwapped: Flow<Boolean> = store.data.map { it.settings.chatSidesSwapped }.distinctUntilChanged()
 
+    override val themeMode: Flow<ThemeMode> =
+        store.data.map { it.settings.themeMode?.toDomain() ?: ThemeMode.System }.distinctUntilChanged()
+
     override suspend fun setShowScheme(scheme: ShowScheme) {
         store.updateData { document -> document.copy(settings = document.settings.copy(showScheme = scheme.toDto())) }
     }
@@ -43,6 +47,10 @@ class DataStoreSettingsRepository(
         store.updateData { document -> document.copy(settings = document.settings.copy(chatSidesSwapped = swapped)) }
     }
 
+    override suspend fun setThemeMode(mode: ThemeMode) {
+        store.updateData { document -> document.copy(settings = document.settings.copy(themeMode = mode.toDto())) }
+    }
+
     override suspend fun setChatProfile(profile: ChatProfile) {
         store.updateData { document ->
             document.copy(
@@ -55,6 +63,20 @@ class DataStoreSettingsRepository(
         }
     }
 }
+
+private fun ThemeModeDto.toDomain(): ThemeMode =
+    when (this) {
+        ThemeModeDto.System -> ThemeMode.System
+        ThemeModeDto.Light -> ThemeMode.Light
+        ThemeModeDto.Dark -> ThemeMode.Dark
+    }
+
+private fun ThemeMode.toDto(): ThemeModeDto =
+    when (this) {
+        ThemeMode.System -> ThemeModeDto.System
+        ThemeMode.Light -> ThemeModeDto.Light
+        ThemeMode.Dark -> ThemeModeDto.Dark
+    }
 
 private fun ChatTextSizeDto.toDomain(): ChatTextSize =
     when (this) {

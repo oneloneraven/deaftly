@@ -14,6 +14,8 @@ public interface SettingsRepository {
 
     public val chatSidesSwapped: Flow<Boolean>
 
+    public val themeMode: Flow<ThemeMode>
+
     public suspend fun setShowScheme(scheme: ShowScheme)
 
     public suspend fun setChatProfile(profile: ChatProfile)
@@ -23,4 +25,6 @@ public interface SettingsRepository {
     public suspend fun setChatTextSize(size: ChatTextSize)
 
     public suspend fun setChatSidesSwapped(swapped: Boolean)
+
+    public suspend fun setThemeMode(mode: ThemeMode)
 }

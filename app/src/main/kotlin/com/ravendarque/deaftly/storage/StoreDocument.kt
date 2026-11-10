@@ -29,6 +29,7 @@ data class SettingsDto(
     val firstRunDone: Boolean = false,
     val chatTextSize: ChatTextSizeDto? = null,
     val chatSidesSwapped: Boolean = false,
+    val themeMode: ThemeModeDto? = null,
 )
 
 @Serializable
@@ -41,6 +42,18 @@ enum class ChatTextSizeDto {
 
     @SerialName("large")
     Large,
+}
+
+@Serializable
+enum class ThemeModeDto {
+    @SerialName("system")
+    System,
+
+    @SerialName("light")
+    Light,
+
+    @SerialName("dark")
+    Dark,
 }
 
 @Serializable

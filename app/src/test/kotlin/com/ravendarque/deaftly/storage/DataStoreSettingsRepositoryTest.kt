@@ -4,6 +4,7 @@ import com.ravendarque.deaftly.core.chat.ChatProfile
 import com.ravendarque.deaftly.core.chat.ColourRole
 import com.ravendarque.deaftly.core.settings.ChatTextSize
 import com.ravendarque.deaftly.core.settings.ShowScheme
+import com.ravendarque.deaftly.core.settings.ThemeMode
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
@@ -22,6 +23,22 @@ class DataStoreSettingsRepositoryTest {
 
     private fun repository(scope: CoroutineScope) =
         DataStoreSettingsRepository(createTemplateStore(File(folder.root, "templates.json"), builtIns, scope))
+
+    @Test
+    fun followsTheSystemThemeUntilOneIsChosen() =
+        runTest {
+            assertEquals(ThemeMode.System, repository(backgroundScope).themeMode.first())
+        }
+
+    @Test
+    fun theChosenThemeSurvivesAFreshStore() =
+        runTest {
+            val firstRun = Job()
+            repository(CoroutineScope(firstRun)).setThemeMode(ThemeMode.Dark)
+            firstRun.cancelAndJoin()
+
+            assertEquals(ThemeMode.Dark, repository(backgroundScope).themeMode.first())
+        }
 
     @Test
     fun hasNoChosenSchemeUntilOneIsSet() =

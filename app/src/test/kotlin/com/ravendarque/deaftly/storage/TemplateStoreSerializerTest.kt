@@ -15,6 +15,7 @@ import java.io.ByteArrayOutputStream
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 class TemplateStoreSerializerTest {
@@ -70,6 +71,33 @@ class TemplateStoreSerializerTest {
                     .jsonPrimitive.content,
             )
             assertEquals(document.settings, read(written).settings)
+        }
+
+    @Test
+    fun settingsSavedByEarlierVersionsHaveNoThemeMode() =
+        runTest {
+            val earlier =
+                """{"version":1,"templates":[],"settings":{"showScheme":"black-on-white","chatName":"Alex","firstRunDone":true}}"""
+
+            assertNull(read(earlier).settings.themeMode)
+        }
+
+    @Test
+    fun theThemeModeIsStoredByName() =
+        runTest {
+            val written = write(seed.copy(settings = SettingsDto(themeMode = ThemeModeDto.Dark)))
+
+            assertEquals(
+                "dark",
+                Json
+                    .parseToJsonElement(written)
+                    .jsonObject
+                    .getValue("settings")
+                    .jsonObject
+                    .getValue("themeMode")
+                    .jsonPrimitive.content,
+            )
+            assertEquals(ThemeModeDto.Dark, read(written).settings.themeMode)
         }
 
     @Test
