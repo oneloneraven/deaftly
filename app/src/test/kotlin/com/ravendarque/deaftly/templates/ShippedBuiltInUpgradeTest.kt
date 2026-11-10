@@ -38,4 +38,13 @@ class ShippedBuiltInUpgradeTest {
             assertEquals(shipped.first { it.id == BuiltInIds.DOCTOR }, doctor)
             assertTrue("{how I communicate}" in doctor.body)
         }
+
+    @Test
+    fun aV039StoreReceivesTheBslInterpreterTemplate() =
+        runTest {
+            val upgraded = upgradeV039Store(backgroundScope)
+
+            assertEquals(shipped.first { it.id == BuiltInIds.BSL_INTERPRETER }, upgraded.first { it.id == BuiltInIds.BSL_INTERPRETER })
+            assertEquals(shipped.map { it.id }.toSet(), upgraded.map { it.id }.toSet())
+        }
 }

@@ -46,6 +46,14 @@ private class BuiltInTemplateFactory(
                 R.string.template_explain_deaf_body,
                 howToReply,
             ),
+            template(
+                BuiltInIds.BSL_INTERPRETER,
+                R.string.template_bsl_interpreter_title,
+                R.string.category_everyday,
+                R.string.template_bsl_interpreter_body,
+                name,
+                howToReply,
+            ),
         ) + askingForHelp() + health() + travel()
 
     private fun askingForHelp(): List<Template> =
