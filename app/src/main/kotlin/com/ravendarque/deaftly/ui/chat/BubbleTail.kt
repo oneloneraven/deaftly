@@ -25,7 +25,7 @@ import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
-private val TailWidth = 26.dp
+private val TailWidth = 20.dp
 private val TipGap = 3.dp
 private val LeanRange = 60.dp
 private const val TAIL_MILLIS = 200
@@ -36,11 +36,13 @@ private const val RIGHT_START_ANGLE = 0f
 private const val BOTTOM_START_ANGLE = 90f
 private const val LEFT_START_ANGLE = 180f
 private const val CORNER_SWEEP = 90f
+private const val BOW_SHARE = 0.06f
 
 @Stable
 class BubbleTailState {
     var cardOrigin by mutableStateOf(Offset.Zero)
     var name by mutableStateOf<Rect?>(null)
+    var tipX by mutableStateOf<Float?>(null)
 }
 
 @Composable
@@ -51,7 +53,7 @@ internal fun Modifier.speechBubble(
     border: Color,
     borderWidth: Dp,
 ): Modifier {
-    val target = tail?.name?.center?.x
+    val target = tail?.tipX ?: tail?.name?.center?.x
     val tipX = remember { Animatable(0f) }
     var seeded by remember { mutableStateOf(false) }
     LaunchedEffect(target) {
@@ -67,9 +69,10 @@ internal fun Modifier.speechBubble(
     val positioned = if (tail == null) this else onGloballyPositioned { tail.cardOrigin = it.positionInRoot() }
     return positioned.drawBehind {
         val points = if (tail != null && seeded) tailPoints(tail, tipX.value, size.width, shape) else null
-        val path = bubblePath(size, shape, borderWidth.toPx(), points)
+        val path = bubblePath(size, shape, borderWidth.toPx())
         drawPath(path, fill)
         drawPath(path, border, style = Stroke(width = borderWidth.toPx(), join = StrokeJoin.Round))
+        points?.takeIf { it.tip.y > size.height }?.let { drawPath(tailPath(it, size.height - borderWidth.toPx() / 2), border) }
     }
 }
 
@@ -99,7 +102,6 @@ private fun DrawScope.bubblePath(
     size: Size,
     shape: CornerBasedShape,
     border: Float,
-    tail: TailPoints?,
 ): Path {
     val inset = border / 2
     val left = inset
@@ -114,15 +116,45 @@ private fun DrawScope.bubblePath(
         arcTo(Rect(right - diameter, top, right, top + diameter), TOP_START_ANGLE, CORNER_SWEEP, false)
         lineTo(right, bottom - radius)
         arcTo(Rect(right - diameter, bottom - diameter, right, bottom), RIGHT_START_ANGLE, CORNER_SWEEP, false)
-        if (tail != null && tail.tip.y > bottom) {
-            lineTo(tail.baseRight, bottom)
-            lineTo(tail.tip.x, tail.tip.y)
-            lineTo(tail.baseLeft, bottom)
-        }
         lineTo(left + radius, bottom)
         arcTo(Rect(left, bottom - diameter, left + diameter, bottom), BOTTOM_START_ANGLE, CORNER_SWEEP, false)
         lineTo(left, top + radius)
         arcTo(Rect(left, top, left + diameter, top + diameter), LEFT_START_ANGLE, CORNER_SWEEP, false)
         close()
     }
+}
+
+private fun tailPath(
+    tail: TailPoints,
+    bottom: Float,
+): Path =
+    Path().apply {
+        moveTo(tail.baseRight, bottom)
+        tailEdges(tail, bottom)
+        close()
+    }
+
+private fun Path.tailEdges(
+    tail: TailPoints,
+    bottom: Float,
+) {
+    val right = Offset(tail.baseRight, bottom)
+    val left = Offset(tail.baseLeft, bottom)
+    val rightIsLong = (tail.tip - right).getDistance() >= (tail.tip - left).getDistance()
+    if (rightIsLong) bowTo(right, tail.tip, left) else lineTo(tail.tip.x, tail.tip.y)
+    if (rightIsLong) lineTo(left.x, left.y) else bowTo(tail.tip, left, right)
+}
+
+private fun Path.bowTo(
+    from: Offset,
+    to: Offset,
+    opposite: Offset,
+) {
+    val edge = to - from
+    val length = edge.getDistance()
+    var normal = Offset(-edge.y, edge.x) / length
+    val mid = (from + to) / 2f
+    if ((opposite - mid).x * normal.x + (opposite - mid).y * normal.y > 0) normal = -normal
+    val control = mid + normal * (length * BOW_SHARE * 2)
+    quadraticTo(control.x, control.y, to.x, to.y)
 }

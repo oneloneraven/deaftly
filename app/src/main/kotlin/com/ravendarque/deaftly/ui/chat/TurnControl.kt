@@ -21,9 +21,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -56,6 +58,7 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
+import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntOffset
@@ -133,6 +136,7 @@ private fun NameButton(
     tail: BubbleTailState? = null,
 ) {
     val ink = Deaftly.colors.ink
+    var layout by remember { mutableStateOf<TextLayoutResult?>(null) }
     Box(
         modifier =
             modifier
@@ -150,9 +154,30 @@ private fun NameButton(
             color = if (isActive) ink else ink.copy(alpha = INACTIVE_NAME_ALPHA),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
-            modifier = if (isActive && tail != null) Modifier.onGloballyPositioned { tail.name = it.boundsInRoot() } else Modifier,
+            onTextLayout = { layout = it },
+            modifier =
+                if (isActive && tail != null) {
+                    Modifier.onGloballyPositioned { coordinates ->
+                        tail.name = coordinates.boundsInRoot()
+                        tail.tipX =
+                            layout
+                                ?.let { innerLetterCentre(it, innerAtEnd = alignment == Alignment.CenterEnd) }
+                                ?.let { coordinates.localToRoot(Offset(it, 0f)).x }
+                    }
+                } else {
+                    Modifier
+                },
         )
     }
+}
+
+private fun innerLetterCentre(
+    layout: TextLayoutResult,
+    innerAtEnd: Boolean,
+): Float? {
+    val visibleEnd = layout.getLineEnd(0, visibleEnd = true)
+    if (visibleEnd == 0) return null
+    return layout.getBoundingBox(if (innerAtEnd) visibleEnd - 1 else 0).center.x
 }
 
 @Composable

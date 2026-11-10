@@ -91,6 +91,26 @@ class BubbleTailTest {
     }
 
     @Test
+    fun theTipSitsOverTheLetterNearestTheSwitch() {
+        show()
+        val sam = tail.name!!
+        assertTrue(tail.tipX!! - sam.left < sam.width / 3)
+
+        composeRule.runOnUiThread { viewModel.selectTurn(ParticipantId.B) }
+        composeRule.waitForIdle()
+        val waiter = tail.name!!
+        assertTrue(waiter.right - tail.tipX!! < waiter.width / 6)
+    }
+
+    @Test
+    fun theTipStaysOverTheInnerLetterWhenSidesAreSwapped() {
+        show(swapped = true)
+        val sam = tail.name!!
+
+        assertTrue(sam.right - tail.tipX!! < sam.width / 3)
+    }
+
+    @Test
     fun bothNamesStayFortyEightDpTargets() {
         show()
 
