@@ -3,7 +3,9 @@ package com.ravendarque.deaftly.ui.settings
 import com.ravendarque.deaftly.core.chat.ChatProfile
 import com.ravendarque.deaftly.core.chat.ColourRole
 import com.ravendarque.deaftly.core.settings.ShowScheme
+import com.ravendarque.deaftly.core.template.Template
 import com.ravendarque.deaftly.ui.chat.FakeSettingsRepository
+import com.ravendarque.deaftly.ui.home.FakeTemplateRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.launchIn
@@ -27,8 +29,14 @@ class SettingsViewModelTest {
     @After
     fun tearDown() = Dispatchers.resetMain()
 
-    private fun TestScope.viewModel(settings: FakeSettingsRepository): SettingsViewModel =
-        SettingsViewModel(settings).also {
+    private val builtInA = Template("a", "A", "Everyday", "Hello", builtIn = true)
+    private val builtInB = Template("b", "B", "Everyday", "Bye", builtIn = true)
+
+    private fun TestScope.viewModel(
+        settings: FakeSettingsRepository,
+        templates: FakeTemplateRepository = FakeTemplateRepository(listOf(builtInA, builtInB), listOf(builtInA, builtInB)),
+    ): SettingsViewModel =
+        SettingsViewModel(settings, templates).also {
             it.state.launchIn(backgroundScope)
             advanceUntilIdle()
         }
@@ -42,9 +50,31 @@ class SettingsViewModelTest {
                 viewModel(FakeSettingsRepository(ChatProfile("Alex", ColourRole.Green), ShowScheme.YellowOnBlack))
 
             assertEquals(
-                SettingsUiState.Ready(ChatProfile("Alex", ColourRole.Green), ShowScheme.YellowOnBlack),
+                SettingsUiState.Ready(ChatProfile("Alex", ColourRole.Green), ShowScheme.YellowOnBlack, hiddenBuiltIns = 0),
                 viewModel.ready(),
             )
+        }
+
+    @Test
+    fun reportsHowManyBuiltInTemplatesAreHidden() =
+        runTest {
+            val templates = FakeTemplateRepository(listOf(builtInA), listOf(builtInA, builtInB))
+            val viewModel = viewModel(FakeSettingsRepository(), templates)
+
+            assertEquals(1, viewModel.ready().hiddenBuiltIns)
+        }
+
+    @Test
+    fun restoringBringsBackOnlyTheHiddenBuiltInsAndLeavesEditsAlone() =
+        runTest {
+            val edited = builtInA.copy(title = "Mine")
+            val templates = FakeTemplateRepository(listOf(edited), listOf(builtInA, builtInB))
+            val viewModel = viewModel(FakeSettingsRepository(), templates)
+
+            viewModel.restoreBuiltInTemplates()
+
+            assertEquals(listOf(edited, builtInB), templates.snapshot)
+            assertEquals(0, viewModel.ready().hiddenBuiltIns)
         }
 
     @Test

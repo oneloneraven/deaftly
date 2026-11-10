@@ -4,11 +4,15 @@ import com.ravendarque.deaftly.core.template.Template
 import com.ravendarque.deaftly.core.template.TemplateRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.map
 
 class FakeTemplateRepository(
     initial: List<Template>,
+    private val builtIns: List<Template> = emptyList(),
 ) : TemplateRepository {
     private val current = MutableStateFlow(initial)
+
+    override val hiddenBuiltInCount: Flow<Int> = current.map { now -> builtIns.count { builtIn -> now.none { it.id == builtIn.id } } }
 
     override val templates: Flow<List<Template>> = current
 
@@ -46,6 +50,10 @@ class FakeTemplateRepository(
     }
 
     override suspend fun restoreBuiltIn(id: String) = Unit
+
+    override suspend fun restoreHiddenBuiltIns() {
+        current.value += builtIns.filter { builtIn -> current.value.none { it.id == builtIn.id } }
+    }
 
     private fun change(
         id: String,

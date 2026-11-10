@@ -9,4 +9,5 @@ data class HomeActions(
     val onCategorySelected: (String?) -> Unit,
     val onSetPinned: (String, Boolean) -> Unit,
     val onSetCategory: (String, String) -> Unit,
+    val onDelete: (String) -> Unit,
 )

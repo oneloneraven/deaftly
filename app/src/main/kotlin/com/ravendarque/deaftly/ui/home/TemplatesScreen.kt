@@ -34,6 +34,8 @@ import com.ravendarque.deaftly.navigation.Route
 import com.ravendarque.deaftly.ui.components.BottomDock
 import com.ravendarque.deaftly.ui.components.DeaftlyIconButton
 import com.ravendarque.deaftly.ui.components.SecondaryButton
+import com.ravendarque.deaftly.ui.editor.ConfirmDialog
+import com.ravendarque.deaftly.ui.editor.ConfirmSpec
 import com.ravendarque.deaftly.ui.icons.DeaftlyIcons
 import com.ravendarque.deaftly.ui.theme.Deaftly
 
@@ -53,6 +55,7 @@ fun TemplatesScreen(
                 viewModel::onCategorySelected,
                 viewModel::setPinned,
                 viewModel::setCategory,
+                viewModel::delete,
             )
         }
     TemplatesContent(state, actions, onHome)
@@ -65,12 +68,16 @@ fun TemplatesContent(
     onHome: () -> Unit,
 ) {
     var optionsFor by rememberSaveable { mutableStateOf<String?>(null) }
-    val optionsTemplate = (state.pinned + state.templates).firstOrNull { it.id == optionsFor }
+    var deleting by rememberSaveable { mutableStateOf<String?>(null) }
+    val all = state.pinned + state.templates
+    val optionsTemplate = all.firstOrNull { it.id == optionsFor }
+    val deletingTemplate = all.firstOrNull { it.id == deleting }
+    val listActions = actions.copy(onDelete = { deleting = it })
     Surface(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.safeDrawingPadding()) {
             Header(onNewTemplate = { actions.onNavigate(Route.Editor()) })
             SearchField(state.query, actions.onQueryChange)
-            TemplateList(state, actions, onOpenOptions = { optionsFor = it }, modifier = Modifier.weight(1f))
+            TemplateList(state, listActions, onOpenOptions = { optionsFor = it }, modifier = Modifier.weight(1f))
             BottomDock {
                 SecondaryButton(
                     text = stringResource(R.string.templates_home),
@@ -85,9 +92,34 @@ fun TemplatesContent(
         TemplateOptionsSheet(
             template = optionsTemplate,
             categories = state.categories,
-            onSetPinned = { actions.onSetPinned(optionsTemplate.id, it) },
-            onSetCategory = { actions.onSetCategory(optionsTemplate.id, it) },
+            actions =
+                TemplateOptionActions(
+                    onSetPinned = { actions.onSetPinned(optionsTemplate.id, it) },
+                    onSetCategory = { actions.onSetCategory(optionsTemplate.id, it) },
+                    onEdit = { actions.onNavigate(Route.Editor(optionsTemplate.id)) },
+                    onDelete = {
+                        deleting = optionsTemplate.id
+                        optionsFor = null
+                    },
+                ),
             onDismiss = { optionsFor = null },
+        )
+    }
+    deletingTemplate?.let { template ->
+        ConfirmDialog(
+            spec =
+                ConfirmSpec(
+                    title = stringResource(R.string.editor_delete_title),
+                    text = stringResource(R.string.editor_delete_text, template.title),
+                    confirm = stringResource(R.string.editor_delete_confirm),
+                    dismiss = stringResource(R.string.editor_dialog_cancel),
+                    destructive = true,
+                ),
+            onConfirm = {
+                actions.onDelete(template.id)
+                deleting = null
+            },
+            onDismiss = { deleting = null },
         )
     }
 }

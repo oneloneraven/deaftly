@@ -92,7 +92,7 @@ class AppContainer(
 
     val settingsViewModelFactory =
         viewModelFactory {
-            initializer { SettingsViewModel(settingsRepository) }
+            initializer { SettingsViewModel(settingsRepository, templateRepository) }
         }
 
     val firstRunViewModelFactory =

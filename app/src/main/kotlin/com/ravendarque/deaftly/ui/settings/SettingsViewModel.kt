@@ -6,6 +6,7 @@ import com.ravendarque.deaftly.core.chat.ChatProfile
 import com.ravendarque.deaftly.core.chat.ColourRole
 import com.ravendarque.deaftly.core.settings.SettingsRepository
 import com.ravendarque.deaftly.core.settings.ShowScheme
+import com.ravendarque.deaftly.core.template.TemplateRepository
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -21,15 +22,17 @@ sealed interface SettingsUiState {
     data class Ready(
         val profile: ChatProfile,
         val showScheme: ShowScheme?,
+        val hiddenBuiltIns: Int,
     ) : SettingsUiState
 }
 
 class SettingsViewModel(
     private val settings: SettingsRepository,
+    private val templates: TemplateRepository,
 ) : ViewModel() {
     val state: StateFlow<SettingsUiState> =
-        combine(settings.chatProfile, settings.showScheme) { profile, scheme ->
-            SettingsUiState.Ready(profile, scheme)
+        combine(settings.chatProfile, settings.showScheme, templates.hiddenBuiltInCount) { profile, scheme, hidden ->
+            SettingsUiState.Ready(profile, scheme, hidden)
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS), SettingsUiState.Loading)
 
     fun setName(name: String) {
@@ -38,6 +41,10 @@ class SettingsViewModel(
 
     fun setColour(colour: ColourRole) {
         viewModelScope.launch { settings.setChatProfile(settings.chatProfile.first().copy(colour = colour)) }
+    }
+
+    fun restoreBuiltInTemplates() {
+        viewModelScope.launch { templates.restoreHiddenBuiltIns() }
     }
 
     fun setShowScheme(scheme: ShowScheme) {

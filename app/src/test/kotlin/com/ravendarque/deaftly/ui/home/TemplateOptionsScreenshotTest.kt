@@ -48,7 +48,7 @@ class TemplateOptionsScreenshotTest {
             Column {
                 Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) { SheetHandle() }
                 SheetBody(template.title) {
-                    TemplateOptionsContent(template, categories, onSetPinned = {}, onSetCategory = {})
+                    TemplateOptionsContent(template, categories, TemplateOptionActions({}, {}, {}, {}))
                 }
             }
         }

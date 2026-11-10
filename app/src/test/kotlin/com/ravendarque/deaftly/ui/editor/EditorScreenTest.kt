@@ -2,7 +2,10 @@ package com.ravendarque.deaftly.ui.editor
 
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.assertHeightIsAtLeast
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsSelected
+import androidx.compose.ui.test.assertWidthIsAtLeast
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
@@ -17,6 +20,7 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.tryPerformAccessibilityChecks
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.ravendarque.deaftly.core.template.PlaceholderType
@@ -85,7 +89,7 @@ class EditorScreenTest {
         composeRule.onNodeWithText("New template").assertExists()
         composeRule.onNodeWithText("Write what you want to say").assertExists()
         composeRule.onNodeWithText("Make a copy").assertDoesNotExist()
-        composeRule.onNodeWithText("Delete template").assertDoesNotExist()
+        composeRule.onNodeWithContentDescription("Delete template").assertDoesNotExist()
         composeRule.onNodeWithText("Restore the original template").assertDoesNotExist()
         composeRule.onNodeWithContentDescription("Delete placeholder").assertDoesNotExist()
         composeRule.onRoot().tryPerformAccessibilityChecks()
@@ -270,13 +274,41 @@ class EditorScreenTest {
     }
 
     @Test
-    fun aBuiltInOffersRestoreAndCopyButNotDelete() {
+    fun aBuiltInOffersRestoreCopyAndDelete() {
         show("order-food")
 
         composeRule.onNodeWithText("Restore the original template").assertExists()
         composeRule.onNodeWithText("Make a copy").assertExists()
-        composeRule.onNodeWithText("Delete template").assertDoesNotExist()
+        composeRule.onNodeWithContentDescription("Delete template").assertExists()
         composeRule.onRoot().tryPerformAccessibilityChecks()
+    }
+
+    @Test
+    fun theDeleteBinIsInTheHeaderWithAFortyEightDpTargetAndThereIsNoDeleteLink() {
+        show("my-note")
+
+        composeRule
+            .onNodeWithContentDescription("Delete template")
+            .assertIsDisplayed()
+            .assertWidthIsAtLeast(48.dp)
+            .assertHeightIsAtLeast(48.dp)
+        composeRule.onNodeWithText("Delete template").assertDoesNotExist()
+    }
+
+    @Test
+    fun deletingABuiltInAsksThenHidesIt() {
+        show("order-food")
+
+        composeRule.onNodeWithContentDescription("Delete template").performClick()
+        composeRule
+            .onNodeWithText(
+                "“Order food” will be hidden. You can bring it back with Restore built-in templates in Settings.",
+            ).assertExists()
+        composeRule.onNodeWithText("Delete").performClick()
+        composeRule.waitForIdle()
+
+        assertEquals(listOf<EditorExit>(EditorExit.Deleted), exits)
+        assertTrue(repository.snapshot.none { it.id == "order-food" })
     }
 
     @Test
@@ -304,7 +336,7 @@ class EditorScreenTest {
     fun deletingAsksFirstAndThenRemovesTheTemplate() {
         show("my-note")
 
-        tap("Delete template")
+        composeRule.onNodeWithContentDescription("Delete template").performClick()
         composeRule.onNodeWithText("Delete this template?").assertExists()
         composeRule.onRoot().tryPerformAccessibilityChecks()
         assertEquals(3, repository.snapshot.size)
@@ -320,7 +352,7 @@ class EditorScreenTest {
     fun cancellingTheDeleteDialogKeepsTheTemplate() {
         show("my-note")
 
-        tap("Delete template")
+        composeRule.onNodeWithContentDescription("Delete template").performClick()
         composeRule.onNodeWithText("Cancel").performClick()
 
         composeRule.onNodeWithText("Delete this template?").assertDoesNotExist()

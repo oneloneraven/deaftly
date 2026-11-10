@@ -98,7 +98,7 @@ class EditorViewModel(
 
     fun delete() {
         val id = templateId
-        if (id == null || builtIn) return
+        if (id == null) return
         launchGuarded {
             repository.delete(id)
             exit = EditorExit.Deleted

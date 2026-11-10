@@ -41,6 +41,7 @@ import com.ravendarque.deaftly.ui.chat.ColourChoices
 import com.ravendarque.deaftly.ui.chat.NameField
 import com.ravendarque.deaftly.ui.chat.PARTICIPANT_NAME_MAX_LENGTH
 import com.ravendarque.deaftly.ui.components.DeaftlyTopBar
+import com.ravendarque.deaftly.ui.components.SecondaryButton
 import com.ravendarque.deaftly.ui.show.labelRes
 import com.ravendarque.deaftly.ui.theme.Deaftly
 import com.ravendarque.deaftly.ui.theme.LocalDarkTheme
@@ -104,6 +105,19 @@ private fun SettingsContent(
                     leading = { SchemeSwatch(scheme) },
                 )
             }
+        }
+        Section(stringResource(R.string.settings_templates_heading)) {
+            Text(
+                text = stringResource(R.string.settings_restore_hint),
+                style = MaterialTheme.typography.bodySmall,
+                color = Deaftly.colors.inkSecondary,
+            )
+            SecondaryButton(
+                text = stringResource(R.string.settings_restore_builtins),
+                onClick = viewModel::restoreBuiltInTemplates,
+                modifier = Modifier.fillMaxWidth(),
+                enabled = state.hiddenBuiltIns > 0,
+            )
         }
     }
 }

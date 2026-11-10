@@ -18,6 +18,9 @@
     <string name="settings_me_heading">Me in chats</string>
     <string name="settings_scheme_heading">Show mode colours</string>
     <string name="settings_swatch_glyph">Aa</string>
+    <string name="settings_templates_heading">Built-in templates</string>
+    <string name="settings_restore_hint">Bring back any built-in templates you have deleted. Built-in templates you still have, including ones you have edited, are left as they are.</string>
+    <string name="settings_restore_builtins">Restore built-in templates</string>
     <string name="home_new_template">New template</string>
     <string name="home_search_label">Search templates</string>
     <string name="home_pinned">Pinned</string>
@@ -93,7 +96,8 @@
     <string name="template_pin">Pin</string>
     <string name="template_unpin">Unpin</string>
     <string name="template_set_category">Set category</string>
-    <string name="template_options_label">Pin or set category</string>
+    <string name="template_options_label">Pin, edit, delete or set category</string>
+    <string name="template_edit">Edit template</string>
     <string name="template_category_heading">Category</string>
     <string name="template_new_category">New category\u2026</string>
     <string name="template_category_name">Category name</string>
@@ -197,6 +201,7 @@
     <string name="editor_keep_editing">Keep editing</string>
     <string name="editor_delete_title">Delete this template?</string>
     <string name="editor_delete_text">“%1$s” will be deleted. This can’t be undone.</string>
+    <string name="editor_delete_builtin_text">“%1$s” will be hidden. You can bring it back with Restore built-in templates in Settings.</string>
     <string name="editor_delete_confirm">Delete</string>
     <string name="editor_restore_title">Restore the original template?</string>
     <string name="editor_restore_text">This replaces your changes with the version that came with Deaftly.</string>

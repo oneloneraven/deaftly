@@ -7,7 +7,9 @@ import com.github.takahirom.roborazzi.captureRoboImage
 import com.ravendarque.deaftly.core.chat.ChatProfile
 import com.ravendarque.deaftly.core.chat.ColourRole
 import com.ravendarque.deaftly.core.settings.ShowScheme
+import com.ravendarque.deaftly.core.template.Template
 import com.ravendarque.deaftly.ui.chat.FakeSettingsRepository
+import com.ravendarque.deaftly.ui.home.FakeTemplateRepository
 import com.ravendarque.deaftly.ui.theme.AppTheme
 import org.junit.Rule
 import org.junit.Test
@@ -24,7 +26,8 @@ class SettingsScreenshotTest {
 
     private fun capture(dark: Boolean) {
         val settings = FakeSettingsRepository(ChatProfile("Alex", ColourRole.Green), ShowScheme.YellowOnBlack)
-        val viewModel = SettingsViewModel(settings)
+        val templates = FakeTemplateRepository(emptyList(), listOf(Template("a", "A", "Everyday", "Hello", builtIn = true)))
+        val viewModel = SettingsViewModel(settings, templates)
         composeRule.setContent { AppTheme(darkTheme = dark) { SettingsScreen(viewModel, onBack = {}) } }
         composeRule.waitForIdle()
         composeRule.onRoot().captureRoboImage()

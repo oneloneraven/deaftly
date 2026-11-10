@@ -4,6 +4,8 @@ import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.junit4.accessibility.enableAccessibilityChecks
@@ -13,6 +15,7 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.tryPerformAccessibilityChecks
 import androidx.compose.ui.text.AnnotatedString
@@ -20,7 +23,9 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.ravendarque.deaftly.core.chat.ChatProfile
 import com.ravendarque.deaftly.core.chat.ColourRole
 import com.ravendarque.deaftly.core.settings.ShowScheme
+import com.ravendarque.deaftly.core.template.Template
 import com.ravendarque.deaftly.ui.chat.FakeSettingsRepository
+import com.ravendarque.deaftly.ui.home.FakeTemplateRepository
 import com.ravendarque.deaftly.ui.theme.AppTheme
 import org.junit.Before
 import org.junit.Rule
@@ -38,12 +43,14 @@ class SettingsScreenTest {
     val composeRule = createComposeRule()
 
     private val settings = FakeSettingsRepository(ChatProfile("Alex", ColourRole.Green), ShowScheme.WhiteOnBlack)
+    private val builtIn = Template("a", "A", "Everyday", "Hello", builtIn = true)
+    private val templates = FakeTemplateRepository(emptyList(), listOf(builtIn))
     private var backs = 0
 
     @Before
     fun setUp() {
         composeRule.enableAccessibilityChecks()
-        val viewModel = SettingsViewModel(settings)
+        val viewModel = SettingsViewModel(settings, templates)
         composeRule.setContent { AppTheme { SettingsScreen(viewModel, onBack = { backs++ }) } }
         composeRule.waitForIdle()
     }
@@ -82,6 +89,20 @@ class SettingsScreenTest {
 
         composeRule.onNodeWithText("Yellow on black").assertIsSelected()
         composeRule.onNodeWithText("Settings").assertIsDisplayed()
+    }
+
+    @Test
+    fun restoreBuiltInTemplatesBringsBackHiddenOnesAndThenDisables() {
+        composeRule
+            .onNodeWithText("Restore built-in templates")
+            .performScrollTo()
+            .assertIsEnabled()
+            .performClick()
+        composeRule.waitForIdle()
+
+        assertEquals(listOf(builtIn), templates.snapshot)
+        composeRule.onNodeWithText("Restore built-in templates").assertIsNotEnabled()
+        composeRule.onRoot().tryPerformAccessibilityChecks()
     }
 
     @Test
