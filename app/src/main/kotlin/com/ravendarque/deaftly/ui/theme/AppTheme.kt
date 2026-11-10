@@ -5,8 +5,17 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.staticCompositionLocalOf
+import com.ravendarque.deaftly.core.settings.ThemeMode
 
 val LocalDarkTheme = staticCompositionLocalOf { false }
+
+@Composable
+fun AppTheme(
+    mode: ThemeMode,
+    content: @Composable () -> Unit,
+) {
+    AppTheme(darkTheme = mode.isDark(isSystemInDarkTheme()), content = content)
+}
 
 @Composable
 fun AppTheme(

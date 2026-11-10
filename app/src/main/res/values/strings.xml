@@ -16,6 +16,11 @@
     <string name="first_run_privacy">Deaftly has no internet access. Your templates and chats never leave your phone.</string>
     <string name="first_run_start">Get started</string>
     <string name="settings_me_heading">Me in chats</string>
+    <string name="settings_appearance_heading">Appearance</string>
+    <string name="settings_appearance_system">System</string>
+    <string name="settings_appearance_system_hint">Matches your phone’s light or dark setting</string>
+    <string name="settings_appearance_light">Light</string>
+    <string name="settings_appearance_dark">Dark</string>
     <string name="settings_scheme_heading">Show mode colours</string>
     <string name="settings_swatch_glyph">Aa</string>
     <string name="settings_templates_heading">Built-in templates</string>

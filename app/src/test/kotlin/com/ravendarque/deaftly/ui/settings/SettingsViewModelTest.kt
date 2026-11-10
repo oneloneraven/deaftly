@@ -3,11 +3,13 @@ package com.ravendarque.deaftly.ui.settings
 import com.ravendarque.deaftly.core.chat.ChatProfile
 import com.ravendarque.deaftly.core.chat.ColourRole
 import com.ravendarque.deaftly.core.settings.ShowScheme
+import com.ravendarque.deaftly.core.settings.ThemeMode
 import com.ravendarque.deaftly.core.template.Template
 import com.ravendarque.deaftly.ui.chat.FakeSettingsRepository
 import com.ravendarque.deaftly.ui.home.FakeTemplateRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -50,9 +52,26 @@ class SettingsViewModelTest {
                 viewModel(FakeSettingsRepository(ChatProfile("Alex", ColourRole.Green), ShowScheme.YellowOnBlack))
 
             assertEquals(
-                SettingsUiState.Ready(ChatProfile("Alex", ColourRole.Green), ShowScheme.YellowOnBlack, hiddenBuiltIns = 0),
+                SettingsUiState.Ready(
+                    ChatProfile("Alex", ColourRole.Green),
+                    ShowScheme.YellowOnBlack,
+                    ThemeMode.System,
+                    hiddenBuiltIns = 0,
+                ),
                 viewModel.ready(),
             )
+        }
+
+    @Test
+    fun choosingAThemeModeSavesItAndIsReported() =
+        runTest {
+            val settings = FakeSettingsRepository()
+            val viewModel = viewModel(settings)
+
+            viewModel.setThemeMode(ThemeMode.Dark)
+
+            assertEquals(ThemeMode.Dark, settings.themeMode.first())
+            assertEquals(ThemeMode.Dark, viewModel.ready().themeMode)
         }
 
     @Test

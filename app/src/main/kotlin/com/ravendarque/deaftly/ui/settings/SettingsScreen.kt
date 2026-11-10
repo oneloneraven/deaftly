@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ravendarque.deaftly.R
 import com.ravendarque.deaftly.core.settings.ShowScheme
+import com.ravendarque.deaftly.core.settings.ThemeMode
 import com.ravendarque.deaftly.ui.chat.ColourChoices
 import com.ravendarque.deaftly.ui.chat.NameField
 import com.ravendarque.deaftly.ui.chat.PARTICIPANT_NAME_MAX_LENGTH
@@ -93,6 +94,16 @@ private fun SettingsContent(
                 },
             )
             ColourChoices(selected = state.profile.colour, takenBy = null, onChoose = viewModel::setColour)
+        }
+        Section(stringResource(R.string.settings_appearance_heading)) {
+            ThemeMode.entries.forEach { mode ->
+                ChoiceRow(
+                    selected = mode == state.themeMode,
+                    label = stringResource(mode.labelRes()),
+                    hint = if (mode == ThemeMode.System) stringResource(R.string.settings_appearance_system_hint) else null,
+                    onClick = { viewModel.setThemeMode(mode) },
+                )
+            }
         }
         Section(stringResource(R.string.settings_scheme_heading)) {
             val current = state.showScheme ?: defaultShowScheme(LocalDarkTheme.current)
@@ -190,3 +201,10 @@ private fun SchemeSwatch(scheme: ShowScheme) {
         Text(text = stringResource(R.string.settings_swatch_glyph), style = MaterialTheme.typography.labelLarge, color = colours.text)
     }
 }
+
+private fun ThemeMode.labelRes(): Int =
+    when (this) {
+        ThemeMode.System -> R.string.settings_appearance_system
+        ThemeMode.Light -> R.string.settings_appearance_light
+        ThemeMode.Dark -> R.string.settings_appearance_dark
+    }
