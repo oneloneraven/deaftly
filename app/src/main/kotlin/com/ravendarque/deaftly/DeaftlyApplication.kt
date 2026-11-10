@@ -1,6 +1,7 @@
 package com.ravendarque.deaftly
 
 import android.app.Application
+import android.os.Build
 import com.ravendarque.deaftly.ui.theme.PlatformNightMode
 import com.ravendarque.deaftly.ui.theme.ThemeModeSync
 import kotlinx.coroutines.CoroutineScope
@@ -14,7 +15,7 @@ class DeaftlyApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         val sync = ThemeModeSync(container.settingsRepository, PlatformNightMode(this))
-        sync.applyStored()
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) sync.applyStored()
         CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate).launch { sync.follow() }
     }
 }
