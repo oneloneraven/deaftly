@@ -28,6 +28,7 @@ The repository is set up with the `project-bootstrap` plugin, using the `core` m
 | Camera | **CameraX** (`Preview` + `ImageAnalysis`) | Handles device quirks, freezing a frame (O5) and the torch (O6). |
 | OCR | **PP-OCRv5 mobile (PaddleOCR) on ncnn**, behind the `TextRecogniser` interface ([ADR-0010](adr/0010-recognise-text-with-paddleocr-on-ncnn.md)). | See §3. |
 | Persistence | **DataStore + kotlinx.serialization (JSON)** for templates and settings | Tens of templates; no database needed. Chats are in memory only (H7). |
+| Light, dark and system theme | `UiModeManager.setApplicationNightMode` on Android 12+, **AppCompat** `AppCompatDelegate.setDefaultNightMode` below ([Android Developers](https://developer.android.com/develop/ui/views/theming/darktheme#change-themes)). The stored setting is applied at startup and on every change. | On Android 12+ the system applies the chosen mode to the splash and starting window as well. Below Android 12 the system draws the starting window from the system's own theme before any app code runs, so it can show the other theme for about a second; AppCompat then applies the chosen mode from the activity's first frame. AppCompat is Jetpack (Google), covered by ADR-0002. |
 | Rich text | Own minimal span model (bold, italic, highlight, quote) rendered with `AnnotatedString` | Four formats don't justify a library. |
 | Show-mode text sizing | Compose auto-size text with a minimum size, then scrolling | S2. |
 

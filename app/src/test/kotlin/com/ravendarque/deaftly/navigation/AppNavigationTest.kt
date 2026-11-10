@@ -20,6 +20,7 @@ import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.tryPerformAccessibilityChecks
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.ravendarque.deaftly.AppContainer
+import com.ravendarque.deaftly.DeaftlyApplication
 import com.ravendarque.deaftly.R
 import com.ravendarque.deaftly.core.template.Template
 import com.ravendarque.deaftly.ui.chat.isMessageField
@@ -45,6 +46,8 @@ class AppNavigationTest {
     @get:Rule
     val composeRule = createAndroidComposeRule<ComponentActivity>()
 
+    private fun appContainer(): AppContainer = (composeRule.activity.application as DeaftlyApplication).container
+
     private fun text(id: Int) = composeRule.activity.getString(id)
 
     private fun text(
@@ -53,7 +56,7 @@ class AppNavigationTest {
     ) = composeRule.activity.getString(id, *args)
 
     private fun showApp(
-        container: AppContainer = AppContainer(composeRule.activity.applicationContext),
+        container: AppContainer = appContainer(),
         firstLaunch: Boolean = false,
     ) {
         if (!firstLaunch) runBlocking { container.settingsRepository.setFirstRunDone() }
@@ -105,7 +108,7 @@ class AppNavigationTest {
 
     @Test
     fun theWelcomeSavesTheChoicesAndIsNotShownAgain() {
-        val container = AppContainer(composeRule.activity.applicationContext)
+        val container = appContainer()
         showApp(container, firstLaunch = true)
 
         composeRule.onNode(hasSetTextAction()).performTextInput("Sam")
@@ -207,7 +210,7 @@ class AppNavigationTest {
 
     @Test
     fun aTemplateWithoutPlaceholdersIsInsertedStraightFromThePicker() {
-        val container = AppContainer(composeRule.activity.applicationContext)
+        val container = appContainer()
         runBlocking { container.templateRepository.add(Template("thanks", "Say thanks", "Everyday", "Thank you very much.")) }
         showApp(container)
         openChatWithAMessage()
@@ -309,7 +312,7 @@ class AppNavigationTest {
 
     @Test
     fun textAddedFromTheScannerFillsTheCameraPlaceholderOnReturning() {
-        val container = AppContainer(composeRule.activity.applicationContext)
+        val container = appContainer()
         showApp(container)
         openTemplates()
         composeRule.onAllNodesWithText(text(R.string.template_order_food_title))[0].performClick()
@@ -467,7 +470,7 @@ class AppNavigationTest {
 
     @Test
     fun showingATemplateReturnsToItsFillThenTemplatesThenTheHub() {
-        val container = AppContainer(composeRule.activity.applicationContext)
+        val container = appContainer()
         runBlocking { container.templateRepository.add(Template("thanks", "Say thanks", "Everyday", "Thank you very much.")) }
         showApp(container)
         openTemplates()
