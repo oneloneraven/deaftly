@@ -77,6 +77,7 @@ data class ComposerActions(
 @Composable
 fun Composer(
     participant: Participant,
+    hasSent: Boolean,
     draft: Draft,
     textSize: ChatTextSize,
     actions: ComposerActions,
@@ -106,7 +107,7 @@ fun Composer(
                 ),
         verticalArrangement = Arrangement.spacedBy(Deaftly.spacing.space8),
     ) {
-        TurnPrompt(participant.id)
+        if (!hasSent) TurnPrompt(participant.id)
         draft.quote?.let { QuotePreview(it.text, colours.strong, actions.onRemoveQuote) }
         MessageField(state, participant.labelled().displayName.orEmpty(), colours.strong, textSize.sp, send)
         FlowRow(

@@ -33,6 +33,12 @@ fun orderingConversation(turn: ParticipantId = ParticipantId.B): Conversation =
         .append(styled("No problem. It will take about 15 minutes.", "15 minutes", SpanStyle.Highlight))
         .withTurn(turn)
 
+fun deafUserHasSpoken(): Conversation =
+    Conversation(
+        Participant(ParticipantId.A, ColourRole.Indigo, "Sam"),
+        Participant(ParticipantId.B, ColourRole.Orange, "Waiter"),
+    ).append(RichText.spans("Hi! I'm deaf.")).withTurn(ParticipantId.B)
+
 fun scriptConversation(
     them: ColourRole = ColourRole.Gold,
     me: ColourRole = ColourRole.Blue,
