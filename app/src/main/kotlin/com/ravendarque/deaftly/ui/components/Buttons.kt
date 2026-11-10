@@ -22,7 +22,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.ravendarque.deaftly.ui.theme.Deaftly
 
-private val ButtonMinHeight = 60.dp
+internal val ButtonMinHeight = 60.dp
 private val IconButtonSize = 48.dp
 private val ButtonIconSize = 22.dp
 private val ButtonIconGap = 8.dp
