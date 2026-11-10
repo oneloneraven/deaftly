@@ -259,6 +259,27 @@ class EditorViewModelTest {
         }
 
     @Test
+    fun backspacingATokenAlsoRemovesItsPlaceholder() =
+        runTest {
+            val viewModel = viewModel()
+
+            viewModel.type("Hello {name}, I need {thing.", cursor = 27)
+
+            assertEquals(listOf("name"), viewModel.draft.placeholders.map { it.key })
+        }
+
+    @Test
+    fun deletingOneOfTwoTokensWithTheSameKeyKeepsThePlaceholder() =
+        runTest {
+            val viewModel = viewModel()
+            viewModel.type("Hello {name}, {name}", cursor = 20)
+
+            viewModel.type("Hello {name}, {name", cursor = 19)
+
+            assertEquals(listOf("name"), viewModel.draft.placeholders.map { it.key })
+        }
+
+    @Test
     fun typingInsideATokenLandsAfterIt() =
         runTest {
             val viewModel = viewModel()
