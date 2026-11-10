@@ -1,6 +1,7 @@
 package com.ravendarque.deaftly.ui.chat
 
 import android.content.ClipData
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -48,6 +49,7 @@ import androidx.compose.ui.semantics.traversalIndex
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import com.ravendarque.deaftly.R
@@ -111,31 +113,6 @@ private fun MessageDivider() {
     Box(Modifier.fillMaxWidth().height(DividerHeight).background(Deaftly.colors.line))
 }
 
-private data class MessageCommand(
-    val label: String,
-    val destructive: Boolean = false,
-    val run: () -> Unit,
-)
-
-@Composable
-private fun rememberMessageCommands(
-    message: Message,
-    actions: MessageActions,
-): List<MessageCommand> {
-    val clipboard = LocalClipboard.current
-    val scope = rememberCoroutineScope()
-    val copyLabel = stringResource(R.string.chat_copy_action)
-    val quoteLabel = stringResource(R.string.chat_quote_action)
-    val deleteLabel = stringResource(R.string.chat_delete_action)
-    return listOf(
-        MessageCommand(copyLabel) {
-            scope.launch { clipboard.setClipEntry(ClipEntry(ClipData.newPlainText(null, message.plainText))) }
-        },
-        MessageCommand(quoteLabel) { actions.onQuote(message.id) },
-        MessageCommand(deleteLabel, destructive = true) { actions.onDelete(message.id) },
-    )
-}
-
 @Composable
 private fun ScriptMessage(
     message: Message,
@@ -175,16 +152,8 @@ private fun ScriptMessage(
                             }
                     },
         )
-        DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
-            commands.forEach { command ->
-                DropdownMenuItem(
-                    text = { Text(command.label, color = if (command.destructive) Deaftly.colors.error else Color.Unspecified) },
-                    onClick = {
-                        menuOpen = false
-                        command.run()
-                    },
-                )
-            }
+        Box(Modifier.align(if (onRight) Alignment.TopEnd else Alignment.TopStart)) {
+            MessageMenu(expanded = menuOpen, commands = commands, onDismiss = { menuOpen = false })
         }
     }
 }
@@ -225,11 +194,6 @@ private fun ScriptLine(
 private fun SpeakerBar(colour: Color) {
     Box(Modifier.width(BarWidth).fillMaxHeight().background(colour, RoundedCornerShape(BarWidth / 2)))
 }
-
-data class MessageActions(
-    val onQuote: (messageId: Int) -> Unit,
-    val onDelete: (messageId: Int) -> Unit,
-)
 
 private data class SpeechPoint(
     val colour: Color,

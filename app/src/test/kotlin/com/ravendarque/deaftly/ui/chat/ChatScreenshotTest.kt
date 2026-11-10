@@ -10,6 +10,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.longClick
 import androidx.compose.ui.test.onFirst
@@ -122,14 +123,19 @@ class ChatScreenshotTest {
     }
 
     @OptIn(ExperimentalRoborazziApi::class)
-    private fun messageMenu(dark: Boolean) {
+    private fun messageMenu(
+        dark: Boolean,
+        speaker: String,
+        swapped: Boolean = false,
+    ) {
         val saved = SavedStateHandle(mapOf("conversation" to ChatCodec.encode(scriptConversation(turn = ParticipantId.A))))
-        val viewModel = ChatViewModel(FakeSettingsRepository(), saved)
+        val viewModel = ChatViewModel(FakeSettingsRepository(sidesSwapped = swapped), saved)
         composeRule.setContent { AppTheme(darkTheme = dark) { ChatScreen(viewModel, onEnd = {}, onInsertTemplate = {}) } }
         composeRule.waitForIdle()
         composeRule
-            .onAllNodes(SemanticsMatcher.keyIsDefined(SemanticsActions.CustomActions))
-            .onFirst()
+            .onAllNodes(
+                SemanticsMatcher.keyIsDefined(SemanticsActions.CustomActions) and hasContentDescription("$speaker:", substring = true),
+            ).onFirst()
             .performTouchInput { longClick() }
         composeRule.waitForIdle()
         captureScreenRoboImage("$SCREENSHOT_DIR/$PACKAGE.${this::class.simpleName}.${testName.methodName}.png")
@@ -163,14 +169,27 @@ class ChatScreenshotTest {
     }
 
     @Test
-    fun messageMenuLightTheme() = messageMenu(dark = false)
+    fun messageMenuLeftSpeakerLightTheme() = messageMenu(dark = false, speaker = "Waiter")
 
     @Test
-    fun messageMenuDarkTheme() = messageMenu(dark = true)
+    fun messageMenuLeftSpeakerDarkTheme() = messageMenu(dark = true, speaker = "Waiter")
 
     @Test
     @Config(fontScale = 2f)
-    fun messageMenuLargeFontScale() = messageMenu(dark = false)
+    fun messageMenuLeftSpeakerLargeFontScale() = messageMenu(dark = false, speaker = "Waiter")
+
+    @Test
+    fun messageMenuRightSpeakerLightTheme() = messageMenu(dark = false, speaker = "Sam")
+
+    @Test
+    fun messageMenuRightSpeakerDarkTheme() = messageMenu(dark = true, speaker = "Sam")
+
+    @Test
+    @Config(fontScale = 2f)
+    fun messageMenuRightSpeakerLargeFontScale() = messageMenu(dark = false, speaker = "Sam")
+
+    @Test
+    fun messageMenuSwappedSidesLightTheme() = messageMenu(dark = false, speaker = "Waiter", swapped = true)
 
     @Test
     fun scriptLightTheme() = script(dark = false)
