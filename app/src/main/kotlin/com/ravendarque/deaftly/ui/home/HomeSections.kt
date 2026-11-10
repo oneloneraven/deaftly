@@ -92,7 +92,7 @@ internal fun TemplateList(
                         }.orEmpty(),
             )
         }
-        if (onAddTemplate != null) {
+        if (onAddTemplate != null && !state.isLoading) {
             item(key = "add") {
                 AddCard(stringResource(R.string.templates_add_new), DeaftlyIcons.Plus, onAddTemplate)
             }
