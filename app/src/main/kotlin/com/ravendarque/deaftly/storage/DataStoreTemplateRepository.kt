@@ -18,8 +18,7 @@ class DataStoreTemplateRepository(
 
     override val templates: Flow<List<Template>> = store.data.map { document -> document.templates.map(TemplateDto::toDomain) }
 
-    override val hiddenBuiltInCount: Flow<Int> =
-        templates.map { current -> builtIns.count { builtIn -> current.none { it.id == builtIn.id } } }
+    override val hiddenBuiltInCount: Flow<Int> = store.data.map { document -> document.hiddenBuiltIns(builtIns).size }
 
     override suspend fun add(template: Template) {
         edit { current ->
@@ -66,13 +65,14 @@ class DataStoreTemplateRepository(
 
     override suspend fun restoreBuiltIn(id: String) {
         val default = builtIns.firstOrNull { it.id == id } ?: return
-        edit { current ->
-            if (current.any { it.id == id }) current.map { if (it.id == id) default else it } else current + default
-        }
+        store.updateData { document -> document.restoring(listOf(default)) }
     }
 
     override suspend fun restoreHiddenBuiltIns() {
-        edit { current -> current + builtIns.filter { builtIn -> current.none { it.id == builtIn.id } } }
+        store.updateData { document ->
+            val hidden = document.hiddenBuiltIns(builtIns).toSet()
+            document.restoring(builtIns.filter { it.id in hidden })
+        }
     }
 
     private suspend fun replace(

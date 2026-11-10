@@ -42,7 +42,7 @@ class TemplateStoreCorruptionTest {
                     .first { it.id == menu.id }
                     .pinned,
             )
-            assertTrue(file.readText().startsWith("{\"version\":1"))
+            assertTrue(file.readText().startsWith("{\"version\":2"))
         }
 
     @Test
