@@ -92,6 +92,7 @@ private fun SidesChat(
     headerActions: ChatHeaderActions,
 ) {
     val conversation = current.conversation
+    val tail = remember { BubbleTailState() }
     Surface(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.safeDrawingPadding()) {
             ChatHeader(current.textSize, headerActions)
@@ -109,12 +110,14 @@ private fun SidesChat(
                 textSize = current.textSize,
                 actions = composerActions,
                 modifier = Modifier.padding(horizontal = Deaftly.spacing.space12),
+                tail = tail,
             )
             TurnControl(
                 conversation = conversation,
                 sidesSwapped = current.sidesSwapped,
                 onSelect = viewModel::selectTurn,
                 modifier = Modifier.padding(Deaftly.spacing.space12),
+                tail = tail,
             )
         }
     }

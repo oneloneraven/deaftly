@@ -41,6 +41,8 @@ import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.boundsInRoot
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
@@ -97,6 +99,7 @@ fun TurnControl(
     sidesSwapped: Boolean,
     onSelect: (ParticipantId) -> Unit,
     modifier: Modifier = Modifier,
+    tail: BubbleTailState? = null,
 ) {
     val active = conversation.turn
     val left = if (sidesSwapped) conversation.participantA else conversation.participantB
@@ -114,9 +117,9 @@ fun TurnControl(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(Deaftly.spacing.space8),
     ) {
-        NameButton(left.labelled(), left.id == active, Alignment.CenterEnd, { choose(left.id) }, Modifier.weight(1f))
+        NameButton(left.labelled(), left.id == active, Alignment.CenterEnd, { choose(left.id) }, Modifier.weight(1f), tail)
         ThumbSwitch(left.labelled(), right.labelled(), active, choose)
-        NameButton(right.labelled(), right.id == active, Alignment.CenterStart, { choose(right.id) }, Modifier.weight(1f))
+        NameButton(right.labelled(), right.id == active, Alignment.CenterStart, { choose(right.id) }, Modifier.weight(1f), tail)
     }
 }
 
@@ -127,6 +130,7 @@ private fun NameButton(
     alignment: Alignment,
     onClick: () -> Unit,
     modifier: Modifier,
+    tail: BubbleTailState? = null,
 ) {
     val ink = Deaftly.colors.ink
     Box(
@@ -146,6 +150,7 @@ private fun NameButton(
             color = if (isActive) ink else ink.copy(alpha = INACTIVE_NAME_ALPHA),
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
+            modifier = if (isActive && tail != null) Modifier.onGloballyPositioned { tail.name = it.boundsInRoot() } else Modifier,
         )
     }
 }

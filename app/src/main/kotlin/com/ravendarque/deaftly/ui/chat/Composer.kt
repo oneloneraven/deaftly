@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CornerBasedShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
@@ -82,9 +83,10 @@ fun Composer(
     textSize: ChatTextSize,
     actions: ComposerActions,
     modifier: Modifier = Modifier,
+    tail: BubbleTailState? = null,
 ) {
     val colours = participant.colour.colours()
-    val shape = Deaftly.shapes.card
+    val shape = Deaftly.shapes.card as CornerBasedShape
     val c = Deaftly.colors
     val state = rememberComposerState(participant.id, draft.composition, actions.onChange)
     val canSend = !state.composition.isBlank
@@ -97,8 +99,7 @@ fun Composer(
         modifier =
             modifier
                 .fillMaxWidth()
-                .background(c.surface, shape)
-                .border(CardBorder, colours.strong, shape)
+                .speechBubble(tail, shape, c.surface, colours.strong, CardBorder)
                 .padding(
                     start = Deaftly.spacing.space12,
                     end = Deaftly.spacing.space12,
