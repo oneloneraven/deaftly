@@ -14,13 +14,11 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.unit.dp
 import com.ravendarque.deaftly.R
+import com.ravendarque.deaftly.ui.components.ButtonMinHeight
 import com.ravendarque.deaftly.ui.components.HubIconDisc
 import com.ravendarque.deaftly.ui.components.PrimaryButton
 import com.ravendarque.deaftly.ui.theme.Deaftly
-
-private val TargetSize = 48.dp
 
 @Composable
 internal fun HubHelpDialog(
@@ -46,7 +44,7 @@ internal fun HubHelpDialog(
         },
         confirmButton = { PrimaryButton(stringResource(R.string.hub_help_start), onClick = onStart) },
         dismissButton = {
-            TextButton(onClick = onDismiss, modifier = Modifier.heightIn(min = TargetSize)) {
+            TextButton(onClick = onDismiss, modifier = Modifier.heightIn(min = ButtonMinHeight)) {
                 Text(stringResource(R.string.hub_help_close), color = c.ink)
             }
         },

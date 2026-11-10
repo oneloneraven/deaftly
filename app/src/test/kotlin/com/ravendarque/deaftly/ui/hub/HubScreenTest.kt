@@ -140,6 +140,15 @@ class HubScreenTest {
     }
 
     @Test
+    fun closeAndStartShareAVerticalCentre() {
+        info("Face to face").performClick()
+
+        val start = composeRule.onNodeWithText("Start").fetchSemanticsNode().boundsInRoot
+        val close = composeRule.onNodeWithText("Close").fetchSemanticsNode().boundsInRoot
+        assertEquals(start.center.y, close.center.y, 0.5f)
+    }
+
+    @Test
     fun startClosesTheDialogAndOpensTheOptionsRoute() {
         info("Face to face").performClick()
 
