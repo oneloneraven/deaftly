@@ -86,7 +86,7 @@ internal fun TemplateList(
                 customActions =
                     onOpenOptions
                         ?.let { open ->
-                            optionsActions(template, actions.onSetPinned) { open(template.id) }
+                            optionsActions(template, actions) { open(template.id) }
                         }.orEmpty(),
             )
         }
@@ -124,7 +124,7 @@ private fun PinnedSection(
                         onLongClick = onOpenOptions?.let { open -> { open(template.id) } },
                         onLongClickLabel = stringResource(R.string.template_options_label),
                         customActions =
-                            onOpenOptions?.let { open -> optionsActions(template, actions.onSetPinned) { open(template.id) } }.orEmpty(),
+                            onOpenOptions?.let { open -> optionsActions(template, actions) { open(template.id) } }.orEmpty(),
                     )
                 }
                 repeat(perRow - row.size) { Spacer(Modifier.weight(1f)) }
@@ -195,18 +195,28 @@ private fun EmptyState(
 @Composable
 private fun optionsActions(
     template: HomeTemplate,
-    onSetPinned: (String, Boolean) -> Unit,
+    actions: HomeActions,
     onSetCategory: () -> Unit,
 ): List<CustomAccessibilityAction> {
     val pinLabel = stringResource(if (template.pinned) R.string.template_unpin else R.string.template_pin)
     val categoryLabel = stringResource(R.string.template_set_category)
+    val editLabel = stringResource(R.string.template_edit)
+    val deleteLabel = stringResource(R.string.editor_delete)
     return listOf(
         CustomAccessibilityAction(pinLabel) {
-            onSetPinned(template.id, !template.pinned)
+            actions.onSetPinned(template.id, !template.pinned)
             true
         },
         CustomAccessibilityAction(categoryLabel) {
             onSetCategory()
+            true
+        },
+        CustomAccessibilityAction(editLabel) {
+            actions.onNavigate(Route.Editor(template.id))
+            true
+        },
+        CustomAccessibilityAction(deleteLabel) {
+            actions.onDelete(template.id)
             true
         },
     )

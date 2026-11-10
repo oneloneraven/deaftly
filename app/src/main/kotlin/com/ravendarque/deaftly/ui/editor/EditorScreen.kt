@@ -4,6 +4,7 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
@@ -29,6 +30,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.ravendarque.deaftly.R
 import com.ravendarque.deaftly.ui.components.CategoryChip
+import com.ravendarque.deaftly.ui.components.DeaftlyIconButton
 import com.ravendarque.deaftly.ui.components.DeaftlyTopBar
 import com.ravendarque.deaftly.ui.icons.DeaftlyIcons
 import com.ravendarque.deaftly.ui.theme.Deaftly
@@ -116,7 +118,15 @@ fun EditorContent(
                 onNavigate = requestCancel,
                 navigationIcon = DeaftlyIcons.Close,
                 navigationLabel = stringResource(R.string.editor_cancel),
-                trailing = { SaveButton(actions.onSave) },
+                trailing = {
+                    if (!state.isNew) {
+                        DeaftlyIconButton(DeaftlyIcons.Trash, stringResource(R.string.editor_delete), onClick = {
+                            dialog =
+                                EditorDialog.Delete
+                        })
+                    }
+                    SaveButton(actions.onSave)
+                },
             )
             Column(
                 modifier =
@@ -216,9 +226,6 @@ private fun EditorLinks(
     if (!state.isNew) {
         LinkButton(stringResource(R.string.editor_copy), onClick = actions.onMakeCopy)
     }
-    if (!state.isNew && !state.builtIn) {
-        LinkButton(stringResource(R.string.editor_delete), onClick = { onAsk(EditorDialog.Delete) }, color = Deaftly.colors.error)
-    }
 }
 
 @Composable
@@ -227,6 +234,11 @@ private fun SaveButton(onClick: () -> Unit) {
         onClick = onClick,
         modifier = Modifier.heightIn(min = SaveHeight),
         shape = Deaftly.shapes.pill,
+        contentPadding =
+            PaddingValues(
+                horizontal = Deaftly.spacing.space16,
+                vertical = ButtonDefaults.ContentPadding.calculateTopPadding(),
+            ),
         colors = ButtonDefaults.buttonColors(containerColor = Deaftly.colors.ink, contentColor = Deaftly.colors.ground),
     ) {
         Text(stringResource(R.string.editor_save), style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold))
@@ -258,7 +270,11 @@ private fun EditorDialogs(
             val spec =
                 ConfirmSpec(
                     title = stringResource(R.string.editor_delete_title),
-                    text = stringResource(R.string.editor_delete_text, state.draft.name.trim()),
+                    text =
+                        stringResource(
+                            if (state.builtIn) R.string.editor_delete_builtin_text else R.string.editor_delete_text,
+                            state.draft.name.trim(),
+                        ),
                     confirm = stringResource(R.string.editor_delete_confirm),
                     dismiss = cancel,
                     destructive = true,

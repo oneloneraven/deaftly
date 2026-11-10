@@ -43,6 +43,7 @@ fun TemplatePickerScreen(
                 onCategorySelected = viewModel::onCategorySelected,
                 onSetPinned = viewModel::setPinned,
                 onSetCategory = viewModel::setCategory,
+                onDelete = viewModel::delete,
             )
         }
     Surface(modifier = Modifier.fillMaxSize()) {

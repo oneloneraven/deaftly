@@ -455,14 +455,14 @@ class EditorViewModelTest {
         }
 
     @Test
-    fun aBuiltInCannotBeDeleted() =
+    fun aBuiltInCanBeDeletedWhichHidesIt() =
         runTest {
             val viewModel = viewModel("order-food")
 
             viewModel.delete()
 
-            assertNull(viewModel.exit)
-            assertEquals(editorTemplates, repository.snapshot)
+            assertEquals(EditorExit.Deleted, viewModel.exit)
+            assertEquals(listOf("check-in", "my-note"), repository.snapshot.map { it.id })
         }
 
     @Test

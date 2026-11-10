@@ -175,4 +175,50 @@ class DataStoreTemplateRepositoryTest {
 
             assertEquals(builtIns + mine, repository.all())
         }
+
+    @Test
+    fun deletingABuiltInHidesItAndCountsItAsHidden() =
+        runTest {
+            val repository = repository(backgroundScope)
+            assertEquals(0, repository.hiddenBuiltInCount.first())
+
+            repository.delete(greeting.id)
+
+            assertEquals(listOf(menu), repository.all())
+            assertEquals(1, repository.hiddenBuiltInCount.first())
+        }
+
+    @Test
+    fun restoringHiddenBuiltInsBringsBackOnlyTheMissingOnesAndKeepsEdits() =
+        runTest {
+            val repository = repository(backgroundScope)
+            val edited = menu.copy(title = "My menu", pinned = true)
+            repository.update(edited)
+            repository.delete(greeting.id)
+
+            repository.restoreHiddenBuiltIns()
+
+            assertEquals(listOf(edited, greeting), repository.all())
+            assertEquals(0, repository.hiddenBuiltInCount.first())
+        }
+
+    @Test
+    fun restoringWhenNothingIsHiddenChangesNothing() =
+        runTest {
+            val repository = repository(backgroundScope)
+
+            repository.restoreHiddenBuiltIns()
+
+            assertEquals(builtIns, repository.all())
+        }
+
+    @Test
+    fun hiddenBuiltInsStayHiddenAcrossAFreshStore() =
+        runTest {
+            val firstRun = Job()
+            repository(CoroutineScope(firstRun)).delete(greeting.id)
+            firstRun.cancelAndJoin()
+
+            assertEquals(1, repository(backgroundScope).hiddenBuiltInCount.first())
+        }
 }

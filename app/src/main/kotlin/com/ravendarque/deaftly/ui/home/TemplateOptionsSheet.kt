@@ -42,26 +42,40 @@ import com.ravendarque.deaftly.ui.theme.Deaftly
 private val OptionMinHeight = 48.dp
 private val CheckSize = 22.dp
 
+data class TemplateOptionActions(
+    val onSetPinned: (Boolean) -> Unit,
+    val onSetCategory: (String) -> Unit,
+    val onEdit: () -> Unit,
+    val onDelete: () -> Unit,
+)
+
 @Composable
 fun TemplateOptionsSheet(
     template: HomeTemplate,
     categories: List<String>,
-    onSetPinned: (Boolean) -> Unit,
-    onSetCategory: (String) -> Unit,
+    actions: TemplateOptionActions,
     onDismiss: () -> Unit,
 ) {
     DeaftlyBottomSheet(title = template.title, onDismiss = onDismiss) {
         TemplateOptionsContent(
             template = template,
             categories = categories,
-            onSetPinned = {
-                onSetPinned(it)
-                onDismiss()
-            },
-            onSetCategory = {
-                onSetCategory(it)
-                onDismiss()
-            },
+            actions =
+                TemplateOptionActions(
+                    onSetPinned = {
+                        actions.onSetPinned(it)
+                        onDismiss()
+                    },
+                    onSetCategory = {
+                        actions.onSetCategory(it)
+                        onDismiss()
+                    },
+                    onEdit = {
+                        actions.onEdit()
+                        onDismiss()
+                    },
+                    onDelete = actions.onDelete,
+                ),
         )
     }
 }
@@ -70,8 +84,7 @@ fun TemplateOptionsSheet(
 fun ColumnScope.TemplateOptionsContent(
     template: HomeTemplate,
     categories: List<String>,
-    onSetPinned: (Boolean) -> Unit,
-    onSetCategory: (String) -> Unit,
+    actions: TemplateOptionActions,
 ) {
     var creating by rememberSaveable { mutableStateOf(false) }
     Column(
@@ -80,8 +93,20 @@ fun ColumnScope.TemplateOptionsContent(
     ) {
         SecondaryButton(
             text = stringResource(if (template.pinned) R.string.template_unpin else R.string.template_pin),
-            onClick = { onSetPinned(!template.pinned) },
+            onClick = { actions.onSetPinned(!template.pinned) },
             modifier = Modifier.fillMaxWidth(),
+        )
+        SecondaryButton(
+            text = stringResource(R.string.template_edit),
+            onClick = actions.onEdit,
+            modifier = Modifier.fillMaxWidth(),
+            icon = DeaftlyIcons.Edit,
+        )
+        SecondaryButton(
+            text = stringResource(R.string.editor_delete),
+            onClick = actions.onDelete,
+            modifier = Modifier.fillMaxWidth(),
+            icon = DeaftlyIcons.Trash,
         )
         Text(
             text = stringResource(R.string.template_category_heading),
@@ -90,11 +115,11 @@ fun ColumnScope.TemplateOptionsContent(
         )
         Column(modifier = Modifier.selectableGroup()) {
             categories.forEach { category ->
-                CategoryOption(category, selected = category == template.category, onClick = { onSetCategory(category) })
+                CategoryOption(category, selected = category == template.category, onClick = { actions.onSetCategory(category) })
             }
         }
         if (creating) {
-            NewCategoryField(onSave = onSetCategory)
+            NewCategoryField(onSave = actions.onSetCategory)
         } else {
             SecondaryButton(
                 text = stringResource(R.string.template_new_category),

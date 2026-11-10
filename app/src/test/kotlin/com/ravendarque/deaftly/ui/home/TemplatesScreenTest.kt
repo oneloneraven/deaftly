@@ -250,6 +250,54 @@ class TemplatesScreenTest {
     }
 
     @Test
+    fun theSheetOffersEditWhichOpensTheEditor() {
+        longClick("Explain I'm deaf")
+
+        composeRule.onNodeWithText("Edit template").performClick()
+
+        assertEquals(listOf<Route>(Route.Editor("explain-deaf")), navigated)
+        composeRule.onNodeWithText("Edit template").assertDoesNotExist()
+    }
+
+    @Test
+    fun theSheetOffersDeleteWhichAsksFirstAndThenRemovesTheTemplate() {
+        longClick("Explain I'm deaf")
+
+        composeRule.onNodeWithText("Delete template").performClick()
+        composeRule.onNodeWithText("Delete this template?").assertExists()
+        composeRule.onRoot().tryPerformAccessibilityChecks()
+        assertTrue(repository.snapshot.any { it.id == "explain-deaf" })
+
+        composeRule.onNodeWithText("Delete").performClick()
+        composeRule.waitForIdle()
+
+        assertTrue(repository.snapshot.none { it.id == "explain-deaf" })
+        composeRule.onNodeWithText("Explain I'm deaf").assertDoesNotExist()
+    }
+
+    @Test
+    fun cancellingTheDeleteConfirmationKeepsTheTemplate() {
+        longClick("Explain I'm deaf")
+        composeRule.onNodeWithText("Delete template").performClick()
+
+        composeRule.onNodeWithText("Cancel").performClick()
+
+        assertTrue(repository.snapshot.any { it.id == "explain-deaf" })
+        composeRule.onNodeWithText("Delete this template?").assertDoesNotExist()
+    }
+
+    @Test
+    fun editAndDeleteAreCustomActionsForTalkBackAndDeleteAlsoConfirms() {
+        invokeCustomAction("Explain I'm deaf", "Edit template")
+        assertEquals(listOf<Route>(Route.Editor("explain-deaf")), navigated)
+
+        invokeCustomAction("Explain I'm deaf", "Delete template")
+
+        composeRule.onNodeWithText("Delete this template?").assertExists()
+        assertTrue(repository.snapshot.any { it.id == "explain-deaf" })
+    }
+
+    @Test
     fun theSetCategoryCustomActionOpensTheSheet() {
         invokeCustomAction("At the doctor's", "Set category")
 

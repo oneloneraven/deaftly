@@ -80,6 +80,10 @@ class HomeViewModel(
         }
     }
 
+    fun delete(id: String) {
+        viewModelScope.launch { repository.delete(id) }
+    }
+
     private fun buildState(
         templates: List<Template>,
         query: String,
