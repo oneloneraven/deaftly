@@ -1,10 +1,12 @@
 package com.ravendarque.deaftly.ui.home
 
 import android.content.Context
+import androidx.compose.ui.test.hasScrollToNodeAction
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
-import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performScrollToNode
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.takahirom.roborazzi.captureRoboImage
@@ -33,7 +35,7 @@ class TemplatesScreenshotTest {
         val viewModel = HomeViewModel(FakeTemplateRepository(templates))
         composeRule.setContent { AppTheme(darkTheme = dark) { TemplatesScreen(viewModel, onNavigate = {}, onHome = {}) } }
         composeRule.waitForIdle()
-        if (scrolledToEnd) composeRule.onNodeWithText("Add new template").performScrollTo()
+        if (scrolledToEnd) composeRule.onNode(hasScrollToNodeAction()).performScrollToNode(hasText("Add new template"))
         composeRule.waitForIdle()
         composeRule.onRoot().captureRoboImage()
     }
