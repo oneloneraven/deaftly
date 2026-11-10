@@ -27,6 +27,7 @@
     <string name="settings_restore_hint">Bring back any built-in templates you have deleted. Built-in templates you still have, including ones you have edited, are left as they are.</string>
     <string name="settings_restore_builtins">Restore built-in templates</string>
     <string name="home_new_template">New template</string>
+    <string name="templates_add_new">Add new template</string>
     <string name="home_search_label">Search templates</string>
     <string name="home_pinned">Pinned</string>
     <string name="home_categories">Categories</string>
