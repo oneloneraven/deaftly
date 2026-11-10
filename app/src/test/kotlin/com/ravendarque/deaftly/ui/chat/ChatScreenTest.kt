@@ -477,10 +477,10 @@ class ChatScreenTest {
     }
 
     @Test
-    fun theToolbarOffersBoldItalicHighlightAndQuoteAsFortyEightDpTargets() {
+    fun theToolbarOffersBoldItalicAndHighlightAsFortyEightDpTargets() {
         showOrdering()
 
-        listOf("Bold", "Italic", "Highlight", "Quote the latest message").forEach {
+        listOf("Bold", "Italic", "Highlight").forEach {
             composeRule
                 .onNodeWithContentDescription(it)
                 .assertIsDisplayed()
@@ -566,7 +566,6 @@ class ChatScreenTest {
         quoteMessage("Waiter: Sure! Do you want it spicy or mild?")
 
         composeRule.onNodeWithContentDescription("Quoting: Sure! Do you want it spicy or mild?").assertIsDisplayed()
-        composeRule.onNodeWithContentDescription("Quote the latest message").assert(hasSelected(true))
         composeRule.onNode(isMessageField).performTextInput("Mild please")
         composeRule.onNodeWithContentDescription("Send").performClick()
         composeRule.waitForIdle()
@@ -591,23 +590,15 @@ class ChatScreenTest {
     }
 
     @Test
-    fun theToolbarQuoteButtonQuotesTheOtherPersonsLatestMessageAndTogglesOff() {
+    fun theToolbarHasNoQuoteButtonAndAPendingQuoteCanBeRemovedFromItsPreview() {
         showOrdering(ParticipantId.A)
+        composeRule.onNodeWithContentDescription("Quote the latest message").assertDoesNotExist()
 
-        composeRule.onNodeWithContentDescription("Quote the latest message").performClick()
+        quoteMessage("Waiter: Sure! Do you want it spicy or mild?")
+        composeRule.onNodeWithContentDescription("Remove quote").performClick()
         composeRule.waitForIdle()
-        assertEquals(Quote(3, "No problem. It will take about 15 minutes."), draft().quote)
 
-        composeRule.onNodeWithContentDescription("Quote the latest message").performClick()
-        composeRule.waitForIdle()
         assertNull(draft().quote)
-    }
-
-    @Test
-    fun theToolbarQuoteButtonIsUnavailableInAnEmptyChat() {
-        show()
-
-        composeRule.onNodeWithContentDescription("Quote the latest message").assertIsNotEnabled()
     }
 
     @Test
@@ -661,7 +652,7 @@ class ChatScreenTest {
     fun onANarrowScreenTheToolbarWrapsInsteadOfClippingButtons() {
         showOrdering()
 
-        listOf("Bold", "Italic", "Highlight", "Quote the latest message", "Insert template", "Send").forEach {
+        listOf("Bold", "Italic", "Highlight", "Insert template", "Send").forEach {
             composeRule.onNodeWithContentDescription(it).assertIsDisplayed().assertWidthIsAtLeast(48.dp)
         }
         composeRule.onRoot().tryPerformAccessibilityChecks()

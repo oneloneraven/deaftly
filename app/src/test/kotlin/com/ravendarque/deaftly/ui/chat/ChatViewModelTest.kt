@@ -470,25 +470,6 @@ class ChatViewModelTest {
         }
 
     @Test
-    fun quotingTheLatestPicksTheOtherPersonsLastMessage() =
-        runTest {
-            val viewModel = viewModel()
-            collect(viewModel)
-            viewModel.type("first")
-            viewModel.send()
-            viewModel.selectTurn(ParticipantId.B)
-            viewModel.type("second")
-            viewModel.send()
-            viewModel.type("third")
-            viewModel.send()
-            viewModel.selectTurn(ParticipantId.A)
-
-            viewModel.quoteLatest()
-
-            assertEquals(Quote(2, "third"), viewModel.draft().quote)
-        }
-
-    @Test
     fun removingTheQuoteDropsIt() =
         runTest {
             val viewModel = viewModel(firstMessage = "Hello")

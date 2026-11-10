@@ -105,7 +105,6 @@ private fun SidesChat(
             Composer(
                 participant = conversation.activeParticipant,
                 draft = current.draft,
-                canQuote = conversation.messages.isNotEmpty(),
                 textSize = current.textSize,
                 actions = composerActions,
                 modifier = Modifier.padding(horizontal = Deaftly.spacing.space12),
@@ -129,7 +128,6 @@ private fun rememberComposerActions(
         ComposerActions(
             onInsertTemplate = onInsertTemplate,
             onChange = viewModel.drafts::setComposition,
-            onQuoteLatest = viewModel::quoteLatest,
             onRemoveQuote = { viewModel.drafts.setQuote(null) },
             onSend = viewModel::send,
         )
