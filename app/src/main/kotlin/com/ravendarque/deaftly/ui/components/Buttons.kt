@@ -7,8 +7,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -116,6 +118,29 @@ fun DeaftlyIconButton(
         enabled = enabled,
         shape = Deaftly.shapes.controlSmall,
         colors = IconButtonDefaults.iconButtonColors(contentColor = Deaftly.colors.ink),
+    ) {
+        Icon(imageVector = icon, contentDescription = contentDescription)
+    }
+}
+
+@Composable
+fun AccentIconButton(
+    icon: ImageVector,
+    contentDescription: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+) {
+    FilledIconButton(
+        onClick = onClick,
+        modifier = modifier.size(IconButtonSize),
+        enabled = enabled,
+        shape = CircleShape,
+        colors =
+            IconButtonDefaults.filledIconButtonColors(
+                containerColor = Deaftly.colors.accent,
+                contentColor = Deaftly.colors.onAccent,
+            ),
     ) {
         Icon(imageVector = icon, contentDescription = contentDescription)
     }
