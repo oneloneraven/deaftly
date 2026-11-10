@@ -1,5 +1,6 @@
 package com.ravendarque.deaftly.ui.fill
 
+import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.SemanticsNodeInteraction
@@ -205,6 +206,31 @@ class FillScreenTest {
         composeRule.onNodeWithText("Type it").assertExists()
         composeRule.onNode(hasSetTextAction()).assertDoesNotExist()
         composeRule.onRoot().tryPerformAccessibilityChecks()
+    }
+
+    private fun sourceButtonHeights() =
+        listOf("Scan the menu", "Type it").map {
+            composeRule
+                .onNodeWithText(it)
+                .fetchSemanticsNode()
+                .boundsInRoot.height
+        }
+
+    @Test
+    fun theSourceButtonsAreTheSameHeight() {
+        show("order-food")
+        chip("menu item").performClick()
+
+        assertEquals(1, sourceButtonHeights().distinct().size)
+    }
+
+    @Test
+    @Config(fontScale = 2f)
+    fun theSourceButtonsAreTheSameHeightAtLargeFontScale() {
+        show("order-food")
+        chip("menu item").performClick()
+
+        assertEquals(1, sourceButtonHeights().distinct().size)
     }
 
     @Test

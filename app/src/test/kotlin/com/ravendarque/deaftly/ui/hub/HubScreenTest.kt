@@ -1,5 +1,6 @@
 package com.ravendarque.deaftly.ui.hub
 
+import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assert
@@ -73,6 +74,31 @@ class HubScreenTest {
                 .assertWidthIsAtLeast(48.dp)
                 .assertHeightIsAtLeast(48.dp)
         }
+    }
+
+    private fun cardHeights() =
+        options.map {
+            composeRule
+                .onNodeWithText(it)
+                .fetchSemanticsNode()
+                .boundsInRoot.height
+        }
+
+    @Test
+    fun allFourCardsAreTheSameHeightAcrossBothGroups() {
+        assertEquals(1, cardHeights().distinct().size)
+    }
+
+    @Test
+    @Config(fontScale = 2f)
+    fun allFourCardsAreTheSameHeightAtLargeFontScale() {
+        assertEquals(1, cardHeights().distinct().size)
+    }
+
+    @Test
+    @Config(fontScale = 1.4f)
+    fun allFourCardsAreTheSameHeightWhenOnlyTheLongerTitlesWrap() {
+        assertEquals(1, cardHeights().distinct().size)
     }
 
     @Test
