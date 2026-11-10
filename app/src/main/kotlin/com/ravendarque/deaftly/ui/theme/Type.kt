@@ -10,7 +10,7 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
 import com.ravendarque.deaftly.R
 
-private val HEADING_OPTICAL_SIZE = 24.sp
+private const val HEADING_OPTICAL_SIZE = 24f
 
 private fun atkinson(weight: FontWeight) =
     Font(
@@ -26,7 +26,7 @@ private fun bricolage(weight: FontWeight) =
         variationSettings =
             FontVariation.Settings(
                 FontVariation.weight(weight.weight),
-                FontVariation.opticalSizing(HEADING_OPTICAL_SIZE),
+                FontVariation.Setting("opsz", HEADING_OPTICAL_SIZE),
             ),
     )
 
