@@ -10,12 +10,17 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -49,6 +54,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
@@ -115,15 +121,17 @@ fun FaceToFaceContent(
     var confirmingEnd by rememberSaveable { mutableStateOf(false) }
     val requestEnd = { if (messages.isEmpty()) onEnd() else confirmingEnd = true }
     BackHandler(onBack = requestEnd)
+    val sideInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal)
+    val bottomInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom)
     Surface(modifier = Modifier.fillMaxSize()) {
-        Column(modifier = Modifier.safeDrawingPadding()) {
-            TopBar(requestEnd, onContinue, Modifier.semantics { traversalIndex = BAR_INDEX })
+        Column(modifier = Modifier.fillMaxSize()) {
             StrangerHalf(
                 messages = messages,
                 live = field.text.toString(),
                 modifier = Modifier.weight(1f).semantics { traversalIndex = STRANGER_INDEX },
             )
-            OwnHalf(field, onSend, Modifier.semantics { traversalIndex = OWN_INDEX })
+            TopBar(requestEnd, onContinue, Modifier.semantics { traversalIndex = BAR_INDEX }.windowInsetsPadding(sideInsets))
+            OwnHalf(field, onSend, Modifier.semantics { traversalIndex = OWN_INDEX }.windowInsetsPadding(bottomInsets))
         }
     }
     if (confirmingEnd) {
@@ -211,7 +219,7 @@ private fun StrangerHalf(
                     contentDescription = description
                 },
         verticalArrangement = Arrangement.spacedBy(Deaftly.spacing.space12),
-        contentPadding = PaddingValues(Deaftly.spacing.space16),
+        contentPadding = rotatedContentPadding(),
     ) {
         if (messages.isEmpty() && live.isBlank()) {
             item(key = "welcome") {
@@ -239,6 +247,19 @@ private fun StrangerHalf(
             }
         }
     }
+}
+
+@Composable
+private fun rotatedContentPadding(): PaddingValues {
+    val insets = WindowInsets.safeDrawing.asPaddingValues()
+    val direction = LocalLayoutDirection.current
+    val margin = Deaftly.spacing.space16
+    return PaddingValues(
+        start = margin + insets.calculateRightPadding(direction),
+        top = margin,
+        end = margin + insets.calculateLeftPadding(direction),
+        bottom = margin + insets.calculateTopPadding(),
+    )
 }
 
 @Composable
