@@ -16,7 +16,7 @@ interface StoreMigration {
 
 class StoreMigrator(
     private val currentVersion: Int = STORE_VERSION,
-    migrations: List<StoreMigration> = emptyList(),
+    migrations: List<StoreMigration> = storeMigrations,
 ) {
     private val byFrom = migrations.associateBy { it.from }
 

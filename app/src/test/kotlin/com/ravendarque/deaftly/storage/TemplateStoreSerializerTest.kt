@@ -45,7 +45,7 @@ class TemplateStoreSerializerTest {
         runTest {
             val root = Json.parseToJsonElement(write(seed)).jsonObject
 
-            assertEquals(1, root.getValue("version").jsonPrimitive.int)
+            assertEquals(2, root.getValue("version").jsonPrimitive.int)
             assertEquals(builtIns.size, root.getValue("templates").jsonArray.size)
             assertEquals(
                 JsonObject(mapOf("firstRunDone" to JsonPrimitive(false), "chatSidesSwapped" to JsonPrimitive(false))),
@@ -121,7 +121,7 @@ class TemplateStoreSerializerTest {
     @Test
     fun unknownFutureVersionIsUnreadable() =
         runTest {
-            assertFailsWith<CorruptionException> { read("""{"version":2,"templates":[],"settings":{}}""") }
+            assertFailsWith<CorruptionException> { read("""{"version":3,"templates":[],"settings":{}}""") }
         }
 
     @Test

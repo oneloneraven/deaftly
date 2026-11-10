@@ -22,7 +22,7 @@ class StoreMigratorTest {
 
     @Test
     fun currentVersionPassesThroughUnchanged() {
-        val input = document(1)
+        val input = document(STORE_VERSION)
 
         assertEquals(input, StoreMigrator().migrate(input))
     }
@@ -58,7 +58,7 @@ class StoreMigratorTest {
 
     @Test
     fun futureVersionIsUnreadable() {
-        assertFailsWith<UnreadableStoreException> { StoreMigrator().migrate(document(2)) }
+        assertFailsWith<UnreadableStoreException> { StoreMigrator().migrate(document(3)) }
     }
 
     @Test

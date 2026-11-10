@@ -18,7 +18,7 @@
     <string name="template_food_allergy_title">Food allergy</string>
     <string name="template_food_allergy_body">I\'m deaf. I\'m allergic to {allergen}. Please check my food is safe. Please {how to reply}.</string>
     <string name="template_doctor_title">At the doctor\'s</string>
-    <string name="template_doctor_body">Hi! I\'m deaf. I have an appointment at {time}. Please write down what the doctor says.</string>
+    <string name="template_doctor_body">Hi! I\'m deaf. I have an appointment at {time}. I will be communicating by {how I communicate}. Please {how to reply}.</string>
     <string name="template_pharmacy_title">Pharmacy</string>
     <string name="template_pharmacy_body">Hi! I\'m deaf. I\'m collecting a prescription for {patient}. Please {how to reply}.</string>
     <string name="template_buy_ticket_title">Buy a ticket</string>
@@ -63,6 +63,13 @@
     </string-array>
     <string name="placeholder_patient_label">Who is it for?</string>
     <string name="placeholder_time_label">Appointment time</string>
+    <string name="placeholder_how_i_communicate_label">How will you communicate?</string>
+    <string-array name="placeholder_how_i_communicate_options">
+        <item>BSL interpreter</item>
+        <item>speech to text</item>
+        <item>typing on my phone</item>
+        <item>lipreading</item>
+    </string-array>
     <string name="placeholder_place_label">Where to?</string>
     <string name="placeholder_payment_label">How do you want to pay?</string>
     <string-array name="placeholder_payment_options">

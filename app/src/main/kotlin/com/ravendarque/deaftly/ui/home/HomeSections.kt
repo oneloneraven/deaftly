@@ -31,6 +31,7 @@ import androidx.compose.ui.text.style.TextAlign
 import com.ravendarque.deaftly.R
 import com.ravendarque.deaftly.core.template.RenderedPart
 import com.ravendarque.deaftly.navigation.Route
+import com.ravendarque.deaftly.ui.components.AddCard
 import com.ravendarque.deaftly.ui.components.CategoryChip
 import com.ravendarque.deaftly.ui.components.ListCard
 import com.ravendarque.deaftly.ui.components.PinnedTile
@@ -51,6 +52,7 @@ internal fun TemplateList(
     actions: HomeActions,
     onOpenOptions: ((String) -> Unit)?,
     modifier: Modifier = Modifier,
+    onAddTemplate: (() -> Unit)? = null,
 ) {
     LazyColumn(
         modifier = modifier.fillMaxWidth(),
@@ -89,6 +91,11 @@ internal fun TemplateList(
                             optionsActions(template, actions) { open(template.id) }
                         }.orEmpty(),
             )
+        }
+        if (onAddTemplate != null) {
+            item(key = "add") {
+                AddCard(stringResource(R.string.templates_add_new), DeaftlyIcons.Plus, onAddTemplate)
+            }
         }
     }
 }

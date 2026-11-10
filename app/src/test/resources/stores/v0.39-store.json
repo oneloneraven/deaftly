@@ -1,0 +1,259 @@
+{
+    "version": 1,
+    "templates": [
+        {
+            "id": "builtin.check-in",
+            "title": "Check in",
+            "category": "Everyday",
+            "body": "Hi! I'm deaf. I'd like to check in. My name is {name}. Please {how to reply}.",
+            "pinned": true,
+            "builtIn": true,
+            "placeholders": [
+                {
+                    "key": "name",
+                    "label": "Your name",
+                    "type": "typing",
+                    "options": [],
+                    "repeatable": false
+                },
+                {
+                    "key": "how to reply",
+                    "label": "How should they reply?",
+                    "type": "choices",
+                    "options": [
+                        "type on my phone",
+                        "type on your phone",
+                        "write it down",
+                        "point to the words",
+                        "face me and speak clearly"
+                    ],
+                    "repeatable": false
+                }
+            ]
+        },
+        {
+            "id": "builtin.order-food",
+            "title": "Order food",
+            "category": "Food & drink",
+            "body": "Hi! I'm deaf. Could I have {menu item} please? If you have a question, please type it on my phone.",
+            "pinned": true,
+            "builtIn": true,
+            "placeholders": [
+                {
+                    "key": "menu item",
+                    "label": "Menu item",
+                    "type": "camera",
+                    "options": [],
+                    "repeatable": true
+                }
+            ]
+        },
+        {
+            "id": "builtin.explain-deaf",
+            "title": "Explain I'm deaf",
+            "category": "Everyday",
+            "body": "I'm deaf. I can't hear you. Please {how to reply}.",
+            "pinned": false,
+            "builtIn": true,
+            "placeholders": [
+                {
+                    "key": "how to reply",
+                    "label": "How should they reply?",
+                    "type": "choices",
+                    "options": [
+                        "type on my phone",
+                        "type on your phone",
+                        "write it down",
+                        "point to the words",
+                        "face me and speak clearly"
+                    ],
+                    "repeatable": false
+                }
+            ]
+        },
+        {
+            "id": "builtin.ask-help",
+            "title": "Ask for help",
+            "category": "Everyday",
+            "body": "Excuse me. I'm deaf. Can you help me find {thing}? Please {how to reply}.",
+            "pinned": false,
+            "builtIn": true,
+            "placeholders": [
+                {
+                    "key": "thing",
+                    "label": "What are you looking for?",
+                    "type": "choices",
+                    "options": [
+                        "the toilets",
+                        "the exit",
+                        "the lift",
+                        "the till",
+                        "a member of staff"
+                    ],
+                    "repeatable": false
+                },
+                {
+                    "key": "how to reply",
+                    "label": "How should they reply?",
+                    "type": "choices",
+                    "options": [
+                        "type on my phone",
+                        "type on your phone",
+                        "write it down",
+                        "point to the words",
+                        "face me and speak clearly"
+                    ],
+                    "repeatable": false
+                }
+            ]
+        },
+        {
+            "id": "builtin.food-allergy",
+            "title": "Food allergy",
+            "category": "Food & drink",
+            "body": "I'm deaf. I'm allergic to {allergen}. Please check my food is safe. Please {how to reply}.",
+            "pinned": false,
+            "builtIn": true,
+            "placeholders": [
+                {
+                    "key": "allergen",
+                    "label": "Allergy",
+                    "type": "choices",
+                    "options": [
+                        "celery",
+                        "gluten",
+                        "crustaceans",
+                        "eggs",
+                        "fish",
+                        "lupin",
+                        "milk",
+                        "molluscs",
+                        "mustard",
+                        "nuts",
+                        "peanuts",
+                        "sesame",
+                        "soya",
+                        "sulphites"
+                    ],
+                    "repeatable": true
+                },
+                {
+                    "key": "how to reply",
+                    "label": "How should they reply?",
+                    "type": "choices",
+                    "options": [
+                        "type on my phone",
+                        "type on your phone",
+                        "write it down",
+                        "point to the words",
+                        "face me and speak clearly"
+                    ],
+                    "repeatable": false
+                }
+            ]
+        },
+        {
+            "id": "builtin.doctor",
+            "title": "At the doctor's",
+            "category": "Health",
+            "body": "Hi! I'm deaf. I have an appointment at {time}. Please write down what the doctor says.",
+            "pinned": false,
+            "builtIn": true,
+            "placeholders": [
+                {
+                    "key": "time",
+                    "label": "Appointment time",
+                    "type": "typing",
+                    "options": [],
+                    "repeatable": false
+                }
+            ]
+        },
+        {
+            "id": "builtin.pharmacy",
+            "title": "Pharmacy",
+            "category": "Health",
+            "body": "Hi! I'm deaf. I'm collecting a prescription for {patient}. Please {how to reply}.",
+            "pinned": false,
+            "builtIn": true,
+            "placeholders": [
+                {
+                    "key": "patient",
+                    "label": "Who is it for?",
+                    "type": "typing",
+                    "options": [],
+                    "repeatable": false
+                },
+                {
+                    "key": "how to reply",
+                    "label": "How should they reply?",
+                    "type": "choices",
+                    "options": [
+                        "type on my phone",
+                        "type on your phone",
+                        "write it down",
+                        "point to the words",
+                        "face me and speak clearly"
+                    ],
+                    "repeatable": false
+                }
+            ]
+        },
+        {
+            "id": "builtin.buy-ticket",
+            "title": "Buy a ticket",
+            "category": "Travel",
+            "body": "Hi! I'm deaf. I'd like a ticket to {place}, please. Please {how to reply}.",
+            "pinned": false,
+            "builtIn": true,
+            "placeholders": [
+                {
+                    "key": "place",
+                    "label": "Where to?",
+                    "type": "typing",
+                    "options": [],
+                    "repeatable": false
+                },
+                {
+                    "key": "how to reply",
+                    "label": "How should they reply?",
+                    "type": "choices",
+                    "options": [
+                        "type on my phone",
+                        "type on your phone",
+                        "write it down",
+                        "point to the words",
+                        "face me and speak clearly"
+                    ],
+                    "repeatable": false
+                }
+            ]
+        },
+        {
+            "id": "builtin.paying",
+            "title": "Paying",
+            "category": "Everyday",
+            "body": "I'm deaf. Can I pay by {payment}? Please show me the total.",
+            "pinned": false,
+            "builtIn": true,
+            "placeholders": [
+                {
+                    "key": "payment",
+                    "label": "How do you want to pay?",
+                    "type": "choices",
+                    "options": [
+                        "card",
+                        "cash",
+                        "phone"
+                    ],
+                    "repeatable": false
+                }
+            ]
+        }
+    ],
+    "settings": {
+        "firstRunDone": false,
+        "chatSidesSwapped": false
+    },
+    "builtInsReceived": {}
+}

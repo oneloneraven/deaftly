@@ -3,6 +3,8 @@ package com.ravendarque.deaftly.templates
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.ravendarque.deaftly.core.template.PlaceholderType
 import com.ravendarque.deaftly.core.template.Template
+import com.ravendarque.deaftly.core.template.TemplateFill
+import com.ravendarque.deaftly.core.template.TemplateRenderer
 import com.ravendarque.deaftly.core.template.TemplateSegment
 import com.ravendarque.deaftly.storage.toDomain
 import com.ravendarque.deaftly.storage.toDto
@@ -124,6 +126,38 @@ class BuiltInTemplatesTest {
         )
         assertEquals(setOf("name", "how to reply"), interpreter.placeholders.keys)
         assertFalse(interpreter.pinned)
+    }
+
+    @Test
+    fun theDoctorTemplateAsksHowYouWillCommunicateAndHowToReply() {
+        val doctor = byId(BuiltInIds.DOCTOR)
+        val communicate = doctor.placeholders.getValue("how I communicate")
+
+        assertEquals(
+            "Hi! I'm deaf. I have an appointment at {time}. I will be communicating by {how I communicate}. Please {how to reply}.",
+            doctor.body,
+        )
+        assertEquals(PlaceholderType.Choices, communicate.type)
+        assertTrue(communicate.repeatable)
+        assertEquals("How will you communicate?", communicate.label)
+        assertEquals(listOf("BSL interpreter", "speech to text", "typing on my phone", "lipreading"), communicate.options)
+        assertEquals(byId(BuiltInIds.CHECK_IN).placeholders.getValue("how to reply"), doctor.placeholders.getValue("how to reply"))
+    }
+
+    @Test
+    fun theDoctorTemplateJoinsTwoCommunicationChoices() {
+        val fill =
+            TemplateFill()
+                .set("time", "3pm")
+                .add("how I communicate", "lipreading")
+                .add("how I communicate", "typing on my phone")
+                .set("how to reply", "write it down")
+
+        assertEquals(
+            "Hi! I'm deaf. I have an appointment at 3pm. I will be communicating by lipreading and typing on my phone. " +
+                "Please write it down.",
+            TemplateRenderer.render(byId(BuiltInIds.DOCTOR), fill).text,
+        )
     }
 
     @Test

@@ -28,3 +28,12 @@ kotlinx.serialization is JetBrains' and is not listed.
 - One small, atomic store with no SQL, schema files or DAO layer.
 - Whole-document reads and writes, which is fine at this size and would
   need revisiting if templates grew into the thousands.
+- The store records which built-in templates the user has received, with a
+  fingerprint (SHA-256 of title, category, body and placeholders) of the
+  shipped version of each. On every load the shipped built-ins are reconciled
+  against that record, rather than by a version-bump migration, because
+  shipped wording changes between releases without a schema change and
+  because a restored Android backup can be older than the installed app.
+  New built-ins are added, unedited ones are updated, and edited or deleted
+  ones are left alone. Changing the fingerprint algorithm invalidates every
+  recorded fingerprint, so a test pins it.

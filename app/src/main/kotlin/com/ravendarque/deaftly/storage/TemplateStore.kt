@@ -28,6 +28,7 @@ fun createTemplateStore(
                 onCorruption(failure)
                 seed
             },
+        migrations = listOf(BuiltInReconciliation(builtIns)),
         scope = scope,
         produceFile = { file },
     )
