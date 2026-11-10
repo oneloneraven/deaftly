@@ -7,8 +7,11 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -159,20 +162,20 @@ private fun CameraChoice(
     onChoose: (String) -> Unit,
 ) {
     var typing by rememberSaveable(typeInstead) { mutableStateOf(typeInstead) }
-    Row(horizontalArrangement = Arrangement.spacedBy(Deaftly.spacing.space12)) {
+    Row(modifier = Modifier.height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(Deaftly.spacing.space12)) {
         ActionTile(
             stringResource(R.string.fill_scan_menu),
             DeaftlyIcons.Scan,
             dark = true,
             onClick = onScan,
-            modifier = Modifier.weight(1f),
+            modifier = Modifier.weight(1f).fillMaxHeight(),
         )
         ActionTile(
             stringResource(R.string.fill_type_it),
             DeaftlyIcons.Type,
             dark = false,
             onClick = { typing = true },
-            modifier = Modifier.weight(1f),
+            modifier = Modifier.weight(1f).fillMaxHeight(),
         )
     }
     if (typing) {

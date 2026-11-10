@@ -32,6 +32,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.ravendarque.deaftly.ui.icons.DeaftlyIcons
 import com.ravendarque.deaftly.ui.theme.Deaftly
@@ -165,6 +166,7 @@ fun HubCard(
     infoLabel: String,
     onInfo: () -> Unit,
     modifier: Modifier = Modifier,
+    minHeight: Dp = Dp.Unspecified,
 ) {
     val shape = Deaftly.shapes.card
     Box(
@@ -178,11 +180,12 @@ fun HubCard(
             modifier =
                 Modifier
                     .fillMaxWidth()
+                    .heightIn(min = minHeight)
                     .clickable(role = Role.Button, onClick = onClick)
                     .semantics { contentDescription = title }
                     .padding(horizontal = Deaftly.spacing.space16, vertical = Deaftly.spacing.space20),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(Deaftly.spacing.space12),
+            verticalArrangement = Arrangement.spacedBy(Deaftly.spacing.space12, Alignment.CenterVertically),
         ) {
             HubIconDisc(icon)
             Text(text = title, style = MaterialTheme.typography.titleMedium, color = Deaftly.colors.ink, textAlign = TextAlign.Center)

@@ -118,6 +118,13 @@ class FillScreenshotTest {
     fun cameraSheetLightTheme() = sheet("order-food", "menu item", dark = false)
 
     @Test
+    fun cameraSheetDarkTheme() = sheet("order-food", "menu item", dark = true)
+
+    @Test
+    @Config(fontScale = 2f)
+    fun cameraSheetLargeFontScale() = sheet("order-food", "menu item", dark = false)
+
+    @Test
     fun typingSheetLightTheme() = sheet("check-in", "name", dark = false)
 
     private fun orderWithTwoItems() {
