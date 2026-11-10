@@ -202,6 +202,16 @@ class ChatScreenshotTest {
     fun scriptLargeFontScale() = script(dark = false)
 
     @Test
+    fun scriptSwappedTurnOnRightLightTheme() = script(dark = false, swapped = true, turn = ParticipantId.B)
+
+    @Test
+    fun scriptSwappedTurnOnRightDarkTheme() = script(dark = true, swapped = true, turn = ParticipantId.B)
+
+    @Test
+    @Config(fontScale = 2f)
+    fun scriptSwappedTurnOnRightLargeFontScale() = script(dark = false, swapped = true, turn = ParticipantId.B)
+
+    @Test
     fun scriptSwappedLightTheme() = script(dark = false, swapped = true, them = ColourRole.Green, me = ColourRole.Indigo)
 
     @Test

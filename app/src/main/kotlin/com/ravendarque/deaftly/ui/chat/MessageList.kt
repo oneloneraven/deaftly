@@ -32,9 +32,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.LocalClipboard
@@ -66,9 +64,6 @@ private const val QUOTE_SIZE_RATIO = 0.8f
 private const val QUOTE_MAX_LINES = 3
 private const val LABEL_TRACKING = 0.04f
 private val BarWidth = 4.dp
-private val BarGap = 12.dp
-private val PointDepth = 6.dp
-private val PointHeight = 10.dp
 private val DividerHeight = 1.dp
 private val QuoteIndent = 12.dp
 
@@ -174,7 +169,7 @@ private fun ScriptLine(
                 .fillMaxWidth()
                 .height(IntrinsicSize.Min)
                 .padding(vertical = Deaftly.spacing.space8),
-        horizontalArrangement = Arrangement.spacedBy(BarGap),
+        horizontalArrangement = Arrangement.spacedBy(Deaftly.spacing.space12),
     ) {
         if (!onRight) SpeakerBar(colours.strong)
         Column(
@@ -182,7 +177,7 @@ private fun ScriptLine(
             horizontalAlignment = if (onRight) Alignment.End else Alignment.Start,
             verticalArrangement = Arrangement.spacedBy(Deaftly.spacing.space4),
         ) {
-            NameLabel(author.displayName.orEmpty(), colours.label, align, SpeechPoint(colours.strong, onRight))
+            NameLabel(author.displayName.orEmpty(), colours.label, align)
             message.quote?.let { QuoteLine(it.text, textSize, align, onRight) }
             MessageText(message, textSize, align)
         }
@@ -195,50 +190,21 @@ private fun SpeakerBar(colour: Color) {
     Box(Modifier.width(BarWidth).fillMaxHeight().background(colour, RoundedCornerShape(BarWidth / 2)))
 }
 
-private data class SpeechPoint(
-    val colour: Color,
-    val onRight: Boolean,
-)
-
-private fun Modifier.speechPoint(point: SpeechPoint): Modifier =
-    drawBehind {
-        val gap = BarGap.toPx()
-        val depth = PointDepth.toPx()
-        val half = PointHeight.toPx() / 2
-        val centre = size.height / 2
-        val base = if (point.onRight) size.width + gap else -gap
-        val tip = if (point.onRight) base - depth else base + depth
-        val path =
-            Path().apply {
-                moveTo(base, centre - half)
-                lineTo(tip, centre)
-                lineTo(base, centre + half)
-                close()
-            }
-        drawPath(path, point.colour)
-    }
-
 @Composable
 private fun NameLabel(
     name: String,
     colour: Color,
     align: TextAlign,
-    point: SpeechPoint,
 ) {
-    Box(
-        modifier = Modifier.fillMaxWidth().speechPoint(point),
-        contentAlignment = if (point.onRight) Alignment.CenterEnd else Alignment.CenterStart,
-    ) {
-        Text(
-            text = name.uppercase(),
-            color = colour,
-            style = MaterialTheme.typography.labelMedium.copy(letterSpacing = LABEL_TRACKING.em),
-            fontWeight = FontWeight.Medium,
-            textAlign = align,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-        )
-    }
+    Text(
+        text = name.uppercase(),
+        color = colour,
+        style = MaterialTheme.typography.labelMedium.copy(letterSpacing = LABEL_TRACKING.em),
+        fontWeight = FontWeight.Medium,
+        textAlign = align,
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
+    )
 }
 
 @Composable
