@@ -8,11 +8,18 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.junit4.v2.createComposeRule
+import androidx.compose.ui.test.longClick
+import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onRoot
+import androidx.compose.ui.test.performTouchInput
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.github.takahirom.roborazzi.ExperimentalRoborazziApi
 import com.github.takahirom.roborazzi.captureRoboImage
+import com.github.takahirom.roborazzi.captureScreenRoboImage
 import com.ravendarque.deaftly.core.chat.ColourRole
 import com.ravendarque.deaftly.core.chat.Conversation
 import com.ravendarque.deaftly.core.chat.Participant
@@ -114,6 +121,20 @@ class ChatScreenshotTest {
         shot { AppTheme(darkTheme = dark) { ChatScreen(viewModel, onEnd = {}, onInsertTemplate = {}) } }
     }
 
+    @OptIn(ExperimentalRoborazziApi::class)
+    private fun messageMenu(dark: Boolean) {
+        val saved = SavedStateHandle(mapOf("conversation" to ChatCodec.encode(scriptConversation(turn = ParticipantId.A))))
+        val viewModel = ChatViewModel(FakeSettingsRepository(), saved)
+        composeRule.setContent { AppTheme(darkTheme = dark) { ChatScreen(viewModel, onEnd = {}, onInsertTemplate = {}) } }
+        composeRule.waitForIdle()
+        composeRule
+            .onAllNodes(SemanticsMatcher.keyIsDefined(SemanticsActions.CustomActions))
+            .onFirst()
+            .performTouchInput { longClick() }
+        composeRule.waitForIdle()
+        captureScreenRoboImage("$SCREENSHOT_DIR/$PACKAGE.${this::class.simpleName}.${testName.methodName}.png")
+    }
+
     private fun switchOnly(
         turn: ParticipantId,
         dark: Boolean,
@@ -140,6 +161,16 @@ class ChatScreenshotTest {
             )
         shot { AppTheme(darkTheme = dark) { ChatScreen(viewModel, onEnd = {}, onInsertTemplate = {}) } }
     }
+
+    @Test
+    fun messageMenuLightTheme() = messageMenu(dark = false)
+
+    @Test
+    fun messageMenuDarkTheme() = messageMenu(dark = true)
+
+    @Test
+    @Config(fontScale = 2f)
+    fun messageMenuLargeFontScale() = messageMenu(dark = false)
 
     @Test
     fun scriptLightTheme() = script(dark = false)

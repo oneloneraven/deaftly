@@ -1,5 +1,7 @@
 package com.ravendarque.deaftly.ui.chat
 
+import android.content.ClipboardManager
+import android.content.Context
 import androidx.activity.ComponentActivity
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.hapticfeedback.HapticFeedback
@@ -19,6 +21,7 @@ import androidx.compose.ui.test.assertWidthIsAtLeast
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.junit4.accessibility.enableAccessibilityChecks
 import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
+import androidx.compose.ui.test.longClick
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -34,6 +37,7 @@ import androidx.compose.ui.test.tryPerformAccessibilityChecks
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.SavedStateHandle
+import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.ravendarque.deaftly.core.chat.ChatProfile
 import com.ravendarque.deaftly.core.chat.ColourRole
@@ -501,6 +505,87 @@ class ChatScreenTest {
         val action = node.config[SemanticsActions.CustomActions].single { it.label == "Quote" }
         composeRule.runOnUiThread { action.action() }
         composeRule.waitForIdle()
+    }
+
+    private fun longPress(description: String) {
+        composeRule
+            .onNodeWithContentDescription(description, substring = true)
+            .performTouchInput { longClick() }
+        composeRule.waitForIdle()
+    }
+
+    private fun clipboardText(): String? {
+        val manager = ApplicationProvider.getApplicationContext<Context>().getSystemService(ClipboardManager::class.java)
+        return manager.primaryClip
+            ?.getItemAt(0)
+            ?.text
+            ?.toString()
+    }
+
+    @Test
+    fun longPressingAMessageOffersCopyQuoteAndDelete() {
+        showOrdering(ParticipantId.A)
+
+        longPress("Waiter: Sure! Do you want it spicy or mild?")
+
+        listOf("Copy", "Quote", "Delete").forEach { composeRule.onNodeWithText(it).assertIsDisplayed() }
+        composeRule.onRoot().tryPerformAccessibilityChecks()
+    }
+
+    @Test
+    fun copyPutsTheMessagesPlainTextOnTheClipboard() {
+        showOrdering(ParticipantId.A)
+        longPress("Sam: Mild please. And no nuts, I'm allergic.")
+
+        composeRule.onNodeWithText("Copy").performClick()
+        composeRule.waitForIdle()
+
+        assertEquals("Mild please. And no nuts, I'm allergic.", clipboardText())
+        composeRule.onNodeWithText("Copy").assertDoesNotExist()
+    }
+
+    @Test
+    fun quoteFromTheMenuReplacesAnyExistingPendingQuote() {
+        showOrdering(ParticipantId.A)
+        quoteMessage("Waiter: Sure! Do you want it spicy or mild?")
+
+        longPress("Waiter: No problem. It will take about 15 minutes.")
+        composeRule.onNodeWithText("Quote").performClick()
+        composeRule.waitForIdle()
+
+        assertEquals(Quote(3, "No problem. It will take about 15 minutes."), draft().quote)
+        composeRule.onNodeWithContentDescription("Quoting: No problem. It will take about 15 minutes.").assertIsDisplayed()
+    }
+
+    @Test
+    fun deleteFromTheMenuRemovesTheMessageStraightAway() {
+        showOrdering(ParticipantId.A)
+        longPress("Waiter: Sure! Do you want it spicy or mild?")
+
+        composeRule.onNodeWithText("Delete").performClick()
+        composeRule.waitForIdle()
+
+        assertEquals(3, conversation().messages.size)
+        composeRule.onNodeWithContentDescription("Waiter: Sure! Do you want it spicy or mild?", substring = true).assertDoesNotExist()
+        composeRule.onNodeWithText("Delete").assertDoesNotExist()
+    }
+
+    @Test
+    fun theMessageActionsAreAlsoCustomActionsForTalkBack() {
+        showOrdering(ParticipantId.A)
+        val node =
+            composeRule
+                .onNodeWithContentDescription(
+                    "Waiter: Sure! Do you want it spicy or mild?",
+                    substring = true,
+                ).fetchSemanticsNode()
+        val labels = node.config[SemanticsActions.CustomActions].map { it.label }
+
+        assertEquals(listOf("Copy", "Quote", "Delete"), labels)
+        val delete = node.config[SemanticsActions.CustomActions].single { it.label == "Delete" }
+        composeRule.runOnUiThread { delete.action() }
+        composeRule.waitForIdle()
+        assertEquals(3, conversation().messages.size)
     }
 
     @Test

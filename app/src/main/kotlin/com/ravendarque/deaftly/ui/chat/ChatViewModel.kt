@@ -96,6 +96,13 @@ class ChatViewModel(
         drafts.setQuote(current.quote(messageId, excerpt))
     }
 
+    fun deleteMessage(messageId: Int) {
+        val current = conversation.value ?: return
+        if (messageId !in current.messages.indices) return
+        change { it.deleteMessage(messageId) }
+        drafts.afterDeleting(messageId)
+    }
+
     fun send() {
         val current = conversation.value
         val draft = current?.let { drafts.all.value[it.turn] }
