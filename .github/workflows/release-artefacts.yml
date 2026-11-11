@@ -52,3 +52,12 @@ jobs:
           apksigner="$(find "$ANDROID_HOME/build-tools" -name apksigner -type f | sort -V | tail -n 1)"
           "$apksigner" verify --print-certs "$apk"
           gh release upload "$TAG" "$apk" --repo "$GITHUB_REPOSITORY" --clobber
+      - name: Ask deaftly.com to rebuild with this release
+        env:
+          GH_TOKEN: ${{ secrets.SITE_DISPATCH_TOKEN }}
+        run: |
+          if [ -z "$GH_TOKEN" ]; then
+            echo "::warning::SITE_DISPATCH_TOKEN isn't set, so deaftly.com won't rebuild for $TAG until its next deploy."
+            exit 0
+          fi
+          gh api repos/oneloneraven/deaftly-website/dispatches -f event_type=app-released
