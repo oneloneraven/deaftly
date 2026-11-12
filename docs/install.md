@@ -7,7 +7,7 @@ It needs Android 8 or newer.
 ## Install
 
 1. On your phone, open the
-   [Releases page](https://github.com/ravendarque/deaftly/releases/latest).
+   [Releases page](https://github.com/oneloneraven/deaftly/releases/latest).
 2. Under **Assets**, tap the file ending in `.apk`, for example
    `deaftly-1.0.0.apk`. Your phone may warn that this type of file can harm
    your device. That warning appears for every app installed this way. Tap

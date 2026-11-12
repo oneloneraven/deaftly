@@ -48,8 +48,8 @@ Guidance for deaf shoppers suggests writing the order out in advance and using a
 | F4, F7 | A free-text "type and show" entry point one tap from launch, with a one-tap clear. | S7 (new) |
 | F3, F5 | When the turn switches to the hearing person, a short plain prompt tells them what to do. | H8 (new) |
 | F1 | Highlighting supports emphasising key words such as quantities, times and negatives. | H4 already covers this; no change |
-| F5 | Speech-to-text is the norm for replies. A cheap interim step is a one-tap hand-off to an installed captioning app. | Post-MVP [#67](https://github.com/ravendarque/deaftly/issues/67) (new) |
-| F1 | BSL video content for templates or onboarding. | Post-MVP [#68](https://github.com/ravendarque/deaftly/issues/68) (new) |
+| F5 | Speech-to-text is the norm for replies. A cheap interim step is a one-tap hand-off to an installed captioning app. | Post-MVP [#67](https://github.com/oneloneraven/deaftly/issues/67) (new) |
+| F1 | BSL video content for templates or onboarding. | Post-MVP [#68](https://github.com/oneloneraven/deaftly/issues/68) (new) |
 
 ## Recommendation
 

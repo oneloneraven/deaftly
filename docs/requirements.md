@@ -2,7 +2,7 @@
 
 Status: Approved (2026-11-07)
 Tech stack: [tech-stack.md](tech-stack.md).
-Source: [PRD.md](PRD.md). Research: [research.md](research.md) (Appendix A). Deferred items: the [Post-MVP epic](https://github.com/ravendarque/deaftly/issues/13). Delivery: the [project board](https://github.com/users/ravendarque/projects/7).
+Source: [PRD.md](PRD.md). Research: [research.md](research.md) (Appendix A). Deferred items: the [Post-MVP epic](https://github.com/oneloneraven/deaftly/issues/13). Delivery: the [project board](https://github.com/users/ravendarque/projects/7).
 
 Requirements added or amended in step 2 are marked with *(A: F*n*)*, where F*n* is the supporting finding in Appendix A.
 
@@ -27,7 +27,7 @@ Deaftly is an Android app that helps deaf people communicate quickly and with li
 | C3 | Fully offline. No accounts, app-run sync or backend. The user's own Android backup of templates and settings is allowed (decision D7). |
 | C4 | All processing, including OCR, runs on the device. |
 | C5 | Free, with no paid third-party services. |
-| C6 | Distributed as a signed APK on GitHub Releases; not on Google Play for now (decision D8, see [#69](https://github.com/ravendarque/deaftly/issues/69)). |
+| C6 | Distributed as a signed APK on GitHub Releases; not on Google Play for now (decision D8, see [#69](https://github.com/oneloneraven/deaftly/issues/69)). |
 | C7 | Every dependency and vendor is screened against the BDS boycott lists before adoption (project-bootstrap ADR-0002). |
 
 ## 4. Functional requirements
@@ -99,7 +99,7 @@ Deaftly is an Android app that helps deaf people communicate quickly and with li
 
 ## 6. Out of scope (MVP)
 
-Everything in the [Post-MVP epic](https://github.com/ravendarque/deaftly/issues/13), plus iOS.
+Everything in the [Post-MVP epic](https://github.com/oneloneraven/deaftly/issues/13), plus iOS.
 
 ## 7. Open points
 
