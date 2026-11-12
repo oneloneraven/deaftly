@@ -13,7 +13,7 @@
     <string name="first_run_title">Welcome to Deaftly</string>
     <string name="first_run_intro">Talk with people who can hear, by text. Fill in a template or type a message, then show it.</string>
     <string name="first_run_me_heading">Your name and colour (optional)</string>
-    <string name="first_run_privacy">Deaftly has no internet access. Your templates and chats never leave your phone.</string>
+    <string name="first_run_privacy">Deaftly keeps your templates and settings on this phone.</string>
     <string name="first_run_start">Get started</string>
     <string name="settings_me_heading">Me in chats</string>
     <string name="settings_appearance_heading">Appearance</string>

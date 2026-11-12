@@ -59,7 +59,7 @@ class FirstRunScreenTest {
 
         composeRule.onNodeWithText("Welcome to Deaftly").assertExists()
         composeRule.onNodeWithText("Split screen").assertDoesNotExist()
-        composeRule.onNodeWithText("Deaftly has no internet access. Your templates and chats never leave your phone.").assertExists()
+        composeRule.onNodeWithText("Deaftly keeps your templates and settings on this phone.").assertExists()
         composeRule.onNodeWithText("Get started").assertExists()
     }
 
@@ -69,8 +69,8 @@ class FirstRunScreenTest {
 
         composeRule.onNodeWithText("Welcome to Deaftly").assert(hasContentDescription("Welcome to Deftly"))
         composeRule
-            .onNodeWithText("Deaftly has no internet access. Your templates and chats never leave your phone.")
-            .assert(hasContentDescription("Deftly has no internet access. Your templates and chats never leave your phone."))
+            .onNodeWithText("Deaftly keeps your templates and settings on this phone.")
+            .assert(hasContentDescription("Deftly keeps your templates and settings on this phone."))
     }
 
     @Test

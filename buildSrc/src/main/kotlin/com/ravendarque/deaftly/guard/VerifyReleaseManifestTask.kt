@@ -18,6 +18,10 @@ abstract class VerifyReleaseManifestTask : DefaultTask() {
     @get:PathSensitive(PathSensitivity.NONE)
     abstract val mergedManifest: RegularFileProperty
 
+    @get:InputFile
+    @get:PathSensitive(PathSensitivity.NONE)
+    abstract val permissionAllowlist: RegularFileProperty
+
     @get:Input
     abstract val appNamespace: Property<String>
 
@@ -26,10 +30,13 @@ abstract class VerifyReleaseManifestTask : DefaultTask() {
 
     @TaskAction
     fun verify() {
-        val violations = manifestViolations(mergedManifest.get().asFile.readText(), appNamespace.get())
+        val namespace = appNamespace.get()
+        val allowed = allowedPermissions(permissionAllowlist.get().asFile.readText(), namespace)
+        val violations = manifestViolations(mergedManifest.get().asFile.readText(), namespace, allowed)
         if (violations.isNotEmpty()) {
             throw GradleException(
-                "The release manifest breaks the network-free guard (ADR-0004):\n" +
+                "The release manifest has permissions or exported components nobody has reviewed (ADR-0011).\n" +
+                    "If a feature needs one, add it to $ALLOWLIST_PATH in the same PR as its threat model and privacy update:\n" +
                     violations.joinToString("\n") { "  - $it" },
             )
         }

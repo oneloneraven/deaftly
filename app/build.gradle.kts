@@ -233,6 +233,7 @@ androidComponents {
             tasks.register<VerifyReleaseManifestTask>("verifyReleaseManifest") {
                 mergedManifest.set(variant.artifacts.get(SingleArtifact.MERGED_MANIFEST))
                 appNamespace.set(variant.namespace)
+                permissionAllowlist.set(rootProject.layout.projectDirectory.file("config/permissions-allowlist.txt"))
                 report.set(layout.buildDirectory.file("reports/verifyReleaseManifest/result.txt"))
             }
         tasks.named("check") { dependsOn(verify) }

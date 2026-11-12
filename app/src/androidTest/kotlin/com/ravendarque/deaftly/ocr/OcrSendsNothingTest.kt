@@ -1,7 +1,5 @@
 package com.ravendarque.deaftly.ocr
 
-import android.Manifest
-import android.content.pm.PackageManager
 import android.net.TrafficStats
 import android.os.Process
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -12,26 +10,15 @@ import com.ravendarque.deaftly.ocr.paddle.PaddleOcrNcnnRecogniser
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
 import org.junit.runner.RunWith
-import java.net.InetSocketAddress
-import java.net.Socket
 import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
-import kotlin.test.assertFalse
 
+// Backs "Pictures never leave your phone": text recognition runs entirely on the device.
 @RunWith(AndroidJUnit4::class)
-class NoNetworkTest {
+class OcrSendsNothingTest {
     private val context = InstrumentationRegistry.getInstrumentation().targetContext
 
     @Test
-    fun appRequestsNoInternetPermission() {
-        val info = context.packageManager.getPackageInfo(context.packageName, PackageManager.GET_PERMISSIONS)
-        assertFalse(info.requestedPermissions.orEmpty().contains(Manifest.permission.INTERNET))
-        assertEquals(PackageManager.PERMISSION_DENIED, context.checkSelfPermission(Manifest.permission.INTERNET))
-    }
-
-    @Test
-    fun socketsAreRefusedAndRecognitionSendsNothing() {
-        assertFailsWith<Exception> { Socket().use { it.connect(InetSocketAddress("93.184.216.34", 80), CONNECT_TIMEOUT_MS) } }
+    fun recognisingTextSendsAndReceivesNothing() {
         val uid = Process.myUid()
         val before = TrafficStats.getUidTxBytes(uid) to TrafficStats.getUidRxBytes(uid)
         PaddleOcrNcnnRecogniser(context, PaddleOcrConfig(threads = 2)).use { recogniser ->
@@ -42,7 +29,6 @@ class NoNetworkTest {
     }
 
     private companion object {
-        const val CONNECT_TIMEOUT_MS = 2000
         const val SAMPLE = 3
     }
 }
