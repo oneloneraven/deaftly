@@ -6,7 +6,7 @@ Please report security vulnerabilities privately, not in a public issue.
 
 Use GitHub's private vulnerability reporting: the "Report a vulnerability"
 button on this repository's
-[Security tab](https://github.com/ravendarque/deaftly/security/advisories/new). It opens a private
+[Security tab](https://github.com/oneloneraven/deaftly/security/advisories/new). It opens a private
 draft advisory that only the maintainers can see until a fix is ready.
 
 Please include:

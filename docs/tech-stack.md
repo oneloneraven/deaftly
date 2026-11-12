@@ -88,7 +88,7 @@ These come from the `android-toolchain` module (D9) and the plugin's `core` modu
 
 ## 6. Distribution
 
-**Signed APK on GitHub Releases only, for now (D8).** Google Play would mean paying Google, a BDS pressure target, where an alternative exists. The cost is reach: installing from outside the Play Store is a real barrier for the target users. This is in the backlog for review ([#69](https://github.com/ravendarque/deaftly/issues/69)). F-Droid isn't an option, because the project's licence is non-commercial and so isn't open source.
+**Signed APK on GitHub Releases only, for now (D8).** Google Play would mean paying Google, a BDS pressure target, where an alternative exists. The cost is reach: installing from outside the Play Store is a real barrier for the target users. This is in the backlog for review ([#69](https://github.com/oneloneraven/deaftly/issues/69)). F-Droid isn't an option, because the project's licence is non-commercial and so isn't open source.
 
 ## 7. Security and privacy
 
