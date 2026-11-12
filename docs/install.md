@@ -61,7 +61,5 @@ Download the file again from the Releases page.
 
 ## What Deaftly does not do
 
-Deaftly has no internet access. It does not ask for permission to use the
-network, so your templates and chats stay on your phone. This is also why it
-can't tell you when an update is available: check the Releases page now and
-then.
+Deaftly doesn't check for updates or tell you when a new version is out.
+Check the Releases page, or What's new on deaftly.com, now and then.

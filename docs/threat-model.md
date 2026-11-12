@@ -6,7 +6,8 @@ change that adds or moves a trust boundary ([coding standards](coding-standards.
 ## The system
 
 - **The app** runs entirely on the user's Android phone. It has no backend,
-  no accounts and no network access ([ADR-0004](adr/0004-the-app-has-no-network-access.md)).
+  no accounts, and today requests no network permission. Permissions are
+  limited to a reviewed allowlist ([ADR-0011](adr/0011-review-permissions-against-an-allowlist.md)).
 - **Local storage**: templates and settings in the app's private DataStore
   file ([ADR-0005](adr/0005-store-templates-and-settings-with-datastore.md)).
   Chats are held in memory and discarded when they end.
@@ -60,7 +61,7 @@ change that adds or moves a trust boundary ([coding standards](coding-standards.
 |---|---|---|---|
 | A look-alike APK published elsewhere | Spoofing | Releases come only from this repository's GitHub Releases, signed with the upload key; the install guide (#57) tells users to install only from there and how to check the signer | Mitigated once #57 ships |
 | An update signed with a different key | Tampering | Android only installs updates signed with the installed app's key; the key is held offline by the maintainer with a backup | Mitigated |
-| A compromised dependency exfiltrates data | Information disclosure | No `INTERNET` permission, enforced on the merged manifest in CI (#19); dependencies are pinned, screened and updated through Dependabot with a cooldown | Mitigated |
+| A compromised dependency exfiltrates data | Information disclosure | The merged release manifest may only request allowlisted permissions, enforced in CI (ADR-0011), and `INTERNET` isn't on the list; dependencies are pinned, screened and updated through Dependabot with a cooldown | Mitigated |
 | Templates read by someone with the unlocked phone | Information disclosure | Out of the app's control: protected by the phone's lock screen | Accepted |
 | Templates exposed through the user's backup | Information disclosure | Backup is the user's own, encrypted by Android and controlled in system settings; only the store is included | Accepted |
 | Recognised text or messages written to logs | Information disclosure | Logs never contain user content (coding standards), checked in review | Mitigated |

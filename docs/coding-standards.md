@@ -157,9 +157,11 @@ and the APK's size and startup.
   When a UI change is intended, run `./gradlew recordRoborazziDebug`, look at
   every changed image, and commit them with the change. Screenshot the light
   and dark themes and a large font scale.
-- **Nothing leaves the device unless a decision says so.** The template has
-  no `INTERNET` permission, and adding one (or any other permission) needs an
-  ADR and an update to the threat model and record of processing. Backups
+- **Permissions are reviewed, not inherited.** The release build may only
+  request what's in `config/permissions-allowlist.txt`
+  ([ADR-0011](adr/0011-review-permissions-against-an-allowlist.md)). Adding
+  one, including `INTERNET`, goes in the same PR as the feature that needs it,
+  with an update to the threat model and record of processing. Backups
   and device transfer include only the template store, through explicit rules
   ([ADR-0008](adr/0008-allow-android-backup-of-templates-and-settings.md)).
 - **Never log user content**, at any level, in any build type. Log events

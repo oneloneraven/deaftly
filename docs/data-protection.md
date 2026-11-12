@@ -6,7 +6,7 @@ updates it in the same PR.
 
 ## Processors
 
-None. The app has no network access ([ADR-0004](adr/0004-the-app-has-no-network-access.md)), so no third party receives data from it.
+None. The app requests no network permission today, so no third party receives data from it. Any feature that would change that adds the permission to the allowlist and updates this record in the same PR ([ADR-0011](adr/0011-review-permissions-against-an-allowlist.md)).
 
 The user's own Android backup can copy the template and settings store off the device ([ADR-0008](adr/0008-allow-android-backup-of-templates-and-settings.md)). That is a service the user chooses and controls in system settings; the app neither configures nor reads it.
 

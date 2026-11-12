@@ -1,0 +1,11 @@
+# Permissions the release build may request (ADR-0011).
+# verifyReleaseManifest fails the build if the merged manifest asks for anything else,
+# so a dependency can't add a permission without someone noticing.
+# To add one, change this file in the same PR as the feature that needs it, with its
+# threat model and privacy updates. {namespace} is the app's package name.
+
+# Reading text with the camera.
+android.permission.CAMERA
+
+# AndroidX adds this signature permission to protect the app's own receivers.
+{namespace}.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION
