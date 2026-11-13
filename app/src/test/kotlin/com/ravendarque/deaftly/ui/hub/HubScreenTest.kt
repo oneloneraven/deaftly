@@ -32,7 +32,7 @@ import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 import kotlin.test.assertEquals
 
-private val options = listOf("Start typing", "Use a template", "Face to face", "Side by side")
+private val options = listOf("Start typing", "Use a template", "Face to face", "Side by side", "Help")
 
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
@@ -63,6 +63,7 @@ class HubScreenTest {
     fun theGroupHeadingsAreHeadings() {
         composeRule.onNodeWithText("Show").assert(isHeading())
         composeRule.onNodeWithText("Chat").assert(isHeading())
+        composeRule.onNodeWithText("Support").assert(isHeading())
     }
 
     @Test
@@ -85,19 +86,19 @@ class HubScreenTest {
         }
 
     @Test
-    fun allFourCardsAreTheSameHeightAcrossBothGroups() {
+    fun allCardsAreTheSameHeightAcrossAllGroups() {
         assertEquals(1, cardHeights().distinct().size)
     }
 
     @Test
     @Config(fontScale = 2f)
-    fun allFourCardsAreTheSameHeightAtLargeFontScale() {
+    fun allCardsAreTheSameHeightAtLargeFontScale() {
         assertEquals(1, cardHeights().distinct().size)
     }
 
     @Test
     @Config(fontScale = 1.4f)
-    fun allFourCardsAreTheSameHeightWhenOnlyTheLongerTitlesWrap() {
+    fun allCardsAreTheSameHeightWhenOnlyTheLongerTitlesWrap() {
         assertEquals(1, cardHeights().distinct().size)
     }
 
@@ -107,7 +108,7 @@ class HubScreenTest {
         composeRule.onNodeWithContentDescription("Settings").performClick()
 
         assertEquals(
-            listOf(Route.TypeShow, Route.Templates, Route.FaceToFace, Route.Chat(), Route.Settings),
+            listOf(Route.TypeShow, Route.Templates, Route.FaceToFace, Route.Chat(), Route.Help, Route.Settings),
             navigated,
         )
     }
@@ -129,6 +130,7 @@ class HubScreenTest {
                 "For a back-and-forth conversation. You share one phone, passing it between you and taking turns to type. " +
                 "Each person’s messages appear in their own colour, like a script, so it’s easy to follow who said what. " +
                 "Flip the switch to change whose turn it is.",
+            "Help" to "Find out how to use Deaftly: templates, Show, Face to face, Side by side and the camera.",
         )
 
     private fun info(option: String) = composeRule.onNodeWithContentDescription("About $option")

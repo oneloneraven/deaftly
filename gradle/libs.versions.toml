@@ -22,6 +22,7 @@ benchmark = "1.5.0"
 baselineprofile = "1.5.0"
 profileinstaller = "1.4.1"
 uiautomator = "2.4.1"
+markdown-renderer = "0.46.0"
 
 [libraries]
 androidx-appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
@@ -48,6 +49,7 @@ androidx-camera-compose = { module = "androidx.camera:camera-compose", version.r
 androidx-benchmark-macro-junit4 = { module = "androidx.benchmark:benchmark-macro-junit4", version.ref = "benchmark" }
 androidx-profileinstaller = { module = "androidx.profileinstaller:profileinstaller", version.ref = "profileinstaller" }
 androidx-test-uiautomator = { module = "androidx.test.uiautomator:uiautomator", version.ref = "uiautomator" }
+markdown-renderer-m3 = { module = "com.mikepenz:multiplatform-markdown-renderer-m3", version.ref = "markdown-renderer" }
 junit = { module = "junit:junit", version.ref = "junit" }
 androidx-datastore = { module = "androidx.datastore:datastore", version.ref = "datastore" }
 kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "coroutines" }

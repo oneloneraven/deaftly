@@ -187,6 +187,10 @@ object DeaftlyIcons {
         strokeIcon("TemplateBlank", rectPath(x = 3, y = 4, width = 18, height = 16, radius = 2), "M7 9h10M7 14h2M11 14h2M15 14h2")
     }
 
+    val Help: ImageVector by lazy {
+        strokeIcon("Help", "M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18z", "M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3M12 17h.01")
+    }
+
     val SwitchSides: ImageVector by lazy { strokeIcon("SwitchSides", "M4 8h16M16 4l4 4-4 4", "M20 16H4M8 12l-4 4 4 4") }
 
     val SideBySide: ImageVector by lazy {

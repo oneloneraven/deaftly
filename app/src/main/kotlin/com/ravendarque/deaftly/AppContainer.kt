@@ -7,6 +7,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.ravendarque.deaftly.core.settings.SettingsRepository
 import com.ravendarque.deaftly.core.template.TemplateRepository
+import com.ravendarque.deaftly.help.HelpRepository
 import com.ravendarque.deaftly.ocr.paddle.PaddleOcrNcnnRecogniser
 import com.ravendarque.deaftly.storage.DataStoreSettingsRepository
 import com.ravendarque.deaftly.storage.DataStoreTemplateRepository
@@ -38,6 +39,8 @@ class AppContainer(
     val templateRepository: TemplateRepository by lazy { DataStoreTemplateRepository(store, builtIns) }
 
     val settingsRepository: SettingsRepository by lazy { DataStoreSettingsRepository(store) }
+
+    val helpRepository by lazy { HelpRepository(context.assets) }
 
     val ocrOutcomes = OcrOutcomes()
     val chatInsertions = ChatInsertions()

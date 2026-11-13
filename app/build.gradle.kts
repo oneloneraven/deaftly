@@ -1,5 +1,6 @@
 import com.android.build.api.artifact.SingleArtifact
 import com.ravendarque.deaftly.guard.VerifyReleaseManifestTask
+import com.ravendarque.deaftly.help.CopyHelpTask
 import com.ravendarque.deaftly.nativelibs.FetchNcnnTask
 
 plugins {
@@ -184,6 +185,7 @@ dependencies {
     implementation(libs.androidx.datastore)
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.kotlinx.serialization.json)
+    implementation(libs.markdown.renderer.m3)
     baselineProfile(project(":baselineprofile"))
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
@@ -219,6 +221,13 @@ roborazzi {
 }
 
 androidComponents {
+    onVariants { variant ->
+        val copyHelp =
+            tasks.register<CopyHelpTask>("copy${variant.name.replaceFirstChar { it.uppercase() }}HelpPages") {
+                pages.from(fileTree(rootProject.layout.projectDirectory.dir("help")) { include("*.md") })
+            }
+        variant.sources.assets?.addGeneratedSourceDirectory(copyHelp, CopyHelpTask::outputDir)
+    }
     finalizeDsl { extension ->
         extension.buildTypes
             .filter { it.name == "benchmarkRelease" || it.name == "nonMinifiedRelease" }
