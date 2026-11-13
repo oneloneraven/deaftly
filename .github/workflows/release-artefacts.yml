@@ -52,12 +52,21 @@ jobs:
           apksigner="$(find "$ANDROID_HOME/build-tools" -name apksigner -type f | sort -V | tail -n 1)"
           "$apksigner" verify --print-certs "$apk"
           gh release upload "$TAG" "$apk" --repo "$GITHUB_REPOSITORY" --clobber
+      - name: Warn if deaftly.com can't be asked to rebuild
+        if: vars.SITE_DISPATCH_APP_CLIENT_ID == ''
+        run: echo "::warning::SITE_DISPATCH_APP_CLIENT_ID isn't set, so deaftly.com won't rebuild for $TAG until its next deploy."
+      - name: Mint a token that can only reach deaftly-website
+        if: vars.SITE_DISPATCH_APP_CLIENT_ID != ''
+        id: site-token
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          client-id: ${{ vars.SITE_DISPATCH_APP_CLIENT_ID }}
+          private-key: ${{ secrets.SITE_DISPATCH_APP_PRIVATE_KEY }}
+          owner: oneloneraven
+          repositories: deaftly-website
+          permission-contents: write
       - name: Ask deaftly.com to rebuild with this release
+        if: vars.SITE_DISPATCH_APP_CLIENT_ID != ''
         env:
-          GH_TOKEN: ${{ secrets.SITE_DISPATCH_TOKEN }}
-        run: |
-          if [ -z "$GH_TOKEN" ]; then
-            echo "::warning::SITE_DISPATCH_TOKEN isn't set, so deaftly.com won't rebuild for $TAG until its next deploy."
-            exit 0
-          fi
-          gh api repos/oneloneraven/deaftly-website/dispatches -f event_type=app-released
+          GH_TOKEN: ${{ steps.site-token.outputs.token }}
+        run: gh api repos/oneloneraven/deaftly-website/dispatches -f event_type=app-released
