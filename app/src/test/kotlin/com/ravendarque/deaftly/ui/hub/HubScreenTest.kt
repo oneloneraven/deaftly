@@ -31,8 +31,9 @@ import org.junit.runner.RunWith
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
-private val options = listOf("Start typing", "Use a template", "Face to face", "Side by side", "Help")
+private val options = listOf("Start typing", "Use a template", "Face to face", "Side by side", "Help", "Share")
 
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
@@ -86,6 +87,24 @@ class HubScreenTest {
         }
 
     @Test
+    fun shareSitsNextToHelpOnTheSameRow() {
+        val help = composeRule.onNodeWithText("Help").fetchSemanticsNodeBounds()
+        val share = composeRule.onNodeWithText("Share").fetchSemanticsNodeBounds()
+        assertEquals(help.top, share.top, 0.5f)
+        assertTrue(share.left > help.right)
+    }
+
+    private fun androidx.compose.ui.test.SemanticsNodeInteraction.fetchSemanticsNodeBounds() = fetchSemanticsNode().boundsInRoot
+
+    @Test
+    @Config(fontScale = 2f)
+    fun shareStacksBelowHelpAtLargeFontScale() {
+        val help = composeRule.onNodeWithText("Help").fetchSemanticsNodeBounds()
+        val share = composeRule.onNodeWithText("Share").fetchSemanticsNodeBounds()
+        assertTrue(share.top > help.bottom)
+    }
+
+    @Test
     fun allCardsAreTheSameHeightAcrossAllGroups() {
         assertEquals(1, cardHeights().distinct().size)
     }
@@ -108,7 +127,7 @@ class HubScreenTest {
         composeRule.onNodeWithContentDescription("Settings").performClick()
 
         assertEquals(
-            listOf(Route.TypeShow, Route.Templates, Route.FaceToFace, Route.Chat(), Route.Help, Route.Settings),
+            listOf(Route.TypeShow, Route.Templates, Route.FaceToFace, Route.Chat(), Route.Help, Route.Share, Route.Settings),
             navigated,
         )
     }
@@ -131,6 +150,7 @@ class HubScreenTest {
                 "Each person’s messages appear in their own colour, like a script, so it’s easy to follow who said what. " +
                 "Flip the switch to change whose turn it is.",
             "Help" to "Find out how to use Deaftly: templates, Show, Face to face, Side by side and the camera.",
+            "Share" to "Show someone the QR code so they can get Deaftly, or send them the link.",
         )
 
     private fun info(option: String) = composeRule.onNodeWithContentDescription("About $option")

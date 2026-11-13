@@ -1,5 +1,6 @@
 package com.ravendarque.deaftly.navigation
 
+import android.content.Intent
 import androidx.activity.ComponentActivity
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.SemanticsMatcher
@@ -38,6 +39,7 @@ import kotlinx.serialization.json.Json
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 import kotlin.test.assertEquals
@@ -509,6 +511,41 @@ class AppNavigationTest {
     }
 
     @Test
+    fun shareOpensThePageAndBackReturnsToTheHub() {
+        composeRule.enableAccessibilityChecks()
+        showApp()
+
+        composeRule.onNodeWithText(text(R.string.hub_share)).performClick()
+        composeRule.onNodeWithText(text(R.string.route_share)).assertExists()
+        composeRule.onNodeWithContentDescription(text(R.string.share_qr_description)).assertExists()
+        composeRule.onNodeWithText("deaftly.com/download").assertExists()
+        composeRule.onRoot().tryPerformAccessibilityChecks()
+
+        composeRule.onNodeWithContentDescription(text(R.string.back)).performClick()
+        assertOnHub()
+
+        composeRule.onNodeWithText(text(R.string.hub_share)).performClick()
+        composeRule.onNodeWithText(text(R.string.share_link_button)).assertExists()
+        pressSystemBack()
+        assertOnHub()
+    }
+
+    @Test
+    fun shareLinkStartsTheSystemChooserWithTheDownloadUrl() {
+        showApp()
+        composeRule.onNodeWithText(text(R.string.hub_share)).performClick()
+
+        composeRule.onNodeWithText(text(R.string.share_link_button)).performClick()
+
+        val chooser = shadowOf(composeRule.activity).nextStartedActivity
+        assertEquals(Intent.ACTION_CHOOSER, chooser.action)
+        val sent = chooser.getParcelableExtra(Intent.EXTRA_INTENT, Intent::class.java)
+        assertEquals(Intent.ACTION_SEND, sent?.action)
+        assertEquals("text/plain", sent?.type)
+        assertEquals("https://deaftly.com/download/", sent?.getStringExtra(Intent.EXTRA_TEXT))
+    }
+
+    @Test
     fun systemBackFromTheHubLeavesTheApp() {
         showApp()
 
@@ -558,6 +595,7 @@ class AppNavigationTest {
                 Route.Settings,
                 Route.Help,
                 Route.HelpPage("templates"),
+                Route.Share,
                 Route.FirstRun,
             )
 
