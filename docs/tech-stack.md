@@ -109,3 +109,27 @@ These come from the `android-toolchain` module (D9) and the plugin's `core` modu
 | Tesseract | Too slow and inaccurate for live camera OCR. |
 | Google Play (for now) | BDS screening (D8). |
 | Renovate | Replaced by the plugin's Dependabot setup. |
+
+## 9. Dependency screening register
+
+Every dependency and vendor, screened against the BDS movement's [consumer boycott and pressure targets](https://bdsmovement.net/Guide-to-BDS-Boycott) and its [No Tech for Oppression, Apartheid or Genocide](https://bdsmovement.net/no-tech-oppression-apartheid-or-genocide) list (ADR-0002). A PR that adds a dependency or vendor adds its row. Last checked against both lists on 2026-11-13.
+
+| Dependency or vendor | Used for | Maintainer | On a list? | Decision |
+|---|---|---|---|---|
+| AndroidX / Jetpack (Activity, AppCompat, Camera, Compose, DataStore, Lifecycle, Navigation 3, Profile Installer, Benchmark, Test, UI Automator) | The app's UI, camera, storage and tests | Google | Yes: pressure target and No Tech list | Allowed under the free-tool exception: free, industry standard, no viable alternative for a native Android app. Nothing is paid. |
+| Android Gradle Plugin, Android Lint, Baseline Profile plugin | Building and checking the app | Google | Yes | Free-tool exception, as above |
+| Robolectric | JVM UI tests | Google engineers (MIT) | Yes, by maintainer | Free-tool exception: dev only, the only maintained way to run Android UI tests on the JVM |
+| Kotlin, Compose compiler plugin, kotlinx (coroutines, serialization, collections-immutable), kotlin-test | Language and core libraries | JetBrains | No | Allowed |
+| JetBrains markdown | Parsing help pages | JetBrains | No | Allowed |
+| multiplatform-markdown-renderer | Rendering help pages | Mike Penz (individual) | No | Allowed |
+| Roborazzi | Screenshot tests | Takahiro Menju (individual) | No | Allowed |
+| JUnit 4 | Tests | JUnit team | No | Allowed |
+| Spotless, ktlint | Formatting | DiffPlug; Pinterest | No | Allowed |
+| detekt | Static analysis | detekt community | No | Allowed |
+| PaddleOCR models (PP-OCRv5 mobile) | Text recognition | Baidu | No | Allowed ([ADR-0010](adr/0010-recognise-text-with-paddleocr-on-ncnn.md)) |
+| ncnn | On-device inference for OCR | Tencent | No | Allowed (ADR-0010) |
+| ML Kit | Considered for OCR | Google | Yes | Rejected: viable alternatives exist and it sends usage data by default (ADR-0010) |
+| ONNX Runtime | Considered for OCR | Microsoft | Yes: consumer boycott target | Rejected |
+| GitHub (code, issues, CI, releases) | Hosting the project | Microsoft | Yes: consumer boycott target | Free-tool exception: free tier only, industry standard. Nothing is paid. |
+| Google Play | Distribution (planned, #69) | Google | Yes | To be decided in #69's ADR: a paid registration fee is a cost the exception doesn't cover |
+

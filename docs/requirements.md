@@ -23,8 +23,8 @@ Deaftly is an Android app that helps deaf people communicate quickly and with li
 | ID | Constraint |
 |----|------------|
 | C1 | Android only. |
-| C2 | UK English only, for both the UI and OCR. |
-| C3 | Fully offline. No accounts, app-run sync or backend. The user's own Android backup of templates and settings is allowed (decision D7). |
+| C2 | English only, localised for en-GB (the default), en-US, en-AU, en-CA, en-NZ and en-IE: spelling, vocabulary and the name of the local official sign language (BSL, ASL, Auslan, NZSL, ISL). Other English locales use en-GB. OCR reads English text (#217). |
+| C3 | No accounts, app-run sync or backend in the MVP. Network access is decided per feature, through a reviewed change ([ADR-0011](adr/0011-review-permissions-against-an-allowlist.md)). The user's own Android backup of templates and settings is allowed (decision D7). |
 | C4 | All processing, including OCR, runs on the device. |
 | C5 | Free, with no paid third-party services. |
 | C6 | Distributed as a signed APK on GitHub Releases; not on Google Play for now (decision D8, see [#69](https://github.com/oneloneraven/deaftly/issues/69)). |
@@ -103,7 +103,7 @@ Everything in the [Post-MVP epic](https://github.com/oneloneraven/deaftly/issues
 
 ## 7. Open points
 
-- **Minimum Android version.** To be decided in step 4 (tech stack).
+- **Minimum Android version.** Decided: Android 8.0 (`minSdk` 26), see [tech stack](tech-stack.md).
 - **Mockups.** Deaftly MVP mockups (a private design canvas).
 - **Content of the starter templates.** To be written to T10 and T11, and validated with deaf users.
-- **User testing with deaf users.** Recommended in Appendix A; decision due in step 5.
+- **User testing with deaf users.** Decided: moderated sessions with deaf test users (#56). Their feedback is also the MVP's device verification.
