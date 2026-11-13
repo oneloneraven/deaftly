@@ -30,6 +30,7 @@ The repository is set up with the `project-bootstrap` plugin, using the `core` m
 | Persistence | **DataStore + kotlinx.serialization (JSON)** for templates and settings | Tens of templates; no database needed. Chats are in memory only (H7). |
 | Light, dark and system theme | `UiModeManager.setApplicationNightMode` on Android 12+, **AppCompat** `AppCompatDelegate.setDefaultNightMode` below ([Android Developers](https://developer.android.com/develop/ui/views/theming/darktheme#change-themes)). The stored setting is applied at startup and on every change. | On Android 12+ the system applies the chosen mode to the splash and starting window as well. Below Android 12 the system draws the starting window from the system's own theme before any app code runs, so it can show the other theme for about a second; AppCompat then applies the chosen mode from the activity's first frame. AppCompat is Jetpack (Google), covered by ADR-0002. |
 | Rich text | Own minimal span model (bold, italic, highlight, quote) rendered with `AnnotatedString` | Four formats don't justify a library. |
+| Help pages | The repository's `help/*.md`, copied into the app's assets at build time by `CopyHelpTask`, rendered with **multiplatform-markdown-renderer** (`com.mikepenz:multiplatform-markdown-renderer-m3`, Apache-2.0), which parses with JetBrains' `markdown` (Apache-2.0) | One source for the website and the app (#187). Screened under ADR-0002 on 2026-11-13: Mike Penz (individual) and JetBrains aren't on the BDS consumer boycott, pressure or No Tech for Apartheid lists. Chosen over compose-richtext (less active) and Markwon (unmaintained since 2021, View-based). |
 | Show-mode text sizing | Compose auto-size text with a minimum size, then scrolling | S2. |
 
 ### Modules
@@ -66,7 +67,7 @@ The spike's outcome is recorded as an ADR.
 |---------|-------|-----|
 | `minSdk` | **26** (Android 8.0) | Covers roughly 95% or more of active devices. Android 11 and later alone was about 88% in October 2026 ([Beebom](https://gadgets.beebom.com/news/google-android-17-adoption-figures-october-2026)). |
 | `targetSdk` / `compileSdk` | **36** | The current Google Play requirement ([target SDK](https://developer.android.com/google/play/requirements/target-sdk)). Kept even though we don't publish to Play, so a later move to Play needs no work. |
-| Permissions | `CAMERA` only, requested the first time OCR is used. **No `INTERNET` permission**, and merged library permissions are explicitly removed. | N6, C3, N7. |
+| Permissions | Only what's in `config/permissions-allowlist.txt` ([ADR-0011](adr/0011-review-permissions-against-an-allowlist.md)): today `CAMERA`, requested the first time OCR is used. Merged library permissions not on the list fail the build or are removed. | N6, N7. |
 | Backup | Android Auto Backup **enabled** for templates and settings (D7) | Users keep their own templates when they change phone. The backup is controlled by the user in Android settings and encrypted; the app itself runs no sync. |
 
 ## 5. Toolchain, testing and CI
