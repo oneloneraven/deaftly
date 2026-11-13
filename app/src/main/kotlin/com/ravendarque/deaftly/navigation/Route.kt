@@ -63,6 +63,9 @@ sealed interface Route : NavKey {
     ) : Route
 
     @Serializable
+    data object Share : Route
+
+    @Serializable
     data object FirstRun : Route
 }
 
@@ -72,6 +75,7 @@ data class HighlightRange(
     val end: Int,
 )
 
+@Suppress("CyclomaticComplexMethod")
 @StringRes
 fun Route.titleRes(): Int =
     when (this) {
@@ -87,5 +91,6 @@ fun Route.titleRes(): Int =
         is Route.Editor -> R.string.route_editor
         Route.Settings -> R.string.route_settings
         Route.Help, is Route.HelpPage -> R.string.route_help
+        Route.Share -> R.string.route_share
         Route.FirstRun -> R.string.first_run_title
     }

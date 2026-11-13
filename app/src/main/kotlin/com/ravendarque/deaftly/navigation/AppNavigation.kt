@@ -7,6 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.EntryProviderScope
@@ -39,6 +40,8 @@ import com.ravendarque.deaftly.ui.ocr.OcrOutcome
 import com.ravendarque.deaftly.ui.ocr.OcrScreen
 import com.ravendarque.deaftly.ui.settings.SettingsScreen
 import com.ravendarque.deaftly.ui.settings.SettingsViewModel
+import com.ravendarque.deaftly.ui.share.ShareScreen
+import com.ravendarque.deaftly.ui.share.shareChooser
 import com.ravendarque.deaftly.ui.show.ShowScreen
 import com.ravendarque.deaftly.ui.show.ShowViewModel
 import com.ravendarque.deaftly.ui.theme.Deaftly
@@ -108,8 +111,19 @@ private fun AppNavigationHost(
                     SettingsScreen(viewModel, onBack = { backStack.removeLastOrNull() })
                 }
                 helpEntries(container, backStack)
+                shareEntry(backStack)
             },
     )
+}
+
+private fun EntryProviderScope<NavKey>.shareEntry(backStack: NavBackStack<NavKey>) {
+    entry<Route.Share> {
+        val context = LocalContext.current
+        ShareScreen(
+            onShare = { context.startActivity(shareChooser(it)) },
+            onBack = { backStack.removeLastOrNull() },
+        )
+    }
 }
 
 private fun EntryProviderScope<NavKey>.helpEntries(

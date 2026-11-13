@@ -62,6 +62,7 @@ private val chatOptions =
 private val supportOptions =
     listOf(
         HubOption(R.string.hub_help, R.string.hub_help_help, DeaftlyIcons.Help, Route.Help),
+        HubOption(R.string.hub_share, R.string.hub_share_help, DeaftlyIcons.Share, Route.Share),
     )
 
 private val allOptions = showOptions + chatOptions + supportOptions
