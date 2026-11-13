@@ -12,6 +12,7 @@ import com.ravendarque.deaftly.ocr.paddle.PaddleOcrNcnnRecogniser
 import com.ravendarque.deaftly.storage.DataStoreSettingsRepository
 import com.ravendarque.deaftly.storage.DataStoreTemplateRepository
 import com.ravendarque.deaftly.storage.createTemplateStore
+import com.ravendarque.deaftly.storage.refreshBuiltIns
 import com.ravendarque.deaftly.templates.builtInTemplates
 import com.ravendarque.deaftly.ui.chat.ChatInsertions
 import com.ravendarque.deaftly.ui.chat.ChatOpening
@@ -32,11 +33,11 @@ import kotlinx.coroutines.flow.first
 class AppContainer(
     private val context: Context,
 ) {
-    private val builtIns by lazy { builtInTemplates(context.resources) }
+    private val store by lazy { createTemplateStore(context, builtInTemplates(context.resources)) }
 
-    private val store by lazy { createTemplateStore(context, builtIns) }
+    val templateRepository: TemplateRepository by lazy { DataStoreTemplateRepository(store, { builtInTemplates(context.resources) }) }
 
-    val templateRepository: TemplateRepository by lazy { DataStoreTemplateRepository(store, builtIns) }
+    suspend fun refreshBuiltInTemplates() = store.refreshBuiltIns(builtInTemplates(context.resources))
 
     val settingsRepository: SettingsRepository by lazy { DataStoreSettingsRepository(store) }
 

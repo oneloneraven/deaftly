@@ -3,6 +3,9 @@
     <string name="app_name">Deaftly</string>
     <string name="back">Back</string>
     <string name="wordmark">deaftly</string>
+    <string name="sign_language">BSL</string>
+    <string name="sign_language_interpreter">%1$s interpreter</string>
+    <string name="sign_language_interpreter_indefinite">a %1$s interpreter</string>
     <string name="route_templates">Templates</string>
     <string name="route_ocr">Read text</string>
     <string name="route_settings">Settings</string>

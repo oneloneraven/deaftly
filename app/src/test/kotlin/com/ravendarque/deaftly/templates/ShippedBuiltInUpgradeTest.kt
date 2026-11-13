@@ -26,7 +26,7 @@ class ShippedBuiltInUpgradeTest {
     private suspend fun upgradeV039Store(scope: CoroutineScope): List<Template> {
         val file = File(folder.root, "templates.json")
         file.writeText(checkNotNull(javaClass.getResource("/stores/v0.39-store.json")).readText())
-        return DataStoreTemplateRepository(createTemplateStore(file, shipped, scope), shipped).templates.first()
+        return DataStoreTemplateRepository(createTemplateStore(file, shipped, scope), { shipped }).templates.first()
     }
 
     @Test

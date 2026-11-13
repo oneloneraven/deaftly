@@ -157,6 +157,17 @@ and the APK's size and startup.
   When a UI change is intended, run `./gradlew recordRoborazziDebug`, look at
   every changed image, and commit them with the change. Screenshot the light
   and dark themes and a large font scale.
+- **English variants are overrides.** `values/` is en-GB. `values-en-rUS`,
+  `-rCA`, `-rAU`, `-rNZ` and `-rIE` hold only what differs, and
+  `values-b+en+001` repeats the en-GB text of every key any of them overrides.
+  Without it Android serves en-GB, en-IN and other English locales the nearest
+  regional folder, so a British phone would show "Auslan". `SpellingTest`
+  checks the spellings and that those locales resolve to the `values/` text, so
+  add a key to `values-b+en+001` whenever a variant overrides it. Unit tests
+  run as en-GB (`robolectric.properties`); a test that sets `qualifiers` states
+  its locale (`en-rGB-w390dp-h844dp`) or it runs as en-US. Built-in templates
+  follow the phone's locale until the user edits them
+  ([ADR-0005](adr/0005-store-templates-and-settings-with-datastore.md)).
 - **Permissions are reviewed, not inherited.** The release build may only
   request what's in `config/permissions-allowlist.txt`
   ([ADR-0011](adr/0011-review-permissions-against-an-allowlist.md)). Adding

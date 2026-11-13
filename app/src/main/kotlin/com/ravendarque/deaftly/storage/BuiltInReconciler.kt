@@ -1,6 +1,7 @@
 package com.ravendarque.deaftly.storage
 
 import androidx.datastore.core.DataMigration
+import androidx.datastore.core.DataStore
 import com.ravendarque.deaftly.core.template.Template
 
 fun StoreDocument.reconcileBuiltIns(builtIns: List<Template>): StoreDocument {
@@ -37,6 +38,10 @@ fun StoreDocument.restoring(defaults: List<Template>): StoreDocument {
         templates = replaced + added,
         builtInsReceived = builtInsReceived + restored.mapValues { it.value.contentFingerprint() },
     )
+}
+
+suspend fun DataStore<StoreDocument>.refreshBuiltIns(builtIns: List<Template>) {
+    updateData { document -> document.reconcileBuiltIns(builtIns) }
 }
 
 class BuiltInReconciliation(

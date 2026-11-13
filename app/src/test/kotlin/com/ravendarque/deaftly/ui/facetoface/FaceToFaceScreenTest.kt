@@ -45,7 +45,7 @@ import kotlin.test.assertTrue
 
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
-@Config(qualifiers = "w390dp-h844dp")
+@Config(qualifiers = "en-rGB-w390dp-h844dp")
 class FaceToFaceScreenTest {
     @get:Rule
     val composeRule = createComposeRule()
@@ -186,7 +186,7 @@ class FaceToFaceScreenTest {
     }
 
     @Test
-    @Config(qualifiers = "w360dp-h780dp")
+    @Config(qualifiers = "en-rGB-w360dp-h780dp")
     fun theHintFitsOnOneLineOnANarrowScreen() {
         show()
 

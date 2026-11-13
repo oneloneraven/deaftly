@@ -26,7 +26,7 @@ class DataStoreTemplateRepositoryTest {
     private fun repository(scope: CoroutineScope) =
         DataStoreTemplateRepository(
             createTemplateStore(File(folder.root, "templates.json"), builtIns, scope),
-            builtIns,
+            { builtIns },
         ) { "copy-${++counter}" }
 
     private suspend fun DataStoreTemplateRepository.all() = templates.first()

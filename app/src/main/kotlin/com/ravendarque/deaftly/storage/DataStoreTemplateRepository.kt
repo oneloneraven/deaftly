@@ -9,16 +9,16 @@ import java.util.UUID
 
 class DataStoreTemplateRepository(
     private val store: DataStore<StoreDocument>,
-    private val builtIns: List<Template>,
+    private val builtIns: () -> List<Template>,
     private val newId: () -> String = { UUID.randomUUID().toString() },
 ) : TemplateRepository {
     init {
-        require(builtIns.all { it.builtIn }) { "Built-in templates must be marked built-in" }
+        require(builtIns().all { it.builtIn }) { "Built-in templates must be marked built-in" }
     }
 
     override val templates: Flow<List<Template>> = store.data.map { document -> document.templates.map(TemplateDto::toDomain) }
 
-    override val hiddenBuiltInCount: Flow<Int> = store.data.map { document -> document.hiddenBuiltIns(builtIns).size }
+    override val hiddenBuiltInCount: Flow<Int> = store.data.map { document -> document.hiddenBuiltIns(builtIns()).size }
 
     override suspend fun add(template: Template) {
         edit { current ->
@@ -64,14 +64,15 @@ class DataStoreTemplateRepository(
     }
 
     override suspend fun restoreBuiltIn(id: String) {
-        val default = builtIns.firstOrNull { it.id == id } ?: return
+        val default = builtIns().firstOrNull { it.id == id } ?: return
         store.updateData { document -> document.restoring(listOf(default)) }
     }
 
     override suspend fun restoreHiddenBuiltIns() {
         store.updateData { document ->
-            val hidden = document.hiddenBuiltIns(builtIns).toSet()
-            document.restoring(builtIns.filter { it.id in hidden })
+            val shipped = builtIns()
+            val hidden = document.hiddenBuiltIns(shipped).toSet()
+            document.restoring(shipped.filter { it.id in hidden })
         }
     }
 

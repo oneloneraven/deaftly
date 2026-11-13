@@ -154,6 +154,8 @@ android {
         disable += setOf("AndroidGradlePluginVersion", "GradleDependency", "NewerVersionAvailable", "OldTargetApi")
         // ADR-0010: release APKs are arm64-v8a and armeabi-v7a only; ChromeOS translates them.
         disable += "ChromeOsAbiSupport"
+        // English variants are overrides of values/, so most keys are missing from them by design; SpellingTest checks what matters.
+        disable += "MissingTranslation"
     }
 }
 

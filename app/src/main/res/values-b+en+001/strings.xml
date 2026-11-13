@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="sign_language_interpreter_indefinite">a %1$s interpreter</string>
+    <string name="sign_language">BSL</string>
+    <string name="first_run_me_heading">Your name and colour (optional)</string>
+    <string name="settings_scheme_heading">Show mode colours</string>
+    <string name="hub_side_by_side_help">For a back-and-forth conversation. You share one phone, passing it between you and taking turns to type. Each person\u2019s messages appear in their own colour, like a script, so it\u2019s easy to follow who said what. Flip the switch to change whose turn it is.</string>
+    <string name="ocr_torch">Torch</string>
+    <string name="show_change_colours">Change colours. Now %1$s, next %2$s</string>
+    <string name="chat_setup">Names and colours</string>
+    <string name="participants_colour_selected">Colour: %1$s</string>
+    <string name="editor_error_key_braces">The name can’t contain curly brackets</string>
+    <string name="template_pharmacy_body">Hi! I\'m deaf. I\'m collecting a prescription for {patient}. Please {how to reply}.</string>
+    <string-array name="placeholder_thing_options">
+        <item>the toilets</item>
+        <item>the exit</item>
+        <item>the lift</item>
+        <item>the till</item>
+        <item>a member of staff</item>
+    </string-array>
+    <string-array name="placeholder_allergen_options">
+        <item>celery</item>
+        <item>gluten</item>
+        <item>crustaceans</item>
+        <item>eggs</item>
+        <item>fish</item>
+        <item>lupin</item>
+        <item>milk</item>
+        <item>molluscs</item>
+        <item>mustard</item>
+        <item>nuts</item>
+        <item>peanuts</item>
+        <item>sesame</item>
+        <item>soya</item>
+        <item>sulphites</item>
+    </string-array>
+</resources>
