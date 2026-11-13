@@ -3,6 +3,7 @@ package com.ravendarque.deaftly.ui.hub
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -58,10 +59,17 @@ private val chatOptions =
         HubOption(R.string.hub_side_by_side, R.string.hub_side_by_side_help, DeaftlyIcons.SideBySide, Route.Chat()),
     )
 
+private val supportOptions =
+    listOf(
+        HubOption(R.string.hub_help, R.string.hub_help_help, DeaftlyIcons.Help, Route.Help),
+    )
+
+private val allOptions = showOptions + chatOptions + supportOptions
+
 @Composable
 fun HubScreen(onNavigate: (Route) -> Unit) {
     var helpLabel by rememberSaveable { mutableStateOf<Int?>(null) }
-    val helpOption = (showOptions + chatOptions).firstOrNull { it.label == helpLabel }
+    val helpOption = allOptions.firstOrNull { it.label == helpLabel }
     Surface(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.safeDrawingPadding()) {
             Header(onSettings = { onNavigate(Route.Settings) })
@@ -81,11 +89,12 @@ fun HubScreen(onNavigate: (Route) -> Unit) {
                 )
                 EqualCardHeights(
                     perRow = cardsPerRow(),
-                    options = showOptions + chatOptions,
+                    options = allOptions,
                 ) { cardHeight ->
                     Column(verticalArrangement = Arrangement.spacedBy(Deaftly.spacing.space24)) {
                         Group(R.string.hub_show_heading, showOptions, cardHeight, onNavigate) { helpLabel = it.label }
                         Group(R.string.hub_chat_heading, chatOptions, cardHeight, onNavigate) { helpLabel = it.label }
+                        Group(R.string.hub_support_heading, supportOptions, cardHeight, onNavigate) { helpLabel = it.label }
                     }
                 }
             }
@@ -163,6 +172,7 @@ private fun Group(
     onNavigate: (Route) -> Unit,
     onHelp: (HubOption) -> Unit,
 ) {
+    val perRow = cardsPerRow()
     Column(verticalArrangement = Arrangement.spacedBy(Deaftly.spacing.space12)) {
         Text(
             text = stringResource(heading),
@@ -170,7 +180,7 @@ private fun Group(
             color = Deaftly.colors.ink,
             modifier = Modifier.semantics { heading() },
         )
-        options.chunked(cardsPerRow()).forEach { row ->
+        options.chunked(perRow).forEach { row ->
             Row(horizontalArrangement = Arrangement.spacedBy(Deaftly.spacing.space12)) {
                 row.forEach { option ->
                     HubOptionCard(
@@ -181,6 +191,7 @@ private fun Group(
                         onInfo = { onHelp(option) },
                     )
                 }
+                if (row.size < perRow) Spacer(Modifier.weight((perRow - row.size).toFloat()))
             }
         }
     }

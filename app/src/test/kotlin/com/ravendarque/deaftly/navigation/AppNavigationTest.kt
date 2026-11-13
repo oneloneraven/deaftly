@@ -486,6 +486,29 @@ class AppNavigationTest {
     }
 
     @Test
+    fun helpOpensTopicsThenAPageThenAnInternalLinkAndBackRetracesEachStep() {
+        showApp()
+
+        composeRule.onNodeWithText(text(R.string.hub_help)).performClick()
+        composeRule.waitUntil(LOAD_TIMEOUT_MILLIS) {
+            composeRule.onAllNodesWithText("Templates").fetchSemanticsNodes().isNotEmpty()
+        }
+        composeRule.onNodeWithText("Templates").performClick()
+        composeRule.waitUntil(LOAD_TIMEOUT_MILLIS) {
+            composeRule.onAllNodesWithText("Using a template").fetchSemanticsNodes().isNotEmpty()
+        }
+
+        pressSystemBack()
+        composeRule.waitUntil(LOAD_TIMEOUT_MILLIS) {
+            composeRule.onAllNodesWithText("Quick start").fetchSemanticsNodes().isNotEmpty()
+        }
+        composeRule.onNodeWithText("Templates").assertExists()
+
+        composeRule.onNodeWithContentDescription(text(R.string.back)).performClick()
+        assertOnHub()
+    }
+
+    @Test
     fun systemBackFromTheHubLeavesTheApp() {
         showApp()
 
@@ -533,6 +556,8 @@ class AppNavigationTest {
                 Route.Editor(),
                 Route.Ocr("order-food", "menu item"),
                 Route.Settings,
+                Route.Help,
+                Route.HelpPage("templates"),
                 Route.FirstRun,
             )
 

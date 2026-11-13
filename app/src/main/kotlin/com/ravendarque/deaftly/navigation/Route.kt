@@ -55,6 +55,14 @@ sealed interface Route : NavKey {
     data object Settings : Route
 
     @Serializable
+    data object Help : Route
+
+    @Serializable
+    data class HelpPage(
+        val slug: String,
+    ) : Route
+
+    @Serializable
     data object FirstRun : Route
 }
 
@@ -78,5 +86,6 @@ fun Route.titleRes(): Int =
         is Route.Ocr -> R.string.route_ocr
         is Route.Editor -> R.string.route_editor
         Route.Settings -> R.string.route_settings
+        Route.Help, is Route.HelpPage -> R.string.route_help
         Route.FirstRun -> R.string.first_run_title
     }

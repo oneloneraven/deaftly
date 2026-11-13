@@ -30,6 +30,8 @@ import com.ravendarque.deaftly.ui.fill.FillScreen
 import com.ravendarque.deaftly.ui.fill.FillViewModel
 import com.ravendarque.deaftly.ui.firstrun.FirstRunScreen
 import com.ravendarque.deaftly.ui.firstrun.FirstRunViewModel
+import com.ravendarque.deaftly.ui.help.HelpPageScreen
+import com.ravendarque.deaftly.ui.help.HelpTopicsScreen
 import com.ravendarque.deaftly.ui.home.HomeViewModel
 import com.ravendarque.deaftly.ui.home.TemplatesScreen
 import com.ravendarque.deaftly.ui.hub.HubScreen
@@ -105,8 +107,30 @@ private fun AppNavigationHost(
                     val viewModel = viewModel<SettingsViewModel>(factory = container.settingsViewModelFactory)
                     SettingsScreen(viewModel, onBack = { backStack.removeLastOrNull() })
                 }
+                helpEntries(container, backStack)
             },
     )
+}
+
+private fun EntryProviderScope<NavKey>.helpEntries(
+    container: AppContainer,
+    backStack: NavBackStack<NavKey>,
+) {
+    entry<Route.Help> {
+        HelpTopicsScreen(
+            container.helpRepository,
+            onOpen = { backStack.add(Route.HelpPage(it)) },
+            onBack = { backStack.removeLastOrNull() },
+        )
+    }
+    entry<Route.HelpPage> { route ->
+        HelpPageScreen(
+            route.slug,
+            container.helpRepository,
+            onOpenTopic = { backStack.add(Route.HelpPage(it)) },
+            onBack = { backStack.removeLastOrNull() },
+        )
+    }
 }
 
 private fun EntryProviderScope<NavKey>.conversationEntries(

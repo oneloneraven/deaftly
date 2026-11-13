@@ -49,6 +49,9 @@ class HubScreenshotTest {
     fun dialogLargeFontScale() = captureDialog(dark = false)
 
     @Test
+    fun dialogHelpLightTheme() = captureDialog(dark = false, option = "Help")
+
+    @Test
     @Config(fontScale = 2f)
     fun dialogLongestCopyLargeFontScale() = captureDialog(dark = false, option = "Use a template")
 
