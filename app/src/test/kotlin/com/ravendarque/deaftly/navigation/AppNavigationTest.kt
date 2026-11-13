@@ -50,7 +50,7 @@ private const val EXTRA_TEMPLATES = 12
 
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
-@Config(qualifiers = "w390dp-h1600dp")
+@Config(qualifiers = "en-rGB-w390dp-h1600dp")
 class AppNavigationTest {
     @get:Rule
     val composeRule = createAndroidComposeRule<ComponentActivity>()

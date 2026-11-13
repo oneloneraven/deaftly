@@ -34,7 +34,7 @@ private const val PACKAGE = "com.ravendarque.deaftly.ui.fill"
 
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
-@Config(qualifiers = "w390dp-h844dp")
+@Config(qualifiers = "en-rGB-w390dp-h844dp")
 class FillScreenshotTest {
     @get:Rule
     val composeRule = createComposeRule()

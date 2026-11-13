@@ -19,7 +19,7 @@ private const val MESSAGE = "Could I have a table for two by the window, please?
 
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
-@Config(qualifiers = "w390dp-h844dp")
+@Config(qualifiers = "en-rGB-w390dp-h844dp")
 class TypeShowScreenshotTest {
     @get:Rule
     val composeRule = createComposeRule()

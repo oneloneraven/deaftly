@@ -22,7 +22,7 @@ class TemplateStoreCorruptionTest {
         file: File,
     ) = DataStoreTemplateRepository(
         createTemplateStore(file, builtIns, scope, onCorruption = { reported += it }),
-        builtIns,
+        { builtIns },
     )
 
     @Test

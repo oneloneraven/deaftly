@@ -62,7 +62,7 @@ import kotlin.test.assertTrue
 
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
-@Config(qualifiers = "w390dp-h1600dp")
+@Config(qualifiers = "en-rGB-w390dp-h1600dp")
 class ChatScreenTest {
     @get:Rule
     val composeRule = createAndroidComposeRule<ComponentActivity>()
@@ -760,7 +760,7 @@ class ChatScreenTest {
     }
 
     @Test
-    @Config(qualifiers = "w300dp-h1600dp")
+    @Config(qualifiers = "en-rGB-w300dp-h1600dp")
     fun onANarrowScreenTheToolbarWrapsInsteadOfClippingButtons() {
         showOrdering()
 

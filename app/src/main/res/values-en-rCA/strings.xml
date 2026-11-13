@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="sign_language_interpreter_indefinite">an %1$s interpreter</string>
+    <string name="sign_language">ASL</string>
+    <string name="ocr_torch">Flashlight</string>
+    <string name="template_pharmacy_body">Hi! I\'m deaf. I\'m picking up a prescription for {patient}. Please {how to reply}.</string>
+    <string-array name="placeholder_thing_options">
+        <item>the washrooms</item>
+        <item>the exit</item>
+        <item>the elevator</item>
+        <item>the register</item>
+        <item>a staff member</item>
+    </string-array>
+    <string-array name="placeholder_allergen_options">
+        <item>celery</item>
+        <item>gluten</item>
+        <item>crustaceans</item>
+        <item>eggs</item>
+        <item>fish</item>
+        <item>lupin</item>
+        <item>milk</item>
+        <item>molluscs</item>
+        <item>mustard</item>
+        <item>tree nuts</item>
+        <item>peanuts</item>
+        <item>sesame</item>
+        <item>soy</item>
+        <item>sulphites</item>
+    </string-array>
+</resources>

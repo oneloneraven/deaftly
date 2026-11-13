@@ -19,6 +19,9 @@ private class BuiltInTemplateFactory(
             R.array.placeholder_how_to_reply_options,
         )
     private val name = placeholder("name", R.string.placeholder_name_label, PlaceholderType.Typing)
+    private val signLanguage = resources.getString(R.string.sign_language)
+    private val signLanguageInterpreter = resources.getString(R.string.sign_language_interpreter, signLanguage)
+    private val indefiniteInterpreter = resources.getString(R.string.sign_language_interpreter_indefinite, signLanguage)
 
     fun create(): List<Template> =
         listOf(
@@ -48,9 +51,9 @@ private class BuiltInTemplateFactory(
             ),
             template(
                 BuiltInIds.BSL_INTERPRETER,
-                R.string.template_bsl_interpreter_title,
+                signLanguageInterpreter,
                 R.string.category_everyday,
-                R.string.template_bsl_interpreter_body,
+                resources.getString(R.string.template_sign_language_interpreter_body, indefiniteInterpreter),
                 name,
                 howToReply,
             ),
@@ -94,8 +97,9 @@ private class BuiltInTemplateFactory(
                     "how I communicate",
                     R.string.placeholder_how_i_communicate_label,
                     PlaceholderType.Choices,
-                    R.array.placeholder_how_i_communicate_options,
+                    R.array.placeholder_how_i_communicate_other_options,
                     repeatable = true,
+                    leadingOptions = listOf(signLanguageInterpreter),
                 ),
                 howToReply,
             ),
@@ -134,11 +138,12 @@ private class BuiltInTemplateFactory(
         type: PlaceholderType,
         options: Int? = null,
         repeatable: Boolean = false,
+        leadingOptions: List<String> = emptyList(),
     ) = Placeholder(
         key = key,
         label = resources.getString(label),
         type = type,
-        options = options?.let { resources.getStringArray(it).toList() }.orEmpty(),
+        options = leadingOptions + options?.let { resources.getStringArray(it).toList() }.orEmpty(),
         repeatable = repeatable,
     )
 
@@ -149,11 +154,20 @@ private class BuiltInTemplateFactory(
         body: Int,
         vararg placeholders: Placeholder,
         pinned: Boolean = false,
+    ) = template(id, resources.getString(title), category, resources.getString(body), *placeholders, pinned = pinned)
+
+    private fun template(
+        id: String,
+        title: String,
+        category: Int,
+        body: String,
+        vararg placeholders: Placeholder,
+        pinned: Boolean = false,
     ) = Template(
         id = id,
-        title = resources.getString(title),
+        title = title,
         category = resources.getString(category),
-        body = resources.getString(body),
+        body = body,
         pinned = pinned,
         builtIn = true,
         placeholders = placeholders.associateBy { it.key },

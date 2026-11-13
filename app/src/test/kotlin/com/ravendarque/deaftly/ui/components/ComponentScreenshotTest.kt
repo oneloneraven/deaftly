@@ -33,7 +33,7 @@ private const val PACKAGE = "com.ravendarque.deaftly.ui.components"
 
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
-@Config(qualifiers = "w390dp-h1600dp")
+@Config(qualifiers = "en-rGB-w390dp-h1600dp")
 abstract class ComponentScreenshotTest {
     @get:Rule
     val composeRule = createComposeRule()

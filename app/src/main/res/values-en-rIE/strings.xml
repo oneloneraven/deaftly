@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="sign_language_interpreter_indefinite">an %1$s interpreter</string>
+    <string name="sign_language">ISL</string>
+</resources>

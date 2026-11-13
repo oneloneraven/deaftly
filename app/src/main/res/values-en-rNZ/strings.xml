@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="sign_language_interpreter_indefinite">an %1$s interpreter</string>
+    <string name="sign_language">NZSL</string>
+    <string-array name="placeholder_allergen_options">
+        <item>celery</item>
+        <item>gluten</item>
+        <item>crustaceans</item>
+        <item>eggs</item>
+        <item>fish</item>
+        <item>lupin</item>
+        <item>milk</item>
+        <item>molluscs</item>
+        <item>mustard</item>
+        <item>tree nuts</item>
+        <item>peanuts</item>
+        <item>sesame</item>
+        <item>soy</item>
+        <item>sulphites</item>
+    </string-array>
+</resources>

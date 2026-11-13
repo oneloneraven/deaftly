@@ -17,7 +17,7 @@ import org.robolectric.annotation.GraphicsMode
 
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
-@Config(qualifiers = "w390dp-h844dp")
+@Config(qualifiers = "en-rGB-w390dp-h844dp")
 class HubScreenshotTest {
     @get:Rule
     val composeRule = createComposeRule()

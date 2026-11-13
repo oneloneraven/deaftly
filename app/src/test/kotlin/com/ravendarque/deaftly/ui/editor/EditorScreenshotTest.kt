@@ -20,7 +20,7 @@ private const val PACKAGE = "com.ravendarque.deaftly.ui.editor"
 
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
-@Config(qualifiers = "w390dp-h1250dp")
+@Config(qualifiers = "en-rGB-w390dp-h1250dp")
 class EditorScreenshotTest {
     @get:Rule
     val composeRule = createComposeRule()
@@ -53,7 +53,7 @@ class EditorScreenshotTest {
     fun newTemplateDarkTheme() = screen(null, dark = true)
 
     @Test
-    @Config(fontScale = 2f, qualifiers = "w390dp-h1500dp")
+    @Config(fontScale = 2f, qualifiers = "en-rGB-w390dp-h1500dp")
     fun newTemplateLargeFontScale() = screen(null, dark = false)
 
     @Test
@@ -63,15 +63,15 @@ class EditorScreenshotTest {
     fun orderFoodWithSettingsDarkTheme() = screen("order-food", dark = true, interact = ::openMenuItem)
 
     @Test
-    @Config(fontScale = 2f, qualifiers = "w390dp-h1900dp")
+    @Config(fontScale = 2f, qualifiers = "en-rGB-w390dp-h1900dp")
     fun orderFoodWithSettingsLargeFontScale() = screen("order-food", dark = false, interact = ::openMenuItem)
 
     @Test
-    @Config(qualifiers = "w390dp-h1700dp")
+    @Config(qualifiers = "en-rGB-w390dp-h1700dp")
     fun choicesPlaceholderWithOptionsLightTheme() = screen("my-note", dark = false, interact = ::openThing)
 
     @Test
-    @Config(qualifiers = "w390dp-h1700dp")
+    @Config(qualifiers = "en-rGB-w390dp-h1700dp")
     fun choicesPlaceholderWithOptionsDarkTheme() = screen("my-note", dark = true, interact = ::openThing)
 
     @Test

@@ -45,7 +45,7 @@ class BuiltInUpgradeTest {
     private fun repository(
         shipped: List<Template>,
         scope: CoroutineScope,
-    ) = DataStoreTemplateRepository(store(shipped, scope), shipped)
+    ) = DataStoreTemplateRepository(store(shipped, scope), { shipped })
 
     private fun document(
         templates: List<Template>,

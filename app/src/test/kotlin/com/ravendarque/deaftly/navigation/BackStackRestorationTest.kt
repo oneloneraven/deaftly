@@ -21,7 +21,7 @@ private const val LOAD_TIMEOUT_MILLIS = 10_000L
 
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
-@Config(qualifiers = "w390dp-h1600dp")
+@Config(qualifiers = "en-rGB-w390dp-h1600dp")
 class BackStackRestorationTest {
     @get:Rule
     val composeRule = createAndroidComposeRule<MainActivity>()
