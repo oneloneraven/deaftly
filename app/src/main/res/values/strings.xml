@@ -3,12 +3,8 @@
     <string name="app_name">Deaftly</string>
     <string name="back">Back</string>
     <string name="wordmark">deaftly</string>
-    <string name="route_fill">Fill in a template</string>
-    <string name="route_show">Show a message</string>
-    <string name="route_chat">Chat</string>
     <string name="route_templates">Templates</string>
     <string name="route_ocr">Read text</string>
-    <string name="route_editor">Edit templates</string>
     <string name="route_settings">Settings</string>
     <string name="route_help">Help</string>
     <string name="route_share">Share Deaftly</string>
@@ -60,7 +56,6 @@
     <string name="share_link_button">Share link</string>
     <string name="hub_help_start">Start</string>
     <string name="hub_help_close">Close</string>
-    <string name="home_face_to_face">Face to face</string>
     <string name="chip_state_empty">Empty</string>
     <string name="chip_state_filled">Filled in</string>
     <string name="chip_state_focused">Editing</string>
