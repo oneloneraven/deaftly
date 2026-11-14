@@ -19,6 +19,7 @@ constexpr int kRecHeight = 48;
 constexpr int kRecMinWidth = 16;
 constexpr int kRecMaxWidth = 3200;
 constexpr int kMaxCandidates = 1000;
+constexpr int kMinLeaderDots = 4;
 
 struct P {
     float x, y;
@@ -384,6 +385,22 @@ void Engine::recogniseLine(const uint8_t* rgb, int width, int height, const Cand
     line.confidence = probSum / (lastTok - firstTok);
     for (int i = 0; i < 8; i++) line.quad[i] = q[i];
 
+    auto leaderDots = [&](const Token& t) {
+        if (t.id - 1 >= (int)dict_.size()) return 0;
+        const std::string& c = dict_[t.id - 1];
+        if (c == "\u2026") return 3;
+        return c == "." || c == "\u00b7" || c == "_" ? 1 : 0;
+    };
+    // Leaders set tight against a menu item become their own word; three dots or fewer is an ellipsis and stays.
+    std::vector<bool> leader(tokens.size(), false);
+    for (size_t i = firstTok; i < lastTok;) {
+        size_t j = i;
+        int dots = 0;
+        while (j < lastTok && leaderDots(tokens[j]) > 0) dots += leaderDots(tokens[j++]);
+        if (dots >= kMinLeaderDots) std::fill(leader.begin() + i, leader.begin() + j, true);
+        i = std::max(j, i + 1);
+    }
+
     struct Span {
         size_t from, to;
     };
@@ -393,6 +410,9 @@ void Engine::recogniseLine(const uint8_t* rgb, int width, int height, const Cand
         if (i == lastTok || isSpace(tokens[i])) {
             if (i > from) spans.push_back({from, i});
             from = i + 1;
+        } else if (i > from && leader[i] != leader[i - 1]) {
+            spans.push_back({from, i});
+            from = i;
         }
     }
     const float spacing = std::max(step, (centre(tokens[lastTok - 1]) - centre(tokens[firstTok])) / std::max<size_t>(1, lastTok - firstTok - 1));
