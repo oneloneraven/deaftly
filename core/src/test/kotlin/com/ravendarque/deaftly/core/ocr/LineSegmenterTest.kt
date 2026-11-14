@@ -52,8 +52,61 @@ class LineSegmenterTest {
     }
 
     @Test
+    fun spacedLeaderDotsSplitTheLineAndAreDropped() {
+        val original =
+            line(
+                "Penne . . . . 11.00",
+                word("Penne", 0f, 50f),
+                word(".", 56f, 60f),
+                word(".", 66f, 70f),
+                word(".", 76f, 80f),
+                word(".", 86f, 90f),
+                word("11.00", 96f, 140f),
+            )
+
+        assertEquals(listOf("Penne", "11.00"), LineSegmenter.split(original).map { it.text })
+    }
+
+    @Test
+    fun ellipsisCharactersCountAsLeaders() {
+        val original = line("Penne …… 11.00", word("Penne", 0f, 50f), word("……", 56f, 80f), word("11.00", 86f, 130f))
+
+        assertEquals(listOf("Penne", "11.00"), LineSegmenter.split(original).map { it.text })
+    }
+
+    @Test
+    fun aFewDotsAcrossAWideGapAreReadAsLeaders() {
+        val original =
+            line("Bruschetta . £6.50", word("Bruschetta", 0f, 100f), word(".", 108f, 112f), word("£6.50", 120f, 170f))
+
+        assertEquals(listOf("Bruschetta", "£6.50"), LineSegmenter.split(original).map { it.text })
+    }
+
+    @Test
+    fun aFewDotsAcrossANarrowGapAreKeptAsText() {
+        val original = line("Est . 1987", word("Est", 0f, 30f), word(".", 32f, 36f), word("1987", 40f, 80f))
+
+        assertSame(original, LineSegmenter.split(original).single())
+    }
+
+    @Test
+    fun aMiddleDotSeparatorIsKeptAcrossAWideGap() {
+        val original =
+            line("Fresh bread · Cakes", word("Fresh", 0f, 50f), word("bread", 56f, 100f), word("·", 108f, 112f), word("Cakes", 120f, 170f))
+
+        assertSame(original, LineSegmenter.split(original).single())
+    }
+
+    @Test
+    fun anEllipsisOnAWordIsKept() {
+        val original = line("Back soon... sorry", word("Back", 0f, 40f), word("soon...", 48f, 104f), word("sorry", 110f, 160f))
+
+        assertSame(original, LineSegmenter.split(original).single())
+    }
+
+    @Test
     fun aWideGapBetweenColumnsSplitsTheLine() {
-        val original = line("Chips £3.60", word("Chips", 0f, 50f), word("£3.60", 90f, 140f))
+        val original = line("Chips £3.60", word("Chips", 0f, 50f), word("£3.60", 75f, 125f))
 
         assertEquals(listOf("Chips", "£3.60"), LineSegmenter.split(original).map { it.text })
     }
