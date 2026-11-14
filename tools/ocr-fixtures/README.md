@@ -1,13 +1,13 @@
 # OCR fixtures
 
-A set of 37 synthetic phone-camera frames with ground truth, used to compare OCR engines (ML Kit and PaddleOCR) on the same input. The images are generated, not photographed: each one is a flat designed scene (a menu, shop sign, receipt or product label) pushed through a simulated camera.
+A set of 38 synthetic phone-camera frames with ground truth, used to compare OCR engines (ML Kit and PaddleOCR) on the same input. The images are generated, not photographed: each one is a flat designed scene (a menu, shop sign, receipt or product label) pushed through a simulated camera.
 
 | Category | Count | Examples |
 |---|---|---|
 | `menu` | 12 | two-column menu with dotted leaders, chalkboard, kraft paper, low light |
 | `sign` | 10 | bakery, butcher, barber (glow), pharmacy opening hours, A-board |
 | `receipt` | 8 | supermarket, café, petrol, parking ticket, low-light return slip |
-| `label` | 7 | cereal nutrition table, medicine dosage, soup tin, shampoo ingredients |
+| `label` | 8 | cereal nutrition table, medicine dosage, antibiotic dispensing label, soup tin, shampoo ingredients |
 
 The committed output lives in `app/src/androidTest/assets/ocr-fixtures/`, one `<id>.jpg` and one `<id>.json` per fixture.
 
