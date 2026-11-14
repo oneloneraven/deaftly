@@ -91,6 +91,23 @@ class LiveRecognitionTest {
         }
 
     @Test
+    fun aMenuItemAndItsPriceBecomeSeparatePhrases() =
+        runTest {
+            val words =
+                listOf(
+                    TextWord("Soup", box(10f, 10f, 30f, 20f)),
+                    TextWord("......", box(32f, 10f, 60f, 20f)),
+                    TextWord("4.50", box(62f, 10f, 80f, 20f)),
+                )
+            val fake = FakeTextRecogniser(result(line("Soup ...... 4.50", box(10f, 10f, 80f, 20f), words)))
+
+            val phrases = LiveRecognition(fake).process(frame(100, 100))
+
+            assertEquals(listOf("Soup", "4.50"), phrases.map { it.text })
+            assertEquals(box(0.1f, 0.1f, 0.3f, 0.2f), phrases[0].quad.boundingBox())
+        }
+
+    @Test
     fun blankLinesAreIgnored() =
         runTest {
             val fake = FakeTextRecogniser(result(line("  ", box(0f, 0f, 5f, 5f)), line("Tea", box(0f, 10f, 30f, 20f))))
