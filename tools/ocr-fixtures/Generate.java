@@ -1905,6 +1905,8 @@ public class Generate {
                 new Photo().rot(4).yaw(0.05).pitch(-0.03).blur(0.9).noise(2.6).gradient(0.12, -30).ground(Ground.WOOD)));
         all.add(label("label-tea-box", false, new String[] {"serif", "gold-on-red", "brewing-guide", "small-print"}, labelTea(),
                 new Photo().rot(-11).yaw(-0.07).pitch(0.04).blur(1.0).noise(3.0).gradient(0.2, 80).ground(Ground.PLASTER)));
+        all.add(label("label-antibiotic", true, new String[] {"dispensing-label", "drug-name", "dosage", "small-print"}, labelAntibiotic(),
+                new Photo().rot(3).yaw(-0.04).pitch(0.03).blur(0.8).noise(2.6).gradient(0.12, 50).ground(Ground.PLASTER)));
         return all;
     }
 
@@ -2075,6 +2077,39 @@ public class Generate {
             d.maxScale = 1.25;
             d.centreVertically = true;
             d.render(s, 60, 54);
+            return s;
+        };
+    }
+
+    static Function<Long, Scene> labelAntibiotic() {
+        return seed -> {
+            Scene s = new Scene(880, 1180, seed);
+            s.surface(new Color(252, 252, 250), 2, 3);
+            Color navy = new Color(24, 54, 110);
+            s.bgG.setColor(navy);
+            s.bgG.fillRect(0, 0, 880, 16);
+            s.bgG.fillRect(0, 1164, 880, 16);
+            Sty t = new Sty(Face.ATKINSON, false, 24, INK);
+            Sty tb = new Sty(Face.ATKINSON, true, 24, INK);
+            Sty sm = new Sty(Face.ATKINSON, false, 17, new Color(50, 54, 58));
+            Doc d = new Doc();
+            d.header.add(head("Meadowbank Pharmacy", new Sty(Face.ATKINSON, true, 40, navy), Align.L, 0));
+            d.header.add(head("14 Station Road, Leeds LS1 4AB", sm, Align.L, 0));
+            d.header.add(head("Tel 0113 496 0123", sm, Align.L, 0));
+            d.header.add(gap(10));
+            d.header.add(rule(navy, 2));
+            d.body.add(head("Layla Hassan", new Sty(Face.ATKINSON, true, 38, INK), Align.L, 14));
+            d.body.add(head("Flucloxacillin 500mg Capsules", new Sty(Face.ATKINSON, true, 31, navy), Align.L, 14));
+            d.body.add(head("Quantity: 28 capsules", t, Align.L, 8));
+            d.body.add(para("Take ONE capsule FOUR times a day, one hour before food or on an empty stomach. Space the doses evenly through the day.", tb, Align.L));
+            d.body.add(para("Complete the course, even if you feel better.", t, Align.L));
+            d.body.add(rule(navy, 1.2));
+            d.body.add(head("Dispensed: 12/11/2025", t, Align.L, 6));
+            d.body.add(head("Use by: 12/11/2026", t, Align.L, 0));
+            d.body.add(para("Keep out of the sight and reach of children. Store below 25°C. Tell your pharmacist if you have an allergy to penicillin.", sm, Align.L));
+            d.maxScale = 1;
+            d.centreVertically = true;
+            d.render(s, 190, 54);
             return s;
         };
     }
