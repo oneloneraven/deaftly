@@ -7,8 +7,10 @@
     "*.md",
     "app/src/test/",
     "core/src/test/",
+    "app/src/androidTest/",
     "config/detekt/",
-    ".editorconfig"
+    ".editorconfig",
+    "tools/"
   ],
   "noneForbidden": []
 }

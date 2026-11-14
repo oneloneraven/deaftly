@@ -194,7 +194,7 @@ class WebsiteScreenshotTest {
     fun faceToFace() {
         val typing = "No, we haven't booked. Is there"
         val field = TextFieldState(typing, TextRange(typing.length))
-        shot { FaceToFaceContent(listOf(MESSAGE), field, onSend = {}, onEnd = {}, onContinue = {}) }
+        shot { FaceToFaceContent(emptyList(), field, onSend = {}, onEnd = {}, onContinue = {}) }
     }
 
     @Test
