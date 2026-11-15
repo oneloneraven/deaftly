@@ -8,6 +8,7 @@ public sealed interface RenderedPart {
     public data class Value(
         val key: String,
         val text: String,
+        val valueSpans: List<TextSpan> = listOf(TextSpan(0, text.length)),
     ) : RenderedPart
 
     public data class Unfilled(
@@ -38,13 +39,15 @@ public data class Rendered(
         buildList {
             var offset = 0
             for (part in parts) {
-                val length =
+                if (part is RenderedPart.Value) {
+                    part.valueSpans.forEach { span -> add(TextSpan(offset + span.start, offset + span.end)) }
+                }
+                offset +=
                     when (part) {
                         is RenderedPart.Text -> part.text.length
-                        is RenderedPart.Value -> part.text.length.also { add(TextSpan(offset, offset + it)) }
+                        is RenderedPart.Value -> part.text.length
                         is RenderedPart.Unfilled -> part.label.length
                     }
-                offset += length
             }
         }
 
@@ -66,12 +69,12 @@ public object TemplateRenderer {
 
                 is TemplateSegment.PlaceholderRef -> {
                     val placeholder = template.placeholder(segment.key)
-                    val text = valueText(placeholder, fill)
-                    if (text.isEmpty()) {
+                    val values = values(placeholder, fill)
+                    if (values.isEmpty()) {
                         unfilled += segment.key
                         parts += RenderedPart.Unfilled(segment.key, placeholder.label)
                     } else {
-                        parts += RenderedPart.Value(segment.key, text)
+                        parts += joined(segment.key, values, placeholder.join)
                     }
                 }
             }
@@ -82,26 +85,30 @@ public object TemplateRenderer {
     public fun join(
         values: List<String>,
         join: Join = Join.And,
-    ): String {
-        val cleaned = values.map { it.trim() }.filter { it.isNotEmpty() }
-        return when (cleaned.size) {
-            0 -> ""
-            1 -> cleaned.first()
-            else -> cleaned.dropLast(1).joinToString(", ") + " ${join.word} " + cleaned.last()
-        }
+    ): String = joined("", cleaned(values), join).text
+
+    private fun joined(
+        key: String,
+        values: List<String>,
+        join: Join,
+    ): RenderedPart.Value {
+        val text = StringBuilder()
+        val spans =
+            values.mapIndexed { index, value ->
+                when {
+                    index == 0 -> Unit
+                    index == values.lastIndex -> text.append(" ${join.word} ")
+                    else -> text.append(", ")
+                }
+                TextSpan(text.length, text.length + value.length).also { text.append(value) }
+            }
+        return RenderedPart.Value(key, text.toString(), spans)
     }
 
-    private fun valueText(
+    private fun cleaned(values: List<String>) = values.map { it.trim() }.filter { it.isNotEmpty() }
+
+    private fun values(
         placeholder: Placeholder,
         fill: TemplateFill,
-    ): String =
-        if (placeholder.repeatable) {
-            join(fill.values(placeholder.key), placeholder.join)
-        } else {
-            fill
-                .values(placeholder.key)
-                .map { it.trim() }
-                .firstOrNull { it.isNotEmpty() }
-                .orEmpty()
-        }
+    ): List<String> = cleaned(fill.values(placeholder.key)).let { if (placeholder.repeatable) it else it.take(1) }
 }

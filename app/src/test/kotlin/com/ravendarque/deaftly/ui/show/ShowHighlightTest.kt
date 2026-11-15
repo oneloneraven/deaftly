@@ -1,43 +1,33 @@
 package com.ravendarque.deaftly.ui.show
 
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import com.ravendarque.deaftly.navigation.HighlightRange
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class ShowHighlightTest {
-    private val background = Color(0xFFFFE15C)
-    private val foreground = Color.Black
-
     @Test
-    fun highlightsExactlyTheGivenRanges() {
-        val styled = highlighted("Hi Sam, hi.", listOf(HighlightRange(3, 6)), background, foreground)
+    fun emboldensExactlyTheGivenRangesWithoutColouringThem() {
+        val styled = emphasised("Hi Sam, hi.", listOf(HighlightRange(3, 6)))
 
         assertEquals("Hi Sam, hi.", styled.text)
         assertEquals(listOf(3 to 6), styled.spanStyles.map { it.start to it.end })
-        assertEquals(
-            background,
-            styled.spanStyles
-                .single()
-                .item.background,
-        )
-        assertEquals(
-            foreground,
-            styled.spanStyles
-                .single()
-                .item.color,
-        )
+        val style = styled.spanStyles.single().item
+        assertEquals(FontWeight.Bold, style.fontWeight)
+        assertEquals(Color.Unspecified, style.background)
+        assertEquals(Color.Unspecified, style.color)
     }
 
     @Test
     fun noRangesMeansNoStyling() {
-        assertEquals(emptyList(), highlighted("Plain text", emptyList(), background, foreground).spanStyles)
+        assertEquals(emptyList(), emphasised("Plain text", emptyList()).spanStyles)
     }
 
     @Test
     fun rangesOutsideTheTextAreClampedOrDropped() {
         val ranges = listOf(HighlightRange(2, 99), HighlightRange(50, 60), HighlightRange(-4, 0))
-        val styled = highlighted("Short", ranges, background, foreground)
+        val styled = emphasised("Short", ranges)
 
         assertEquals(listOf(2 to 5), styled.spanStyles.map { it.start to it.end })
     }

@@ -17,6 +17,7 @@ import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipeDown
 import androidx.compose.ui.test.swipeUp
 import androidx.compose.ui.test.tryPerformAccessibilityChecks
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Density
@@ -96,7 +97,7 @@ class ShowScreenTest {
     }
 
     @Test
-    fun highlightedTextPassesAccessibilityChecksInEveryScheme() {
+    fun emphasisedTextPassesAccessibilityChecksInEveryScheme() {
         val start = SHORT.indexOf("type on my phone")
         val highlights = listOf(HighlightRange(start, start + "type on my phone".length))
         show(SHORT, highlights = highlights)
@@ -191,9 +192,9 @@ class ShowScreenTest {
             val measurer = rememberTextMeasurer()
             val density = LocalDensity.current
             val area = Constraints(maxWidth = 1000, maxHeight = 1400)
-            short = fitFontSizeSp(SHORT, area, density, measurer)
-            long = fitFontSizeSp(LONG, area, density, measurer)
-            wide = fitFontSizeSp("Supercalifragilisticexpialidocious", area, Density(1f), measurer)
+            short = fitFontSizeSp(AnnotatedString(SHORT), area, density, measurer)
+            long = fitFontSizeSp(AnnotatedString(LONG), area, density, measurer)
+            wide = fitFontSizeSp(AnnotatedString("Supercalifragilisticexpialidocious"), area, Density(1f), measurer)
         }
         composeRule.waitForIdle()
 

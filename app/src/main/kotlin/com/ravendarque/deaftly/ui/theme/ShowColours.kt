@@ -9,8 +9,6 @@ data class ShowColours(
     val background: Color,
     val text: Color,
     val muted: Color,
-    val markBackground: Color,
-    val markText: Color,
 )
 
 private val BlackOnWhite =
@@ -18,8 +16,6 @@ private val BlackOnWhite =
         background = Color(0xFFFFFFFF),
         text = Color(0xFF000000),
         muted = Color(0xFF55555E),
-        markBackground = Color(0xFFFFE15C),
-        markText = Color(0xFF000000),
     )
 
 private val WhiteOnBlack =
@@ -27,8 +23,6 @@ private val WhiteOnBlack =
         background = Color(0xFF000000),
         text = Color(0xFFFFFFFF),
         muted = Color(0xFFA9A9B3),
-        markBackground = Color(0xFF6A4596),
-        markText = Color(0xFFFFFFFF),
     )
 
 private val YellowOnBlack =
@@ -36,8 +30,6 @@ private val YellowOnBlack =
         background = Color(0xFF000000),
         text = Color(0xFFFFE15C),
         muted = Color(0xFFBDB27A),
-        markBackground = Color(0xFFFFE15C),
-        markText = Color(0xFF000000),
     )
 
 val ShowScheme.colours: ShowColours
