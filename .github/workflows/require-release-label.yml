@@ -39,6 +39,7 @@ jobs:
           fi
 
       - name: Verify a released PR has a What's new section
+        if: github.event.pull_request.user.login != 'dependabot[bot]'
         env:
           GH_TOKEN: ${{ github.token }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
