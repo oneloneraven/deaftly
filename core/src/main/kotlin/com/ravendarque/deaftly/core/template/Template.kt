@@ -2,7 +2,12 @@ package com.ravendarque.deaftly.core.template
 
 public enum class PlaceholderType { Choices, Typing, Camera }
 
-public enum class Join { And, Or }
+public enum class Join(
+    public val word: String,
+) {
+    And("and"),
+    Or("or"),
+}
 
 public data class Placeholder(
     val key: String,

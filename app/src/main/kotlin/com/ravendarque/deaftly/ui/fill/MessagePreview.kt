@@ -98,7 +98,7 @@ private fun MutableList<PreviewToken>.addFilled(
     }
     val last = part.values.lastIndex
     part.values.forEachIndexed { index, value ->
-        if (index > 0 && index == last) this += PreviewToken.Word("and", gapBefore = true)
+        if (index > 0 && index == last) this += PreviewToken.Word(part.placeholder.join.word, gapBefore = true)
         this +=
             PreviewToken.Chip(
                 placeholder = part.placeholder,
