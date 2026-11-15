@@ -31,6 +31,9 @@ Every PR needs exactly one label before it can merge. A required check
   `release: none` when any changed file is outside the allowlist in
   `.github/release-paths.json`, and always on paths that deploy on their own
   (such as infrastructure and database migrations).
+  The one exception is Dependabot: its PRs are always `release: none`, even
+  when they bump app dependencies, so updates ship with the next real
+  release instead of cutting one of their own.
 
 The test is "would someone using this notice or need to know?" Any yes is at
 least a patch.

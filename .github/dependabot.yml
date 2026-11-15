@@ -6,7 +6,7 @@ updates:
     schedule:
       interval: "weekly"
     labels:
-      - "release: patch"
+      - "release: none"
     cooldown:
       default-days: 3
     groups:
