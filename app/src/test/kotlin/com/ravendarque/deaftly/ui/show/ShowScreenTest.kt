@@ -5,10 +5,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.test.junit4.accessibility.enableAccessibilityChecks
 import androidx.compose.ui.test.junit4.v2.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
@@ -17,10 +17,10 @@ import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipeDown
 import androidx.compose.ui.test.swipeUp
 import androidx.compose.ui.test.tryPerformAccessibilityChecks
-import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.rememberTextMeasurer
-import androidx.compose.ui.unit.Constraints
-import androidx.compose.ui.unit.Density
+import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.text.TextLayoutResult
+import androidx.compose.ui.unit.TextUnit
+import androidx.compose.ui.unit.sp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.ravendarque.deaftly.core.settings.ShowScheme
 import com.ravendarque.deaftly.navigation.HighlightRange
@@ -36,6 +36,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 private const val SHORT = "Hi! I'm deaf. I'd like to check in. My name is Sam. Please type on my phone."
+private const val MAX_PAGES = 100
 private val LONG = List(150) { "Could I have the pasta arrabbiata please? I am deaf." }.joinToString(" ")
 
 @RunWith(AndroidJUnit4::class)
@@ -184,22 +185,52 @@ class ShowScreenTest {
     }
 
     @Test
-    fun fitsShortTextLargeAndLongTextAtTheMinimum() {
-        var short = 0
-        var long = 0
-        var wide = 0
+    fun shortAndLongTextShareOneSize() {
+        var text by mutableStateOf(SHORT)
         composeRule.setContent {
-            val measurer = rememberTextMeasurer()
-            val density = LocalDensity.current
-            val area = Constraints(maxWidth = 1000, maxHeight = 1400)
-            short = fitFontSizeSp(AnnotatedString(SHORT), area, density, measurer)
-            long = fitFontSizeSp(AnnotatedString(LONG), area, density, measurer)
-            wide = fitFontSizeSp(AnnotatedString("Supercalifragilisticexpialidocious"), area, Density(1f), measurer)
+            AppTheme { ShowContent(text, ShowScheme.BlackOnWhite, onCycleScheme = {}, onClose = {}, onContinueAsChat = {}) }
         }
         composeRule.waitForIdle()
+        val short = fontSizeOf(SHORT)
+        text = LONG
+        composeRule.waitForIdle()
+        val long = fontSizeOf(LONG)
 
-        assertTrue(short > MIN_SHOW_FONT_SP, "short text fills the space: $short")
-        assertEquals(MIN_SHOW_FONT_SP, long)
-        assertTrue(wide in MIN_SHOW_FONT_SP..MAX_SHOW_FONT_SP)
+        assertEquals(SHOW_FONT_SP.sp, short)
+        assertEquals(short, long)
+    }
+
+    @Test
+    fun shortTextHasNoMoreBelowCue() {
+        show(SHORT)
+
+        composeRule.onNodeWithText("More below").assertDoesNotExist()
+    }
+
+    @Test
+    fun moreBelowShowsUntilTheEnd() {
+        show(LONG)
+        composeRule.onRoot().tryPerformAccessibilityChecks()
+
+        var taps = 0
+        while (composeRule.onAllNodesWithText("More below").fetchSemanticsNodes().isNotEmpty()) {
+            check(++taps < MAX_PAGES) { "never reached the end" }
+            composeRule.onNodeWithText("More below").performClick()
+            composeRule.waitForIdle()
+        }
+
+        assertTrue(taps > 1, "long text took $taps pages")
+        assertEquals(0, closes)
+    }
+
+    private fun fontSizeOf(text: String): TextUnit {
+        val results = mutableListOf<TextLayoutResult>()
+        composeRule
+            .onNodeWithText(text)
+            .fetchSemanticsNode()
+            .config[SemanticsActions.GetTextLayoutResult]
+            .action
+            ?.invoke(results)
+        return results.single().layoutInput.style.fontSize
     }
 }

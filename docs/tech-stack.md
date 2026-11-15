@@ -31,7 +31,7 @@ The repository is set up with the `project-bootstrap` plugin, using the `core` m
 | Light, dark and system theme | `UiModeManager.setApplicationNightMode` on Android 12+, **AppCompat** `AppCompatDelegate.setDefaultNightMode` below ([Android Developers](https://developer.android.com/develop/ui/views/theming/darktheme#change-themes)). The stored setting is applied at startup and on every change. | On Android 12+ the system applies the chosen mode to the splash and starting window as well. Below Android 12 the system draws the starting window from the system's own theme before any app code runs, so it can show the other theme for about a second; AppCompat then applies the chosen mode from the activity's first frame. AppCompat is Jetpack (Google), covered by ADR-0002. |
 | Rich text | Own minimal span model (bold, italic, highlight, quote) rendered with `AnnotatedString` | Four formats don't justify a library. |
 | Help pages | The repository's `help/*.md`, copied into the app's assets at build time by `CopyHelpTask`, rendered with **multiplatform-markdown-renderer** (`com.mikepenz:multiplatform-markdown-renderer-m3`, Apache-2.0), which parses with JetBrains' `markdown` (Apache-2.0) | One source for the website and the app (#187). Screened under ADR-0002 on 2026-11-13: Mike Penz (individual) and JetBrains aren't on the BDS consumer boycott, pressure or No Tech for Apartheid lists. Chosen over compose-richtext (less active) and Markwon (unmaintained since 2021, View-based). |
-| Show-mode text sizing | Compose auto-size text with a minimum size, then scrolling | S2. |
+| Show-mode text sizing | One fixed size (56 sp, capped at 84 dp under large font scales), then scrolling with a "More below" cue | S2. |
 
 ### Modules
 
