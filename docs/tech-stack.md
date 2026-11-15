@@ -10,7 +10,7 @@ The repository is set up with the `project-bootstrap` plugin, using the `core` m
 | Driver | Source |
 |--------|--------|
 | Android only | C1 |
-| Offline, on-device, no backend, no telemetry | C3, C4, N7 |
+| On-device processing, no telemetry | C4, N7 |
 | Live, low-latency OCR (under 500 ms) | O1, N2 |
 | Fast start (under 1 s); accessible (WCAG 2.2 AA, system font scale) | N1, N3 |
 | Simplest thing that works | KISS principle |
@@ -48,7 +48,7 @@ The first engineering work after bootstrap. It compares the two engines on a mid
 | Word and line accuracy on the fixtures | Measured and compared |
 | Block, line and word bounding boxes | Required for O2 and O3 |
 | APK size added | Measured |
-| Network activity with no `INTERNET` permission | None observed, and no crashes |
+| Network activity from the engine | None observed, and no crashes |
 | Screening (ADR-0002) | Recorded for the engine and its inference runtime |
 
 **Screening notes for the spike:**
@@ -93,7 +93,7 @@ These come from the `android-toolchain` module (D9) and the plugin's `core` modu
 
 ## 7. Security and privacy
 
-- No network access, enforced by the manifest. Only the launcher activity is exported. R8 on release builds.
+- Permissions are limited to the allowlist ([ADR-0011](adr/0011-review-permissions-against-an-allowlist.md)), enforced on the release manifest. Only the launcher activity is exported. R8 on release builds.
 - The release signing key is held in GitHub encrypted secrets and created by the owner as a manual step; it is never committed.
 - Logs never contain user content (templates, OCR text, chat messages).
 - The threat model covers the device, the camera and the release pipeline; there is no backend. The record of processing states that no personal data leaves the device, apart from the user's own Android backup (D7).

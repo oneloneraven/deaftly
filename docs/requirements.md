@@ -15,7 +15,7 @@ Deaftly is an Android app that helps deaf people communicate quickly and with li
 - **KISS.** The MVP covers the three PRD features and nothing else.
 - **Speed under pressure.** Every core task works one-handed in a few taps, for example at a till with a queue behind you.
 - **Readable at a glance.** Text shown to a hearing person must be legible at arm's length.
-- **Private by default.** All data stays on the device. There are no accounts, no backend and no network dependency.
+- **Private by default.** There are no accounts and no telemetry.
 - **Minimal, beautiful, with personality.** The design is clean and calm, with room for the user's own expression.
 
 ## 3. Scope and constraints
@@ -24,7 +24,7 @@ Deaftly is an Android app that helps deaf people communicate quickly and with li
 |----|------------|
 | C1 | Android only. |
 | C2 | English only, localised for en-GB (the default), en-US, en-AU, en-CA, en-NZ and en-IE: spelling, vocabulary and the name of the local official sign language (BSL, ASL, Auslan, NZSL, ISL). Other English locales use en-GB. OCR reads English text (#217). |
-| C3 | No accounts, app-run sync or backend in the MVP. Network access is decided per feature, through a reviewed change ([ADR-0011](adr/0011-review-permissions-against-an-allowlist.md)). The user's own Android backup of templates and settings is allowed (decision D7). |
+| C3 | No accounts, app-run sync or backend in the MVP. The user's own Android backup of templates and settings is allowed (decision D7). |
 | C4 | All processing, including OCR, runs on the device. |
 | C5 | Free, with no paid third-party services. |
 | C6 | Distributed as a signed APK on GitHub Releases; not on Google Play for now (decision D8, see [#69](https://github.com/oneloneraven/deaftly/issues/69)). |
@@ -94,7 +94,7 @@ Deaftly is an Android app that helps deaf people communicate quickly and with li
 | N3 | The app meets WCAG 2.2 AA for contrast and touch targets and supports the system font scale. |
 | N4 | The app works one-handed. Primary actions sit within thumb reach. |
 | N5 | The app has light and dark themes, following the system setting by default. |
-| N6 | The app requests no permissions beyond the camera, and asks for it only when OCR is first used. |
+| N6 | The app requests only the permissions its features need, each when it's first needed. The camera is asked for when OCR is first used. |
 | N7 | There is no analytics or telemetry in the MVP. |
 
 ## 6. Out of scope (MVP)
