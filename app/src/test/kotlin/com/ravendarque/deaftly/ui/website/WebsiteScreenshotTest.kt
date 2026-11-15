@@ -63,11 +63,10 @@ import java.io.File
 private const val SCREENSHOT_DIR = "src/test/screenshots"
 private const val PACKAGE = "com.ravendarque.deaftly.ui.website"
 private const val FIXTURES = "src/androidTest/assets/ocr-fixtures"
-private const val MESSAGE = "Could I have a table for two by the window, please? We're both vegetarian."
-private const val SHORT_MESSAGE = "Could I have a table for two by the window, please?"
-private const val HOME_CARD = "+h600dp"
+private const val MESSAGE = "Could I have a table for two by the window, please?"
+private const val ORDER = "Hi! I'm deaf. Could I have Pasta arrabbiata please? If you have a question, please type it on my phone."
 private const val VIEWPORT_WIDTH = 390f
-private const val VIEWPORT_HEIGHT = 844f
+private const val VIEWPORT_HEIGHT = 600f
 private val PRICE = Regex("^£\\d+(\\.\\d{2})?$")
 
 private class Fixture(
@@ -120,7 +119,7 @@ private fun viewportOf(
 
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
-@Config(qualifiers = "en-rGB-w390dp-h844dp")
+@Config(qualifiers = "en-rGB-w390dp-h600dp")
 class WebsiteScreenshotTest {
     @get:Rule
     val composeRule = createComposeRule()
@@ -180,16 +179,10 @@ class WebsiteScreenshotTest {
     fun typeAndShow() = shot { TypeShowContent(TextFieldState(MESSAGE), onShow = {}, onBack = {}) }
 
     @Test
-    fun show() = showScene(MESSAGE)
-
-    @Test
-    @Config(qualifiers = HOME_CARD)
-    fun homeShow() = showScene(SHORT_MESSAGE)
-
-    private fun showScene(message: String) =
+    fun show() =
         shot {
             ShowContent(
-                message,
+                MESSAGE,
                 defaultShowScheme(false),
                 onCycleScheme = {},
                 onClose = {},
@@ -199,26 +192,14 @@ class WebsiteScreenshotTest {
         }
 
     @Test
-    fun faceToFace() = faceToFaceScene()
-
-    @Test
-    @Config(qualifiers = HOME_CARD)
-    fun homeFaceToFace() = faceToFaceScene()
-
-    private fun faceToFaceScene() {
-        val typing = "No, we haven't booked. Is there"
+    fun faceToFace() {
+        val typing = "Hi! I'm deaf, so I'll type. Is that parcel for"
         val field = TextFieldState(typing, TextRange(typing.length))
         shot { FaceToFaceContent(emptyList(), field, onSend = {}, onEnd = {}, onContinue = {}) }
     }
 
     @Test
-    fun fill() = fillScene()
-
-    @Test
-    @Config(qualifiers = HOME_CARD)
-    fun homeFill() = fillScene()
-
-    private fun fillScene() {
+    fun fill() {
         val viewModel = FillViewModel("order-food", FakeTemplateRepository(fillTemplates), SavedStateHandle())
         composeRule.setContent {
             AppTheme(darkTheme = false) { FillScreen("order-food", viewModel, onNavigate = {}, onBack = {}) }
@@ -236,18 +217,14 @@ class WebsiteScreenshotTest {
     fun cameraMenu() = camera("menu-trattoria", viewportOf(45f, 340f, 450f), ::followedByPrice, "Pasta arrabbiata")
 
     @Test
-    fun sideBySide() = sideBySideScene()
-
-    @Test
-    @Config(qualifiers = HOME_CARD)
-    fun homeSideBySide() = sideBySideScene()
-
-    private fun sideBySideScene() {
+    fun sideBySide() {
         val conversation =
             Conversation(
                 Participant(ParticipantId.A, ColourRole.Blue, "Me"),
                 Participant(ParticipantId.B, ColourRole.Gold, "Waiter"),
-            ).withTurn(ParticipantId.B)
+            ).withTurn(ParticipantId.A)
+                .append(RichText.spans(ORDER))
+                .withTurn(ParticipantId.B)
                 .append(RichText.spans("Sure! Do you have any allergies?"))
                 .withTurn(ParticipantId.A)
                 .append(RichText.spans("Yes, I'm allergic to peanuts."))
