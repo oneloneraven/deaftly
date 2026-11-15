@@ -8,7 +8,7 @@ Accepted
 
 Live OCR (requirements O1–O6) needs on-device text recognition with line and
 word geometry, fast enough for a live camera (N2: under 500 ms on a mid-range
-phone), and no network access ([ADR-0004](0004-the-app-has-no-network-access.md)).
+phone), and sends nothing off the phone.
 
 Two candidates were benchmarked on the same 37 generated fixtures, emulator
 and harness (#24, #25; results in `docs/spikes/`):

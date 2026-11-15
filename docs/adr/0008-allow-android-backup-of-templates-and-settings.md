@@ -7,8 +7,7 @@ Accepted
 ## Context
 
 Users build their own templates over time. Without backup, changing or
-resetting a phone loses them. The app itself has no network access
-([ADR-0004](0004-the-app-has-no-network-access.md)) and runs no sync.
+resetting a phone loses them. The app runs no sync of its own.
 
 ## Decision
 
