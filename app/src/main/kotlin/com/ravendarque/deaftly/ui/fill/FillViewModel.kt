@@ -132,7 +132,6 @@ class FillViewModel(
         val template = loaded.value?.template
         val clean = value.trim()
         if (template != null && key in placeholderKeys(template) && clean.isNotEmpty()) {
-            val wasUnfilled = key in TemplateRenderer.render(template, fill.value).unfilledKeys
             val before = fill.value
             val after =
                 when {
@@ -141,7 +140,7 @@ class FillViewModel(
                     else -> before.add(key, clean)
                 }
             update(template, after)
-            setActive(if (wasUnfilled) TemplateRenderer.render(template, after).unfilledKeys.firstOrNull() else null)
+            setActive(null)
         }
     }
 
