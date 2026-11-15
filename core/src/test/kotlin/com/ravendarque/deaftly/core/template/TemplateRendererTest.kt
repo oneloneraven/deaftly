@@ -244,11 +244,25 @@ class TemplateRendererTest {
     }
 
     @Test
-    fun aRepeatableValueIsOneSpanOverTheWholeJoinedText() {
+    fun aRepeatableValueHasASpanPerValueAndNoneOverItsSeparators() {
         val template = template("Could I have {item} please?", repeatable("item"))
-        val fill = TemplateFill().add("item", "tea").add("item", "a scone").add("item", "jam")
+        val fill =
+            TemplateFill()
+                .add("item", " tea ")
+                .add("item", "")
+                .add("item", "a scone")
+                .add("item", "jam")
         val rendered = TemplateRenderer.render(template, fill)
-        assertEquals(listOf("tea, a scone and jam"), rendered.valueSpans.map { rendered.text.substring(it.start, it.end) })
+        assertEquals("Could I have tea, a scone and jam please?", rendered.text)
+        assertEquals(listOf("tea", "a scone", "jam"), rendered.valueSpans.map { rendered.text.substring(it.start, it.end) })
+    }
+
+    @Test
+    fun orJoinedValuesLeaveTheJoinWordOutOfTheSpans() {
+        val template = template("Please {reply}.", repeatable("reply").copy(join = Join.Or))
+        val fill = TemplateFill().add("reply", "write it down").add("reply", "type")
+        val rendered = TemplateRenderer.render(template, fill)
+        assertEquals(listOf(TextSpan(7, 20), TextSpan(24, 28)), rendered.valueSpans)
     }
 
     @Test

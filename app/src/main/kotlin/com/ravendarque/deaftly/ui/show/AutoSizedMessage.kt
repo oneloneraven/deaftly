@@ -38,27 +38,32 @@ private fun showStyle(
 ) = TextStyle(
     color = color,
     fontFamily = AtkinsonHyperlegibleNext,
-    fontWeight = FontWeight.Bold,
+    fontWeight = FontWeight.Medium,
     fontSize = sizeSp.sp,
     lineHeight = (sizeSp * LINE_HEIGHT_RATIO).sp,
     letterSpacing = (-0.01).em,
 )
 
 internal fun fitFontSizeSp(
-    text: String,
+    text: AnnotatedString,
     available: Constraints,
     density: Density,
     measurer: TextMeasurer,
 ): Int {
-    val words = text.split(WhitespacePattern).filter { it.isNotEmpty() }.distinct()
+    val words =
+        text.text
+            .split(WhitespacePattern)
+            .filter { it.isNotEmpty() }
+            .distinct()
     val wrapped = Constraints(maxWidth = available.maxWidth)
 
     fun fits(sizeSp: Int): Boolean {
         val style = showStyle(sizeSp, Color.Unspecified)
         val height = measurer.measure(text, style, constraints = wrapped, density = density).size.height
         if (height > available.maxHeight) return false
+        val widest = style.copy(fontWeight = FontWeight.Bold)
         return words.all { word ->
-            measurer.measure(word, style, softWrap = false, density = density).size.width <= available.maxWidth
+            measurer.measure(word, widest, softWrap = false, density = density).size.width <= available.maxWidth
         }
     }
 
@@ -71,15 +76,13 @@ internal fun fitFontSizeSp(
     return low
 }
 
-internal fun highlighted(
+internal fun emphasised(
     text: String,
     highlights: List<HighlightRange>,
-    background: Color,
-    foreground: Color,
 ): AnnotatedString =
     buildAnnotatedString {
         append(text)
-        val mark = SpanStyle(color = foreground, background = background)
+        val mark = SpanStyle(fontWeight = FontWeight.Bold)
         highlights.forEach { range ->
             val start = range.start.coerceIn(0, text.length)
             val end = range.end.coerceIn(start, text.length)
@@ -93,23 +96,18 @@ fun AutoSizedMessage(
     color: Color,
     modifier: Modifier = Modifier,
     highlights: List<HighlightRange> = emptyList(),
-    markBackground: Color = Color.Unspecified,
-    markText: Color = color,
 ) {
     val measurer = rememberTextMeasurer()
     val density = LocalDensity.current
     BoxWithConstraints(modifier) {
-        val sizeSp = remember(text, constraints, density) { fitFontSizeSp(text, constraints, density, measurer) }
+        val styled = remember(text, highlights) { emphasised(text, highlights) }
+        val sizeSp = remember(styled, constraints, density) { fitFontSizeSp(styled, constraints, density, measurer) }
         val viewportHeight = maxHeight
         Box(modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState())) {
             Box(
                 modifier = Modifier.fillMaxWidth().heightIn(min = viewportHeight),
                 contentAlignment = Alignment.Center,
             ) {
-                val styled =
-                    remember(text, highlights, markBackground, markText) {
-                        highlighted(text, highlights, markBackground, markText)
-                    }
                 BasicText(text = styled, style = showStyle(sizeSp, color))
             }
         }

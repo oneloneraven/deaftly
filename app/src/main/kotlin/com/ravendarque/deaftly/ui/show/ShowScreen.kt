@@ -109,8 +109,6 @@ fun ShowContent(
             color = colours.text,
             modifier = Modifier.weight(1f).fillMaxWidth().padding(horizontal = 26.dp),
             highlights = highlights,
-            markBackground = colours.markBackground,
-            markText = colours.markText,
         )
         Column(
             modifier = Modifier.fillMaxWidth().padding(start = 20.dp, end = 20.dp, bottom = 28.dp, top = 8.dp),
