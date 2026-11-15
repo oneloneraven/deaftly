@@ -64,6 +64,8 @@ private const val SCREENSHOT_DIR = "src/test/screenshots"
 private const val PACKAGE = "com.ravendarque.deaftly.ui.website"
 private const val FIXTURES = "src/androidTest/assets/ocr-fixtures"
 private const val MESSAGE = "Could I have a table for two by the window, please? We're both vegetarian."
+private const val SHORT_MESSAGE = "Could I have a table for two by the window, please?"
+private const val HOME_CARD = "+h600dp"
 private const val VIEWPORT_WIDTH = 390f
 private const val VIEWPORT_HEIGHT = 844f
 private val PRICE = Regex("^£\\d+(\\.\\d{2})?$")
@@ -178,10 +180,16 @@ class WebsiteScreenshotTest {
     fun typeAndShow() = shot { TypeShowContent(TextFieldState(MESSAGE), onShow = {}, onBack = {}) }
 
     @Test
-    fun show() =
+    fun show() = showScene(MESSAGE)
+
+    @Test
+    @Config(qualifiers = HOME_CARD)
+    fun homeShow() = showScene(SHORT_MESSAGE)
+
+    private fun showScene(message: String) =
         shot {
             ShowContent(
-                MESSAGE,
+                message,
                 defaultShowScheme(false),
                 onCycleScheme = {},
                 onClose = {},
@@ -191,14 +199,26 @@ class WebsiteScreenshotTest {
         }
 
     @Test
-    fun faceToFace() {
+    fun faceToFace() = faceToFaceScene()
+
+    @Test
+    @Config(qualifiers = HOME_CARD)
+    fun homeFaceToFace() = faceToFaceScene()
+
+    private fun faceToFaceScene() {
         val typing = "No, we haven't booked. Is there"
         val field = TextFieldState(typing, TextRange(typing.length))
         shot { FaceToFaceContent(emptyList(), field, onSend = {}, onEnd = {}, onContinue = {}) }
     }
 
     @Test
-    fun fill() {
+    fun fill() = fillScene()
+
+    @Test
+    @Config(qualifiers = HOME_CARD)
+    fun homeFill() = fillScene()
+
+    private fun fillScene() {
         val viewModel = FillViewModel("order-food", FakeTemplateRepository(fillTemplates), SavedStateHandle())
         composeRule.setContent {
             AppTheme(darkTheme = false) { FillScreen("order-food", viewModel, onNavigate = {}, onBack = {}) }
@@ -216,7 +236,13 @@ class WebsiteScreenshotTest {
     fun cameraMenu() = camera("menu-trattoria", viewportOf(45f, 340f, 450f), ::followedByPrice, "Pasta arrabbiata")
 
     @Test
-    fun sideBySide() {
+    fun sideBySide() = sideBySideScene()
+
+    @Test
+    @Config(qualifiers = HOME_CARD)
+    fun homeSideBySide() = sideBySideScene()
+
+    private fun sideBySideScene() {
         val conversation =
             Conversation(
                 Participant(ParticipantId.A, ColourRole.Blue, "Me"),
