@@ -193,7 +193,7 @@ class WebsiteScreenshotTest {
 
     @Test
     fun faceToFace() {
-        val typing = "Hi! I'm deaf, so I'll type. Is that parcel for"
+        val typing = "Hi! I'm deaf, so I'll type. My name is Ellie Thompson. Do you need me to sign"
         val field = TextFieldState(typing, TextRange(typing.length))
         shot { FaceToFaceContent(emptyList(), field, onSend = {}, onEnd = {}, onContinue = {}) }
     }
