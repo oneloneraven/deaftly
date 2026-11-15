@@ -1,5 +1,6 @@
 package com.ravendarque.deaftly.ui.fill
 
+import com.ravendarque.deaftly.core.template.Join
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -87,6 +88,23 @@ class MessagePreviewTokensTest {
                 PreviewToken.Word("and", true),
                 PreviewToken.Chip(item, "B", true, gapBefore = true, removeIndex = 1),
                 PreviewToken.AddMore(item, gapBefore = true),
+            ),
+            tokens,
+        )
+    }
+
+    @Test
+    fun repeatableValuesUseThePlaceholdersOrJoin() {
+        val either = item.copy(join = Join.Or)
+        val tokens = previewTokens(listOf(FillPart.Filled(either, listOf("A", "B", "C"))))
+
+        assertEquals(
+            listOf(
+                PreviewToken.Chip(either, "A", true, gapBefore = false, suffix = ",", removeIndex = 0),
+                PreviewToken.Chip(either, "B", true, gapBefore = true, removeIndex = 1),
+                PreviewToken.Word("or", true),
+                PreviewToken.Chip(either, "C", true, gapBefore = true, removeIndex = 2),
+                PreviewToken.AddMore(either, gapBefore = true),
             ),
             tokens,
         )

@@ -144,6 +144,7 @@ class BuiltInTemplatesTest {
         assertEquals(byId(BuiltInIds.CHECK_IN).placeholders.getValue("name"), doctor.placeholders.getValue("name"))
         assertEquals(PlaceholderType.Choices, communicate.type)
         assertTrue(communicate.repeatable)
+        assertEquals(Join.Or, communicate.join)
         assertEquals("How will you communicate?", communicate.label)
         assertEquals(listOf("BSL interpreter", "speech to text", "typing on my phone", "lipreading"), communicate.options)
         assertEquals(byId(BuiltInIds.CHECK_IN).placeholders.getValue("how to reply"), doctor.placeholders.getValue("how to reply"))
@@ -162,7 +163,7 @@ class BuiltInTemplatesTest {
 
         assertEquals(
             "Hi! I'm deaf. My name is Marcus Campbell. I have an appointment at 10:30 with Dr Shah. " +
-                "I prefer to communicate by lipreading and typing on my phone. If you need to reply, please write it down.",
+                "I prefer to communicate by lipreading or typing on my phone. If you need to reply, please write it down.",
             TemplateRenderer.render(byId(BuiltInIds.DOCTOR), fill).text,
         )
     }

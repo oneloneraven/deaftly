@@ -104,6 +104,7 @@ private class BuiltInTemplateFactory(
                     PlaceholderType.Choices,
                     R.array.placeholder_how_i_communicate_other_options,
                     repeatable = true,
+                    join = Join.Or,
                     leadingOptions = listOf(signLanguageInterpreter),
                 ),
                 howToReply,

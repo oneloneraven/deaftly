@@ -112,7 +112,7 @@ public object TemplateRenderer {
             values.mapIndexed { index, value ->
                 when {
                     index == 0 -> Unit
-                    index == values.lastIndex -> text.append(" ${join.word()} ")
+                    index == values.lastIndex -> text.append(" ${join.word} ")
                     else -> text.append(", ")
                 }
                 TextSpan(text.length, text.length + value.length).also { text.append(value) }
@@ -121,12 +121,6 @@ public object TemplateRenderer {
     }
 
     private fun cleaned(values: List<String>) = values.map { it.trim() }.filter { it.isNotEmpty() }
-
-    private fun Join.word() =
-        when (this) {
-            Join.And -> "and"
-            Join.Or -> "or"
-        }
 
     private fun values(
         placeholder: Placeholder,
