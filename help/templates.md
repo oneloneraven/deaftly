@@ -19,6 +19,8 @@ Templates are messages you use often, such as checking in or ordering food. You 
 4. Where you see **+ add more**, you can add more than one, such as two dishes. They're joined with "and" or "or", as the template's author chose, such as "write it down or type on my phone".
 5. Tap **Show** to show it full screen, or **Insert into chat** when you're in a chat.
 
+If you've saved your name in [Settings](settings.md), the name in Check in, BSL interpreter, At the doctor's and Pharmacy is already filled in. Tap it to change it for that message.
+
 ## The built-in templates
 
 Deaftly comes with templates for everyday situations:

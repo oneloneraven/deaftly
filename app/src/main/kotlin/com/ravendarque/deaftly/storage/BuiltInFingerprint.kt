@@ -27,6 +27,7 @@ fun TemplateDto.contentFingerprint(): String {
         placeholder.options.forEach(::write)
         write(if (placeholder.repeatable) "1" else "0")
         if (placeholder.join != JoinDto.And) write(placeholder.join.name)
+        placeholder.fillsWith?.let { write(it.name) }
     }
     return MessageDigest.getInstance("SHA-256").digest(bytes.toByteArray()).joinToString("") { "%02x".format(it) }
 }

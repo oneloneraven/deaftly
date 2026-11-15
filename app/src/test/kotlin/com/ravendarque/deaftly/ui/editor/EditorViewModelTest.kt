@@ -4,6 +4,7 @@ import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.SavedStateHandle
 import com.ravendarque.deaftly.core.template.Join
+import com.ravendarque.deaftly.core.template.PersonalField
 import com.ravendarque.deaftly.core.template.Placeholder
 import com.ravendarque.deaftly.core.template.PlaceholderType
 import kotlinx.coroutines.Dispatchers
@@ -312,6 +313,25 @@ class EditorViewModelTest {
                 Placeholder("name", "Who?", PlaceholderType.Choices, listOf("Sam", "Alex"), repeatable = true),
                 stored("my-note").placeholder("name"),
             )
+        }
+
+    @Test
+    fun aPlaceholderThatFillsWithAPersonalFieldKeepsItWhenSaved() =
+        runTest {
+            val original = stored("my-note")
+            repository.update(
+                original.copy(
+                    placeholders =
+                        original.placeholders + ("name" to original.placeholder("name").copy(fillsWith = PersonalField.FormalName)),
+                ),
+            )
+            val viewModel = viewModel()
+            viewModel.type("Hello {name}, I need {thing} now.")
+
+            viewModel.save()
+
+            assertEquals(PersonalField.FormalName, stored("my-note").placeholder("name").fillsWith)
+            assertNull(stored("my-note").placeholder("thing").fillsWith)
         }
 
     @Test

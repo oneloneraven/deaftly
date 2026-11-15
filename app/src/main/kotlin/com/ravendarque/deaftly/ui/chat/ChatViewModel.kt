@@ -65,13 +65,19 @@ class ChatViewModel(
         }
         viewModelScope.launch {
             if (conversation.value == null) {
-                val started = opened(settings.chatProfile.first().startConversation())
+                val started = opened(chatProfile().startConversation())
                 if (conversation.compareAndSet(null, started)) {
                     save(started)
                     drafts.restore(ParticipantId.A, opening.draft)
                 }
             }
         }
+    }
+
+    private suspend fun chatProfile(): ChatProfile {
+        val profile = settings.chatProfile.first()
+        val name = settings.personalNames.first().chatName
+        return if (name == null) profile else profile.copy(name = name)
     }
 
     fun updateParticipant(participant: Participant) {

@@ -15,7 +15,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
@@ -39,6 +42,7 @@ import com.ravendarque.deaftly.R
 import com.ravendarque.deaftly.core.settings.ShowScheme
 import com.ravendarque.deaftly.core.settings.ThemeMode
 import com.ravendarque.deaftly.ui.chat.ColourChoices
+import com.ravendarque.deaftly.ui.chat.LabelledTextField
 import com.ravendarque.deaftly.ui.chat.NameField
 import com.ravendarque.deaftly.ui.chat.PARTICIPANT_NAME_MAX_LENGTH
 import com.ravendarque.deaftly.ui.components.DeaftlyTopBar
@@ -78,7 +82,6 @@ private fun SettingsContent(
     state: SettingsUiState.Ready,
     viewModel: SettingsViewModel,
 ) {
-    var name by rememberSaveable { mutableStateOf(state.profile.name.orEmpty()) }
     Column(
         modifier =
             Modifier
@@ -86,17 +89,7 @@ private fun SettingsContent(
                 .padding(horizontal = Deaftly.spacing.space20, vertical = Deaftly.spacing.space8),
         verticalArrangement = Arrangement.spacedBy(Deaftly.spacing.space24),
     ) {
-        Section(stringResource(R.string.settings_me_heading)) {
-            NameField(
-                value = name,
-                placeholder = stringResource(R.string.chat_name_me),
-                onValueChange = {
-                    name = it.take(PARTICIPANT_NAME_MAX_LENGTH)
-                    viewModel.setName(name)
-                },
-            )
-            ColourChoices(selected = state.profile.colour, takenBy = null, onChoose = viewModel::setColour)
-        }
+        MeSection(state, viewModel)
         Section(stringResource(R.string.settings_appearance_heading)) {
             ThemeMode.entries.forEach { mode ->
                 ChoiceRow(
@@ -166,6 +159,53 @@ private fun RestoreBuiltIns(
 }
 
 @Composable
+private fun MeSection(
+    state: SettingsUiState.Ready,
+    viewModel: SettingsViewModel,
+) {
+    var name by rememberSaveable { mutableStateOf(state.profile.name.orEmpty()) }
+    Section(stringResource(R.string.settings_me_heading)) {
+        Text(
+            text = stringResource(R.string.settings_names_hint),
+            style = MaterialTheme.typography.bodySmall,
+            color = Deaftly.colors.inkSecondary,
+        )
+        NameInput(state.names.firstName, stringResource(R.string.settings_first_name_label)) { value ->
+            viewModel.changeNames { it.copy(firstName = value) }
+        }
+        NameInput(state.names.surname, stringResource(R.string.settings_surname_label)) { value ->
+            viewModel.changeNames { it.copy(surname = value) }
+        }
+        CheckRow(
+            checked = state.names.legalNameDiffers,
+            label = stringResource(R.string.settings_legal_name_differs),
+            onChange = { value -> viewModel.changeNames { it.copy(legalNameDiffers = value) } },
+        )
+        if (state.names.legalNameDiffers) {
+            NameInput(state.names.legalName, stringResource(R.string.settings_legal_name_label)) { value ->
+                viewModel.changeNames { it.copy(legalName = value) }
+            }
+        }
+        CheckRow(
+            checked = state.names.useFirstNameInChats,
+            label = stringResource(R.string.settings_use_first_name),
+            onChange = { value -> viewModel.changeNames { it.copy(useFirstNameInChats = value) } },
+        )
+        if (state.names.chatName == null) {
+            NameField(
+                value = name,
+                placeholder = stringResource(R.string.chat_name_me),
+                onValueChange = {
+                    name = it.take(PARTICIPANT_NAME_MAX_LENGTH)
+                    viewModel.setName(name)
+                },
+            )
+        }
+        ColourChoices(selected = state.profile.colour, takenBy = null, onChoose = viewModel::setColour)
+    }
+}
+
+@Composable
 internal fun Section(
     title: String,
     content: @Composable () -> Unit,
@@ -216,6 +256,49 @@ internal fun ChoiceRow(
                 Text(text = hint, style = MaterialTheme.typography.bodySmall, color = c.inkSecondary)
             }
         }
+    }
+}
+
+@Composable
+private fun NameInput(
+    initial: String,
+    label: String,
+    onChange: (String) -> Unit,
+) {
+    var text by rememberSaveable { mutableStateOf(initial) }
+    LabelledTextField(
+        value = text,
+        label = label,
+        supporting = null,
+        onValueChange = {
+            text = it
+            onChange(it)
+        },
+    )
+}
+
+@Composable
+private fun CheckRow(
+    checked: Boolean,
+    label: String,
+    onChange: (Boolean) -> Unit,
+) {
+    val c = Deaftly.colors
+    Row(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .heightIn(min = RowMinHeight)
+                .toggleable(value = checked, role = Role.Checkbox, onValueChange = onChange),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(Deaftly.spacing.space12),
+    ) {
+        Checkbox(
+            checked = checked,
+            onCheckedChange = null,
+            colors = CheckboxDefaults.colors(checkedColor = c.accentStrong, uncheckedColor = c.outline, checkmarkColor = c.onAccent),
+        )
+        Text(text = label, style = MaterialTheme.typography.titleSmall, color = c.ink, modifier = Modifier.weight(1f))
     }
 }
 

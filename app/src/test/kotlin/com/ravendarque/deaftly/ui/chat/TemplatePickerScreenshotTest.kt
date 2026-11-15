@@ -51,7 +51,7 @@ class TemplatePickerScreenshotTest {
 
     @Test
     fun fillForChatLightTheme() {
-        val viewModel = FillViewModel(BuiltInIds.EXPLAIN_DEAF, repository, SavedStateHandle())
+        val viewModel = FillViewModel(BuiltInIds.EXPLAIN_DEAF, repository, FakeSettingsRepository(), SavedStateHandle())
         composeRule.setContent {
             AppTheme { FillScreen(BuiltInIds.EXPLAIN_DEAF, viewModel, onNavigate = {}, onBack = {}, onInsert = {}) }
         }

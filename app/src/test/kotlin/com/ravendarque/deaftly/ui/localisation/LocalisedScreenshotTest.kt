@@ -53,7 +53,8 @@ class LocalisedScreenshotTest {
     }
 
     private fun interpreter(dark: Boolean) {
-        val viewModel = FillViewModel(BuiltInIds.BSL_INTERPRETER, FakeTemplateRepository(templates), SavedStateHandle())
+        val viewModel =
+            FillViewModel(BuiltInIds.BSL_INTERPRETER, FakeTemplateRepository(templates), FakeSettingsRepository(), SavedStateHandle())
         capture(dark) { FillScreen(BuiltInIds.BSL_INTERPRETER, viewModel, onNavigate = {}, onBack = {}) }
     }
 

@@ -18,6 +18,7 @@ All processing happens on the user's device. The project receives none of it.
 |---|---|---|---|---|
 | Templates and the values typed into them (may include names, health details or routines) | Composing messages to show | Not applicable: processed only on the user's device for their own use | Until the user deletes them or the app | The user, and anyone they show the phone to |
 | Participant names and colours, and other settings | Personalising chat and show mode | As above | Until the user changes them or deletes the app | The user |
+| The user's first name, surname and full legal name (all optional) | Pre-filling the name gaps in templates, and optionally naming the user in chats | As above: kept on the device only, in the settings store, and never sent anywhere. The Android backup includes the settings with the template store, at the user's choice ([ADR-0008](adr/0008-allow-android-backup-of-templates-and-settings.md)) | Until the user changes them or deletes the app | The user, and anyone they show the phone to once a name is filled into a message |
 | Chat messages | Holding a conversation | As above | In memory only; discarded when the chat ends | The two people in the conversation |
 | Camera frames and recognised text | Lifting text into a template | As above | Frames: never stored. Text: only if the user inserts it into a template | The user |
 

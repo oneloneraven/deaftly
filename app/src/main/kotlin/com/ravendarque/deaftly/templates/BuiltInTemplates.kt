@@ -3,6 +3,7 @@ package com.ravendarque.deaftly.templates
 import android.content.res.Resources
 import com.ravendarque.deaftly.R
 import com.ravendarque.deaftly.core.template.Join
+import com.ravendarque.deaftly.core.template.PersonalField
 import com.ravendarque.deaftly.core.template.Placeholder
 import com.ravendarque.deaftly.core.template.PlaceholderType
 import com.ravendarque.deaftly.core.template.Template
@@ -21,7 +22,7 @@ private class BuiltInTemplateFactory(
             repeatable = true,
             join = Join.Or,
         )
-    private val name = placeholder("name", R.string.placeholder_name_label, PlaceholderType.Typing)
+    private val name = placeholder("name", R.string.placeholder_name_label, PlaceholderType.Typing, fillsWith = PersonalField.FormalName)
     private val signLanguage = resources.getString(R.string.sign_language)
     private val signLanguageInterpreter = resources.getString(R.string.sign_language_interpreter, signLanguage)
     private val indefiniteInterpreter = resources.getString(R.string.sign_language_interpreter_indefinite, signLanguage)
@@ -114,7 +115,7 @@ private class BuiltInTemplateFactory(
                 R.string.template_pharmacy_title,
                 R.string.category_health,
                 R.string.template_pharmacy_body,
-                placeholder("patient", R.string.placeholder_patient_label, PlaceholderType.Typing),
+                placeholder("patient", R.string.placeholder_patient_label, PlaceholderType.Typing, fillsWith = PersonalField.FormalName),
                 howToReply,
             ),
         )
@@ -146,6 +147,7 @@ private class BuiltInTemplateFactory(
         repeatable: Boolean = false,
         join: Join = Join.And,
         leadingOptions: List<String> = emptyList(),
+        fillsWith: PersonalField? = null,
     ) = Placeholder(
         key = key,
         label = resources.getString(label),
@@ -153,6 +155,7 @@ private class BuiltInTemplateFactory(
         options = leadingOptions + options?.let { resources.getStringArray(it).toList() }.orEmpty(),
         repeatable = repeatable,
         join = join,
+        fillsWith = fillsWith,
     )
 
     private fun template(

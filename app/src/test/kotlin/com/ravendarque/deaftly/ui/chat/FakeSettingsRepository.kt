@@ -2,11 +2,13 @@ package com.ravendarque.deaftly.ui.chat
 
 import com.ravendarque.deaftly.core.chat.ChatProfile
 import com.ravendarque.deaftly.core.settings.ChatTextSize
+import com.ravendarque.deaftly.core.settings.PersonalNames
 import com.ravendarque.deaftly.core.settings.SettingsRepository
 import com.ravendarque.deaftly.core.settings.ShowScheme
 import com.ravendarque.deaftly.core.settings.ThemeMode
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.update
 
 class FakeSettingsRepository(
     initial: ChatProfile = ChatProfile(),
@@ -15,6 +17,7 @@ class FakeSettingsRepository(
     textSize: ChatTextSize = ChatTextSize.Default,
     sidesSwapped: Boolean = false,
     theme: ThemeMode = ThemeMode.System,
+    names: PersonalNames = PersonalNames(),
 ) : SettingsRepository {
     private val profile = MutableStateFlow(initial)
     private val scheme = MutableStateFlow(showScheme)
@@ -22,6 +25,7 @@ class FakeSettingsRepository(
     private val size = MutableStateFlow(textSize)
     private val swapped = MutableStateFlow(sidesSwapped)
     private val mode = MutableStateFlow(theme)
+    private val personal = MutableStateFlow(names)
 
     override val chatProfile: Flow<ChatProfile> = profile
 
@@ -35,7 +39,11 @@ class FakeSettingsRepository(
 
     override val themeMode: Flow<ThemeMode> = mode
 
+    override val personalNames: Flow<PersonalNames> = personal
+
     val saved: ChatProfile get() = profile.value
+
+    val savedNames: PersonalNames get() = personal.value
 
     override suspend fun setChatProfile(profile: ChatProfile) {
         this.profile.value = profile
@@ -59,5 +67,9 @@ class FakeSettingsRepository(
 
     override suspend fun setThemeMode(mode: ThemeMode) {
         this.mode.value = mode
+    }
+
+    override suspend fun updatePersonalNames(change: (PersonalNames) -> PersonalNames) {
+        personal.update(change)
     }
 }

@@ -135,13 +135,28 @@ internal fun NameField(
     placeholder: String,
     onValueChange: (String) -> Unit,
 ) {
+    LabelledTextField(
+        value = value,
+        label = stringResource(R.string.participants_name_label),
+        supporting = stringResource(R.string.participants_name_default, placeholder),
+        onValueChange = onValueChange,
+    )
+}
+
+@Composable
+internal fun LabelledTextField(
+    value: String,
+    label: String,
+    supporting: String?,
+    onValueChange: (String) -> Unit,
+) {
     val c = Deaftly.colors
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
         modifier = Modifier.fillMaxWidth(),
-        label = { Text(stringResource(R.string.participants_name_label)) },
-        supportingText = { Text(stringResource(R.string.participants_name_default, placeholder)) },
+        label = { Text(label) },
+        supportingText = supporting?.let { { Text(it) } },
         singleLine = true,
         textStyle = MaterialTheme.typography.bodyMedium,
         shape = Deaftly.shapes.control,

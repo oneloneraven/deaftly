@@ -200,7 +200,7 @@ class WebsiteScreenshotTest {
 
     @Test
     fun fill() {
-        val viewModel = FillViewModel("order-food", FakeTemplateRepository(fillTemplates), SavedStateHandle())
+        val viewModel = FillViewModel("order-food", FakeTemplateRepository(fillTemplates), FakeSettingsRepository(), SavedStateHandle())
         composeRule.setContent {
             AppTheme(darkTheme = false) { FillScreen("order-food", viewModel, onNavigate = {}, onBack = {}) }
         }

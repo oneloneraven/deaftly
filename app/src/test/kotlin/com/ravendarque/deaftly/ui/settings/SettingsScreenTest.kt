@@ -9,6 +9,7 @@ import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.hasSetTextAction
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.accessibility.enableAccessibilityChecks
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
@@ -23,6 +24,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.ravendarque.deaftly.core.chat.ChatProfile
 import com.ravendarque.deaftly.core.chat.ColourRole
+import com.ravendarque.deaftly.core.settings.PersonalNames
 import com.ravendarque.deaftly.core.settings.ShowScheme
 import com.ravendarque.deaftly.core.settings.ThemeMode
 import com.ravendarque.deaftly.core.template.Template
@@ -66,15 +68,14 @@ class SettingsScreenTest {
         composeRule.onNodeWithText("Split screen").assertDoesNotExist()
         composeRule.onNodeWithText("White on black").assertIsSelected()
         composeRule
-            .onNode(
-                hasSetTextAction(),
-            ).assert(SemanticsMatcher.expectValue(SemanticsProperties.EditableText, AnnotatedString("Alex")))
+            .onNode(hasSetTextAction() and hasText("Name (optional)", substring = true))
+            .assert(SemanticsMatcher.expectValue(SemanticsProperties.EditableText, AnnotatedString("Alex")))
         composeRule.onRoot().tryPerformAccessibilityChecks()
     }
 
     @Test
     fun editingTheNameKeepsTheColour() {
-        composeRule.onNode(hasSetTextAction()).performTextReplacement("Sam")
+        composeRule.onNode(hasSetTextAction() and hasText("Name (optional)", substring = true)).performTextReplacement("Sam")
         composeRule.waitForIdle()
 
         assertEquals(ChatProfile("Sam", ColourRole.Green), settings.saved)
@@ -153,5 +154,51 @@ class SettingsScreenTest {
         composeRule.onNodeWithContentDescription("Back").performClick()
 
         assertEquals(1, backs)
+    }
+
+    @Test
+    fun theFirstNameAndSurnameSave() {
+        composeRule.onNode(hasSetTextAction() and hasText("First name")).performTextReplacement("Amira")
+        composeRule.onNode(hasSetTextAction() and hasText("Surname")).performTextReplacement("Hassan")
+        composeRule.waitForIdle()
+
+        assertEquals(PersonalNames("Amira", "Hassan"), settings.savedNames)
+    }
+
+    @Test
+    fun theLegalNameFieldAppearsOnlyWhileTheBoxIsTicked() {
+        composeRule.onNodeWithText("Full legal name").assertDoesNotExist()
+
+        composeRule.onNodeWithText("My legal name is different").performScrollTo().performClick()
+        composeRule.waitForIdle()
+        composeRule
+            .onNode(
+                hasSetTextAction() and hasText("Full legal name"),
+            ).performScrollTo()
+            .performTextReplacement("Amira Fatima Hassan")
+        composeRule.waitForIdle()
+
+        assertEquals(PersonalNames(legalNameDiffers = true, legalName = "Amira Fatima Hassan"), settings.savedNames)
+
+        composeRule.onNodeWithText("My legal name is different").performClick()
+        composeRule.waitForIdle()
+
+        composeRule.onNodeWithText("Full legal name").assertDoesNotExist()
+        composeRule.onRoot().tryPerformAccessibilityChecks()
+    }
+
+    @Test
+    fun usingTheFirstNameInChatsHidesTheChatNameFieldOnceThereIsAFirstName() {
+        composeRule.onNode(hasSetTextAction() and hasText("First name")).performTextReplacement("Amira")
+        composeRule.onNodeWithText("Use my first name in chats").performScrollTo().performClick()
+        composeRule.waitForIdle()
+
+        assertEquals(PersonalNames(firstName = "Amira", useFirstNameInChats = true), settings.savedNames)
+        composeRule.onNode(hasSetTextAction() and hasText("Name (optional)", substring = true)).assertDoesNotExist()
+
+        composeRule.onNodeWithText("Use my first name in chats").performClick()
+        composeRule.waitForIdle()
+
+        composeRule.onNode(hasSetTextAction() and hasText("Name (optional)", substring = true)).assertExists()
     }
 }

@@ -1,6 +1,7 @@
 package com.ravendarque.deaftly.storage
 
 import com.ravendarque.deaftly.core.template.Join
+import com.ravendarque.deaftly.core.template.PersonalField
 import com.ravendarque.deaftly.core.template.Placeholder
 import com.ravendarque.deaftly.core.template.PlaceholderType
 import com.ravendarque.deaftly.core.template.Template
@@ -33,6 +34,11 @@ data class SettingsDto(
     val chatTextSize: ChatTextSizeDto? = null,
     val chatSidesSwapped: Boolean = false,
     val themeMode: ThemeModeDto? = null,
+    val firstName: String = "",
+    val surname: String = "",
+    val legalNameDiffers: Boolean = false,
+    val legalName: String = "",
+    val useFirstNameInChats: Boolean = false,
 )
 
 @Serializable
@@ -116,6 +122,7 @@ data class PlaceholderDto(
     val options: List<String> = emptyList(),
     val repeatable: Boolean = false,
     val join: JoinDto = JoinDto.And,
+    val fillsWith: PersonalFieldDto? = null,
 )
 
 @Serializable
@@ -125,6 +132,12 @@ enum class JoinDto {
 
     @SerialName("or")
     Or,
+}
+
+@Serializable
+enum class PersonalFieldDto {
+    @SerialName("formal-name")
+    FormalName,
 }
 
 @Serializable
@@ -161,6 +174,11 @@ private fun Placeholder.toDto(): PlaceholderDto =
                 Join.And -> JoinDto.And
                 Join.Or -> JoinDto.Or
             },
+        fillsWith =
+            when (fillsWith) {
+                PersonalField.FormalName -> PersonalFieldDto.FormalName
+                null -> null
+            },
     )
 
 private fun PlaceholderDto.toDomain(): Placeholder =
@@ -179,5 +197,10 @@ private fun PlaceholderDto.toDomain(): Placeholder =
             when (join) {
                 JoinDto.And -> Join.And
                 JoinDto.Or -> Join.Or
+            },
+        fillsWith =
+            when (fillsWith) {
+                PersonalFieldDto.FormalName -> PersonalField.FormalName
+                null -> null
             },
     )

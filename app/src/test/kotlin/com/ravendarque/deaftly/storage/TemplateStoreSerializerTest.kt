@@ -2,6 +2,7 @@ package com.ravendarque.deaftly.storage
 
 import androidx.datastore.core.CorruptionException
 import com.ravendarque.deaftly.core.template.Join
+import com.ravendarque.deaftly.core.template.PersonalField
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
@@ -55,6 +56,23 @@ class TemplateStoreSerializerTest {
         }
 
     @Test
+    fun thePersonalFieldAPlaceholderFillsWithSurvivesSavingAndLoading() =
+        runTest {
+            val filled =
+                greeting.copy(
+                    placeholders =
+                        greeting.placeholders + ("name" to greeting.placeholder("name").copy(fillsWith = PersonalField.FormalName)),
+                )
+            val document = StoreDocument(STORE_VERSION, listOf(filled, menu).map { it.toDto() }, SettingsDto())
+
+            val restored = read(write(document)).templates.map { it.toDomain() }
+
+            assertEquals(PersonalField.FormalName, restored.first { it.id == greeting.id }.placeholder("name").fillsWith)
+            assertNull(restored.first { it.id == greeting.id }.placeholder("how to reply").fillsWith)
+            assertNull(restored.first { it.id == menu.id }.placeholder("item").fillsWith)
+        }
+
+    @Test
     fun writesAVersionedDocumentWithTemplatesAndSettings() =
         runTest {
             val root = Json.parseToJsonElement(write(seed)).jsonObject
@@ -62,7 +80,17 @@ class TemplateStoreSerializerTest {
             assertEquals(2, root.getValue("version").jsonPrimitive.int)
             assertEquals(builtIns.size, root.getValue("templates").jsonArray.size)
             assertEquals(
-                JsonObject(mapOf("firstRunDone" to JsonPrimitive(false), "chatSidesSwapped" to JsonPrimitive(false))),
+                JsonObject(
+                    mapOf(
+                        "firstRunDone" to JsonPrimitive(false),
+                        "chatSidesSwapped" to JsonPrimitive(false),
+                        "firstName" to JsonPrimitive(""),
+                        "surname" to JsonPrimitive(""),
+                        "legalNameDiffers" to JsonPrimitive(false),
+                        "legalName" to JsonPrimitive(""),
+                        "useFirstNameInChats" to JsonPrimitive(false),
+                    ),
+                ),
                 root.getValue("settings"),
             )
         }

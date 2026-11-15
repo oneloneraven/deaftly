@@ -4,6 +4,7 @@ import androidx.datastore.core.DataStore
 import com.ravendarque.deaftly.core.chat.ChatProfile
 import com.ravendarque.deaftly.core.chat.ColourRole
 import com.ravendarque.deaftly.core.settings.ChatTextSize
+import com.ravendarque.deaftly.core.settings.PersonalNames
 import com.ravendarque.deaftly.core.settings.SettingsRepository
 import com.ravendarque.deaftly.core.settings.ShowScheme
 import com.ravendarque.deaftly.core.settings.ThemeMode
@@ -31,6 +32,12 @@ class DataStoreSettingsRepository(
     override val themeMode: Flow<ThemeMode> =
         store.data.map { it.settings.themeMode?.toDomain() ?: ThemeMode.System }.distinctUntilChanged()
 
+    override val personalNames: Flow<PersonalNames> =
+        store.data
+            .map {
+                it.settings.personalNames()
+            }.distinctUntilChanged()
+
     override suspend fun setShowScheme(scheme: ShowScheme) {
         store.updateData { document -> document.copy(settings = document.settings.copy(showScheme = scheme.toDto())) }
     }
@@ -49,6 +56,23 @@ class DataStoreSettingsRepository(
 
     override suspend fun setThemeMode(mode: ThemeMode) {
         store.updateData { document -> document.copy(settings = document.settings.copy(themeMode = mode.toDto())) }
+    }
+
+    override suspend fun updatePersonalNames(change: (PersonalNames) -> PersonalNames) {
+        store.updateData { document ->
+            val settings = document.settings
+            val names = change(settings.personalNames())
+            document.copy(
+                settings =
+                    settings.copy(
+                        firstName = names.firstName,
+                        surname = names.surname,
+                        legalNameDiffers = names.legalNameDiffers,
+                        legalName = names.legalName,
+                        useFirstNameInChats = names.useFirstNameInChats,
+                    ),
+            )
+        }
     }
 
     override suspend fun setChatProfile(profile: ChatProfile) {
@@ -125,3 +149,5 @@ private fun ColourRole.toDto(): ParticipantColourDto =
         ColourRole.Blue -> ParticipantColourDto.Blue
         ColourRole.Indigo -> ParticipantColourDto.Indigo
     }
+
+private fun SettingsDto.personalNames() = PersonalNames(firstName, surname, legalNameDiffers, legalName, useFirstNameInChats)
