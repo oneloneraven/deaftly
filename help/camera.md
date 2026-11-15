@@ -21,7 +21,7 @@ The camera can read text from a menu, sign, label, timetable or letter, and add 
 - **Clear text** starts your selection again.
 - If it can't read the text, tap **Type it instead**.
 
-Pictures never leave your phone.
+Deaftly doesn't store or send your pictures.
 
 ## If the camera is off
 
