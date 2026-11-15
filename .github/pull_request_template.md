@@ -2,6 +2,10 @@ Closes #
 
 ## What changed
 
+## What's new
+
+<!-- One plain sentence per change someone using Deaftly would notice, listed in the release notes. Leave empty if they won't notice anything. -->
+
 ## How it was verified
 
 ## Definition of done
@@ -16,3 +20,4 @@ See [the definition of done](../docs/definition-of-done.md).
 - [ ] Documented: docs and ADRs updated; no narrative comments
 - [ ] Clean: nothing the change replaced is left behind
 - [ ] Labelled: correct release label
+- [ ] Announced: "What's new" filled in if someone using Deaftly will notice the change, empty if not

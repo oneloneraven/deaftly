@@ -1,5 +1,6 @@
 import { execFileSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import { releaseNotes, whatsNewFromPrBody } from "./whats-new.mjs";
 
 const BUMPS = ["major", "minor", "patch"];
 
@@ -23,7 +24,7 @@ export function planReleases({ commits, latestVersion, isTagged, prFor }) {
     const bump = pr && bumpOf(pr.labels);
     if (!bump) continue;
     version = nextVersion(version, bump);
-    plan.push({ sha, version, pr: pr.number });
+    plan.push({ sha, version, pr: pr.number, notes: releaseNotes(whatsNewFromPrBody(pr.body)) });
   }
   return plan;
 }
@@ -44,7 +45,7 @@ export function planFromRepo({ git, prFor, mergeSha, bumpInput }) {
       .split("\n")
       .find(tag => /^v\d+\.\d+\.\d+$/.test(tag));
     if (existing) throw new Error(`HEAD is already released as ${existing}`);
-    return [{ sha: git(["rev-parse", "HEAD"]), version: nextVersion(latestTag, bumpInput), pr: null }];
+    return [{ sha: git(["rev-parse", "HEAD"]), version: nextVersion(latestTag, bumpInput), pr: null, notes: "" }];
   }
   if (latestTag && !isAncestor(git, latestTag, mergeSha)) {
     throw new Error(`${latestTag} isn't in ${mergeSha}'s history, so there's no safe range to release from`);
@@ -81,7 +82,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
     prFor: sha => {
       const prs = parsePulls(run("gh", ["api", `repos/${GITHUB_REPOSITORY}/commits/${sha}/pulls`]), sha);
       const pr = prs.find(p => p.merge_commit_sha === sha);
-      return pr ? { number: pr.number, labels: pr.labels.map(l => l.name) } : null;
+      return pr ? { number: pr.number, body: pr.body, labels: pr.labels.map(l => l.name) } : null;
     },
   });
   process.stdout.write(`${JSON.stringify(plan)}\n`);

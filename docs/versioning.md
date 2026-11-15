@@ -42,7 +42,8 @@ When a labelled PR merges, `release.yml`:
 1. reads the label (`none` stops here);
 2. finds the latest `vX.Y.Z` tag and computes the next version;
 3. tags the PR's own merge commit and pushes only the tag;
-4. creates a GitHub Release with generated notes and attaches any build
+4. creates a GitHub Release whose body is the PR's "What's new" lines as `- `
+   bullets, nothing else (empty when the PR has none), and attaches any build
    artefact.
 
 The tag is pushed with a short-lived token from the release GitHub App,

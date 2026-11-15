@@ -20,3 +20,10 @@ same list.
 7. **Clean.** Nothing the change replaced is left behind: no unused exports,
    styles, fixtures, scripts or tests.
 8. **Labelled.** The PR has the right release label ([versioning](versioning.md)).
+9. **Announced.** Every PR that makes a release has a "What's new" heading,
+   with one plain sentence per change someone using Deaftly will notice,
+   written for them: each line becomes a bullet in the release notes. Leave
+   it empty only when they won't notice anything. CI fails a released PR
+   without the heading (`require-release-label.yml`), so a body written with
+   `--body-file`, which skips the template, has to include it
+   ([versioning](versioning.md#cutting-a-release)).
