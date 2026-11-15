@@ -325,7 +325,11 @@ class FillScreenTest {
 
         composeRule.onNodeWithText("Show").performClick()
 
-        val highlights = listOf("Pasta arrabbiata", "Garlic bread").map { HighlightRange(joined.indexOf(it), joined.indexOf(it) + it.length) }
+        val highlights =
+            listOf(
+                "Pasta arrabbiata",
+                "Garlic bread",
+            ).map { HighlightRange(joined.indexOf(it), joined.indexOf(it) + it.length) }
         assertEquals(listOf<Route>(Route.Show(joined, highlights)), navigated)
     }
 
