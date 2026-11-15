@@ -63,7 +63,7 @@ class CameraGateTest {
     fun explainsWhyTheCameraIsNeededBeforeAsking() {
         show(CameraAccess.NotAsked)
 
-        composeRule.onNodeWithText("Deaftly uses the camera to read text. Pictures never leave your phone.").assertIsDisplayed()
+        composeRule.onNodeWithText("Deaftly uses the camera to read text. It doesn't store or send your pictures.").assertIsDisplayed()
         composeRule.onNodeWithText("camera").assertDoesNotExist()
         composeRule.onRoot().tryPerformAccessibilityChecks()
     }
@@ -73,8 +73,8 @@ class CameraGateTest {
         show(CameraAccess.NotAsked)
 
         composeRule
-            .onNodeWithText("Deaftly uses the camera to read text. Pictures never leave your phone.")
-            .assert(hasContentDescription("Deftly uses the camera to read text. Pictures never leave your phone."))
+            .onNodeWithText("Deaftly uses the camera to read text. It doesn't store or send your pictures.")
+            .assert(hasContentDescription("Deftly uses the camera to read text. It doesn't store or send your pictures."))
     }
 
     @Test
