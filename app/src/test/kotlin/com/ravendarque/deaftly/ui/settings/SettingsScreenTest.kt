@@ -48,7 +48,9 @@ class SettingsScreenTest {
 
     private val settings = FakeSettingsRepository(ChatProfile("Alex", ColourRole.Green), ShowScheme.WhiteOnBlack)
     private val builtIn = Template("a", "A", "Everyday", "Hello", builtIn = true)
-    private val templates = FakeTemplateRepository(emptyList(), listOf(builtIn))
+    private val other = Template("b", "B", "Everyday", "Bye", builtIn = true)
+    private val edited = other.copy(body = "See you")
+    private val templates = FakeTemplateRepository(listOf(edited), listOf(builtIn, other))
     private var backs = 0
 
     @Before
@@ -96,15 +98,33 @@ class SettingsScreenTest {
     }
 
     @Test
-    fun restoreBuiltInTemplatesBringsBackHiddenOnesAndThenDisables() {
+    fun restoreAsksAboutEditsAndKeepingThemBringsBackOnlyHiddenOnes() {
         composeRule
             .onNodeWithText("Restore built-in templates")
             .performScrollTo()
             .assertIsEnabled()
             .performClick()
+        composeRule.onNodeWithText("Restore edited templates too?").assertIsDisplayed()
+        composeRule.onRoot().tryPerformAccessibilityChecks()
+
+        composeRule.onNodeWithText("Keep my changes").performClick()
         composeRule.waitForIdle()
 
-        assertEquals(listOf(builtIn), templates.snapshot)
+        assertEquals(listOf(edited, builtIn), templates.snapshot)
+        composeRule.onNodeWithText("Restore edited templates too?").assertDoesNotExist()
+        composeRule.onNodeWithText("Restore built-in templates").assertIsEnabled()
+    }
+
+    @Test
+    fun restoringAllUndoesEditsAndThenDisables() {
+        composeRule
+            .onNodeWithText("Restore built-in templates")
+            .performScrollTo()
+            .performClick()
+        composeRule.onNodeWithText("Restore all").performClick()
+        composeRule.waitForIdle()
+
+        assertEquals(listOf(other, builtIn), templates.snapshot)
         composeRule.onNodeWithText("Restore built-in templates").assertIsNotEnabled()
         composeRule.onRoot().tryPerformAccessibilityChecks()
     }

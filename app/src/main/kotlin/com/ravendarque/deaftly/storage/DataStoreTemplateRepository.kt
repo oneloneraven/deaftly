@@ -20,6 +20,8 @@ class DataStoreTemplateRepository(
 
     override val hiddenBuiltInCount: Flow<Int> = store.data.map { document -> document.hiddenBuiltIns(builtIns()).size }
 
+    override val editedBuiltInCount: Flow<Int> = store.data.map { document -> document.editedBuiltIns(builtIns()).size }
+
     override suspend fun add(template: Template) {
         edit { current ->
             require(current.none { it.id == template.id }) { "A template with this id already exists" }
@@ -68,11 +70,11 @@ class DataStoreTemplateRepository(
         store.updateData { document -> document.restoring(listOf(default)) }
     }
 
-    override suspend fun restoreHiddenBuiltIns() {
+    override suspend fun restoreBuiltIns(includeEdited: Boolean) {
         store.updateData { document ->
             val shipped = builtIns()
-            val hidden = document.hiddenBuiltIns(shipped).toSet()
-            document.restoring(shipped.filter { it.id in hidden })
+            val chosen = (document.hiddenBuiltIns(shipped) + if (includeEdited) document.editedBuiltIns(shipped) else emptyList()).toSet()
+            document.restoring(shipped.filter { it.id in chosen })
         }
     }
 

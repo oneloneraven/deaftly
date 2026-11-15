@@ -30,6 +30,13 @@ fun StoreDocument.reconcileBuiltIns(builtIns: List<Template>): StoreDocument {
 fun StoreDocument.hiddenBuiltIns(builtIns: List<Template>): List<String> =
     builtIns.map { it.id }.filter { id -> id in builtInsReceived && templates.none { it.id == id } }
 
+fun StoreDocument.editedBuiltIns(builtIns: List<Template>): List<String> {
+    val shipped = builtIns.map(Template::toDto).associateBy { it.id }
+    return templates.mapNotNull { stored ->
+        shipped[stored.id]?.takeIf { it.contentFingerprint() != stored.contentFingerprint() }?.id
+    }
+}
+
 fun StoreDocument.restoring(defaults: List<Template>): StoreDocument {
     val restored = defaults.map(Template::toDto).associateBy { it.id }
     val replaced = templates.map { restored[it.id] ?: it }
