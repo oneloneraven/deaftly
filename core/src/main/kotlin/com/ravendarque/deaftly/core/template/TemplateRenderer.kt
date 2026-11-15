@@ -39,30 +39,15 @@ public data class Rendered(
         buildList {
             var offset = 0
             for (part in parts) {
-                val length =
+                if (part is RenderedPart.Value) {
+                    part.valueSpans.forEach { span -> add(TextSpan(offset + span.start, offset + span.end)) }
+                }
+                offset +=
                     when (part) {
-                        is RenderedPart.Text -> {
-                            part.text.length
-                        }
-
-                        is RenderedPart.Value -> {
-                            part.text.length.also {
-                                part.valueSpans.forEach {
-                                    add(
-                                        TextSpan(
-                                            offset + it.start,
-                                            offset + it.end,
-                                        ),
-                                    )
-                                }
-                            }
-                        }
-
-                        is RenderedPart.Unfilled -> {
-                            part.label.length
-                        }
+                        is RenderedPart.Text -> part.text.length
+                        is RenderedPart.Value -> part.text.length
+                        is RenderedPart.Unfilled -> part.label.length
                     }
-                offset += length
             }
         }
 
