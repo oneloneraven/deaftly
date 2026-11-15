@@ -79,21 +79,30 @@ public object TemplateRenderer {
         return Rendered(parts, unfilled.toList())
     }
 
-    public fun join(values: List<String>): String {
+    public fun join(
+        values: List<String>,
+        join: Join = Join.And,
+    ): String {
         val cleaned = values.map { it.trim() }.filter { it.isNotEmpty() }
         return when (cleaned.size) {
             0 -> ""
             1 -> cleaned.first()
-            else -> cleaned.dropLast(1).joinToString(", ") + " and " + cleaned.last()
+            else -> cleaned.dropLast(1).joinToString(", ") + " ${join.word()} " + cleaned.last()
         }
     }
+
+    private fun Join.word() =
+        when (this) {
+            Join.And -> "and"
+            Join.Or -> "or"
+        }
 
     private fun valueText(
         placeholder: Placeholder,
         fill: TemplateFill,
     ): String =
         if (placeholder.repeatable) {
-            join(fill.values(placeholder.key))
+            join(fill.values(placeholder.key), placeholder.join)
         } else {
             fill
                 .values(placeholder.key)

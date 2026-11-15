@@ -2,12 +2,15 @@ package com.ravendarque.deaftly.core.template
 
 public enum class PlaceholderType { Choices, Typing, Camera }
 
+public enum class Join { And, Or }
+
 public data class Placeholder(
     val key: String,
     val label: String,
     val type: PlaceholderType,
     val options: List<String> = emptyList(),
     val repeatable: Boolean = false,
+    val join: Join = Join.And,
 )
 
 public data class Template(

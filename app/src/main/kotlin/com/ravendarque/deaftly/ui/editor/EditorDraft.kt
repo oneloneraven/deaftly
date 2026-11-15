@@ -2,6 +2,7 @@ package com.ravendarque.deaftly.ui.editor
 
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
+import com.ravendarque.deaftly.core.template.Join
 import com.ravendarque.deaftly.core.template.Placeholder
 import com.ravendarque.deaftly.core.template.PlaceholderType
 import com.ravendarque.deaftly.core.template.Template
@@ -19,6 +20,7 @@ data class DraftPlaceholder(
     val type: PlaceholderType = PlaceholderType.Typing,
     val options: List<String> = emptyList(),
     val repeatable: Boolean = false,
+    val join: Join = Join.And,
 ) {
     fun toPlaceholder(): Placeholder =
         Placeholder(
@@ -32,6 +34,7 @@ data class DraftPlaceholder(
                     emptyList()
                 },
             repeatable = repeatable,
+            join = join,
         )
 
     companion object {
@@ -42,6 +45,7 @@ data class DraftPlaceholder(
                 type = placeholder.type,
                 options = placeholder.options,
                 repeatable = placeholder.repeatable,
+                join = placeholder.join,
             )
     }
 }

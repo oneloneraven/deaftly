@@ -16,7 +16,7 @@ Templates are messages you use often, such as checking in or ordering food. You 
    - tap **Something else…** to type your own
    - tap **Type it**
    - read it with the camera, for example **Scan the menu**. See [Reading text with the camera](camera.md).
-4. Where you see **+ add more**, you can add more than one, such as two dishes. They're joined with "and".
+4. Where you see **+ add more**, you can add more than one, such as two dishes. They're joined with "and" or "or", as the template's author chose, such as "write it down or type on my phone".
 5. Tap **Show** to show it full screen, or **Insert into chat** when you're in a chat.
 
 ## The built-in templates
@@ -46,6 +46,7 @@ To add a part that changes, tap **Placeholder**. For each placeholder you choose
 - **Question when filling in**: what Deaftly asks you
 - **Filled by**: **Choices** to pick from, **Typing**, or the **Camera**
 - **Allow more than one**: shows "+ add more"
+- **Join values with**: when more than one is allowed, whether the values join with "and" or "or"
 
 Tap **Save**.
 

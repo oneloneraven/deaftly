@@ -1,6 +1,7 @@
 package com.ravendarque.deaftly.storage
 
 import androidx.datastore.core.CorruptionException
+import com.ravendarque.deaftly.core.template.Join
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
@@ -38,6 +39,19 @@ class TemplateStoreSerializerTest {
             assertEquals(document.templates, restored.templates)
             assertEquals(document.version, restored.version)
             assertEquals(builtIns + custom, restored.templates.map { it.toDomain() })
+        }
+
+    @Test
+    fun theJoinChoiceSurvivesSavingAndLoading() =
+        runTest {
+            val document = StoreDocument(STORE_VERSION, builtIns.map { it.toDto() }, SettingsDto())
+
+            val written = write(document)
+            val restored = read(written).templates.map { it.toDomain() }
+
+            assertTrue("\"join\":\"or\"" in written)
+            assertEquals(Join.Or, restored.first { it.id == greeting.id }.placeholder("how to reply").join)
+            assertEquals(Join.And, restored.first { it.id == menu.id }.placeholder("item").join)
         }
 
     @Test

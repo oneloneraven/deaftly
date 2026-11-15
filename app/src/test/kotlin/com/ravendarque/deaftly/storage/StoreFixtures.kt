@@ -1,5 +1,6 @@
 package com.ravendarque.deaftly.storage
 
+import com.ravendarque.deaftly.core.template.Join
 import com.ravendarque.deaftly.core.template.Placeholder
 import com.ravendarque.deaftly.core.template.PlaceholderType
 import com.ravendarque.deaftly.core.template.Template
@@ -22,6 +23,7 @@ val greeting =
                         type = PlaceholderType.Choices,
                         options = listOf("type on my phone", "write it down"),
                         repeatable = true,
+                        join = Join.Or,
                     ),
             ),
     )

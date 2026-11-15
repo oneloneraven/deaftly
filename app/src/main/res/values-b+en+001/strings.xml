@@ -10,7 +10,7 @@
     <string name="chat_setup">Names and colours</string>
     <string name="participants_colour_selected">Colour: %1$s</string>
     <string name="editor_error_key_braces">The name can’t contain curly brackets</string>
-    <string name="template_pharmacy_body">Hi! I\'m deaf. I\'m collecting a prescription for {patient}. Please {how to reply}.</string>
+    <string name="template_pharmacy_body">Hi! I\'m deaf. I\'m collecting a prescription for {patient}. If you need to reply, please {how to reply}.</string>
     <string-array name="placeholder_thing_options">
         <item>the toilets</item>
         <item>the exit</item>

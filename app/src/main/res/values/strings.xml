@@ -200,7 +200,10 @@
     <string name="editor_remove_option">Remove choice %1$d</string>
     <string name="editor_add_option">Add a choice</string>
     <string name="editor_repeatable">Allow more than one</string>
-    <string name="editor_repeatable_hint">Shows “+ add more”, joined with “and”</string>
+    <string name="editor_repeatable_hint">Shows “+ add more”</string>
+    <string name="editor_join">Join values with</string>
+    <string name="editor_join_and">and</string>
+    <string name="editor_join_or">or</string>
     <string name="editor_error_name">Give the template a name</string>
     <string name="editor_error_category">Choose or type a category</string>
     <string name="editor_error_message">Write a message</string>

@@ -37,6 +37,24 @@ class TemplateRendererTest {
     }
 
     @Test
+    fun orJoinsFollowTheSameShapeAsAnd() {
+        assertEquals("A", TemplateRenderer.join(listOf("A"), Join.Or))
+        assertEquals("A or B", TemplateRenderer.join(listOf("A", "B"), Join.Or))
+        assertEquals("A, B or C", TemplateRenderer.join(listOf("A", "B", "C"), Join.Or))
+        assertEquals("A and B", TemplateRenderer.join(listOf("A", "B"), Join.And))
+    }
+
+    @Test
+    fun aRepeatablePlaceholderJoinsWithItsChosenWord() {
+        val fill = TemplateFill().add("how", "write it down").add("how", "type on my phone").add("how", "point")
+        val withOr = template("Please {how}.", repeatable("how").copy(join = Join.Or))
+        val withAnd = template("Please {how}.", repeatable("how"))
+
+        assertEquals("Please write it down, type on my phone or point.", TemplateRenderer.render(withOr, fill).text)
+        assertEquals("Please write it down, type on my phone and point.", TemplateRenderer.render(withAnd, fill).text)
+    }
+
+    @Test
     fun joinTrimsAndIgnoresEmptyValues() {
         assertEquals("A and B", TemplateRenderer.join(listOf("  A ", "", "   ", "B ")))
         assertEquals("", TemplateRenderer.join(listOf("", "  ")))
