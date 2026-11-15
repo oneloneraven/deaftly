@@ -2,6 +2,7 @@ package com.ravendarque.deaftly.templates
 
 import android.content.res.Resources
 import com.ravendarque.deaftly.R
+import com.ravendarque.deaftly.core.template.Join
 import com.ravendarque.deaftly.core.template.Placeholder
 import com.ravendarque.deaftly.core.template.PlaceholderType
 import com.ravendarque.deaftly.core.template.Template
@@ -17,6 +18,8 @@ private class BuiltInTemplateFactory(
             R.string.placeholder_how_to_reply_label,
             PlaceholderType.Choices,
             R.array.placeholder_how_to_reply_options,
+            repeatable = true,
+            join = Join.Or,
         )
     private val name = placeholder("name", R.string.placeholder_name_label, PlaceholderType.Typing)
     private val signLanguage = resources.getString(R.string.sign_language)
@@ -92,7 +95,9 @@ private class BuiltInTemplateFactory(
                 R.string.template_doctor_title,
                 R.string.category_health,
                 R.string.template_doctor_body,
+                name,
                 placeholder("time", R.string.placeholder_time_label, PlaceholderType.Typing),
+                placeholder("doctor", R.string.placeholder_doctor_label, PlaceholderType.Typing),
                 placeholder(
                     "how I communicate",
                     R.string.placeholder_how_i_communicate_label,
@@ -138,6 +143,7 @@ private class BuiltInTemplateFactory(
         type: PlaceholderType,
         options: Int? = null,
         repeatable: Boolean = false,
+        join: Join = Join.And,
         leadingOptions: List<String> = emptyList(),
     ) = Placeholder(
         key = key,
@@ -145,6 +151,7 @@ private class BuiltInTemplateFactory(
         type = type,
         options = leadingOptions + options?.let { resources.getStringArray(it).toList() }.orEmpty(),
         repeatable = repeatable,
+        join = join,
     )
 
     private fun template(

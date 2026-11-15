@@ -23,6 +23,7 @@ import androidx.compose.ui.test.tryPerformAccessibilityChecks
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.ravendarque.deaftly.core.template.Join
 import com.ravendarque.deaftly.core.template.PlaceholderType
 import com.ravendarque.deaftly.ui.theme.AppTheme
 import org.junit.Before
@@ -214,6 +215,25 @@ class EditorScreenTest {
         assertTrue(viewModel.draft.selected?.repeatable == true)
         tap("Allow more than one")
         assertTrue(viewModel.draft.selected?.repeatable == false)
+    }
+
+    @Test
+    fun theJoinChoiceAppearsOnlyForARepeatablePlaceholderAndSelectsOr() {
+        show("my-note")
+        viewModel.edit { it.select("name") }
+        composeRule.waitForIdle()
+
+        composeRule.onNodeWithText("Join values with").assertDoesNotExist()
+        tap("Allow more than one")
+        composeRule.waitForIdle()
+
+        composeRule.onNodeWithText("Join values with").assertExists()
+        option("and").assertIsSelected()
+        option("or").performScrollTo().performClick()
+
+        assertEquals(Join.Or, viewModel.draft.selected?.join)
+        option("or").assertIsSelected()
+        composeRule.onRoot().tryPerformAccessibilityChecks()
     }
 
     @Test

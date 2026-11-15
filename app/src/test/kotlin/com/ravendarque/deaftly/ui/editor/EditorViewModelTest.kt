@@ -3,6 +3,7 @@ package com.ravendarque.deaftly.ui.editor
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.SavedStateHandle
+import com.ravendarque.deaftly.core.template.Join
 import com.ravendarque.deaftly.core.template.Placeholder
 import com.ravendarque.deaftly.core.template.PlaceholderType
 import kotlinx.coroutines.Dispatchers
@@ -310,6 +311,25 @@ class EditorViewModelTest {
             assertEquals(
                 Placeholder("name", "Who?", PlaceholderType.Choices, listOf("Sam", "Alex"), repeatable = true),
                 stored("my-note").placeholder("name"),
+            )
+        }
+
+    @Test
+    fun theJoinChoiceIsSavedAndRestoredWhenEditingAgain() =
+        runTest {
+            val viewModel = viewModel()
+            viewModel.edit { it.select("name").updateSelected { p -> p.copy(repeatable = true, join = Join.Or) } }
+
+            viewModel.save()
+
+            assertEquals(Join.Or, stored("my-note").placeholder("name").join)
+            assertEquals(
+                Join.Or,
+                EditorDraft
+                    .from(stored("my-note"))
+                    .placeholders
+                    .first { it.key == "name" }
+                    .join,
             )
         }
 

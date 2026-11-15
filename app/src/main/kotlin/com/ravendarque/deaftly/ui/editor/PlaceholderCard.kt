@@ -32,6 +32,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.ravendarque.deaftly.R
+import com.ravendarque.deaftly.core.template.Join
 import com.ravendarque.deaftly.core.template.PlaceholderType
 import com.ravendarque.deaftly.ui.components.DeaftlyIconButton
 import com.ravendarque.deaftly.ui.icons.DeaftlyIcons
@@ -71,6 +72,9 @@ fun PlaceholderCard(
             OptionsEditor(placeholder.options) { options -> onEdit { it.updateSelected { p -> p.copy(options = options) } } }
         }
         RepeatableSwitch(placeholder.repeatable) { value -> onEdit { it.updateSelected { p -> p.copy(repeatable = value) } } }
+        if (placeholder.repeatable) {
+            JoinChoice(placeholder.join) { join -> onEdit { it.updateSelected { p -> p.copy(join = join) } } }
+        }
     }
 }
 
@@ -208,3 +212,32 @@ private fun RepeatableSwitch(
         )
     }
 }
+
+@Composable
+private fun JoinChoice(
+    selected: Join,
+    onSelect: (Join) -> Unit,
+) {
+    val c = Deaftly.colors
+    val group =
+        Modifier
+            .fillMaxWidth()
+            .clip(Deaftly.shapes.controlSmall)
+            .background(c.surfaceSunken, Deaftly.shapes.controlSmall)
+            .selectableGroup()
+            .padding(Deaftly.spacing.space4)
+    Column(verticalArrangement = Arrangement.spacedBy(Deaftly.spacing.space8)) {
+        FieldLabel(stringResource(R.string.editor_join))
+        Row(group, horizontalArrangement = Arrangement.spacedBy(Deaftly.spacing.space4)) {
+            Join.entries.forEach { join ->
+                Segment(stringResource(join.labelRes()), join == selected, { onSelect(join) }, Modifier.weight(1f))
+            }
+        }
+    }
+}
+
+private fun Join.labelRes() =
+    when (this) {
+        Join.And -> R.string.editor_join_and
+        Join.Or -> R.string.editor_join_or
+    }

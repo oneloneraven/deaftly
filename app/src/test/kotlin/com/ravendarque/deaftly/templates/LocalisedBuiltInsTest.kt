@@ -61,7 +61,7 @@ class LocalisedBuiltInsTest {
             assertEquals("$language interpreter", interpreter.title, qualifiers)
             assertEquals(
                 "Hi! I'm deaf. My name is {name}. I should have $article $language interpreter booked. " +
-                    "Are they here yet? Please {how to reply}.",
+                    "Are they here yet? To reply, please {how to reply}.",
                 interpreter.body,
                 qualifiers,
             )

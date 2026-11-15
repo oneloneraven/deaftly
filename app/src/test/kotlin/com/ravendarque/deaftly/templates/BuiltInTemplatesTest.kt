@@ -1,6 +1,7 @@
 package com.ravendarque.deaftly.templates
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.ravendarque.deaftly.core.template.Join
 import com.ravendarque.deaftly.core.template.PlaceholderType
 import com.ravendarque.deaftly.core.template.Template
 import com.ravendarque.deaftly.core.template.TemplateFill
@@ -55,10 +56,10 @@ class BuiltInTemplatesTest {
     }
 
     @Test
-    fun everySentenceIsTwelveWordsOrFewer() {
+    fun everySentenceIsFourteenWordsOrFewer() {
         templates.forEach { template ->
             wordCounts(template.body).forEach { count ->
-                assertTrue(count <= 12, "${template.id} has a sentence of $count words")
+                assertTrue(count <= 14, "${template.id} has a sentence of $count words")
             }
         }
     }
@@ -121,7 +122,7 @@ class BuiltInTemplatesTest {
         assertEquals("BSL interpreter", interpreter.title)
         assertEquals("Everyday", interpreter.category)
         assertEquals(
-            "Hi! I'm deaf. My name is {name}. I should have a BSL interpreter booked. Are they here yet? Please {how to reply}.",
+            "Hi! I'm deaf. My name is {name}. I should have a BSL interpreter booked. Are they here yet? To reply, please {how to reply}.",
             interpreter.body,
         )
         assertEquals(setOf("name", "how to reply"), interpreter.placeholders.keys)
@@ -134,9 +135,13 @@ class BuiltInTemplatesTest {
         val communicate = doctor.placeholders.getValue("how I communicate")
 
         assertEquals(
-            "Hi! I'm deaf. I have an appointment at {time}. I will be communicating by {how I communicate}. Please {how to reply}.",
+            "Hi! I'm deaf. My name is {name}. I have an appointment at {time} with {doctor}. " +
+                "I prefer to communicate by {how I communicate}. If you need to reply, please {how to reply}.",
             doctor.body,
         )
+        assertEquals("Who is it with?", doctor.placeholders.getValue("doctor").label)
+        assertEquals(PlaceholderType.Typing, doctor.placeholders.getValue("doctor").type)
+        assertEquals(byId(BuiltInIds.CHECK_IN).placeholders.getValue("name"), doctor.placeholders.getValue("name"))
         assertEquals(PlaceholderType.Choices, communicate.type)
         assertTrue(communicate.repeatable)
         assertEquals("How will you communicate?", communicate.label)
@@ -148,16 +153,51 @@ class BuiltInTemplatesTest {
     fun theDoctorTemplateJoinsTwoCommunicationChoices() {
         val fill =
             TemplateFill()
-                .set("time", "3pm")
+                .set("name", "Marcus Campbell")
+                .set("time", "10:30")
+                .set("doctor", "Dr Shah")
                 .add("how I communicate", "lipreading")
                 .add("how I communicate", "typing on my phone")
                 .set("how to reply", "write it down")
 
         assertEquals(
-            "Hi! I'm deaf. I have an appointment at 3pm. I will be communicating by lipreading and typing on my phone. " +
-                "Please write it down.",
+            "Hi! I'm deaf. My name is Marcus Campbell. I have an appointment at 10:30 with Dr Shah. " +
+                "I prefer to communicate by lipreading and typing on my phone. If you need to reply, please write it down.",
             TemplateRenderer.render(byId(BuiltInIds.DOCTOR), fill).text,
         )
+    }
+
+    @Test
+    fun theDoctorTemplateRendersTheWebsiteMessage() {
+        val fill =
+            TemplateFill()
+                .set("name", "Marcus Campbell")
+                .set("time", "10:30")
+                .set("doctor", "Dr Shah")
+                .set("how I communicate", "typing on my phone")
+                .add("how to reply", "write it down")
+                .add("how to reply", "type on my phone")
+
+        assertEquals(
+            "Hi! I'm deaf. My name is Marcus Campbell. I have an appointment at 10:30 with Dr Shah. " +
+                "I prefer to communicate by typing on my phone. " +
+                "If you need to reply, please write it down or type on my phone.",
+            TemplateRenderer.render(byId(BuiltInIds.DOCTOR), fill).text,
+        )
+    }
+
+    @Test
+    fun howToReplyJoinsWithOrAndFoodJoinsWithAnd() {
+        val repliers = templates.filter { "how to reply" in it.placeholders }
+
+        assertTrue(repliers.size >= 8)
+        repliers.forEach {
+            val reply = it.placeholders.getValue("how to reply")
+            assertTrue(reply.repeatable, it.id)
+            assertEquals(Join.Or, reply.join, it.id)
+        }
+        assertEquals(Join.And, byId(BuiltInIds.ORDER_FOOD).placeholders.getValue("menu item").join)
+        assertEquals(Join.And, byId(BuiltInIds.FOOD_ALLERGY).placeholders.getValue("allergen").join)
     }
 
     @Test

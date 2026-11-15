@@ -1,5 +1,6 @@
 package com.ravendarque.deaftly.storage
 
+import com.ravendarque.deaftly.core.template.Join
 import com.ravendarque.deaftly.core.template.Placeholder
 import com.ravendarque.deaftly.core.template.PlaceholderType
 import com.ravendarque.deaftly.core.template.Template
@@ -114,7 +115,17 @@ data class PlaceholderDto(
     val type: PlaceholderTypeDto,
     val options: List<String> = emptyList(),
     val repeatable: Boolean = false,
+    val join: JoinDto = JoinDto.And,
 )
+
+@Serializable
+enum class JoinDto {
+    @SerialName("and")
+    And,
+
+    @SerialName("or")
+    Or,
+}
 
 @Serializable
 enum class PlaceholderTypeDto {
@@ -145,6 +156,11 @@ private fun Placeholder.toDto(): PlaceholderDto =
             },
         options = options,
         repeatable = repeatable,
+        join =
+            when (join) {
+                Join.And -> JoinDto.And
+                Join.Or -> JoinDto.Or
+            },
     )
 
 private fun PlaceholderDto.toDomain(): Placeholder =
@@ -159,4 +175,9 @@ private fun PlaceholderDto.toDomain(): Placeholder =
             },
         options = options,
         repeatable = repeatable,
+        join =
+            when (join) {
+                JoinDto.And -> Join.And
+                JoinDto.Or -> Join.Or
+            },
     )

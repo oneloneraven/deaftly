@@ -40,7 +40,7 @@ Deaftly is an Android app that helps deaf people communicate quickly and with li
 | T2 | Users can create, edit, duplicate and delete their own templates. Built-in templates can be edited and restored to default. |
 | T3 | Templates can contain placeholders, each of which has a label and a list of predefined options. |
 | T4 | Tapping a placeholder shows its options and lets the user type a custom value. |
-| T5 | A placeholder can be marked repeatable, so the user can add further values ("+ add more"). |
+| T5 | A placeholder can be marked repeatable, so the user can add further values ("+ add more"), joined with "and" or "or" as the template author chooses. |
 | T6 | A placeholder can be of type OCR, which opens the camera capture (see 4.3). |
 | T7 | Templates are reachable within one tap of app launch, with a way to pin favourites. |
 | T8 | Users can organise templates simply, for example by pinning or with basic categories. |

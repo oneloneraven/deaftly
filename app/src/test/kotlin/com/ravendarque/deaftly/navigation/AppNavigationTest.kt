@@ -212,7 +212,9 @@ class AppNavigationTest {
         composeRule.waitForIdle()
 
         composeRule.onNodeWithContentDescription("Me: Hello there").assertExists()
-        composeRule.onNode(isMessageField).assert(hasText("Please wait. I'm deaf. I can't hear you. Please $option."))
+        composeRule
+            .onNode(isMessageField)
+            .assert(hasText("Please wait. I'm deaf. I can't hear you so if you need to talk to me, please $option."))
         composeRule.onNodeWithText(text(R.string.fill_insert)).assertDoesNotExist()
         composeRule.onRoot().tryPerformAccessibilityChecks()
     }
