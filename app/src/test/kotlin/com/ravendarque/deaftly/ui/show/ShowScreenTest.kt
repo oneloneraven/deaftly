@@ -6,6 +6,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.junit4.accessibility.enableAccessibilityChecks
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
@@ -17,7 +18,6 @@ import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipeDown
 import androidx.compose.ui.test.swipeUp
 import androidx.compose.ui.test.tryPerformAccessibilityChecks
-import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
@@ -201,6 +201,17 @@ class ShowScreenTest {
     }
 
     @Test
+    fun aWordWiderThanTheScreenBreaksAcrossLines() {
+        val word = "Supercalifragilisticexpialidocious"
+        show(word)
+
+        val layout = layoutOf(word)
+
+        assertTrue(layout.lineCount > 1, "lines: ${layout.lineCount}")
+        assertFalse(layout.didOverflowWidth)
+    }
+
+    @Test
     fun shortTextHasNoMoreBelowCue() {
         show(SHORT)
 
@@ -223,7 +234,9 @@ class ShowScreenTest {
         assertEquals(0, closes)
     }
 
-    private fun fontSizeOf(text: String): TextUnit {
+    private fun fontSizeOf(text: String): TextUnit = layoutOf(text).layoutInput.style.fontSize
+
+    private fun layoutOf(text: String): TextLayoutResult {
         val results = mutableListOf<TextLayoutResult>()
         composeRule
             .onNodeWithText(text)
@@ -231,6 +244,6 @@ class ShowScreenTest {
             .config[SemanticsActions.GetTextLayoutResult]
             .action
             ?.invoke(results)
-        return results.single().layoutInput.style.fontSize
+        return results.single()
     }
 }

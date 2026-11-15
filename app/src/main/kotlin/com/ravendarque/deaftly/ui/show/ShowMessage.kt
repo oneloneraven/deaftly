@@ -48,7 +48,7 @@ import kotlinx.coroutines.launch
 internal const val SHOW_FONT_SP = 56
 private val LargestShowText = 84.dp
 private const val LINE_HEIGHT_RATIO = 1.16f
-private const val PAGE_FRACTION = 0.8f
+private const val FADE_SOLID_FROM = 0.5f
 private val FadeHeight = 96.dp
 private val MoreTarget = 48.dp
 
@@ -112,13 +112,13 @@ private fun MoreBelow(
     modifier: Modifier = Modifier,
 ) {
     val scope = rememberCoroutineScope()
-    val page = with(LocalDensity.current) { (viewportHeight * PAGE_FRACTION).toPx() }
+    val page = with(LocalDensity.current) { (viewportHeight - FadeHeight).coerceAtLeast(MoreTarget).toPx() }
     Box(
         modifier =
             modifier
                 .fillMaxWidth()
                 .height(FadeHeight)
-                .background(Brush.verticalGradient(0f to Color.Transparent, 0.5f to colours.background)),
+                .background(Brush.verticalGradient(0f to Color.Transparent, FADE_SOLID_FROM to colours.background)),
         contentAlignment = Alignment.BottomCenter,
     ) {
         Row(
