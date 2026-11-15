@@ -8,6 +8,7 @@ import com.ravendarque.deaftly.core.settings.ShowScheme
 import com.ravendarque.deaftly.core.settings.ThemeMode
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.update
 
 class FakeSettingsRepository(
     initial: ChatProfile = ChatProfile(),
@@ -68,7 +69,7 @@ class FakeSettingsRepository(
         this.mode.value = mode
     }
 
-    override suspend fun setPersonalNames(names: PersonalNames) {
-        personal.value = names
+    override suspend fun updatePersonalNames(change: (PersonalNames) -> PersonalNames) {
+        personal.update(change)
     }
 }

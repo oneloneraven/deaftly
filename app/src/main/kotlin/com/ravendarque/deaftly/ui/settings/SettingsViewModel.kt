@@ -50,7 +50,7 @@ class SettingsViewModel(
     }
 
     fun changeNames(change: (PersonalNames) -> PersonalNames) {
-        viewModelScope.launch { settings.setPersonalNames(change(settings.personalNames.first())) }
+        viewModelScope.launch { settings.updatePersonalNames(change) }
     }
 
     fun setColour(colour: ColourRole) {

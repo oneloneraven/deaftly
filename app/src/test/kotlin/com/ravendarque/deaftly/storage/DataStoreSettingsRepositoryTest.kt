@@ -10,6 +10,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.joinAll
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
@@ -170,7 +172,7 @@ class DataStoreSettingsRepositoryTest {
             val names =
                 PersonalNames("Amira", "Hassan", legalNameDiffers = true, legalName = "Amira Fatima Hassan", useFirstNameInChats = true)
             val firstRun = Job()
-            repository(CoroutineScope(firstRun)).setPersonalNames(names)
+            repository(CoroutineScope(firstRun)).updatePersonalNames { names }
             firstRun.cancelAndJoin()
 
             assertEquals(names, repository(backgroundScope).personalNames.first())
@@ -195,9 +197,23 @@ class DataStoreSettingsRepositoryTest {
             val repository = repository(backgroundScope)
 
             repository.setChatProfile(ChatProfile("Alex", ColourRole.Blue))
-            repository.setPersonalNames(PersonalNames(firstName = "Amira"))
+            repository.updatePersonalNames { PersonalNames(firstName = "Amira") }
 
             assertEquals(ChatProfile("Alex", ColourRole.Blue), repository.chatProfile.first())
             assertEquals("Amira", repository.personalNames.first().firstName)
+        }
+
+    @Test
+    fun concurrentNameChangesAreAllKept() =
+        runTest {
+            val repository = repository(backgroundScope)
+
+            listOf<(PersonalNames) -> PersonalNames>(
+                { it.copy(firstName = "Amira") },
+                { it.copy(surname = "Okafor") },
+                { it.copy(legalNameDiffers = true) },
+            ).map { change -> launch { repository.updatePersonalNames(change) } }.joinAll()
+
+            assertEquals(PersonalNames(firstName = "Amira", surname = "Okafor", legalNameDiffers = true), repository.personalNames.first())
         }
 }

@@ -35,7 +35,7 @@ class DataStoreSettingsRepository(
     override val personalNames: Flow<PersonalNames> =
         store.data
             .map {
-                with(it.settings) { PersonalNames(firstName, surname, legalNameDiffers, legalName, useFirstNameInChats) }
+                it.settings.personalNames()
             }.distinctUntilChanged()
 
     override suspend fun setShowScheme(scheme: ShowScheme) {
@@ -58,11 +58,13 @@ class DataStoreSettingsRepository(
         store.updateData { document -> document.copy(settings = document.settings.copy(themeMode = mode.toDto())) }
     }
 
-    override suspend fun setPersonalNames(names: PersonalNames) {
+    override suspend fun updatePersonalNames(change: (PersonalNames) -> PersonalNames) {
         store.updateData { document ->
+            val settings = document.settings
+            val names = change(settings.personalNames())
             document.copy(
                 settings =
-                    document.settings.copy(
+                    settings.copy(
                         firstName = names.firstName,
                         surname = names.surname,
                         legalNameDiffers = names.legalNameDiffers,
@@ -147,3 +149,5 @@ private fun ColourRole.toDto(): ParticipantColourDto =
         ColourRole.Blue -> ParticipantColourDto.Blue
         ColourRole.Indigo -> ParticipantColourDto.Indigo
     }
+
+private fun SettingsDto.personalNames() = PersonalNames(firstName, surname, legalNameDiffers, legalName, useFirstNameInChats)

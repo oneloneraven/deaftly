@@ -30,5 +30,5 @@ public interface SettingsRepository {
 
     public suspend fun setThemeMode(mode: ThemeMode)
 
-    public suspend fun setPersonalNames(names: PersonalNames)
+    public suspend fun updatePersonalNames(change: (PersonalNames) -> PersonalNames)
 }
