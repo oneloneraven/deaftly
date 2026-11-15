@@ -26,21 +26,20 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
-          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
         run: |
           labels=$(gh pr view "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" --json labels --jq '.labels[].name')
           if ! echo "$labels" | grep -qE "^release: (major|minor|patch|none)$"; then
             echo "::error::No release label. Apply release: major, minor, patch or none (docs/versioning.md)."
             exit 1
           fi
-          # Dependency bumps ship with the next real release, so Dependabot's are none whatever they touch.
-          if echo "$labels" | grep -qx "release: none" && [ "$PR_AUTHOR" != "dependabot[bot]" ]; then
+          if echo "$labels" | grep -qx "release: none"; then
             gh api --paginate "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER/files" \
               --jq '.[] | .filename, (.previous_filename // empty)' \
               | node .github/scripts/check-release-paths.mjs
           fi
 
       - name: Verify a released PR has a What's new section
+        if: github.event.pull_request.user.login != 'dependabot[bot]'
         env:
           GH_TOKEN: ${{ github.token }}
           PR_NUMBER: ${{ github.event.pull_request.number }}

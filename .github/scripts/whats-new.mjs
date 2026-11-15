@@ -30,6 +30,8 @@ export function whatsNewFromPrBody(body = "") {
 
 export const placeholdersIn = changes => changes.filter(change => PLACEHOLDER.test(change));
 
+export const GENERIC_NOTE = "Behind-the-scenes improvements and security updates.";
+
 export function releaseNotes(changes) {
-  return changes.map(change => `- ${change}`).join("\n");
+  return (changes.length ? changes : [GENERIC_NOTE]).map(change => `- ${change}`).join("\n");
 }

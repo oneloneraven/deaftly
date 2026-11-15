@@ -60,7 +60,7 @@ test("flags placeholders", () => {
 
 test("formats release notes as bullets, empty when there are none", () => {
   assert.equal(releaseNotes(["A.", "B."]), "- A.\n- B.");
-  assert.equal(releaseNotes([]), "");
+  assert.equal(releaseNotes([]), "- Behind-the-scenes improvements and security updates.");
 });
 
 const check = (labels, body) =>
@@ -110,7 +110,7 @@ test("each release carries only its own PR's lines; none and empty PRs add nothi
     plan.map(({ version, notes }) => [version, notes]),
     [
       ["v1.1.0", "- Fatima can pin a phrase.\n- Pinned phrases sit first."],
-      ["v1.1.1", ""],
+      ["v1.1.1", "- Behind-the-scenes improvements and security updates."],
     ],
   );
 });
@@ -118,6 +118,6 @@ test("each release carries only its own PR's lines; none and empty PRs add nothi
 test("a manual release has an empty body", () => {
   const git = args => (args[0] === "tag" && args[1] === "-l" ? "v1.0.0" : args[0] === "rev-parse" ? "abc" : "");
   assert.deepEqual(planFromRepo({ git, prFor: () => null, bumpInput: "patch" }), [
-    { sha: "abc", version: "v1.0.1", pr: null, notes: "" },
+    { sha: "abc", version: "v1.0.1", pr: null, notes: "- Behind-the-scenes improvements and security updates." },
   ]);
 });
