@@ -25,4 +25,4 @@ The colours a message starts in when you [show it](show.md): black on white, whi
 
 ## Built-in templates
 
-**Restore built-in templates** brings back any built-in templates you've deleted. Built-in templates you still have, including ones you've edited, are left as they are.
+**Restore built-in templates** brings back any built-in templates you've deleted. If you've edited any built-in templates, it asks whether to restore those too: **Restore all** replaces your changes with the version that came with Deaftly, and **Keep my changes** leaves them as they are.

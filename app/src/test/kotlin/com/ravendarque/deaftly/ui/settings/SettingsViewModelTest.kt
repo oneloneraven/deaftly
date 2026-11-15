@@ -58,6 +58,7 @@ class SettingsViewModelTest {
                     ShowScheme.YellowOnBlack,
                     ThemeMode.System,
                     hiddenBuiltIns = 0,
+                    editedBuiltIns = 0,
                     names = PersonalNames(),
                 ),
                 viewModel.ready(),
@@ -96,6 +97,28 @@ class SettingsViewModelTest {
 
             assertEquals(listOf(edited, builtInB), templates.snapshot)
             assertEquals(0, viewModel.ready().hiddenBuiltIns)
+        }
+
+    @Test
+    fun reportsHowManyBuiltInTemplatesAreEdited() =
+        runTest {
+            val templates = FakeTemplateRepository(listOf(builtInA.copy(title = "Mine")), listOf(builtInA, builtInB))
+            val viewModel = viewModel(FakeSettingsRepository(), templates)
+
+            assertEquals(1, viewModel.ready().editedBuiltIns)
+        }
+
+    @Test
+    fun restoringAllUndoesEditsAndBringsBackHiddenBuiltIns() =
+        runTest {
+            val templates = FakeTemplateRepository(listOf(builtInA.copy(title = "Mine")), listOf(builtInA, builtInB))
+            val viewModel = viewModel(FakeSettingsRepository(), templates)
+
+            viewModel.restoreAllBuiltInTemplates()
+
+            assertEquals(listOf(builtInA, builtInB), templates.snapshot)
+            assertEquals(0, viewModel.ready().hiddenBuiltIns)
+            assertEquals(0, viewModel.ready().editedBuiltIns)
         }
 
     @Test

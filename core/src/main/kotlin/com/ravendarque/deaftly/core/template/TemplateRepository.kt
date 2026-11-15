@@ -7,6 +7,8 @@ public interface TemplateRepository {
 
     public val hiddenBuiltInCount: Flow<Int>
 
+    public val editedBuiltInCount: Flow<Int>
+
     public suspend fun add(template: Template)
 
     public suspend fun update(template: Template)
@@ -30,5 +32,5 @@ public interface TemplateRepository {
 
     public suspend fun restoreBuiltIn(id: String)
 
-    public suspend fun restoreHiddenBuiltIns()
+    public suspend fun restoreBuiltIns(includeEdited: Boolean)
 }

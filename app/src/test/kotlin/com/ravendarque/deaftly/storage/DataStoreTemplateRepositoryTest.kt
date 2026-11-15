@@ -196,7 +196,7 @@ class DataStoreTemplateRepositoryTest {
             repository.update(edited)
             repository.delete(greeting.id)
 
-            repository.restoreHiddenBuiltIns()
+            repository.restoreBuiltIns(includeEdited = false)
 
             assertEquals(listOf(edited, greeting), repository.all())
             assertEquals(0, repository.hiddenBuiltInCount.first())
@@ -207,7 +207,7 @@ class DataStoreTemplateRepositoryTest {
         runTest {
             val repository = repository(backgroundScope)
 
-            repository.restoreHiddenBuiltIns()
+            repository.restoreBuiltIns(includeEdited = false)
 
             assertEquals(builtIns, repository.all())
         }
@@ -220,5 +220,34 @@ class DataStoreTemplateRepositoryTest {
             firstRun.cancelAndJoin()
 
             assertEquals(1, repository(backgroundScope).hiddenBuiltInCount.first())
+        }
+
+    @Test
+    fun editedBuiltInsAreCountedButPinningAndUserTemplatesAreNot() =
+        runTest {
+            val repository = repository(backgroundScope)
+            assertEquals(0, repository.editedBuiltInCount.first())
+
+            repository.setPinned(menu.id, !menu.pinned)
+            repository.add(mine)
+            assertEquals(0, repository.editedBuiltInCount.first())
+
+            repository.update(greeting.copy(body = "Changed"))
+            assertEquals(1, repository.editedBuiltInCount.first())
+        }
+
+    @Test
+    fun restoringAllBuiltInsUndoesEditsAndBringsBackHiddenOnesButKeepsUserTemplates() =
+        runTest {
+            val repository = repository(backgroundScope)
+            repository.update(menu.copy(title = "My menu"))
+            repository.delete(greeting.id)
+            repository.add(mine)
+
+            repository.restoreBuiltIns(includeEdited = true)
+
+            assertEquals(listOf(menu, mine, greeting), repository.all())
+            assertEquals(0, repository.hiddenBuiltInCount.first())
+            assertEquals(0, repository.editedBuiltInCount.first())
         }
 }
