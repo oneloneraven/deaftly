@@ -157,9 +157,9 @@ class SettingsScreenTest {
     }
 
     @Test
-    fun theFirstNameAndSurnameSave() {
+    fun theFirstNameAndLastNameSave() {
         composeRule.onNode(hasSetTextAction() and hasText("First name")).performTextReplacement("Amira")
-        composeRule.onNode(hasSetTextAction() and hasText("Surname")).performTextReplacement("Hassan")
+        composeRule.onNode(hasSetTextAction() and hasText("Last name")).performTextReplacement("Hassan")
         composeRule.waitForIdle()
 
         assertEquals(PersonalNames("Amira", "Hassan"), settings.savedNames)

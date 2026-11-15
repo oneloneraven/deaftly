@@ -9,7 +9,7 @@ order: 8
 
 Your name and colour.
 
-**First name** and **Surname** are used to fill in your name on templates such as Check in, so you don't have to type it each time. You can still change it on any message, and that only affects that message. Tick **My legal name is different** if the name on your documents isn't your first name and surname, then type your **Full legal name**. Leave them all blank and the name gaps start empty.
+**First name** and **Last name** are used to fill in your name on templates such as Check in, so you don't have to type it each time. You can still change it on any message, and that only affects that message. Tick **My legal name is different** if the name on your documents isn't your first name and last name, then type your **Full legal name**. Leave them all blank and the name gaps start empty.
 
 Your names stay on this phone.
 

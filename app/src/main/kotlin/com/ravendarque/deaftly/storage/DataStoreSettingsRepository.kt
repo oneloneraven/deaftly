@@ -66,7 +66,7 @@ class DataStoreSettingsRepository(
                 settings =
                     settings.copy(
                         firstName = names.firstName,
-                        surname = names.surname,
+                        lastName = names.lastName,
                         legalNameDiffers = names.legalNameDiffers,
                         legalName = names.legalName,
                         useFirstNameInChats = names.useFirstNameInChats,
@@ -150,4 +150,4 @@ private fun ColourRole.toDto(): ParticipantColourDto =
         ColourRole.Indigo -> ParticipantColourDto.Indigo
     }
 
-private fun SettingsDto.personalNames() = PersonalNames(firstName, surname, legalNameDiffers, legalName, useFirstNameInChats)
+private fun SettingsDto.personalNames() = PersonalNames(firstName, lastName, legalNameDiffers, legalName, useFirstNameInChats)

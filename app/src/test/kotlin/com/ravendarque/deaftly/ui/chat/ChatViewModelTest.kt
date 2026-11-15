@@ -83,7 +83,7 @@ class ChatViewModelTest {
     @Test
     fun usesTheFirstNameFromSettingsWhenChosen() =
         runTest {
-            val names = PersonalNames(firstName = "Amira", surname = "Hassan", useFirstNameInChats = true)
+            val names = PersonalNames(firstName = "Amira", lastName = "Hassan", useFirstNameInChats = true)
             val viewModel = viewModel(FakeSettingsRepository(ChatProfile("Alex", ColourRole.Green), names = names))
             collect(viewModel)
 

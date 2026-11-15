@@ -160,7 +160,7 @@ class SettingsViewModelTest {
             val viewModel = viewModel(settings)
 
             viewModel.changeNames { it.copy(firstName = "Amira") }
-            viewModel.changeNames { it.copy(surname = "Hassan") }
+            viewModel.changeNames { it.copy(lastName = "Hassan") }
             viewModel.changeNames { it.copy(legalNameDiffers = true) }
             viewModel.changeNames { it.copy(legalName = "Amira Fatima Hassan") }
             viewModel.changeNames { it.copy(useFirstNameInChats = true) }
