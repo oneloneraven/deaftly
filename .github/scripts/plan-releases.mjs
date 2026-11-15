@@ -45,7 +45,7 @@ export function planFromRepo({ git, prFor, mergeSha, bumpInput }) {
       .split("\n")
       .find(tag => /^v\d+\.\d+\.\d+$/.test(tag));
     if (existing) throw new Error(`HEAD is already released as ${existing}`);
-    return [{ sha: git(["rev-parse", "HEAD"]), version: nextVersion(latestTag, bumpInput), pr: null, notes: "" }];
+    return [{ sha: git(["rev-parse", "HEAD"]), version: nextVersion(latestTag, bumpInput), pr: null, notes: releaseNotes([]) }];
   }
   if (latestTag && !isAncestor(git, latestTag, mergeSha)) {
     throw new Error(`${latestTag} isn't in ${mergeSha}'s history, so there's no safe range to release from`);

@@ -31,9 +31,6 @@ Every PR needs exactly one label before it can merge. A required check
   `release: none` when any changed file is outside the allowlist in
   `.github/release-paths.json`, and always on paths that deploy on their own
   (such as infrastructure and database migrations).
-  The one exception is Dependabot: its PRs are always `release: none`, even
-  when they bump app dependencies, so updates ship with the next real
-  release instead of cutting one of their own.
 
 The test is "would someone using this notice or need to know?" Any yes is at
 least a patch.
@@ -46,8 +43,10 @@ When a labelled PR merges, `release.yml`:
 2. finds the latest `vX.Y.Z` tag and computes the next version;
 3. tags the PR's own merge commit and pushes only the tag;
 4. creates a GitHub Release whose body is the PR's "What's new" lines as `- `
-   bullets, nothing else (empty when the PR has none), and attaches any build
-   artefact.
+   bullets, nothing else, and attaches any build
+   artefact. When the PR has no What's new lines (Dependabot PRs, or changes
+   nobody will notice), the body is "- Behind-the-scenes improvements and
+   security updates."
 
 The tag is pushed with a short-lived token from the release GitHub App,
 because a push made with the default `GITHUB_TOKEN` doesn't trigger other
