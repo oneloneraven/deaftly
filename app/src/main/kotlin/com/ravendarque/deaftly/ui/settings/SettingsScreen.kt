@@ -173,8 +173,8 @@ private fun MeSection(
         NameInput(state.names.firstName, stringResource(R.string.settings_first_name_label)) { value ->
             viewModel.changeNames { it.copy(firstName = value) }
         }
-        NameInput(state.names.surname, stringResource(R.string.settings_surname_label)) { value ->
-            viewModel.changeNames { it.copy(surname = value) }
+        NameInput(state.names.lastName, stringResource(R.string.settings_last_name_label)) { value ->
+            viewModel.changeNames { it.copy(lastName = value) }
         }
         CheckRow(
             checked = state.names.legalNameDiffers,

@@ -19,7 +19,7 @@
     <string name="settings_me_heading">Me</string>
     <string name="settings_names_hint">Used to fill in your name on templates. Stays on this phone.</string>
     <string name="settings_first_name_label">First name</string>
-    <string name="settings_surname_label">Surname</string>
+    <string name="settings_last_name_label">Last name</string>
     <string name="settings_legal_name_differs">My legal name is different</string>
     <string name="settings_legal_name_label">Full legal name</string>
     <string name="settings_use_first_name">Use my first name in chats</string>

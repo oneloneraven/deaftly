@@ -2,7 +2,7 @@ package com.ravendarque.deaftly.core.settings
 
 public data class PersonalNames(
     val firstName: String = "",
-    val surname: String = "",
+    val lastName: String = "",
     val legalNameDiffers: Boolean = false,
     val legalName: String = "",
     val useFirstNameInChats: Boolean = false,
@@ -10,7 +10,7 @@ public data class PersonalNames(
     val formalName: String?
         get() {
             val legal = legalName.trim()
-            val full = listOf(firstName, surname).map(String::trim).filter(String::isNotEmpty).joinToString(" ")
+            val full = listOf(firstName, lastName).map(String::trim).filter(String::isNotEmpty).joinToString(" ")
             return (if (legalNameDiffers && legal.isNotEmpty()) legal else full).ifEmpty { null }
         }
 

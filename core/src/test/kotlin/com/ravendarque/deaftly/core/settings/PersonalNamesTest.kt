@@ -6,24 +6,24 @@ import kotlin.test.assertNull
 
 class PersonalNamesTest {
     @Test
-    fun theFormalNameIsTheFirstNameAndSurnameTogether() {
-        assertEquals("Amira Hassan", PersonalNames(firstName = "Amira", surname = "Hassan").formalName)
+    fun theFormalNameIsTheFirstNameAndLastNameTogether() {
+        assertEquals("Amira Hassan", PersonalNames(firstName = "Amira", lastName = "Hassan").formalName)
     }
 
     @Test
     fun blankPartsAreIgnoredAndTheRestIsTrimmed() {
-        assertEquals("Amira", PersonalNames(firstName = "  Amira ", surname = "   ").formalName)
-        assertEquals("Hassan", PersonalNames(firstName = "", surname = " Hassan ").formalName)
+        assertEquals("Amira", PersonalNames(firstName = "  Amira ", lastName = "   ").formalName)
+        assertEquals("Hassan", PersonalNames(firstName = "", lastName = " Hassan ").formalName)
     }
 
     @Test
     fun noNamesMeansNoFormalName() {
         assertNull(PersonalNames().formalName)
-        assertNull(PersonalNames(firstName = " ", surname = " ", legalNameDiffers = true, legalName = " ").formalName)
+        assertNull(PersonalNames(firstName = " ", lastName = " ", legalNameDiffers = true, legalName = " ").formalName)
     }
 
     @Test
-    fun aDifferentLegalNameReplacesTheFirstNameAndSurname() {
+    fun aDifferentLegalNameReplacesTheFirstNameAndLastName() {
         val names = PersonalNames("Tunde", "Bello", legalNameDiffers = true, legalName = " Olatunde Bello ")
 
         assertEquals("Olatunde Bello", names.formalName)
@@ -35,7 +35,7 @@ class PersonalNamesTest {
     }
 
     @Test
-    fun aBlankLegalNameFallsBackToTheFirstNameAndSurname() {
+    fun aBlankLegalNameFallsBackToTheFirstNameAndLastName() {
         assertEquals("Tunde Bello", PersonalNames("Tunde", "Bello", legalNameDiffers = true, legalName = " ").formalName)
     }
 

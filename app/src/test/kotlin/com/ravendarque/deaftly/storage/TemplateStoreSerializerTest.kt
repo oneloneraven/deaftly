@@ -85,7 +85,7 @@ class TemplateStoreSerializerTest {
                         "firstRunDone" to JsonPrimitive(false),
                         "chatSidesSwapped" to JsonPrimitive(false),
                         "firstName" to JsonPrimitive(""),
-                        "surname" to JsonPrimitive(""),
+                        "lastName" to JsonPrimitive(""),
                         "legalNameDiffers" to JsonPrimitive(false),
                         "legalName" to JsonPrimitive(""),
                         "useFirstNameInChats" to JsonPrimitive(false),

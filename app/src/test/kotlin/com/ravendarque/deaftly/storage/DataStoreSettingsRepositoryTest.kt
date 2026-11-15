@@ -210,10 +210,10 @@ class DataStoreSettingsRepositoryTest {
 
             listOf<(PersonalNames) -> PersonalNames>(
                 { it.copy(firstName = "Amira") },
-                { it.copy(surname = "Okafor") },
+                { it.copy(lastName = "Okafor") },
                 { it.copy(legalNameDiffers = true) },
             ).map { change -> launch { repository.updatePersonalNames(change) } }.joinAll()
 
-            assertEquals(PersonalNames(firstName = "Amira", surname = "Okafor", legalNameDiffers = true), repository.personalNames.first())
+            assertEquals(PersonalNames(firstName = "Amira", lastName = "Okafor", legalNameDiffers = true), repository.personalNames.first())
         }
 }

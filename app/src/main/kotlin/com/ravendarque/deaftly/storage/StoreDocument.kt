@@ -35,7 +35,7 @@ data class SettingsDto(
     val chatSidesSwapped: Boolean = false,
     val themeMode: ThemeModeDto? = null,
     val firstName: String = "",
-    val surname: String = "",
+    val lastName: String = "",
     val legalNameDiffers: Boolean = false,
     val legalName: String = "",
     val useFirstNameInChats: Boolean = false,
