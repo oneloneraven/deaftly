@@ -25,7 +25,11 @@
     <string name="settings_scheme_heading">Show mode colours</string>
     <string name="settings_swatch_glyph">Aa</string>
     <string name="settings_templates_heading">Built-in templates</string>
-    <string name="settings_restore_hint">Bring back any built-in templates you have deleted. Built-in templates you still have, including ones you have edited, are left as they are.</string>
+    <string name="settings_restore_hint">Bring back any built-in templates you have deleted. If you have edited any, you can choose whether to undo your changes too.</string>
+    <string name="settings_restore_edited_title">Restore edited templates too?</string>
+    <string name="settings_restore_edited_text">You have edited some built-in templates. Restore them to the version that came with Deaftly, or keep your changes?</string>
+    <string name="settings_restore_all">Restore all</string>
+    <string name="settings_restore_keep_changes">Keep my changes</string>
     <string name="settings_restore_builtins">Restore built-in templates</string>
     <string name="home_new_template">New template</string>
     <string name="templates_add_new">Add new template</string>

@@ -25,6 +25,7 @@ sealed interface SettingsUiState {
         val showScheme: ShowScheme?,
         val themeMode: ThemeMode,
         val hiddenBuiltIns: Int,
+        val editedBuiltIns: Int,
     ) : SettingsUiState
 }
 
@@ -38,8 +39,9 @@ class SettingsViewModel(
             settings.showScheme,
             settings.themeMode,
             templates.hiddenBuiltInCount,
-        ) { profile, scheme, mode, hidden ->
-            SettingsUiState.Ready(profile, scheme, mode, hidden)
+            templates.editedBuiltInCount,
+        ) { profile, scheme, mode, hidden, edited ->
+            SettingsUiState.Ready(profile, scheme, mode, hidden, edited)
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS), SettingsUiState.Loading)
 
     fun setName(name: String) {
@@ -51,7 +53,11 @@ class SettingsViewModel(
     }
 
     fun restoreBuiltInTemplates() {
-        viewModelScope.launch { templates.restoreHiddenBuiltIns() }
+        viewModelScope.launch { templates.restoreBuiltIns(includeEdited = false) }
+    }
+
+    fun restoreAllBuiltInTemplates() {
+        viewModelScope.launch { templates.restoreBuiltIns(includeEdited = true) }
     }
 
     fun setThemeMode(mode: ThemeMode) {

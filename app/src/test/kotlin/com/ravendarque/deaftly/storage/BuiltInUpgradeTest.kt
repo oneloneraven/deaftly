@@ -109,7 +109,7 @@ class BuiltInUpgradeTest {
 
             assertEquals(1, firstRun.hiddenBuiltInCount.first())
 
-            firstRun.restoreHiddenBuiltIns()
+            firstRun.restoreBuiltIns(includeEdited = false)
 
             assertEquals(shipped, firstRun.templates.first())
             assertEquals(0, firstRun.hiddenBuiltInCount.first())
@@ -155,7 +155,7 @@ class BuiltInUpgradeTest {
             val firstRun = Job()
             val first = repository(builtIns, CoroutineScope(firstRun))
             first.delete(greeting.id)
-            first.restoreHiddenBuiltIns()
+            first.restoreBuiltIns(includeEdited = false)
             firstRun.cancelAndJoin()
             val reworded = greeting.copy(body = "Hello! I'm {name}. Please {how to reply}.")
 
@@ -237,7 +237,7 @@ class BuiltInUpgradeTest {
             assertTrue(result.none { it.id == "builtin.pharmacy" })
             assertEquals(1, repository.hiddenBuiltInCount.first())
 
-            repository.restoreHiddenBuiltIns()
+            repository.restoreBuiltIns(includeEdited = false)
 
             assertEquals(
                 "Changed",

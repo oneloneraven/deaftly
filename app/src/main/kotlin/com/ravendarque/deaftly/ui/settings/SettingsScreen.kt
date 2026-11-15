@@ -43,6 +43,8 @@ import com.ravendarque.deaftly.ui.chat.NameField
 import com.ravendarque.deaftly.ui.chat.PARTICIPANT_NAME_MAX_LENGTH
 import com.ravendarque.deaftly.ui.components.DeaftlyTopBar
 import com.ravendarque.deaftly.ui.components.SecondaryButton
+import com.ravendarque.deaftly.ui.editor.ConfirmDialog
+import com.ravendarque.deaftly.ui.editor.ConfirmSpec
 import com.ravendarque.deaftly.ui.show.labelRes
 import com.ravendarque.deaftly.ui.theme.Deaftly
 import com.ravendarque.deaftly.ui.theme.LocalDarkTheme
@@ -117,17 +119,47 @@ private fun SettingsContent(
                 )
             }
         }
-        Section(stringResource(R.string.settings_templates_heading)) {
-            Text(
-                text = stringResource(R.string.settings_restore_hint),
-                style = MaterialTheme.typography.bodySmall,
-                color = Deaftly.colors.inkSecondary,
-            )
-            SecondaryButton(
-                text = stringResource(R.string.settings_restore_builtins),
-                onClick = viewModel::restoreBuiltInTemplates,
-                modifier = Modifier.fillMaxWidth(),
-                enabled = state.hiddenBuiltIns > 0,
+        RestoreBuiltIns(state, viewModel)
+    }
+}
+
+@Composable
+private fun RestoreBuiltIns(
+    state: SettingsUiState.Ready,
+    viewModel: SettingsViewModel,
+) {
+    Section(stringResource(R.string.settings_templates_heading)) {
+        Text(
+            text = stringResource(R.string.settings_restore_hint),
+            style = MaterialTheme.typography.bodySmall,
+            color = Deaftly.colors.inkSecondary,
+        )
+        var askingAboutEdits by rememberSaveable { mutableStateOf(false) }
+        SecondaryButton(
+            text = stringResource(R.string.settings_restore_builtins),
+            onClick = { if (state.editedBuiltIns > 0) askingAboutEdits = true else viewModel.restoreBuiltInTemplates() },
+            modifier = Modifier.fillMaxWidth(),
+            enabled = state.hiddenBuiltIns > 0 || state.editedBuiltIns > 0,
+        )
+        if (askingAboutEdits) {
+            ConfirmDialog(
+                spec =
+                    ConfirmSpec(
+                        title = stringResource(R.string.settings_restore_edited_title),
+                        text = stringResource(R.string.settings_restore_edited_text),
+                        confirm = stringResource(R.string.settings_restore_all),
+                        dismiss = stringResource(R.string.settings_restore_keep_changes),
+                        destructive = true,
+                    ),
+                onConfirm = {
+                    askingAboutEdits = false
+                    viewModel.restoreAllBuiltInTemplates()
+                },
+                onDismiss = {
+                    askingAboutEdits = false
+                    viewModel.restoreBuiltInTemplates()
+                },
+                onCancel = { askingAboutEdits = false },
             )
         }
     }

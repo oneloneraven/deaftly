@@ -212,10 +212,11 @@ fun ConfirmDialog(
     spec: ConfirmSpec,
     onConfirm: () -> Unit,
     onDismiss: () -> Unit,
+    onCancel: () -> Unit = onDismiss,
 ) {
     val c = Deaftly.colors
     AlertDialog(
-        onDismissRequest = onDismiss,
+        onDismissRequest = onCancel,
         containerColor = c.surface,
         titleContentColor = c.ink,
         textContentColor = c.inkSecondary,

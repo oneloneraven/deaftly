@@ -182,7 +182,7 @@ class LocalisedBuiltInsTest {
             repository.delete(BuiltInIds.BSL_INTERPRETER)
 
             shipped = shippedFor("en-rAU")
-            repository.restoreHiddenBuiltIns()
+            repository.restoreBuiltIns(includeEdited = false)
 
             assertEquals("Auslan interpreter", repository.all().byId(BuiltInIds.BSL_INTERPRETER).title)
             run.cancelAndJoin()

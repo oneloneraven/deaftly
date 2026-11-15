@@ -14,6 +14,9 @@ class FakeTemplateRepository(
 
     override val hiddenBuiltInCount: Flow<Int> = current.map { now -> builtIns.count { builtIn -> now.none { it.id == builtIn.id } } }
 
+    override val editedBuiltInCount: Flow<Int> =
+        current.map { now -> builtIns.count { builtIn -> now.any { it.id == builtIn.id && it.copy(pinned = builtIn.pinned) != builtIn } } }
+
     override val templates: Flow<List<Template>> = current
 
     val snapshot: List<Template> get() = current.value
@@ -51,8 +54,10 @@ class FakeTemplateRepository(
 
     override suspend fun restoreBuiltIn(id: String) = Unit
 
-    override suspend fun restoreHiddenBuiltIns() {
-        current.value += builtIns.filter { builtIn -> current.value.none { it.id == builtIn.id } }
+    override suspend fun restoreBuiltIns(includeEdited: Boolean) {
+        val shipped = builtIns.associateBy { it.id }
+        val kept = if (includeEdited) current.value.map { shipped[it.id] ?: it } else current.value
+        current.value = kept + builtIns.filter { builtIn -> current.value.none { it.id == builtIn.id } }
     }
 
     private fun change(
