@@ -2,6 +2,7 @@ package com.ravendarque.deaftly.templates
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.ravendarque.deaftly.core.template.Join
+import com.ravendarque.deaftly.core.template.PersonalField
 import com.ravendarque.deaftly.core.template.PlaceholderType
 import com.ravendarque.deaftly.core.template.Template
 import com.ravendarque.deaftly.core.template.TemplateFill
@@ -30,6 +31,28 @@ class BuiltInTemplatesTest {
             .filter { it > 0 }
 
     private fun byId(id: String): Template = templates.first { it.id == id }
+
+    @Test
+    fun theNameAndPatientGapsFillWithTheFormalNameAndNothingElseDoes() {
+        val filled =
+            templates
+                .flatMap { template ->
+                    template.placeholders.values
+                        .filter { it.fillsWith != null }
+                        .map { template.id to it }
+                }.map { (id, placeholder) -> id to placeholder.key }
+
+        assertEquals(
+            setOf(
+                BuiltInIds.CHECK_IN to "name",
+                BuiltInIds.BSL_INTERPRETER to "name",
+                BuiltInIds.DOCTOR to "name",
+                BuiltInIds.PHARMACY to "patient",
+            ),
+            filled.toSet(),
+        )
+        assertEquals(PersonalField.FormalName, byId(BuiltInIds.PHARMACY).placeholders.getValue("patient").fillsWith)
+    }
 
     @Test
     fun coversTheRequiredSituations() {

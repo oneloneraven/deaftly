@@ -17,6 +17,7 @@ import androidx.compose.ui.test.performTextInput
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.takahirom.roborazzi.captureRoboImage
+import com.ravendarque.deaftly.ui.chat.FakeSettingsRepository
 import com.ravendarque.deaftly.ui.components.SheetBody
 import com.ravendarque.deaftly.ui.components.SheetHandle
 import com.ravendarque.deaftly.ui.home.FakeTemplateRepository
@@ -51,7 +52,7 @@ class FillScreenshotTest {
         dark: Boolean,
         interact: () -> Unit = {},
     ) {
-        val viewModel = FillViewModel(templateId, FakeTemplateRepository(fillTemplates), SavedStateHandle())
+        val viewModel = FillViewModel(templateId, FakeTemplateRepository(fillTemplates), FakeSettingsRepository(), SavedStateHandle())
         composeRule.setContent {
             AppTheme(darkTheme = dark) { FillScreen(templateId, viewModel, onNavigate = {}, onBack = {}) }
         }

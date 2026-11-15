@@ -26,6 +26,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.ravendarque.deaftly.navigation.HighlightRange
 import com.ravendarque.deaftly.navigation.Route
+import com.ravendarque.deaftly.ui.chat.FakeSettingsRepository
 import com.ravendarque.deaftly.ui.home.FakeTemplateRepository
 import com.ravendarque.deaftly.ui.theme.AppTheme
 import org.junit.Before
@@ -52,7 +53,7 @@ class FillScreenTest {
     }
 
     private fun show(templateId: String) {
-        val viewModel = FillViewModel(templateId, FakeTemplateRepository(fillTemplates), SavedStateHandle())
+        val viewModel = FillViewModel(templateId, FakeTemplateRepository(fillTemplates), FakeSettingsRepository(), SavedStateHandle())
         composeRule.setContent {
             AppTheme { FillScreen(templateId, viewModel, onNavigate = { navigated += it }, onBack = { backs++ }) }
         }
@@ -336,7 +337,7 @@ class FillScreenTest {
     @Test
     fun whenInsertingIntoAChatTheMainButtonInsertsTheFilledMessage() {
         val inserted = mutableListOf<String>()
-        val viewModel = FillViewModel("check-in", FakeTemplateRepository(fillTemplates), SavedStateHandle())
+        val viewModel = FillViewModel("check-in", FakeTemplateRepository(fillTemplates), FakeSettingsRepository(), SavedStateHandle())
         composeRule.setContent {
             AppTheme {
                 FillScreen("check-in", viewModel, onNavigate = { navigated += it }, onBack = { backs++ }, onInsert = { inserted += it })

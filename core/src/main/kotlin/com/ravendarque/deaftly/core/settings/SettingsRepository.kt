@@ -16,6 +16,8 @@ public interface SettingsRepository {
 
     public val themeMode: Flow<ThemeMode>
 
+    public val personalNames: Flow<PersonalNames>
+
     public suspend fun setShowScheme(scheme: ShowScheme)
 
     public suspend fun setChatProfile(profile: ChatProfile)
@@ -27,4 +29,6 @@ public interface SettingsRepository {
     public suspend fun setChatSidesSwapped(swapped: Boolean)
 
     public suspend fun setThemeMode(mode: ThemeMode)
+
+    public suspend fun setPersonalNames(names: PersonalNames)
 }

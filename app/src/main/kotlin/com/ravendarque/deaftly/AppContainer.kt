@@ -111,6 +111,6 @@ class AppContainer(
 
     fun fillViewModelFactory(templateId: String) =
         viewModelFactory {
-            initializer { FillViewModel(templateId, templateRepository, createSavedStateHandle(), ocrOutcomes) }
+            initializer { FillViewModel(templateId, templateRepository, settingsRepository, createSavedStateHandle(), ocrOutcomes) }
         }
 }

@@ -1,6 +1,9 @@
 package com.ravendarque.deaftly.ui.fill
 
 import androidx.lifecycle.SavedStateHandle
+import com.ravendarque.deaftly.core.settings.PersonalNames
+import com.ravendarque.deaftly.core.template.PersonalField
+import com.ravendarque.deaftly.ui.chat.FakeSettingsRepository
 import com.ravendarque.deaftly.ui.home.FakeTemplateRepository
 import com.ravendarque.deaftly.ui.ocr.OcrOutcome
 import com.ravendarque.deaftly.ui.ocr.OcrOutcomes
@@ -37,10 +40,12 @@ class FillViewModelTest {
 
     private val outcomes = OcrOutcomes()
 
+    private val settings = FakeSettingsRepository()
+
     private fun viewModel(
         id: String = "check-in",
         savedState: SavedStateHandle = SavedStateHandle(),
-    ) = FillViewModel(id, repository, savedState, outcomes)
+    ) = FillViewModel(id, repository, settings, savedState, outcomes)
 
     private fun FillViewModel.ready() = assertIs<FillUiState.Ready>(state.value)
 
@@ -387,5 +392,93 @@ class FillViewModelTest {
             collect(viewModel)
 
             assertEquals(listOf("Lasagne"), (viewModel.ready().parts[1] as FillPart.Filled).values)
+        }
+
+    private val formalCheckIn =
+        checkIn.copy(
+            id = "formal-check-in",
+            placeholders = checkIn.placeholders + ("name" to checkIn.placeholder("name").copy(fillsWith = PersonalField.FormalName)),
+        )
+
+    private fun formalViewModel(
+        names: PersonalNames,
+        savedState: SavedStateHandle = SavedStateHandle(),
+        store: FakeSettingsRepository = FakeSettingsRepository(names = names),
+    ) = FillViewModel("formal-check-in", FakeTemplateRepository(fillTemplates + formalCheckIn), store, savedState, outcomes)
+
+    @Test
+    fun aGapThatFillsWithTheFormalNameStartsWithItFromSettings() =
+        runTest {
+            val viewModel = formalViewModel(PersonalNames("Amira", "Hassan"))
+            collect(viewModel)
+
+            assertEquals(
+                listOf(FillPart.Filled(formalCheckIn.placeholder("name"), listOf("Amira Hassan"))),
+                viewModel.ready().parts.filterIsInstance<FillPart.Filled>(),
+            )
+            assertTrue(viewModel.ready().text.startsWith("Hi! I'm deaf. I'd like to check in. My name is Amira Hassan."))
+        }
+
+    @Test
+    fun theLegalNameIsUsedWhenItDiffers() =
+        runTest {
+            val viewModel = formalViewModel(PersonalNames("Tunde", "Bello", legalNameDiffers = true, legalName = "Olatunde Bello"))
+            collect(viewModel)
+
+            assertTrue("My name is Olatunde Bello." in viewModel.ready().text)
+        }
+
+    @Test
+    fun theNameGapStaysEmptyWhenNoNamesAreSet() =
+        runTest {
+            val viewModel = formalViewModel(PersonalNames())
+            collect(viewModel)
+
+            assertTrue(viewModel.ready().parts.any { it is FillPart.Empty && it.placeholder.key == "name" })
+        }
+
+    @Test
+    fun aGapWithoutAPersonalFieldIsNeverPreFilled() =
+        runTest {
+            val viewModel =
+                FillViewModel(
+                    "check-in",
+                    repository,
+                    FakeSettingsRepository(names = PersonalNames("Amira", "Hassan")),
+                    SavedStateHandle(),
+                    outcomes,
+                )
+            collect(viewModel)
+
+            assertTrue(viewModel.ready().parts.any { it is FillPart.Empty && it.placeholder.key == "name" })
+        }
+
+    @Test
+    fun aValueAlreadyThereIsNotOverwritten() =
+        runTest {
+            val saved = SavedStateHandle()
+            val first = formalViewModel(PersonalNames("Amira", "Hassan"), saved)
+            collect(first)
+            first.activate("name")
+            first.choose("Mira")
+
+            val second = formalViewModel(PersonalNames("Amira", "Hassan"), saved)
+            collect(second)
+
+            assertTrue("My name is Mira." in second.ready().text)
+        }
+
+    @Test
+    fun changingThePreFilledValueAffectsOnlyThisMessage() =
+        runTest {
+            val store = FakeSettingsRepository(names = PersonalNames("Amira", "Hassan"))
+            val viewModel = formalViewModel(PersonalNames(), store = store)
+            collect(viewModel)
+
+            viewModel.activate("name")
+            viewModel.choose("Mira")
+
+            assertTrue("My name is Mira." in viewModel.ready().text)
+            assertEquals(PersonalNames("Amira", "Hassan"), store.savedNames)
         }
 }

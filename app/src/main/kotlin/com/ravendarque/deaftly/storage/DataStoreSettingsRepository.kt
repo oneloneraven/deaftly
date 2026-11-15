@@ -4,6 +4,7 @@ import androidx.datastore.core.DataStore
 import com.ravendarque.deaftly.core.chat.ChatProfile
 import com.ravendarque.deaftly.core.chat.ColourRole
 import com.ravendarque.deaftly.core.settings.ChatTextSize
+import com.ravendarque.deaftly.core.settings.PersonalNames
 import com.ravendarque.deaftly.core.settings.SettingsRepository
 import com.ravendarque.deaftly.core.settings.ShowScheme
 import com.ravendarque.deaftly.core.settings.ThemeMode
@@ -31,6 +32,12 @@ class DataStoreSettingsRepository(
     override val themeMode: Flow<ThemeMode> =
         store.data.map { it.settings.themeMode?.toDomain() ?: ThemeMode.System }.distinctUntilChanged()
 
+    override val personalNames: Flow<PersonalNames> =
+        store.data
+            .map {
+                with(it.settings) { PersonalNames(firstName, surname, legalNameDiffers, legalName, useFirstNameInChats) }
+            }.distinctUntilChanged()
+
     override suspend fun setShowScheme(scheme: ShowScheme) {
         store.updateData { document -> document.copy(settings = document.settings.copy(showScheme = scheme.toDto())) }
     }
@@ -49,6 +56,21 @@ class DataStoreSettingsRepository(
 
     override suspend fun setThemeMode(mode: ThemeMode) {
         store.updateData { document -> document.copy(settings = document.settings.copy(themeMode = mode.toDto())) }
+    }
+
+    override suspend fun setPersonalNames(names: PersonalNames) {
+        store.updateData { document ->
+            document.copy(
+                settings =
+                    document.settings.copy(
+                        firstName = names.firstName,
+                        surname = names.surname,
+                        legalNameDiffers = names.legalNameDiffers,
+                        legalName = names.legalName,
+                        useFirstNameInChats = names.useFirstNameInChats,
+                    ),
+            )
+        }
     }
 
     override suspend fun setChatProfile(profile: ChatProfile) {

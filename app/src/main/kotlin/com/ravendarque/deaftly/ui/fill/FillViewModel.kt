@@ -3,6 +3,8 @@ package com.ravendarque.deaftly.ui.fill
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.ravendarque.deaftly.core.settings.SettingsRepository
+import com.ravendarque.deaftly.core.template.PersonalField
 import com.ravendarque.deaftly.core.template.Placeholder
 import com.ravendarque.deaftly.core.template.RenderedPart
 import com.ravendarque.deaftly.core.template.Template
@@ -18,6 +20,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -66,6 +69,7 @@ sealed interface FillUiState {
 class FillViewModel(
     private val templateId: String,
     repository: TemplateRepository,
+    private val settings: SettingsRepository,
     private val savedState: SavedStateHandle,
     private val outcomes: OcrOutcomes = OcrOutcomes(),
 ) : ViewModel() {
@@ -83,6 +87,14 @@ class FillViewModel(
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS), FillUiState.Loading)
 
     init {
+        viewModelScope.launch {
+            val template = loaded.filterNotNull().first().template
+            val formalName = settings.personalNames.first().formalName
+            if (template != null && formalName != null) {
+                val filled = fill.value.preFilled(template, formalName)
+                if (filled != fill.value) update(template, filled)
+            }
+        }
         viewModelScope.launch {
             combine(loaded.filterNotNull(), outcomes.pending) { loaded, pending -> loaded.template to pending }
                 .collect { (template, pending) ->
@@ -235,3 +247,11 @@ class FillViewModel(
 
 private fun placeholderKeys(template: Template): Set<String> =
     template.segments().filterIsInstance<TemplateSegment.PlaceholderRef>().mapTo(linkedSetOf()) { it.key }
+
+private fun TemplateFill.preFilled(
+    template: Template,
+    formalName: String,
+): TemplateFill =
+    placeholderKeys(template)
+        .filter { template.placeholder(it).fillsWith == PersonalField.FormalName && values(it).isEmpty() }
+        .fold(this) { fill, key -> fill.set(key, formalName) }

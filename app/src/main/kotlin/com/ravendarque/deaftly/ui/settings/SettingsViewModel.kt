@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ravendarque.deaftly.core.chat.ChatProfile
 import com.ravendarque.deaftly.core.chat.ColourRole
+import com.ravendarque.deaftly.core.settings.PersonalNames
 import com.ravendarque.deaftly.core.settings.SettingsRepository
 import com.ravendarque.deaftly.core.settings.ShowScheme
 import com.ravendarque.deaftly.core.settings.ThemeMode
@@ -25,6 +26,7 @@ sealed interface SettingsUiState {
         val showScheme: ShowScheme?,
         val themeMode: ThemeMode,
         val hiddenBuiltIns: Int,
+        val names: PersonalNames,
     ) : SettingsUiState
 }
 
@@ -38,12 +40,17 @@ class SettingsViewModel(
             settings.showScheme,
             settings.themeMode,
             templates.hiddenBuiltInCount,
-        ) { profile, scheme, mode, hidden ->
-            SettingsUiState.Ready(profile, scheme, mode, hidden)
+            settings.personalNames,
+        ) { profile, scheme, mode, hidden, names ->
+            SettingsUiState.Ready(profile, scheme, mode, hidden, names)
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS), SettingsUiState.Loading)
 
     fun setName(name: String) {
         viewModelScope.launch { settings.setChatProfile(settings.chatProfile.first().copy(name = name)) }
+    }
+
+    fun changeNames(change: (PersonalNames) -> PersonalNames) {
+        viewModelScope.launch { settings.setPersonalNames(change(settings.personalNames.first())) }
     }
 
     fun setColour(colour: ColourRole) {

@@ -3,6 +3,7 @@ package com.ravendarque.deaftly.storage
 import com.ravendarque.deaftly.core.chat.ChatProfile
 import com.ravendarque.deaftly.core.chat.ColourRole
 import com.ravendarque.deaftly.core.settings.ChatTextSize
+import com.ravendarque.deaftly.core.settings.PersonalNames
 import com.ravendarque.deaftly.core.settings.ShowScheme
 import com.ravendarque.deaftly.core.settings.ThemeMode
 import kotlinx.coroutines.CoroutineScope
@@ -155,5 +156,48 @@ class DataStoreSettingsRepositoryTest {
             repository.setChatSidesSwapped(true)
 
             assertEquals(ChatProfile("Alex", ColourRole.Blue), repository.chatProfile.first())
+        }
+
+    @Test
+    fun hasNoNamesAndDoesNotUseTheFirstNameInChatsUntilTheyAreSet() =
+        runTest {
+            assertEquals(PersonalNames(), repository(backgroundScope).personalNames.first())
+        }
+
+    @Test
+    fun thePersonalNamesAndFlagsSurviveAFreshStore() =
+        runTest {
+            val names =
+                PersonalNames("Amira", "Hassan", legalNameDiffers = true, legalName = "Amira Fatima Hassan", useFirstNameInChats = true)
+            val firstRun = Job()
+            repository(CoroutineScope(firstRun)).setPersonalNames(names)
+            firstRun.cancelAndJoin()
+
+            assertEquals(names, repository(backgroundScope).personalNames.first())
+        }
+
+    @Test
+    fun anOldStoreWithoutNamesLoadsWithEmptyDefaults() =
+        runTest {
+            File(folder.root, "templates.json").writeText(
+                """{"version":2,"templates":[],"settings":{"chatName":"Alex","firstRunDone":true}}""",
+            )
+
+            val repository = repository(backgroundScope)
+
+            assertEquals(PersonalNames(), repository.personalNames.first())
+            assertEquals(ChatProfile("Alex", ColourRole.Indigo), repository.chatProfile.first())
+        }
+
+    @Test
+    fun theNamesDoNotOverwriteTheChatProfile() =
+        runTest {
+            val repository = repository(backgroundScope)
+
+            repository.setChatProfile(ChatProfile("Alex", ColourRole.Blue))
+            repository.setPersonalNames(PersonalNames(firstName = "Amira"))
+
+            assertEquals(ChatProfile("Alex", ColourRole.Blue), repository.chatProfile.first())
+            assertEquals("Amira", repository.personalNames.first().firstName)
         }
 }

@@ -2,6 +2,7 @@ package com.ravendarque.deaftly.ui.settings
 
 import com.ravendarque.deaftly.core.chat.ChatProfile
 import com.ravendarque.deaftly.core.chat.ColourRole
+import com.ravendarque.deaftly.core.settings.PersonalNames
 import com.ravendarque.deaftly.core.settings.ShowScheme
 import com.ravendarque.deaftly.core.settings.ThemeMode
 import com.ravendarque.deaftly.core.template.Template
@@ -57,6 +58,7 @@ class SettingsViewModelTest {
                     ShowScheme.YellowOnBlack,
                     ThemeMode.System,
                     hiddenBuiltIns = 0,
+                    names = PersonalNames(),
                 ),
                 viewModel.ready(),
             )
@@ -117,5 +119,44 @@ class SettingsViewModelTest {
             viewModel.setShowScheme(ShowScheme.WhiteOnBlack)
 
             assertEquals(ShowScheme.WhiteOnBlack, viewModel.ready().showScheme)
+        }
+
+    @Test
+    fun reportsTheStoredNames() =
+        runTest {
+            val names =
+                PersonalNames("Amira", "Hassan", legalNameDiffers = true, legalName = "Amira Fatima Hassan", useFirstNameInChats = true)
+
+            assertEquals(names, viewModel(FakeSettingsRepository(names = names)).ready().names)
+        }
+
+    @Test
+    fun eachNameFieldSavesWithoutDisturbingTheOthers() =
+        runTest {
+            val settings = FakeSettingsRepository()
+            val viewModel = viewModel(settings)
+
+            viewModel.changeNames { it.copy(firstName = "Amira") }
+            viewModel.changeNames { it.copy(surname = "Hassan") }
+            viewModel.changeNames { it.copy(legalNameDiffers = true) }
+            viewModel.changeNames { it.copy(legalName = "Amira Fatima Hassan") }
+            viewModel.changeNames { it.copy(useFirstNameInChats = true) }
+
+            assertEquals(
+                PersonalNames("Amira", "Hassan", legalNameDiffers = true, legalName = "Amira Fatima Hassan", useFirstNameInChats = true),
+                settings.savedNames,
+            )
+            assertEquals(settings.savedNames, viewModel.ready().names)
+        }
+
+    @Test
+    fun savingNamesLeavesTheChatProfileAlone() =
+        runTest {
+            val settings = FakeSettingsRepository(ChatProfile("Alex", ColourRole.Green))
+            val viewModel = viewModel(settings)
+
+            viewModel.changeNames { it.copy(firstName = "Amira") }
+
+            assertEquals(ChatProfile("Alex", ColourRole.Green), settings.saved)
         }
 }

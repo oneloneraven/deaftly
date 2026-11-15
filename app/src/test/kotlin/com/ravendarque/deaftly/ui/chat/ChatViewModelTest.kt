@@ -13,6 +13,7 @@ import com.ravendarque.deaftly.core.chat.Span
 import com.ravendarque.deaftly.core.chat.SpanStyle
 import com.ravendarque.deaftly.core.chat.StyleRange
 import com.ravendarque.deaftly.core.settings.ChatTextSize
+import com.ravendarque.deaftly.core.settings.PersonalNames
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
@@ -77,6 +78,28 @@ class ChatViewModelTest {
 
             assertEquals(Participant(ParticipantId.A, ColourRole.Green, "Alex"), viewModel.conversation().participantA)
             assertNull(viewModel.conversation().participantB.name)
+        }
+
+    @Test
+    fun usesTheFirstNameFromSettingsWhenChosen() =
+        runTest {
+            val names = PersonalNames(firstName = "Amira", surname = "Hassan", useFirstNameInChats = true)
+            val viewModel = viewModel(FakeSettingsRepository(ChatProfile("Alex", ColourRole.Green), names = names))
+            collect(viewModel)
+
+            assertEquals(Participant(ParticipantId.A, ColourRole.Green, "Amira"), viewModel.conversation().participantA)
+        }
+
+    @Test
+    fun keepsTheChatNameWhenTheFirstNameIsNotChosenOrIsBlank() =
+        runTest {
+            val notChosen = viewModel(FakeSettingsRepository(ChatProfile("Alex"), names = PersonalNames(firstName = "Amira")))
+            collect(notChosen)
+            val blank = viewModel(FakeSettingsRepository(ChatProfile("Alex"), names = PersonalNames(useFirstNameInChats = true)))
+            collect(blank)
+
+            assertEquals("Alex", notChosen.conversation().participantA.name)
+            assertEquals("Alex", blank.conversation().participantA.name)
         }
 
     @Test

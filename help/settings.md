@@ -5,9 +5,15 @@ order: 8
 
 # Settings
 
-## Me in chats
+## Me
 
-Your name and colour, used for your side of a [Side by side](side-by-side.md) chat.
+Your name and colour.
+
+**First name** and **Surname** are used to fill in your name on templates such as Check in, so you don't have to type it each time. You can still change it on any message, and that only affects that message. Tick **My legal name is different** if the name on your documents isn't your first name and surname, then type your **Full legal name**. Leave them all blank and the name gaps start empty.
+
+Your names stay on this phone.
+
+Tick **Use my first name in chats** to use your first name for your side of a [Side by side](side-by-side.md) chat. Your chat name box is hidden while it's on. Otherwise, set a name and colour of your own for your side of a chat.
 
 ## Appearance
 

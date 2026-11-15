@@ -9,6 +9,8 @@ public enum class Join(
     Or("or"),
 }
 
+public enum class PersonalField { FormalName }
+
 public data class Placeholder(
     val key: String,
     val label: String,
@@ -16,6 +18,7 @@ public data class Placeholder(
     val options: List<String> = emptyList(),
     val repeatable: Boolean = false,
     val join: Join = Join.And,
+    val fillsWith: PersonalField? = null,
 )
 
 public data class Template(
