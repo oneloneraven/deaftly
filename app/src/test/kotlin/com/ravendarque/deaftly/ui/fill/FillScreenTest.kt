@@ -72,6 +72,7 @@ class FillScreenTest {
         composeRule.onNode(hasSetTextAction()).performTextInput("Sam")
         composeRule.onNode(hasSetTextAction()).performImeAction()
         composeRule.waitForIdle()
+        chip("how to reply").performClick()
         option("write it down").performClick()
         composeRule.waitForIdle()
     }
@@ -102,6 +103,7 @@ class FillScreenTest {
         composeRule.waitForIdle()
         composeRule.onNodeWithText("Show").assertIsNotEnabled()
 
+        chip("how to reply").performClick()
         option("write it down").performClick()
         composeRule.waitForIdle()
         composeRule.onNodeWithText("Show").assertIsEnabled()
@@ -122,7 +124,7 @@ class FillScreenTest {
     }
 
     @Test
-    fun choosingAnOptionFillsTheChipAndShowsItSelectedWhenReopened() {
+    fun choosingAnOptionFillsTheChipAndClosesTheSheet() {
         show("check-in")
         chip("how to reply").performClick()
 
@@ -130,8 +132,8 @@ class FillScreenTest {
         composeRule.waitForIdle()
 
         chip("write it down").assertState("Filled in")
-        chip("name").assertState("Editing")
-        composeRule.onNode(hasSetTextAction()).assertIsFocused()
+        chip("name").assertState("Empty")
+        composeRule.onNode(hasSetTextAction()).assertDoesNotExist()
     }
 
     @Test
@@ -151,9 +153,6 @@ class FillScreenTest {
         show("check-in")
         chip("how to reply").performClick()
         option("write it down").performClick()
-        composeRule.waitForIdle()
-        composeRule.onNode(hasSetTextAction()).performTextInput("Sam")
-        composeRule.onNode(hasSetTextAction()).performImeAction()
         composeRule.waitForIdle()
 
         chip("write it down").performClick()

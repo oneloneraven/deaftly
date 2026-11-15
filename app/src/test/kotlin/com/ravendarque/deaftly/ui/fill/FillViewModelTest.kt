@@ -103,17 +103,17 @@ class FillViewModelTest {
         }
 
     @Test
-    fun choosingAValueFillsTheChipAndAdvancesToTheNextUnfilledPlaceholder() =
+    fun choosingAValueFillsTheChipAndClosesTheSheetWithoutOpeningTheNextGap() =
         runTest {
             val viewModel = viewModel()
             collect(viewModel)
             viewModel.activate("name")
 
-            viewModel.choose("Sam")
+            viewModel.choose("Amara")
 
             val state = viewModel.ready()
-            assertEquals("Sam", (state.parts[1] as FillPart.Filled).values.single())
-            assertEquals("how to reply", state.active?.placeholder?.key)
+            assertEquals("Amara", (state.parts[1] as FillPart.Filled).values.single())
+            assertNull(state.active)
             assertFalse(state.canShow)
         }
 
@@ -124,6 +124,7 @@ class FillViewModelTest {
             collect(viewModel)
             viewModel.activate("name")
             viewModel.choose("Sam")
+            viewModel.activate("how to reply")
 
             viewModel.choose("write it down")
 
@@ -140,6 +141,7 @@ class FillViewModelTest {
             collect(viewModel)
             viewModel.activate("name")
             viewModel.choose("Sam")
+            viewModel.activate("how to reply")
             viewModel.choose("write it down")
 
             val state = viewModel.ready()
@@ -219,6 +221,7 @@ class FillViewModelTest {
             collect(first)
             first.activate("name")
             first.choose("Sam")
+            first.activate("how to reply")
 
             val second = viewModel(savedState = savedState)
             collect(second)
