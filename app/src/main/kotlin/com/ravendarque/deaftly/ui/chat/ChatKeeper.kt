@@ -3,7 +3,9 @@ package com.ravendarque.deaftly.ui.chat
 import androidx.lifecycle.SavedStateHandle
 import com.ravendarque.deaftly.core.chat.Conversation
 import com.ravendarque.deaftly.storage.SavedChatStore
+import com.ravendarque.deaftly.storage.logKeptChatSaveFailure
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -35,6 +37,8 @@ class ChatKeeper(
         id: String,
         conversation: Conversation,
     ) {
-        writeScope.launch { writes.withLock { store.save(id, conversation) } }
+        writeScope.launch(start = CoroutineStart.UNDISPATCHED) {
+            writes.withLock { runCatching { store.save(id, conversation) }.onFailure(::logKeptChatSaveFailure) }
+        }
     }
 }
