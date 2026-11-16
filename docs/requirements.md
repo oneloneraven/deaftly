@@ -53,7 +53,7 @@ Deaftly is an Android app that helps deaf people communicate quickly and with li
 | ID | Requirement |
 |----|-------------|
 | S1 | A completed template (or any message) is previewed, then shown full screen in large, high-contrast text for a hearing person to read. *(A: F2)* |
-| S2 | The text scales to fill the screen down to a minimum legible size. Beyond that it wraps and scrolls; it never shrinks to unreadable. *(A: F4)* |
+| S2 | Every message is shown at one large, fixed text size, whatever its length. Longer text wraps and scrolls, with a clear "More below" cue until the end is reached. *(A: F4; issue #263)* |
 | S3 | Show mode keeps the screen awake. |
 | S4 | The user can leave show mode and return to editing in one gesture. |
 | S5 | From show mode, the user can go straight into a chat with the shown message as the first turn. |

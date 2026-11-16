@@ -104,9 +104,9 @@ fun ShowContent(
                 .leaveOnSwipeDown(onClose),
     ) {
         ShowHeader(scheme, onCycleScheme, onClose)
-        AutoSizedMessage(
+        ShowMessage(
             text = text,
-            color = colours.text,
+            colours = colours,
             modifier = Modifier.weight(1f).fillMaxWidth().padding(horizontal = 26.dp),
             highlights = highlights,
         )

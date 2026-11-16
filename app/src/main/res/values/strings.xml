@@ -116,6 +116,7 @@
     <string name="show_scheme_white_on_black">white on black</string>
     <string name="show_scheme_yellow_on_black">yellow on black</string>
     <string name="show_hint">Swipe down to go back</string>
+    <string name="show_more_below">More below</string>
     <string name="template_pin">Pin</string>
     <string name="template_unpin">Unpin</string>
     <string name="template_set_category">Set category</string>
