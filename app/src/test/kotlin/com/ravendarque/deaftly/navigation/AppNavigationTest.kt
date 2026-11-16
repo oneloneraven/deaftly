@@ -171,8 +171,8 @@ class AppNavigationTest {
         composeRule.onNodeWithContentDescription(text(R.string.chat_send)).performClick()
         composeRule.onNodeWithContentDescription("Me: Hello there").assertExists()
         composeRule.onNodeWithContentDescription(text(R.string.chat_end)).performClick()
-        composeRule.onNodeWithText(text(R.string.chat_end_title)).assertExists()
-        composeRule.onNodeWithText(text(R.string.chat_end_confirm)).performClick()
+        composeRule.onNodeWithText(text(R.string.chat_keep_title)).assertExists()
+        composeRule.onNodeWithText(text(R.string.chat_keep_delete)).performClick()
         openChat()
 
         composeRule.onNodeWithText(text(R.string.chat_empty)).assertExists()
@@ -318,7 +318,7 @@ class AppNavigationTest {
         composeRule.onNodeWithContentDescription(text(R.string.chat_turn_label)).assertExists()
         composeRule.onRoot().tryPerformAccessibilityChecks()
         composeRule.onNodeWithContentDescription(text(R.string.chat_end)).performClick()
-        composeRule.onNodeWithText(text(R.string.chat_end_confirm)).performClick()
+        composeRule.onNodeWithText(text(R.string.chat_keep_delete)).performClick()
         composeRule.onNodeWithContentDescription(text(R.string.show_close)).assertExists()
     }
 
@@ -418,7 +418,7 @@ class AppNavigationTest {
         composeRule.onNodeWithContentDescription(text(R.string.chat_turn_label)).assertExists()
         composeRule.onRoot().tryPerformAccessibilityChecks()
         composeRule.onNodeWithContentDescription(text(R.string.chat_end)).performClick()
-        composeRule.onNodeWithText(text(R.string.chat_end_confirm)).performClick()
+        composeRule.onNodeWithText(text(R.string.chat_keep_delete)).performClick()
         composeRule.onNodeWithText(text(R.string.hub_face_to_face)).assertExists()
     }
 

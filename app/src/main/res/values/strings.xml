@@ -182,6 +182,10 @@
     <string name="chat_end_text">The messages will be deleted.</string>
     <string name="chat_end_confirm">End chat</string>
     <string name="chat_end_keep">Keep chatting</string>
+    <string name="chat_keep_title">Keep this chat?</string>
+    <string name="chat_keep_text">Kept chats stay on this phone and in your Android backup, so you can read them or carry on later.</string>
+    <string name="chat_keep_confirm">Keep</string>
+    <string name="chat_keep_delete">Delete</string>
     <string name="chat_copy_action">Copy</string>
     <string name="chat_quote_action">Quote</string>
     <string name="chat_delete_action">Delete</string>
