@@ -27,7 +27,7 @@ Status "pass" means no finding at 1x and at 200%.
 | Fill, empty and filled | Back, Edit template, placeholder chips (labelled with the placeholder name), Show (disabled until filled) | pass | Wraps cleanly | pass |
 | Fill, choices sheet and "Something else" | Each choice labelled; scrim exposes "Close sheet"; drag handle labelled | pass | Typing sheet fits | pass |
 | Fill, camera placeholder sheet | Scan the menu, Type it | pass | Not separately checked | pass |
-| Show, all three schemes | Close show mode, Change colours (label states the current and next scheme), Continue as chat | pass | Message text auto-sizes; footer fits | pass |
+| Show, all three schemes | Close show mode, Change colours (label states the current and next scheme), Continue as chat | pass | Message text auto-sizes; footer fits. Since #263 the text is one fixed size with a "More below" cue | pass |
 | Type & show | Back, Clear message, Message to show field, Show | pass | Not separately checked beyond Show | pass |
 | Editor | Cancel, Save, Name, Category, category chips, Message, Placeholder, Delete placeholder, placeholder fields; discard dialog buttons | pass | Title wraps to two lines; all fields reachable | pass |
 | Chat, side by side | End chat, participants, layout switch, text size, composer, Bold, Italic, Highlight, Insert template, Send, turn control (label includes who is next) | pass | Header participants wrap; toolbar and turn control fit | pass |
