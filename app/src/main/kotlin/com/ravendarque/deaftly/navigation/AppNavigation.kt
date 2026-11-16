@@ -8,6 +8,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.EntryProviderScope
@@ -38,6 +39,8 @@ import com.ravendarque.deaftly.ui.home.TemplatesScreen
 import com.ravendarque.deaftly.ui.hub.HubScreen
 import com.ravendarque.deaftly.ui.ocr.OcrOutcome
 import com.ravendarque.deaftly.ui.ocr.OcrScreen
+import com.ravendarque.deaftly.ui.savedchats.SavedChatsScreen
+import com.ravendarque.deaftly.ui.savedchats.SavedChatsViewModel
 import com.ravendarque.deaftly.ui.settings.SettingsScreen
 import com.ravendarque.deaftly.ui.settings.SettingsViewModel
 import com.ravendarque.deaftly.ui.share.ShareScreen
@@ -82,7 +85,10 @@ private fun AppNavigationHost(
                     val viewModel = viewModel<FirstRunViewModel>(factory = container.firstRunViewModelFactory)
                     FirstRunScreen(viewModel, onDone = { backStack[backStack.lastIndex] = Route.Home })
                 }
-                entry<Route.Home> { HubScreen(onNavigate = { backStack.add(it) }) }
+                entry<Route.Home> {
+                    val savedChats by container.savedChatStore.summaries.collectAsStateWithLifecycle()
+                    HubScreen(onNavigate = { backStack.add(it) }, hasSavedChats = savedChats.isNotEmpty())
+                }
                 entry<Route.Templates> {
                     val viewModel = viewModel<HomeViewModel>(factory = container.homeViewModelFactory)
                     TemplatesScreen(viewModel, onNavigate = { backStack.add(it) }, onHome = { backStack.removeLastOrNull() })
@@ -151,6 +157,14 @@ private fun EntryProviderScope<NavKey>.conversationEntries(
     container: AppContainer,
     backStack: NavBackStack<NavKey>,
 ) {
+    entry<Route.SavedChats> {
+        val viewModel = viewModel<SavedChatsViewModel>(factory = container.savedChatsViewModelFactory)
+        SavedChatsScreen(
+            viewModel,
+            onOpen = { backStack.add(Route.Chat(savedChatId = it)) },
+            onBack = { backStack.removeLastOrNull() },
+        )
+    }
     entry<Route.FaceToFace> {
         val viewModel = viewModel<FaceToFaceViewModel>(factory = container.faceToFaceViewModelFactory)
         FaceToFaceScreen(

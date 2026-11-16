@@ -58,6 +58,16 @@
     <string name="hub_use_template">Use a template</string>
     <string name="hub_face_to_face">Face to face</string>
     <string name="hub_side_by_side">Side by side</string>
+    <string name="hub_saved_chats">Saved chats</string>
+    <string name="hub_saved_chats_help">Read or carry on chats you kept. When you end a side by side chat, choose Keep and it appears here.</string>
+    <string name="saved_chats_them">Them</string>
+    <string name="saved_chats_no_messages">No messages</string>
+    <string name="saved_chats_delete">Delete chat with %1$s</string>
+    <string name="saved_chats_delete_title">Delete this chat?</string>
+    <string name="saved_chats_delete_text">It will be removed from this phone and your Android backup.</string>
+    <string name="saved_chats_delete_confirm">Delete</string>
+    <string name="saved_chats_delete_cancel">Cancel</string>
+    <string name="saved_chats_empty">No saved chats. When you end a chat, choose Keep to save it here.</string>
     <string name="hub_start_typing_help">Type what you want to say, then show it full screen in large, clear text for the other person to read. Use this for anything you haven\u2019t saved as a template.</string>
     <string name="hub_use_template_help">Templates are messages you use often, such as ordering a coffee or giving your name at reception. Pick one, fill in the parts that change each time, like a time or a name, then show it. You can type the details or read them from a sign or document with the camera.</string>
     <string name="hub_face_to_face_help">For typing to someone opposite you while securely holding your phone. The keyboard faces you, while the text you type faces away from you so they can read along as you type. If they want to reply, you can switch to Side by side and pass them the phone.</string>
