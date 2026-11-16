@@ -134,6 +134,20 @@ class ChatViewModelTest {
         }
 
     @Test
+    fun rememberingSavesATypedNameWhenThisChatIsNotUsingTheFirstName() =
+        runTest {
+            val settings = FakeSettingsRepository(ChatProfile("Mira"), names = PersonalNames(firstName = "Amira"))
+            val viewModel = viewModel(settings)
+            collect(viewModel)
+            settings.updatePersonalNames { it.copy(useFirstNameInChats = true) }
+            viewModel.updateParticipant(viewModel.conversation().participantA.copy(name = "Kwame"))
+
+            viewModel.rememberOwnDefaults()
+
+            assertEquals("Kwame", settings.saved.name)
+        }
+
+    @Test
     fun keepsTheChatNameWhenTheFirstNameIsNotChosenOrIsBlank() =
         runTest {
             val notChosen = viewModel(FakeSettingsRepository(ChatProfile("Alex"), names = PersonalNames(firstName = "Amira")))

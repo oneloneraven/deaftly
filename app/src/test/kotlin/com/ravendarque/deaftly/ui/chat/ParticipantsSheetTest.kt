@@ -14,6 +14,7 @@ import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.hasSetTextAction
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.accessibility.enableAccessibilityChecks
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
@@ -66,7 +67,11 @@ class ParticipantsSheetTest {
                             onChange = { conversation = conversation.withParticipant(it) },
                             onDone = { done++ },
                             firstNameInChats = firstName,
-                            onUseDifferentName = { differentNames++ },
+                            onUseDifferentName = {
+                                differentNames++
+                                firstName = null
+                                conversation = conversation.withParticipant(conversation.participantA.copy(name = "Mira"))
+                            },
                         )
                     }
                 }
@@ -103,6 +108,7 @@ class ParticipantsSheetTest {
         composeRule.onNodeWithText("Use a different name").performClick()
 
         assertEquals(1, differentNames)
+        composeRule.onAllNodes(hasSetTextAction())[0].assert(hasText("Mira"))
     }
 
     @Test

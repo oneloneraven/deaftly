@@ -93,7 +93,11 @@ class ChatViewModel(
     fun rememberOwnDefaults() {
         val own = conversation.value?.participantA ?: return
         viewModelScope.launch {
-            val usingFirstName = settings.personalNames.first().chatName != null
+            val usingFirstName =
+                settings.personalNames
+                    .first()
+                    .chatName
+                    ?.let { it == own.name } == true
             val name = if (usingFirstName) settings.chatProfile.first().name else own.name
             settings.setChatProfile(ChatProfile(name, own.colour))
         }

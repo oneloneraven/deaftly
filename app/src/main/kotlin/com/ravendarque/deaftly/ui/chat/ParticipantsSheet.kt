@@ -108,7 +108,7 @@ private fun ParticipantSection(
     firstNameInChats: String? = null,
     onUseDifferentName: () -> Unit = {},
 ) {
-    var text by rememberSaveable(participant.id) { mutableStateOf(participant.name.orEmpty()) }
+    var text by rememberSaveable(participant.id, firstNameInChats) { mutableStateOf(participant.name.orEmpty()) }
     val fallback =
         participant
             .copy(name = null)
@@ -148,16 +148,21 @@ private fun FirstNameInUse(
     onUseDifferentName: () -> Unit,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(Deaftly.spacing.space8)) {
-        Text(
-            text = firstName,
-            style = MaterialTheme.typography.bodyLarge,
-            color = Deaftly.colors.ink,
-        )
-        Text(
-            text = stringResource(R.string.participants_first_name_in_use),
-            style = MaterialTheme.typography.bodySmall,
-            color = Deaftly.colors.inkSecondary,
-        )
+        Column(
+            modifier = Modifier.semantics(mergeDescendants = true) {},
+            verticalArrangement = Arrangement.spacedBy(Deaftly.spacing.space8),
+        ) {
+            Text(
+                text = firstName,
+                style = MaterialTheme.typography.bodyLarge,
+                color = Deaftly.colors.ink,
+            )
+            Text(
+                text = stringResource(R.string.participants_first_name_in_use),
+                style = MaterialTheme.typography.bodySmall,
+                color = Deaftly.colors.inkSecondary,
+            )
+        }
         SecondaryButton(
             text = stringResource(R.string.participants_use_different_name),
             onClick = onUseDifferentName,
