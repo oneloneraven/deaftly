@@ -34,7 +34,9 @@ import com.ravendarque.deaftly.core.ocr.ViewportMapping
 import com.ravendarque.deaftly.ui.chat.ChatCodec
 import com.ravendarque.deaftly.ui.chat.ChatScreen
 import com.ravendarque.deaftly.ui.chat.ChatViewModel
+import com.ravendarque.deaftly.ui.chat.FakeSavedChatStore
 import com.ravendarque.deaftly.ui.chat.FakeSettingsRepository
+import com.ravendarque.deaftly.ui.chat.testWriteScope
 import com.ravendarque.deaftly.ui.facetoface.FaceToFaceContent
 import com.ravendarque.deaftly.ui.fill.FillScreen
 import com.ravendarque.deaftly.ui.fill.FillViewModel
@@ -231,7 +233,12 @@ class WebsiteScreenshotTest {
                 .withTurn(ParticipantId.B)
                 .append(RichText.spans("Got it, thanks. I'll make sure the kitchen is aware."))
         val viewModel =
-            ChatViewModel(FakeSettingsRepository(), SavedStateHandle(mapOf("conversation" to ChatCodec.encode(conversation))))
+            ChatViewModel(
+                FakeSettingsRepository(),
+                SavedStateHandle(mapOf("conversation" to ChatCodec.encode(conversation))),
+                store = FakeSavedChatStore(),
+                writeScope = testWriteScope,
+            )
         shot { ChatScreen(viewModel, onEnd = {}, onInsertTemplate = {}) }
     }
 

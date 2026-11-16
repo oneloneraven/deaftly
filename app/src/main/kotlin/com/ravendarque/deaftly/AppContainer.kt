@@ -11,6 +11,8 @@ import com.ravendarque.deaftly.help.HelpRepository
 import com.ravendarque.deaftly.ocr.paddle.PaddleOcrNcnnRecogniser
 import com.ravendarque.deaftly.storage.DataStoreSettingsRepository
 import com.ravendarque.deaftly.storage.DataStoreTemplateRepository
+import com.ravendarque.deaftly.storage.FileSavedChatStore
+import com.ravendarque.deaftly.storage.SavedChatStore
 import com.ravendarque.deaftly.storage.createTemplateStore
 import com.ravendarque.deaftly.storage.refreshBuiltIns
 import com.ravendarque.deaftly.templates.builtInTemplates
@@ -28,7 +30,11 @@ import com.ravendarque.deaftly.ui.ocr.OcrOutcomes
 import com.ravendarque.deaftly.ui.ocr.OcrViewModel
 import com.ravendarque.deaftly.ui.settings.SettingsViewModel
 import com.ravendarque.deaftly.ui.show.ShowViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.first
+import java.io.File
 
 class AppContainer(
     private val context: Context,
@@ -40,6 +46,10 @@ class AppContainer(
     suspend fun refreshBuiltInTemplates() = store.refreshBuiltIns(builtInTemplates(context.resources))
 
     val settingsRepository: SettingsRepository by lazy { DataStoreSettingsRepository(store) }
+
+    private val appScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
+    val savedChatStore: SavedChatStore by lazy { FileSavedChatStore(File(context.filesDir, "chats"), Dispatchers.IO, appScope) }
 
     val helpRepository by lazy { HelpRepository(context.assets) }
 
@@ -106,7 +116,7 @@ class AppContainer(
 
     fun chatViewModelFactory(opening: ChatOpening) =
         viewModelFactory {
-            initializer { ChatViewModel(settingsRepository, createSavedStateHandle(), opening, chatInsertions) }
+            initializer { ChatViewModel(settingsRepository, createSavedStateHandle(), opening, chatInsertions, savedChatStore, appScope) }
         }
 
     fun fillViewModelFactory(templateId: String) =

@@ -10,6 +10,8 @@ import com.ravendarque.deaftly.core.chat.ParticipantId
 import com.ravendarque.deaftly.core.chat.RichText
 import com.ravendarque.deaftly.core.settings.ChatTextSize
 import com.ravendarque.deaftly.core.settings.SettingsRepository
+import com.ravendarque.deaftly.storage.SavedChatStore
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -17,7 +19,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.coroutines.launch
 
 private const val STOP_TIMEOUT_MILLIS = 5_000L
@@ -26,6 +28,7 @@ private const val CONVERSATION_KEY = "conversation"
 data class ChatOpening(
     val messages: List<String> = emptyList(),
     val draft: String = "",
+    val savedChatId: String? = null,
 )
 
 sealed interface ChatUiState {
@@ -37,6 +40,7 @@ sealed interface ChatUiState {
         val sidesSwapped: Boolean,
         val drafts: Map<ParticipantId, Draft>,
         val firstNameInChats: String? = null,
+        val kept: Boolean = false,
     ) : ChatUiState {
         val draft: Draft get() = drafts[conversation.turn] ?: Draft()
     }
@@ -47,24 +51,27 @@ class ChatViewModel(
     private val savedState: SavedStateHandle,
     private val opening: ChatOpening = ChatOpening(),
     private val insertions: ChatInsertions = ChatInsertions(),
+    store: SavedChatStore,
+    writeScope: CoroutineScope,
 ) : ViewModel() {
     private val conversation = MutableStateFlow(ChatCodec.decode(savedState[CONVERSATION_KEY]))
     val display = ChatDisplay(settings, viewModelScope)
     val drafts = ChatDrafts(savedState) { conversation.value?.turn }
+    val keeper = ChatKeeper(store, savedState, writeScope)
 
     val state: StateFlow<ChatUiState> =
         combine(
-            conversation,
+            combine(conversation, keeper.keptId) { chat, id -> chat to (id != null) },
             display.textSize,
             display.sidesSwapped,
             drafts.all,
             settings.personalNames,
-        ) { conversation, textSize, swapped, drafts, names ->
+        ) { (conversation, kept), textSize, swapped, drafts, names ->
             if (conversation == null) {
                 ChatUiState.Loading
             } else {
                 val firstName = names.chatName?.takeIf { it == conversation.participantA.name }
-                ChatUiState.Ready(conversation, textSize, swapped, drafts, firstName)
+                ChatUiState.Ready(conversation, textSize, swapped, drafts, firstName, kept)
             }
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS), ChatUiState.Loading)
 
@@ -77,10 +84,11 @@ class ChatViewModel(
         }
         viewModelScope.launch {
             if (conversation.value == null) {
-                val started = opened(settings.startingProfile().startConversation())
+                val reopened = opening.savedChatId?.let { keeper.open(it) }
+                val started = reopened ?: opened(settings.startingProfile().startConversation())
                 if (conversation.compareAndSet(null, started)) {
                     save(started)
-                    drafts.restore(ParticipantId.A, opening.draft)
+                    if (reopened == null) drafts.restore(ParticipantId.A, opening.draft)
                 }
             }
         }
@@ -158,7 +166,7 @@ class ChatViewModel(
     }
 
     private fun change(transform: (Conversation) -> Conversation) {
-        conversation.update { current -> current?.let(transform)?.also(::save) }
+        conversation.updateAndGet { current -> current?.let(transform)?.also(::save) }?.let(keeper::persist)
     }
 
     private fun save(conversation: Conversation) {

@@ -9,11 +9,13 @@ import com.ravendarque.deaftly.core.chat.FormattedText
 import com.ravendarque.deaftly.core.chat.Participant
 import com.ravendarque.deaftly.core.chat.ParticipantId
 import com.ravendarque.deaftly.core.chat.Quote
+import com.ravendarque.deaftly.core.chat.RichText
 import com.ravendarque.deaftly.core.chat.Span
 import com.ravendarque.deaftly.core.chat.SpanStyle
 import com.ravendarque.deaftly.core.chat.StyleRange
 import com.ravendarque.deaftly.core.settings.ChatTextSize
 import com.ravendarque.deaftly.core.settings.PersonalNames
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
@@ -30,6 +32,7 @@ import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
 import kotlin.test.assertIs
 import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class ChatViewModelTest {
@@ -49,7 +52,16 @@ class ChatViewModelTest {
         firstMessage: String? = null,
         draft: String = "",
         insertions: ChatInsertions = ChatInsertions(),
-    ) = ChatViewModel(settings, savedState, ChatOpening(listOfNotNull(firstMessage), draft), insertions)
+    ) = ChatViewModel(
+        settings,
+        savedState,
+        ChatOpening(listOfNotNull(firstMessage), draft),
+        insertions,
+        store,
+        CoroutineScope(UnconfinedTestDispatcher()),
+    )
+
+    private val store = FakeSavedChatStore()
 
     private fun ChatViewModel.type(text: String) = drafts.setComposition(Composition().withText(text, text.length, text.length))
 
@@ -683,6 +695,8 @@ class ChatViewModelTest {
                     SavedStateHandle(),
                     ChatOpening(listOf("Hello, I am deaf", "  ", "Could I have a coffee")),
                     ChatInsertions(),
+                    store,
+                    CoroutineScope(UnconfinedTestDispatcher()),
                 )
             collect(viewModel)
 

@@ -33,6 +33,7 @@ sealed interface Route : NavKey {
     data class Chat(
         val messages: List<String> = emptyList(),
         val draft: String = "",
+        val savedChatId: String? = null,
     ) : Route
 
     @Serializable

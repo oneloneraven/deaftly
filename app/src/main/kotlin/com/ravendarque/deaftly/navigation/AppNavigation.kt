@@ -160,7 +160,8 @@ private fun EntryProviderScope<NavKey>.conversationEntries(
         )
     }
     entry<Route.Chat> { route ->
-        val viewModel = viewModel<ChatViewModel>(factory = container.chatViewModelFactory(ChatOpening(route.messages, route.draft)))
+        val viewModel =
+            viewModel<ChatViewModel>(factory = container.chatViewModelFactory(ChatOpening(route.messages, route.draft, route.savedChatId)))
         ChatScreen(
             viewModel,
             onEnd = { backStack.removeLastOrNull() },

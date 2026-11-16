@@ -9,6 +9,7 @@ import kotlin.test.assertTrue
 
 class BackupRulesTest {
     private val storeRule = "include" to ("file" to "datastore/$TEMPLATE_STORE_FILE")
+    private val chatsRule = "include" to ("file" to "chats/")
 
     private fun children(element: Element): List<Element> =
         (0 until element.childNodes.length).mapNotNull { element.childNodes.item(it) as? Element }
@@ -23,16 +24,16 @@ class BackupRulesTest {
             .documentElement
 
     @Test
-    fun fullBackupIncludesOnlyTheTemplateStore() {
-        assertEquals(listOf(storeRule), rules(parse("backup_rules.xml")))
+    fun fullBackupIncludesOnlyTheTemplateStoreAndKeptChats() {
+        assertEquals(listOf(storeRule, chatsRule), rules(parse("backup_rules.xml")))
     }
 
     @Test
-    fun cloudBackupAndDeviceTransferIncludeOnlyTheTemplateStore() {
+    fun cloudBackupAndDeviceTransferIncludeOnlyTheTemplateStoreAndKeptChats() {
         val sections = children(parse("data_extraction_rules.xml"))
 
         assertEquals(listOf("cloud-backup", "device-transfer"), sections.map { it.tagName })
-        sections.forEach { assertEquals(listOf(storeRule), rules(it)) }
+        sections.forEach { assertEquals(listOf(storeRule, chatsRule), rules(it)) }
     }
 
     @Test

@@ -34,7 +34,8 @@ class BubbleTailTest {
 
     private fun show(swapped: Boolean = false) {
         val saved = SavedStateHandle(mapOf("conversation" to ChatCodec.encode(scriptConversation(turn = ParticipantId.A))))
-        viewModel = ChatViewModel(FakeSettingsRepository(sidesSwapped = swapped), saved)
+        viewModel =
+            ChatViewModel(FakeSettingsRepository(sidesSwapped = swapped), saved, store = FakeSavedChatStore(), writeScope = testWriteScope)
         composeRule.setContent {
             AppTheme {
                 val current by viewModel.state.collectAsState()
