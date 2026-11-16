@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.ravendarque.deaftly.core.template.Join
+import com.ravendarque.deaftly.core.template.PersonalField
 import com.ravendarque.deaftly.core.template.PlaceholderType
 import com.ravendarque.deaftly.ui.theme.AppTheme
 import org.junit.Before
@@ -33,6 +34,7 @@ import org.junit.runner.RunWith
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 @RunWith(AndroidJUnit4::class)
@@ -234,6 +236,50 @@ class EditorScreenTest {
         assertEquals(Join.Or, viewModel.draft.selected?.join)
         option("or").assertIsSelected()
         composeRule.onRoot().tryPerformAccessibilityChecks()
+    }
+
+    @Test
+    fun aTypingGapCanStartWithASavedName() {
+        show("my-note")
+        viewModel.edit { it.select("name") }
+        composeRule.waitForIdle()
+
+        composeRule.onNodeWithText("Start with my name").performScrollTo().assertExists()
+        option("No").assertIsSelected()
+        option("Last name").performScrollTo().performClick()
+
+        option("Last name").assertIsSelected()
+        assertEquals(PersonalField.LastName, viewModel.draft.selected?.fillsWith)
+        composeRule.onRoot().tryPerformAccessibilityChecks()
+    }
+
+    @Test
+    fun choosingNoClearsTheSavedName() {
+        show("my-note")
+        viewModel.edit { it.select("name") }
+        composeRule.waitForIdle()
+
+        option("Legal name").performScrollTo().performClick()
+        option("No").performScrollTo().performClick()
+
+        assertNull(viewModel.draft.selected?.fillsWith)
+    }
+
+    @Test
+    fun theSavedNameChoiceIsOnlyForTypingAndSwitchingAwayClearsIt() {
+        show("my-note")
+        viewModel.edit { it.select("thing") }
+        composeRule.waitForIdle()
+        composeRule.onNodeWithText("Start with my name").assertDoesNotExist()
+
+        viewModel.edit { it.select("name") }
+        composeRule.waitForIdle()
+        option("Full name").performScrollTo().performClick()
+        option("Camera").performScrollTo().performClick()
+        composeRule.waitForIdle()
+
+        composeRule.onNodeWithText("Start with my name").assertDoesNotExist()
+        assertNull(viewModel.draft.selected?.fillsWith)
     }
 
     @Test

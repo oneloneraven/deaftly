@@ -3,8 +3,8 @@ package com.ravendarque.deaftly.ui.fill
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.ravendarque.deaftly.core.settings.PersonalNames
 import com.ravendarque.deaftly.core.settings.SettingsRepository
-import com.ravendarque.deaftly.core.template.PersonalField
 import com.ravendarque.deaftly.core.template.Placeholder
 import com.ravendarque.deaftly.core.template.RenderedPart
 import com.ravendarque.deaftly.core.template.Template
@@ -89,9 +89,8 @@ class FillViewModel(
     init {
         viewModelScope.launch {
             val template = loaded.filterNotNull().first().template
-            val formalName = settings.personalNames.first().formalName
-            if (template != null && formalName != null) {
-                val filled = fill.value.preFilled(template, formalName)
+            if (template != null) {
+                val filled = fill.value.preFilled(template, settings.personalNames.first())
                 if (filled != fill.value) update(template, filled)
             }
         }
@@ -250,8 +249,14 @@ private fun placeholderKeys(template: Template): Set<String> =
 
 private fun TemplateFill.preFilled(
     template: Template,
-    formalName: String,
+    names: PersonalNames,
 ): TemplateFill =
     placeholderKeys(template)
-        .filter { template.placeholder(it).fillsWith == PersonalField.FormalName && values(it).isEmpty() }
-        .fold(this) { fill, key -> fill.set(key, formalName) }
+        .filter { values(it).isEmpty() }
+        .fold(this) { fill, key ->
+            template
+                .placeholder(key)
+                .fillsWith
+                ?.let(names::valueOf)
+                ?.let { fill.set(key, it) } ?: fill
+        }

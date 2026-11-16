@@ -229,6 +229,13 @@
     <string name="editor_option_label">Choice %1$d</string>
     <string name="editor_remove_option">Remove choice %1$d</string>
     <string name="editor_add_option">Add a choice</string>
+    <string name="editor_fills_with">Start with my name</string>
+    <string name="editor_fills_with_hint">From Settings. You can change it each time.</string>
+    <string name="editor_fills_with_none">No</string>
+    <string name="editor_fills_with_first_name">First name</string>
+    <string name="editor_fills_with_last_name">Last name</string>
+    <string name="editor_fills_with_full_name">Full name</string>
+    <string name="editor_fills_with_legal_name">Legal name</string>
     <string name="editor_repeatable">Allow more than one</string>
     <string name="editor_repeatable_hint">Shows “+ add more”</string>
     <string name="editor_join">Join values with</string>

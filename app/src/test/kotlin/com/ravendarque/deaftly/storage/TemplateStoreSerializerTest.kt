@@ -58,18 +58,19 @@ class TemplateStoreSerializerTest {
     @Test
     fun thePersonalFieldAPlaceholderFillsWithSurvivesSavingAndLoading() =
         runTest {
-            val filled =
-                greeting.copy(
-                    placeholders =
-                        greeting.placeholders + ("name" to greeting.placeholder("name").copy(fillsWith = PersonalField.FormalName)),
-                )
-            val document = StoreDocument(STORE_VERSION, listOf(filled, menu).map { it.toDto() }, SettingsDto())
+            PersonalField.entries.forEach { field ->
+                val filled =
+                    greeting.copy(
+                        placeholders = greeting.placeholders + ("name" to greeting.placeholder("name").copy(fillsWith = field)),
+                    )
+                val document = StoreDocument(STORE_VERSION, listOf(filled, menu).map { it.toDto() }, SettingsDto())
 
-            val restored = read(write(document)).templates.map { it.toDomain() }
+                val restored = read(write(document)).templates.map { it.toDomain() }
 
-            assertEquals(PersonalField.FormalName, restored.first { it.id == greeting.id }.placeholder("name").fillsWith)
-            assertNull(restored.first { it.id == greeting.id }.placeholder("how to reply").fillsWith)
-            assertNull(restored.first { it.id == menu.id }.placeholder("item").fillsWith)
+                assertEquals(field, restored.first { it.id == greeting.id }.placeholder("name").fillsWith)
+                assertNull(restored.first { it.id == greeting.id }.placeholder("how to reply").fillsWith)
+                assertNull(restored.first { it.id == menu.id }.placeholder("item").fillsWith)
+            }
         }
 
     @Test
