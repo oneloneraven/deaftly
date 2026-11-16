@@ -15,7 +15,7 @@ Side by side is for a back-and-forth conversation on one phone. You pass the pho
 
 ## Names, colours and sides
 
-- **Names and colours** lets you set a name and colour for each of you. If you leave a name blank, it shows as "Me" or "Them".
+- **Names and colours** lets you set a name and colour for each of you. If you leave a name blank, it shows as "Me" or "Them". If you use your first name in chats, your side shows it with **Use a different name**, which turns that off so you can type another.
 - **Switch sides** swaps which side of the screen each of you is on, so it matches where you're standing.
 
 ## Writing messages

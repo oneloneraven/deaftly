@@ -58,6 +58,8 @@ private fun ChatContent(
     if (editingParticipants) {
         ParticipantsSheet(
             conversation = current.conversation,
+            firstNameInChats = current.firstNameInChats,
+            onUseDifferentName = viewModel::useDifferentName,
             onChange = viewModel::updateParticipant,
             onDone = {
                 viewModel.rememberOwnDefaults()

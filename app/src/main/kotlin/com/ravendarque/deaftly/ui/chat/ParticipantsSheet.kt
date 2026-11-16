@@ -43,6 +43,7 @@ import com.ravendarque.deaftly.core.chat.Conversation
 import com.ravendarque.deaftly.core.chat.Participant
 import com.ravendarque.deaftly.ui.components.DeaftlyBottomSheet
 import com.ravendarque.deaftly.ui.components.PrimaryButton
+import com.ravendarque.deaftly.ui.components.SecondaryButton
 import com.ravendarque.deaftly.ui.icons.DeaftlyIcons
 import com.ravendarque.deaftly.ui.theme.Deaftly
 import com.ravendarque.deaftly.ui.theme.colours
@@ -58,11 +59,13 @@ private const val UNAVAILABLE_ALPHA = 0.4f
 @Composable
 fun ParticipantsSheet(
     conversation: Conversation,
+    firstNameInChats: String?,
+    onUseDifferentName: () -> Unit,
     onChange: (Participant) -> Unit,
     onDone: () -> Unit,
 ) {
     DeaftlyBottomSheet(title = stringResource(R.string.participants_title), onDismiss = onDone) {
-        ParticipantsSheetContent(conversation, onChange, onDone)
+        ParticipantsSheetContent(conversation, onChange, onDone, firstNameInChats, onUseDifferentName)
     }
 }
 
@@ -71,6 +74,8 @@ fun ColumnScope.ParticipantsSheetContent(
     conversation: Conversation,
     onChange: (Participant) -> Unit,
     onDone: () -> Unit,
+    firstNameInChats: String? = null,
+    onUseDifferentName: () -> Unit = {},
 ) {
     Column(
         modifier = Modifier.weight(1f, fill = false).verticalScroll(rememberScrollState()),
@@ -81,6 +86,8 @@ fun ColumnScope.ParticipantsSheetContent(
             other = conversation.participantB,
             heading = stringResource(R.string.participants_you),
             onChange = onChange,
+            firstNameInChats = firstNameInChats,
+            onUseDifferentName = onUseDifferentName,
         )
         ParticipantSection(
             participant = conversation.participantB,
@@ -98,8 +105,10 @@ private fun ParticipantSection(
     other: Participant,
     heading: String,
     onChange: (Participant) -> Unit,
+    firstNameInChats: String? = null,
+    onUseDifferentName: () -> Unit = {},
 ) {
-    var text by rememberSaveable(participant.id) { mutableStateOf(participant.name.orEmpty()) }
+    var text by rememberSaveable(participant.id, firstNameInChats) { mutableStateOf(participant.name.orEmpty()) }
     val fallback =
         participant
             .copy(name = null)
@@ -113,18 +122,51 @@ private fun ParticipantSection(
             color = Deaftly.colors.ink,
             modifier = Modifier.semantics { heading() },
         )
-        NameField(
-            value = text,
-            placeholder = fallback,
-            onValueChange = {
-                text = it.take(PARTICIPANT_NAME_MAX_LENGTH)
-                onChange(participant.copy(name = text.ifBlank { null }))
-            },
-        )
+        if (firstNameInChats != null) {
+            FirstNameInUse(firstNameInChats, onUseDifferentName)
+        } else {
+            NameField(
+                value = text,
+                placeholder = fallback,
+                onValueChange = {
+                    text = it.take(PARTICIPANT_NAME_MAX_LENGTH)
+                    onChange(participant.copy(name = text.ifBlank { null }))
+                },
+            )
+        }
         ColourChoices(
             selected = participant.colour,
             takenBy = other.labelled(),
             onChoose = { onChange(participant.copy(colour = it)) },
+        )
+    }
+}
+
+@Composable
+private fun FirstNameInUse(
+    firstName: String,
+    onUseDifferentName: () -> Unit,
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(Deaftly.spacing.space8)) {
+        Column(
+            modifier = Modifier.semantics(mergeDescendants = true) {},
+            verticalArrangement = Arrangement.spacedBy(Deaftly.spacing.space8),
+        ) {
+            Text(
+                text = firstName,
+                style = MaterialTheme.typography.bodyLarge,
+                color = Deaftly.colors.ink,
+            )
+            Text(
+                text = stringResource(R.string.participants_first_name_in_use),
+                style = MaterialTheme.typography.bodySmall,
+                color = Deaftly.colors.inkSecondary,
+            )
+        }
+        SecondaryButton(
+            text = stringResource(R.string.participants_use_different_name),
+            onClick = onUseDifferentName,
+            modifier = Modifier.fillMaxWidth(),
         )
     }
 }

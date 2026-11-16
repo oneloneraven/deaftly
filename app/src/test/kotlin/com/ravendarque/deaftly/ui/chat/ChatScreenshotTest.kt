@@ -51,6 +51,7 @@ class ChatScreenshotTest {
     val testName = TestName()
 
     private val defaults = Conversation(Participant.defaultA(), Participant.defaultB())
+    private val withFirstName = Conversation(Participant(ParticipantId.A, ColourRole.Green, "Amira"), Participant.defaultB())
     private val named =
         Conversation(
             Participant(ParticipantId.A, ColourRole.Green, "Alex"),
@@ -66,12 +67,15 @@ class ChatScreenshotTest {
     private fun sheet(
         conversation: Conversation,
         dark: Boolean,
+        firstName: String? = null,
     ) = shot {
         AppTheme(darkTheme = dark) {
             Surface(color = Deaftly.colors.surface, shape = Deaftly.shapes.sheet) {
                 Column {
                     Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) { SheetHandle() }
-                    SheetBody("Who is chatting?") { ParticipantsSheetContent(conversation, onChange = {}, onDone = {}) }
+                    SheetBody("Who is chatting?") {
+                        ParticipantsSheetContent(conversation, onChange = {}, onDone = {}, firstNameInChats = firstName)
+                    }
                 }
             }
         }
@@ -326,6 +330,16 @@ class ChatScreenshotTest {
 
     @Test
     fun sheetWithNamesDarkTheme() = sheet(named, dark = true)
+
+    @Test
+    fun sheetWithFirstNameLightTheme() = sheet(withFirstName, dark = false, firstName = "Amira")
+
+    @Test
+    fun sheetWithFirstNameDarkTheme() = sheet(withFirstName, dark = true, firstName = "Amira")
+
+    @Test
+    @Config(fontScale = 2f)
+    fun sheetWithFirstNameLargeFontScale() = sheet(withFirstName, dark = false, firstName = "Amira")
 
     @Test
     fun headerLightTheme() = header(dark = false)

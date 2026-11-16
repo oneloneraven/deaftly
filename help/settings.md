@@ -13,7 +13,7 @@ Your name and colour.
 
 Your names stay on this phone.
 
-Tick **Use my first name in chats** to use your first name for your side of a [Side by side](side-by-side.md) chat. Your chat name box is hidden while it's on. Otherwise, set a name and colour of your own for your side of a chat.
+Tick **Use my first name in chats** to use your first name for your side of a [Side by side](side-by-side.md) chat. Your chat name box is hidden while it's on. To use a different name, tap **Use a different name** in a chat's names and colours, which turns this off. Otherwise, set a name and colour of your own for your side of a chat.
 
 ## Appearance
 
