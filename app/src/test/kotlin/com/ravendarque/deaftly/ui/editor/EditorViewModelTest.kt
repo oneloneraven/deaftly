@@ -322,7 +322,7 @@ class EditorViewModelTest {
             repository.update(
                 original.copy(
                     placeholders =
-                        original.placeholders + ("name" to original.placeholder("name").copy(fillsWith = PersonalField.FormalName)),
+                        original.placeholders + ("name" to original.placeholder("name").copy(fillsWith = PersonalField.LastName)),
                 ),
             )
             val viewModel = viewModel()
@@ -330,7 +330,7 @@ class EditorViewModelTest {
 
             viewModel.save()
 
-            assertEquals(PersonalField.FormalName, stored("my-note").placeholder("name").fillsWith)
+            assertEquals(PersonalField.LastName, stored("my-note").placeholder("name").fillsWith)
             assertNull(stored("my-note").placeholder("thing").fillsWith)
         }
 

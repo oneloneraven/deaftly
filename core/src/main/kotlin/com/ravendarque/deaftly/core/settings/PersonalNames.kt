@@ -1,5 +1,7 @@
 package com.ravendarque.deaftly.core.settings
 
+import com.ravendarque.deaftly.core.template.PersonalField
+
 public data class PersonalNames(
     val firstName: String = "",
     val lastName: String = "",
@@ -7,12 +9,18 @@ public data class PersonalNames(
     val legalName: String = "",
     val useFirstNameInChats: Boolean = false,
 ) {
-    val formalName: String?
-        get() {
-            val legal = legalName.trim()
-            val full = listOf(firstName, lastName).map(String::trim).filter(String::isNotEmpty).joinToString(" ")
-            return (if (legalNameDiffers && legal.isNotEmpty()) legal else full).ifEmpty { null }
-        }
+    public fun valueOf(field: PersonalField): String? {
+        val first = firstName.trim()
+        val last = lastName.trim()
+        val full = listOf(first, last).filter(String::isNotEmpty).joinToString(" ")
+        val differentLegal = legalName.trim().takeIf { legalNameDiffers && it.isNotEmpty() }
+        return when (field) {
+            PersonalField.FirstName -> first
+            PersonalField.LastName -> last
+            PersonalField.FullName -> full
+            PersonalField.LegalName -> differentLegal ?: full
+        }.ifEmpty { null }
+    }
 
     val chatName: String?
         get() = firstName.trim().takeIf { useFirstNameInChats && it.isNotEmpty() }

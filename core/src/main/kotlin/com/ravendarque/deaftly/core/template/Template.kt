@@ -9,7 +9,7 @@ public enum class Join(
     Or("or"),
 }
 
-public enum class PersonalField { FormalName }
+public enum class PersonalField { FirstName, LastName, FullName, LegalName }
 
 public data class Placeholder(
     val key: String,

@@ -22,7 +22,8 @@ private class BuiltInTemplateFactory(
             repeatable = true,
             join = Join.Or,
         )
-    private val name = placeholder("name", R.string.placeholder_name_label, PlaceholderType.Typing, fillsWith = PersonalField.FormalName)
+    private val name = placeholder("name", R.string.placeholder_name_label, PlaceholderType.Typing, fillsWith = PersonalField.LegalName)
+    private val fullName = name.copy(fillsWith = PersonalField.FullName)
     private val signLanguage = resources.getString(R.string.sign_language)
     private val signLanguageInterpreter = resources.getString(R.string.sign_language_interpreter, signLanguage)
     private val indefiniteInterpreter = resources.getString(R.string.sign_language_interpreter_indefinite, signLanguage)
@@ -58,7 +59,7 @@ private class BuiltInTemplateFactory(
                 signLanguageInterpreter,
                 R.string.category_everyday,
                 resources.getString(R.string.template_sign_language_interpreter_body, indefiniteInterpreter),
-                name,
+                fullName,
                 howToReply,
             ),
         ) + askingForHelp() + health() + travel()
@@ -115,7 +116,7 @@ private class BuiltInTemplateFactory(
                 R.string.template_pharmacy_title,
                 R.string.category_health,
                 R.string.template_pharmacy_body,
-                placeholder("patient", R.string.placeholder_patient_label, PlaceholderType.Typing, fillsWith = PersonalField.FormalName),
+                placeholder("patient", R.string.placeholder_patient_label, PlaceholderType.Typing, fillsWith = PersonalField.LegalName),
                 howToReply,
             ),
         )

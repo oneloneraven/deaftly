@@ -2,7 +2,6 @@ package com.ravendarque.deaftly.storage
 
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertNotEquals
 
 class BuiltInFingerprintTest {
     private val dto = greeting.toDto()
@@ -16,7 +15,9 @@ class BuiltInFingerprintTest {
     }
 
     @Test
-    fun fillingWithAPersonalFieldChangesTheFingerprint() {
-        assertNotEquals(dto.contentFingerprint(), dto.fillingNameWith(PersonalFieldDto.FormalName).contentFingerprint())
+    fun eachPersonalFieldFingerprintsDifferently() {
+        val fingerprints = (listOf(null) + PersonalFieldDto.entries).map { dto.fillingNameWith(it).contentFingerprint() }
+
+        assertEquals(fingerprints.size, fingerprints.toSet().size)
     }
 }
