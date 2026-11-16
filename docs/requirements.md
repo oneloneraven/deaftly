@@ -82,7 +82,7 @@ Deaftly is an Android app that helps deaf people communicate quickly and with li
 | H4 | Messages support simple formatting (bold, italic), highlighting, and quoting an earlier message. |
 | H5 | Bubbles are easy to read for both people, with an adjustable text size. |
 | H6 | Inserting a template into a chat turn is supported. |
-| H7 | Chats are ephemeral. Closing a chat discards it, after a confirmation. |
+| H7 | Chats are discarded when they end unless the user keeps them. Kept chats are stored on the device and in the user's Android backup, and can be reopened, carried on and deleted. *(Issue #62)* |
 | H8 | When the turn switches to the hearing person, a short plain prompt tells them what to do (e.g. "Your turn – type your reply"). *(A: F3, F5)* |
 
 ## 5. Non-functional requirements

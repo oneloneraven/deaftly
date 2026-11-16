@@ -2,8 +2,10 @@
 <data-extraction-rules>
     <cloud-backup>
         <include domain="file" path="datastore/templates.json" />
+        <include domain="file" path="chats/" />
     </cloud-backup>
     <device-transfer>
         <include domain="file" path="datastore/templates.json" />
+        <include domain="file" path="chats/" />
     </device-transfer>
 </data-extraction-rules>

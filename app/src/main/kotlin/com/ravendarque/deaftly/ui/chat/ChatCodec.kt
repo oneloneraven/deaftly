@@ -15,7 +15,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
 @Serializable
-private data class ConversationDto(
+internal data class ConversationDto(
     val a: ParticipantDto,
     val b: ParticipantDto,
     val turn: ParticipantId,
@@ -23,13 +23,13 @@ private data class ConversationDto(
 )
 
 @Serializable
-private data class ParticipantDto(
+internal data class ParticipantDto(
     val colour: ColourRole,
     val name: String? = null,
 )
 
 @Serializable
-private data class MessageDto(
+internal data class MessageDto(
     val author: ParticipantId,
     val spans: List<SpanDto>,
     val quoteId: Int? = null,
@@ -37,7 +37,7 @@ private data class MessageDto(
 )
 
 @Serializable
-private data class SpanDto(
+internal data class SpanDto(
     val text: String,
     val styles: Set<SpanStyle> = emptySet(),
 )
@@ -63,29 +63,10 @@ private data class RangeDto(
 internal object ChatCodec {
     private val json = Json { ignoreUnknownKeys = true }
 
-    fun encode(conversation: Conversation): String =
-        json.encodeToString(
-            ConversationDto.serializer(),
-            ConversationDto(
-                a = conversation.participantA.toDto(),
-                b = conversation.participantB.toDto(),
-                turn = conversation.turn,
-                messages = conversation.messages.map { it.toDto() },
-            ),
-        )
+    fun encode(conversation: Conversation): String = json.encodeToString(ConversationDto.serializer(), conversation.toDto())
 
     fun decode(encoded: String?): Conversation? =
-        encoded?.let {
-            runCatching {
-                val dto = json.decodeFromString(ConversationDto.serializer(), it)
-                Conversation(
-                    participantA = Participant(ParticipantId.A, dto.a.colour, dto.a.name),
-                    participantB = Participant(ParticipantId.B, dto.b.colour, dto.b.name),
-                    messages = dto.messages.mapIndexed { index, message -> message.toDomain(index) },
-                    turn = dto.turn,
-                )
-            }.getOrNull()
-        }
+        encoded?.let { runCatching { json.decodeFromString(ConversationDto.serializer(), it).toDomain() }.getOrNull() }
 
     fun encodeDraft(draft: Draft): String =
         json.encodeToString(
@@ -115,16 +96,32 @@ internal object ChatCodec {
                     )
                 }.getOrNull()
             } ?: Draft()
-
-    private fun Participant.toDto() = ParticipantDto(colour, name)
-
-    private fun Message.toDto() = MessageDto(author, spans.map { SpanDto(it.text, it.styles) }, quote?.messageId, quote?.text)
-
-    private fun MessageDto.toDomain(id: Int) =
-        Message(
-            id = id,
-            author = author,
-            spans = spans.map { Span(it.text, it.styles) },
-            quote = quoteText?.let { Quote(quoteId, it) },
-        )
 }
+
+internal fun Conversation.toDto() =
+    ConversationDto(
+        a = participantA.toDto(),
+        b = participantB.toDto(),
+        turn = turn,
+        messages = messages.map { it.toDto() },
+    )
+
+internal fun ConversationDto.toDomain() =
+    Conversation(
+        participantA = Participant(ParticipantId.A, a.colour, a.name),
+        participantB = Participant(ParticipantId.B, b.colour, b.name),
+        messages = messages.mapIndexed { index, message -> message.toDomain(index) },
+        turn = turn,
+    )
+
+private fun Participant.toDto() = ParticipantDto(colour, name)
+
+private fun Message.toDto() = MessageDto(author, spans.map { SpanDto(it.text, it.styles) }, quote?.messageId, quote?.text)
+
+private fun MessageDto.toDomain(id: Int) =
+    Message(
+        id = id,
+        author = author,
+        spans = spans.map { Span(it.text, it.styles) },
+        quote = quoteText?.let { Quote(quoteId, it) },
+    )

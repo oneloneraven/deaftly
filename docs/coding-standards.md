@@ -173,8 +173,8 @@ and the APK's size and startup.
   ([ADR-0011](adr/0011-review-permissions-against-an-allowlist.md)). Adding
   one, including `INTERNET`, goes in the same PR as the feature that needs it,
   with an update to the threat model and record of processing. Backups
-  and device transfer include only the template store, through explicit rules
-  ([ADR-0008](adr/0008-allow-android-backup-of-templates-and-settings.md)).
+  and device transfer include only the template store and kept chats, through
+  explicit rules ([ADR-0012](adr/0012-back-up-kept-chats.md)).
 - **Never log user content**, at any level, in any build type. Log events
   and error types, not what the user wrote, said or captured.
 - **Export nothing but the launcher activity.** Every other component sets
