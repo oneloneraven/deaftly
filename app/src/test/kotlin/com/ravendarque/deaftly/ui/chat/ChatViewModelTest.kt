@@ -27,6 +27,7 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
 import kotlin.test.assertIs
 import kotlin.test.assertNull
 
@@ -88,6 +89,48 @@ class ChatViewModelTest {
             collect(viewModel)
 
             assertEquals(Participant(ParticipantId.A, ColourRole.Green, "Amira"), viewModel.conversation().participantA)
+        }
+
+    @Test
+    fun saysWhenTheDeafUserIsUsingTheirFirstName() =
+        runTest {
+            val names = PersonalNames(firstName = "Amira", useFirstNameInChats = true)
+            val using = viewModel(FakeSettingsRepository(ChatProfile("Alex"), names = names))
+            collect(using)
+            val notUsing = viewModel(FakeSettingsRepository(ChatProfile("Alex"), names = names.copy(useFirstNameInChats = false)))
+            collect(notUsing)
+
+            assertEquals("Amira", assertIs<ChatUiState.Ready>(using.state.value).firstNameInChats)
+            assertNull(assertIs<ChatUiState.Ready>(notUsing.state.value).firstNameInChats)
+        }
+
+    @Test
+    fun usingADifferentNameTurnsTheFirstNameOffAndUsesTheChatName() =
+        runTest {
+            val names = PersonalNames(firstName = "Amira", useFirstNameInChats = true)
+            val settings = FakeSettingsRepository(ChatProfile("Mira", ColourRole.Green), names = names)
+            val viewModel = viewModel(settings)
+            collect(viewModel)
+
+            viewModel.useDifferentName()
+
+            assertFalse(settings.savedNames.useFirstNameInChats)
+            assertEquals("Mira", viewModel.conversation().participantA.name)
+            assertNull(assertIs<ChatUiState.Ready>(viewModel.state.value).firstNameInChats)
+        }
+
+    @Test
+    fun rememberingKeepsTheChatNameWhileTheFirstNameIsInUse() =
+        runTest {
+            val names = PersonalNames(firstName = "Amira", useFirstNameInChats = true)
+            val settings = FakeSettingsRepository(ChatProfile("Mira"), names = names)
+            val viewModel = viewModel(settings)
+            collect(viewModel)
+            viewModel.updateParticipant(viewModel.conversation().participantA.copy(colour = ColourRole.Red))
+
+            viewModel.rememberOwnDefaults()
+
+            assertEquals(ChatProfile("Mira", ColourRole.Red), settings.saved)
         }
 
     @Test

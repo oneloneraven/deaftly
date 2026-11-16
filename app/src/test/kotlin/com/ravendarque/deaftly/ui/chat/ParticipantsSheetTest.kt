@@ -47,6 +47,8 @@ class ParticipantsSheetTest {
 
     private var conversation by mutableStateOf(Conversation(Participant.defaultA(), Participant.defaultB()))
     private var done = 0
+    private var firstName by mutableStateOf<String?>(null)
+    private var differentNames = 0
 
     @Before
     fun enableChecks() {
@@ -63,6 +65,8 @@ class ParticipantsSheetTest {
                             conversation = conversation,
                             onChange = { conversation = conversation.withParticipant(it) },
                             onDone = { done++ },
+                            firstNameInChats = firstName,
+                            onUseDifferentName = { differentNames++ },
                         )
                     }
                 }
@@ -84,6 +88,21 @@ class ParticipantsSheetTest {
         composeRule.onNodeWithText("Shown as \u201cThem\u201d if left blank").assertExists()
         listOf("Indigo", "Orange", "Green", "Red", "Blue").forEach { swatches(it).assertCountEquals(2) }
         composeRule.onRoot().tryPerformAccessibilityChecks()
+    }
+
+    @Test
+    fun showsTheFirstNameInUseWithAWayToUseADifferentName() {
+        firstName = "Amira"
+        show(Conversation(Participant.defaultA("Amira"), Participant.defaultB()))
+
+        composeRule.onNodeWithText("Amira").assertExists()
+        composeRule.onNodeWithText("Your first name, from Settings").assertExists()
+        composeRule.onAllNodesWithText("Name (optional)").assertCountEquals(1)
+        composeRule.onRoot().tryPerformAccessibilityChecks()
+
+        composeRule.onNodeWithText("Use a different name").performClick()
+
+        assertEquals(1, differentNames)
     }
 
     @Test

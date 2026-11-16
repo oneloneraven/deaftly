@@ -36,6 +36,7 @@ sealed interface ChatUiState {
         val textSize: ChatTextSize,
         val sidesSwapped: Boolean,
         val drafts: Map<ParticipantId, Draft>,
+        val firstNameInChats: String? = null,
     ) : ChatUiState {
         val draft: Draft get() = drafts[conversation.turn] ?: Draft()
     }
@@ -52,8 +53,19 @@ class ChatViewModel(
     val drafts = ChatDrafts(savedState) { conversation.value?.turn }
 
     val state: StateFlow<ChatUiState> =
-        combine(conversation, display.textSize, display.sidesSwapped, drafts.all) { conversation, textSize, swapped, drafts ->
-            if (conversation == null) ChatUiState.Loading else ChatUiState.Ready(conversation, textSize, swapped, drafts)
+        combine(
+            conversation,
+            display.textSize,
+            display.sidesSwapped,
+            drafts.all,
+            settings.personalNames,
+        ) { conversation, textSize, swapped, drafts, names ->
+            if (conversation == null) {
+                ChatUiState.Loading
+            } else {
+                val firstName = names.chatName?.takeIf { it == conversation.participantA.name }
+                ChatUiState.Ready(conversation, textSize, swapped, drafts, firstName)
+            }
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS), ChatUiState.Loading)
 
     init {
@@ -65,7 +77,7 @@ class ChatViewModel(
         }
         viewModelScope.launch {
             if (conversation.value == null) {
-                val started = opened(chatProfile().startConversation())
+                val started = opened(settings.startingProfile().startConversation())
                 if (conversation.compareAndSet(null, started)) {
                     save(started)
                     drafts.restore(ParticipantId.A, opening.draft)
@@ -74,19 +86,25 @@ class ChatViewModel(
         }
     }
 
-    private suspend fun chatProfile(): ChatProfile {
-        val profile = settings.chatProfile.first()
-        val name = settings.personalNames.first().chatName
-        return if (name == null) profile else profile.copy(name = name)
-    }
-
     fun updateParticipant(participant: Participant) {
         change { it.withParticipant(participant) }
     }
 
     fun rememberOwnDefaults() {
         val own = conversation.value?.participantA ?: return
-        viewModelScope.launch { settings.setChatProfile(ChatProfile(own.name, own.colour)) }
+        viewModelScope.launch {
+            val usingFirstName = settings.personalNames.first().chatName != null
+            val name = if (usingFirstName) settings.chatProfile.first().name else own.name
+            settings.setChatProfile(ChatProfile(name, own.colour))
+        }
+    }
+
+    fun useDifferentName() {
+        viewModelScope.launch {
+            val stored = settings.chatProfile.first().name
+            change { it.withParticipant(it.participantA.copy(name = stored)) }
+            settings.updatePersonalNames { it.copy(useFirstNameInChats = false) }
+        }
     }
 
     fun selectTurn(id: ParticipantId) {
@@ -142,4 +160,10 @@ class ChatViewModel(
     private fun save(conversation: Conversation) {
         savedState[CONVERSATION_KEY] = ChatCodec.encode(conversation)
     }
+}
+
+private suspend fun SettingsRepository.startingProfile(): ChatProfile {
+    val profile = chatProfile.first()
+    val name = personalNames.first().chatName
+    return if (name == null) profile else profile.copy(name = name)
 }

@@ -146,6 +146,8 @@
     <string name="participants_colour_selected">Colour: %1$s</string>
     <string name="participants_colour_used_by">Used by %1$s</string>
     <string name="participants_done">Done</string>
+    <string name="participants_first_name_in_use">Your first name, from Settings</string>
+    <string name="participants_use_different_name">Use a different name</string>
     <string name="colour_red">Red</string>
     <string name="colour_orange">Orange</string>
     <string name="colour_gold">Gold</string>
