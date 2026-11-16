@@ -196,6 +196,7 @@
     <string name="chat_keep_text">Kept chats stay on this phone and in your Android backup, so you can read them or carry on later.</string>
     <string name="chat_keep_confirm">Keep</string>
     <string name="chat_keep_delete">Delete</string>
+    <string name="chat_keep_failed">This chat couldn\u2019t be saved. Try Keep again, or Delete to end without saving.</string>
     <string name="chat_copy_action">Copy</string>
     <string name="chat_quote_action">Quote</string>
     <string name="chat_delete_action">Delete</string>

@@ -45,7 +45,6 @@ private fun ChatContent(
     val requestEnd = {
         when {
             current.kept -> {
-                viewModel.keeper.keep(current.conversation)
                 onEnd()
             }
 
@@ -83,13 +82,10 @@ private fun ChatContent(
         )
     }
     if (confirmingEnd) {
-        EndChatDialog(
-            onKeep = {
-                confirmingEnd = false
-                viewModel.keeper.keep(current.conversation)
-                onEnd()
-            },
-            onDelete = {
+        KeepChatDialog(
+            conversation = current.conversation,
+            keeper = viewModel.keeper,
+            onEnd = {
                 confirmingEnd = false
                 onEnd()
             },

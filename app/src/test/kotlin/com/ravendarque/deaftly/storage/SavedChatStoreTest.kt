@@ -123,12 +123,21 @@ class SavedChatStoreTest {
     fun refusesIdsThatAreNotItsOwn() =
         runTest {
             val store = store()
+            store.save(VALID_ID, conversation())
+            val validChat = File(dir, "$VALID_ID.json").readText()
+            store.delete(VALID_ID)
+            val outside = File(folder.root, "templates.json").apply { writeText(validChat) }
+            val further = File(folder.root.parentFile, "x.json")
 
             assertFailsWith<IllegalArgumentException> { store.save("../templates", conversation()) }
             assertNull(store.load("../templates"))
-            assertFalse(File(folder.root, "templates.json").exists())
+            store.delete("../templates")
+            store.delete("../../x")
+
+            assertEquals(validChat, outside.readText())
+            assertFalse(further.exists())
             assertEquals(
-                emptyList(),
+                listOf(outside),
                 folder.root
                     .walk()
                     .filter { it.isFile }

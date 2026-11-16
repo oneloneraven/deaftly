@@ -9,10 +9,12 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import java.io.IOException
 import java.util.UUID
 
 class FakeSavedChatStore(
     initial: List<SavedChat> = emptyList(),
+    private val failSaves: Boolean = false,
 ) : SavedChatStore {
     private val chats = initial.associateBy { it.id }.toMutableMap()
     private val all = MutableStateFlow(summarise())
@@ -30,6 +32,7 @@ class FakeSavedChatStore(
         conversation: Conversation,
     ) {
         require(isSavedChatId(id)) { "Not a saved chat ID" }
+        if (failSaves) throw IOException("No space left")
         saves++
         chats[id] = SavedChat(id, conversation, ++clock)
         all.value = summarise()

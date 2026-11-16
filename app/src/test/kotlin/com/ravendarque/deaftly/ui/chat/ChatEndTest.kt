@@ -28,7 +28,7 @@ class ChatEndTest {
     @get:Rule
     val composeRule = createAndroidComposeRule<ComponentActivity>()
 
-    private val store = FakeSavedChatStore()
+    private var store = FakeSavedChatStore()
     private var ended = 0
     private lateinit var viewModel: ChatViewModel
 
@@ -128,7 +128,7 @@ class ChatEndTest {
     }
 
     @Test
-    fun endingAKeptChatSavesWithoutAsking() {
+    fun endingAKeptChatLeavesWithoutAskingOrRewritingIt() {
         val id = store.newId()
         runBlocking { store.save(id, orderingConversation()) }
         show(conversation = null, savedChatId = id)
@@ -137,7 +137,20 @@ class ChatEndTest {
 
         composeRule.onNodeWithText("Keep this chat?").assertDoesNotExist()
         assertEquals(1, ended)
-        assertEquals(2, store.saves)
+        assertEquals(1, store.saves)
+    }
+
+    @Test
+    fun aFailedKeepStaysInTheChatAndSaysSo() {
+        store = FakeSavedChatStore(failSaves = true)
+        show()
+        endChat()
+
+        composeRule.onNodeWithText("Keep").performClick()
+
+        composeRule.onNodeWithText("This chat couldn\u2019t be saved. Try Keep again, or Delete to end without saving.").assertIsDisplayed()
+        assertEquals(0, ended)
+        composeRule.onRoot().tryPerformAccessibilityChecks()
     }
 
     @Test

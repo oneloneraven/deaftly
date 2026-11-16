@@ -351,8 +351,13 @@ class ChatScreenshotTest {
     @Config(fontScale = 2f)
     fun sheetWithFirstNameLargeFontScale() = sheet(withFirstName, dark = false, firstName = "Amira")
 
-    private fun endDialog(dark: Boolean) {
-        composeRule.setContent { AppTheme(darkTheme = dark) { EndChatDialog(onKeep = {}, onDelete = {}, onKeepChatting = {}) } }
+    private fun endDialog(
+        dark: Boolean,
+        saveFailed: Boolean = false,
+    ) {
+        composeRule.setContent {
+            AppTheme(darkTheme = dark) { EndChatDialog(saveFailed = saveFailed, onKeep = {}, onDelete = {}, onKeepChatting = {}) }
+        }
         composeRule.waitForIdle()
         composeRule.onNode(isDialog()).captureRoboImage("$SCREENSHOT_DIR/$PACKAGE.${this::class.simpleName}.${testName.methodName}.png")
     }
@@ -362,6 +367,9 @@ class ChatScreenshotTest {
 
     @Test
     fun endChatDialogDarkTheme() = endDialog(dark = true)
+
+    @Test
+    fun endChatDialogSaveFailedLightTheme() = endDialog(dark = false, saveFailed = true)
 
     @Test
     @Config(fontScale = 2f)
