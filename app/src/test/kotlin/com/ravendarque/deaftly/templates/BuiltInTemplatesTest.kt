@@ -33,25 +33,23 @@ class BuiltInTemplatesTest {
     private fun byId(id: String): Template = templates.first { it.id == id }
 
     @Test
-    fun theNameAndPatientGapsFillWithTheFormalNameAndNothingElseDoes() {
+    fun nameGapsFillWithTheRightSavedNameAndNothingElseDoes() {
         val filled =
             templates
                 .flatMap { template ->
                     template.placeholders.values
-                        .filter { it.fillsWith != null }
-                        .map { template.id to it }
-                }.map { (id, placeholder) -> id to placeholder.key }
+                        .mapNotNull { placeholder -> placeholder.fillsWith?.let { (template.id to placeholder.key) to it } }
+                }.toMap()
 
         assertEquals(
-            setOf(
-                BuiltInIds.CHECK_IN to "name",
-                BuiltInIds.BSL_INTERPRETER to "name",
-                BuiltInIds.DOCTOR to "name",
-                BuiltInIds.PHARMACY to "patient",
+            mapOf(
+                (BuiltInIds.CHECK_IN to "name") to PersonalField.LegalName,
+                (BuiltInIds.BSL_INTERPRETER to "name") to PersonalField.FullName,
+                (BuiltInIds.DOCTOR to "name") to PersonalField.LegalName,
+                (BuiltInIds.PHARMACY to "patient") to PersonalField.LegalName,
             ),
-            filled.toSet(),
+            filled,
         )
-        assertEquals(PersonalField.FormalName, byId(BuiltInIds.PHARMACY).placeholders.getValue("patient").fillsWith)
     }
 
     @Test

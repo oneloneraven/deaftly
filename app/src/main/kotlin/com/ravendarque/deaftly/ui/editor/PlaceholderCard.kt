@@ -67,7 +67,10 @@ fun PlaceholderCard(
             hint = stringResource(R.string.editor_placeholder_question_hint),
             imeAction = ImeAction.Done,
         )
-        FilledBy(placeholder.type) { type -> onEdit { it.updateSelected { p -> p.copy(type = type) } } }
+        FilledBy(placeholder.type) { type -> onEdit { it.updateSelected { p -> p.withType(type) } } }
+        if (placeholder.type == PlaceholderType.Typing) {
+            FillsWith(placeholder.fillsWith) { field -> onEdit { it.updateSelected { p -> p.copy(fillsWith = field) } } }
+        }
         if (placeholder.type == PlaceholderType.Choices) {
             OptionsEditor(placeholder.options) { options -> onEdit { it.updateSelected { p -> p.copy(options = options) } } }
         }
@@ -145,7 +148,7 @@ private fun FilledBy(
 }
 
 @Composable
-private fun Segment(
+internal fun Segment(
     text: String,
     selected: Boolean,
     onClick: () -> Unit,

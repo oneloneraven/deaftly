@@ -24,6 +24,9 @@ data class DraftPlaceholder(
     val join: Join = Join.And,
     val fillsWith: PersonalField? = null,
 ) {
+    fun withType(type: PlaceholderType): DraftPlaceholder =
+        copy(type = type, fillsWith = fillsWith.takeIf { type == PlaceholderType.Typing })
+
     fun toPlaceholder(): Placeholder =
         Placeholder(
             key = key,

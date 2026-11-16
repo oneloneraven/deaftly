@@ -136,8 +136,17 @@ enum class JoinDto {
 
 @Serializable
 enum class PersonalFieldDto {
-    @SerialName("formal-name")
-    FormalName,
+    @SerialName("first-name")
+    FirstName,
+
+    @SerialName("last-name")
+    LastName,
+
+    @SerialName("full-name")
+    FullName,
+
+    @SerialName("legal-name")
+    LegalName,
 }
 
 @Serializable
@@ -176,7 +185,10 @@ private fun Placeholder.toDto(): PlaceholderDto =
             },
         fillsWith =
             when (fillsWith) {
-                PersonalField.FormalName -> PersonalFieldDto.FormalName
+                PersonalField.FirstName -> PersonalFieldDto.FirstName
+                PersonalField.LastName -> PersonalFieldDto.LastName
+                PersonalField.FullName -> PersonalFieldDto.FullName
+                PersonalField.LegalName -> PersonalFieldDto.LegalName
                 null -> null
             },
     )
@@ -200,7 +212,10 @@ private fun PlaceholderDto.toDomain(): Placeholder =
             },
         fillsWith =
             when (fillsWith) {
-                PersonalFieldDto.FormalName -> PersonalField.FormalName
+                PersonalFieldDto.FirstName -> PersonalField.FirstName
+                PersonalFieldDto.LastName -> PersonalField.LastName
+                PersonalFieldDto.FullName -> PersonalField.FullName
+                PersonalFieldDto.LegalName -> PersonalField.LegalName
                 null -> null
             },
     )

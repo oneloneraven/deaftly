@@ -394,44 +394,53 @@ class FillViewModelTest {
             assertEquals(listOf("Lasagne"), (viewModel.ready().parts[1] as FillPart.Filled).values)
         }
 
-    private val formalCheckIn =
+    private fun namedCheckIn(field: PersonalField) =
         checkIn.copy(
-            id = "formal-check-in",
-            placeholders = checkIn.placeholders + ("name" to checkIn.placeholder("name").copy(fillsWith = PersonalField.FormalName)),
+            id = "named-check-in",
+            placeholders = checkIn.placeholders + ("name" to checkIn.placeholder("name").copy(fillsWith = field)),
         )
 
-    private fun formalViewModel(
+    private fun namedViewModel(
         names: PersonalNames,
         savedState: SavedStateHandle = SavedStateHandle(),
         store: FakeSettingsRepository = FakeSettingsRepository(names = names),
-    ) = FillViewModel("formal-check-in", FakeTemplateRepository(fillTemplates + formalCheckIn), store, savedState, outcomes)
+        field: PersonalField = PersonalField.LegalName,
+    ) = FillViewModel("named-check-in", FakeTemplateRepository(fillTemplates + namedCheckIn(field)), store, savedState, outcomes)
 
     @Test
-    fun aGapThatFillsWithTheFormalNameStartsWithItFromSettings() =
+    fun aGapThatFillsWithASavedNameStartsWithItFromSettings() =
         runTest {
-            val viewModel = formalViewModel(PersonalNames("Amira", "Hassan"))
+            val viewModel = namedViewModel(PersonalNames("Amira", "Hassan"))
             collect(viewModel)
 
             assertEquals(
-                listOf(FillPart.Filled(formalCheckIn.placeholder("name"), listOf("Amira Hassan"))),
+                listOf(FillPart.Filled(namedCheckIn(PersonalField.LegalName).placeholder("name"), listOf("Amira Hassan"))),
                 viewModel.ready().parts.filterIsInstance<FillPart.Filled>(),
             )
             assertTrue(viewModel.ready().text.startsWith("Hi! I'm deaf. I'd like to check in. My name is Amira Hassan."))
         }
 
     @Test
-    fun theLegalNameIsUsedWhenItDiffers() =
+    fun eachSavedNameFillsInItsOwnValue() =
         runTest {
-            val viewModel = formalViewModel(PersonalNames("Tunde", "Bello", legalNameDiffers = true, legalName = "Olatunde Bello"))
-            collect(viewModel)
+            val names = PersonalNames("Tunde", "Bello", legalNameDiffers = true, legalName = "Olatunde Bello")
+            mapOf(
+                PersonalField.FirstName to "Tunde",
+                PersonalField.LastName to "Bello",
+                PersonalField.FullName to "Tunde Bello",
+                PersonalField.LegalName to "Olatunde Bello",
+            ).forEach { (field, expected) ->
+                val viewModel = namedViewModel(names, field = field)
+                collect(viewModel)
 
-            assertTrue("My name is Olatunde Bello." in viewModel.ready().text)
+                assertTrue("My name is $expected." in viewModel.ready().text, field.name)
+            }
         }
 
     @Test
     fun theNameGapStaysEmptyWhenNoNamesAreSet() =
         runTest {
-            val viewModel = formalViewModel(PersonalNames())
+            val viewModel = namedViewModel(PersonalNames())
             collect(viewModel)
 
             assertTrue(viewModel.ready().parts.any { it is FillPart.Empty && it.placeholder.key == "name" })
@@ -457,12 +466,12 @@ class FillViewModelTest {
     fun aValueAlreadyThereIsNotOverwritten() =
         runTest {
             val saved = SavedStateHandle()
-            val first = formalViewModel(PersonalNames("Amira", "Hassan"), saved)
+            val first = namedViewModel(PersonalNames("Amira", "Hassan"), saved)
             collect(first)
             first.activate("name")
             first.choose("Mira")
 
-            val second = formalViewModel(PersonalNames("Amira", "Hassan"), saved)
+            val second = namedViewModel(PersonalNames("Amira", "Hassan"), saved)
             collect(second)
 
             assertTrue("My name is Mira." in second.ready().text)
@@ -472,7 +481,7 @@ class FillViewModelTest {
     fun changingThePreFilledValueAffectsOnlyThisMessage() =
         runTest {
             val store = FakeSettingsRepository(names = PersonalNames("Amira", "Hassan"))
-            val viewModel = formalViewModel(PersonalNames(), store = store)
+            val viewModel = namedViewModel(PersonalNames(), store = store)
             collect(viewModel)
 
             viewModel.activate("name")
