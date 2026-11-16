@@ -47,6 +47,7 @@ To add a part that changes, tap **Placeholder**. For each placeholder you choose
 - **Name in the message**: the word that shows highlighted
 - **Question when filling in**: what Deaftly asks you
 - **Filled by**: **Choices** to pick from, **Typing**, or the **Camera**
+- **Start with my name**: for a typed placeholder, whether it starts with your **First name**, **Last name**, **Full name** or **Legal name** from [Settings](settings.md). You can still change it on any message.
 - **Allow more than one**: shows "+ add more"
 - **Join values with**: when more than one is allowed, whether the values join with "and" or "or"
 

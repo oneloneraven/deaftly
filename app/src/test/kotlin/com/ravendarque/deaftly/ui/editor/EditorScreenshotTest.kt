@@ -7,6 +7,7 @@ import androidx.compose.ui.test.performClick
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.takahirom.roborazzi.captureRoboImage
+import com.ravendarque.deaftly.core.template.PersonalField
 import com.ravendarque.deaftly.ui.theme.AppTheme
 import org.junit.Rule
 import org.junit.Test
@@ -45,6 +46,9 @@ class EditorScreenshotTest {
     private fun openMenuItem(viewModel: EditorViewModel) = viewModel.edit { it.select("menu item") }
 
     private fun openThing(viewModel: EditorViewModel) = viewModel.edit { it.select("thing") }
+
+    private fun openNameStartingWithFullName(viewModel: EditorViewModel) =
+        viewModel.edit { it.select("name").updateSelected { p -> p.copy(fillsWith = PersonalField.FullName) } }
 
     @Test
     fun newTemplateLightTheme() = screen(null, dark = false)
@@ -85,4 +89,16 @@ class EditorScreenshotTest {
         screen("my-note", dark = false) {
             it.edit { draft -> draft.select("thing").renameSelected("name") }
         }
+
+    @Test
+    @Config(qualifiers = "en-rGB-w390dp-h1600dp")
+    fun typingPlaceholderWithSavedNameLightTheme() = screen("my-note", dark = false, interact = ::openNameStartingWithFullName)
+
+    @Test
+    @Config(qualifiers = "en-rGB-w390dp-h1600dp")
+    fun typingPlaceholderWithSavedNameDarkTheme() = screen("my-note", dark = true, interact = ::openNameStartingWithFullName)
+
+    @Test
+    @Config(fontScale = 2f, qualifiers = "en-rGB-w390dp-h2400dp")
+    fun typingPlaceholderWithSavedNameLargeFontScale() = screen("my-note", dark = false, interact = ::openNameStartingWithFullName)
 }
