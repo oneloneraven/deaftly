@@ -54,6 +54,9 @@ sealed interface Route : NavKey {
     data object Settings : Route
 
     @Serializable
+    data object SavedChats : Route
+
+    @Serializable
     data object Help : Route
 
     @Serializable

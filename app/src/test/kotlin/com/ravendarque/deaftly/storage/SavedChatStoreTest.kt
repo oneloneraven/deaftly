@@ -106,29 +106,55 @@ class SavedChatStoreTest {
         }
 
     @Test
-    fun aCorruptFileIsSkipped() =
+    fun aCorruptFileIsListedAsUnreadableAndCanBeDeleted() =
         runTest {
             dir.mkdirs()
-            File(dir, "$VALID_ID.json").writeText("{\"version\":1,")
+            File(dir, "$VALID_ID.json").apply { writeText("{\"version\":1,") }.setLastModified(5_000)
             File(dir, "$OTHER_VALID_ID.json").writeText("")
+            File(dir, "notes.json").writeText("{}")
 
             val store = store()
 
-            assertEquals(emptyList(), store.summaries.value)
+            assertEquals(
+                setOf(VALID_ID, OTHER_VALID_ID),
+                store.summaries.value
+                    .map { it.id }
+                    .toSet(),
+            )
+            assertTrue(store.summaries.value.all { !it.readable })
+            assertEquals(
+                5_000,
+                store.summaries.value
+                    .single { it.id == VALID_ID }
+                    .changedAt,
+            )
             assertNull(store.load(VALID_ID))
-            assertNull(store.load(OTHER_VALID_ID))
+
+            store.delete(VALID_ID)
+
+            assertFalse(File(dir, "$VALID_ID.json").exists())
+            assertEquals(listOf(OTHER_VALID_ID), store.summaries.value.map { it.id })
         }
 
     @Test
     fun refusesIdsThatAreNotItsOwn() =
         runTest {
             val store = store()
+            store.save(VALID_ID, conversation())
+            val validChat = File(dir, "$VALID_ID.json").readText()
+            store.delete(VALID_ID)
+            val outside = File(folder.root, "templates.json").apply { writeText(validChat) }
+            val further = File(folder.root.parentFile, "x.json")
 
             assertFailsWith<IllegalArgumentException> { store.save("../templates", conversation()) }
             assertNull(store.load("../templates"))
-            assertFalse(File(folder.root, "templates.json").exists())
+            store.delete("../templates")
+            store.delete("../../x")
+
+            assertEquals(validChat, outside.readText())
+            assertFalse(further.exists())
             assertEquals(
-                emptyList(),
+                listOf(outside),
                 folder.root
                     .walk()
                     .filter { it.isFile }

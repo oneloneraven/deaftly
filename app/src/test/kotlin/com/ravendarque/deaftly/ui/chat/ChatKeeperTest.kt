@@ -5,7 +5,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.ravendarque.deaftly.core.chat.Conversation
 import com.ravendarque.deaftly.core.chat.Participant
 import com.ravendarque.deaftly.core.chat.RichText
-import com.ravendarque.deaftly.storage.SavedChatStore
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
@@ -16,10 +15,10 @@ import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
-import java.io.IOException
 import kotlin.coroutines.CoroutineContext
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -98,10 +97,13 @@ class ChatKeeperTest {
                 CoroutineScope(
                     UnconfinedTestDispatcher(testScheduler) + SupervisorJob() + CoroutineExceptionHandler { _, e -> failures += e },
                 )
-            val keeper = ChatKeeper(FailingSavedChatStore(), SavedStateHandle(), scope)
+            val keeper = ChatKeeper(FakeSavedChatStore(failSaves = true), SavedStateHandle(), scope)
 
-            keeper.keep(chat("Hello"))
+            keeper.persist(chat("Hello"))
+            val kept = keeper.keep(chat("Hello"))
 
+            assertFalse(kept)
+            assertNull(keeper.keptId.value)
             assertEquals(emptyList(), failures)
             assertTrue(scope.isActive)
         }
@@ -142,13 +144,4 @@ private class ReversingDispatcher : CoroutineDispatcher() {
     fun flush() {
         while (queued.isNotEmpty()) queued.removeFirst().run()
     }
-}
-
-private class FailingSavedChatStore(
-    private val delegate: FakeSavedChatStore = FakeSavedChatStore(),
-) : SavedChatStore by delegate {
-    override suspend fun save(
-        id: String,
-        conversation: Conversation,
-    ): Unit = throw IOException("No space left")
 }

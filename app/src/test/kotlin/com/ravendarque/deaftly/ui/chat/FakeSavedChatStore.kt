@@ -9,11 +9,16 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import java.io.IOException
 import java.util.UUID
 
 class FakeSavedChatStore(
     initial: List<SavedChat> = emptyList(),
+    private val failSaves: Boolean = false,
+    unreadable: Map<String, Long> = emptyMap(),
 ) : SavedChatStore {
+    private val unreadableChats = unreadable.toMutableMap()
+
     private val chats = initial.associateBy { it.id }.toMutableMap()
     private val all = MutableStateFlow(summarise())
     private var clock = initial.maxOfOrNull { it.changedAt } ?: 0L
@@ -30,6 +35,7 @@ class FakeSavedChatStore(
         conversation: Conversation,
     ) {
         require(isSavedChatId(id)) { "Not a saved chat ID" }
+        if (failSaves) throw IOException("No space left")
         saves++
         chats[id] = SavedChat(id, conversation, ++clock)
         all.value = summarise()
@@ -37,6 +43,7 @@ class FakeSavedChatStore(
 
     override suspend fun delete(id: String) {
         chats.remove(id)
+        unreadableChats.remove(id)
         all.value = summarise()
     }
 
@@ -54,7 +61,8 @@ class FakeSavedChatStore(
                         ?.plainText,
                     it.changedAt,
                 )
-            }
+            } +
+            unreadableChats.map { (id, changedAt) -> SavedChatSummary(id, null, null, changedAt, readable = false) }
 }
 
 val testWriteScope = CoroutineScope(Dispatchers.Unconfined)

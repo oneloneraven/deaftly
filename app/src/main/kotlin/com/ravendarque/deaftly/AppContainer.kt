@@ -28,6 +28,7 @@ import com.ravendarque.deaftly.ui.home.HomeViewModel
 import com.ravendarque.deaftly.ui.ocr.FrameImage
 import com.ravendarque.deaftly.ui.ocr.OcrOutcomes
 import com.ravendarque.deaftly.ui.ocr.OcrViewModel
+import com.ravendarque.deaftly.ui.savedchats.SavedChatsViewModel
 import com.ravendarque.deaftly.ui.settings.SettingsViewModel
 import com.ravendarque.deaftly.ui.show.ShowViewModel
 import kotlinx.coroutines.CoroutineScope
@@ -107,6 +108,11 @@ class AppContainer(
     val settingsViewModelFactory =
         viewModelFactory {
             initializer { SettingsViewModel(settingsRepository, templateRepository) }
+        }
+
+    val savedChatsViewModelFactory =
+        viewModelFactory {
+            initializer { SavedChatsViewModel(savedChatStore) }
         }
 
     val firstRunViewModelFactory =

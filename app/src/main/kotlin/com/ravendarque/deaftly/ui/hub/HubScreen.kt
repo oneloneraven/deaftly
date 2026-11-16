@@ -59,16 +59,22 @@ private val chatOptions =
         HubOption(R.string.hub_side_by_side, R.string.hub_side_by_side_help, DeaftlyIcons.SideBySide, Route.Chat()),
     )
 
+private val savedChatsOption =
+    HubOption(R.string.hub_saved_chats, R.string.hub_saved_chats_help, DeaftlyIcons.Chat, Route.SavedChats)
+
 private val supportOptions =
     listOf(
         HubOption(R.string.hub_help, R.string.hub_help_help, DeaftlyIcons.Help, Route.Help),
         HubOption(R.string.hub_share, R.string.hub_share_help, DeaftlyIcons.Share, Route.Share),
     )
 
-private val allOptions = showOptions + chatOptions + supportOptions
+private val allOptions = showOptions + chatOptions + savedChatsOption + supportOptions
 
 @Composable
-fun HubScreen(onNavigate: (Route) -> Unit) {
+fun HubScreen(
+    onNavigate: (Route) -> Unit,
+    hasSavedChats: Boolean = false,
+) {
     var helpLabel by rememberSaveable { mutableStateOf<Int?>(null) }
     val helpOption = allOptions.firstOrNull { it.label == helpLabel }
     Surface(modifier = Modifier.fillMaxSize()) {
@@ -94,7 +100,8 @@ fun HubScreen(onNavigate: (Route) -> Unit) {
                 ) { cardHeight ->
                     Column(verticalArrangement = Arrangement.spacedBy(Deaftly.spacing.space24)) {
                         Group(R.string.hub_show_heading, showOptions, cardHeight, onNavigate) { helpLabel = it.label }
-                        Group(R.string.hub_chat_heading, chatOptions, cardHeight, onNavigate) { helpLabel = it.label }
+                        val chats = if (hasSavedChats) chatOptions + savedChatsOption else chatOptions
+                        Group(R.string.hub_chat_heading, chats, cardHeight, onNavigate) { helpLabel = it.label }
                         Group(R.string.hub_support_heading, supportOptions, cardHeight, onNavigate) { helpLabel = it.label }
                     }
                 }

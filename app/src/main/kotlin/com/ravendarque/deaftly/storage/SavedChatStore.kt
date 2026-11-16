@@ -25,6 +25,7 @@ data class SavedChatSummary(
     val otherName: String?,
     val lastMessage: String?,
     val changedAt: Long,
+    val readable: Boolean = true,
 )
 
 data class SavedChat(
@@ -136,7 +137,13 @@ class FileSavedChatStore(
         dir
             .listFiles { file -> file.name.endsWith(SUFFIX) }
             .orEmpty()
-            .mapNotNull { read(it.name.removeSuffix(SUFFIX))?.summary() }
+            .mapNotNull { file ->
+                val id = file.name.removeSuffix(SUFFIX)
+                when {
+                    !isSavedChatId(id) -> null
+                    else -> read(id)?.summary() ?: SavedChatSummary(id, null, null, file.lastModified(), readable = false)
+                }
+            }
 
     private fun read(id: String): SavedChat? =
         File(dir, id + SUFFIX)

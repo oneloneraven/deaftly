@@ -30,4 +30,14 @@ Long-press a message to **Copy**, **Quote** or **Delete** it. A quoted message a
 
 ## Ending the chat
 
-Tap **End chat**. The messages are deleted.
+Tap **End chat**. If the chat has messages, you're asked whether to keep it:
+
+- **Keep** saves the chat so you can read it or carry on later.
+- **Delete** ends the chat and deletes the messages.
+- **Keep chatting** goes back to the chat.
+
+## Saved chats
+
+Chats you keep appear in **Saved chats** on the home screen. Tap one to open it and carry on where you left off. Changes are saved as you go, and ending a kept chat saves it without asking.
+
+To delete a saved chat, tap the bin next to it. If a saved chat can't be opened, it shows as "This chat cannot be read", and you can still delete it. Kept chats stay on this phone and, if you've turned it on, in your Android backup.

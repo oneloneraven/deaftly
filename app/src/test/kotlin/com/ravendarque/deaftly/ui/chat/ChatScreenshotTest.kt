@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.hasContentDescription
+import androidx.compose.ui.test.isDialog
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.longClick
 import androidx.compose.ui.test.onFirst
@@ -349,6 +350,30 @@ class ChatScreenshotTest {
     @Test
     @Config(fontScale = 2f)
     fun sheetWithFirstNameLargeFontScale() = sheet(withFirstName, dark = false, firstName = "Amira")
+
+    private fun endDialog(
+        dark: Boolean,
+        saveFailed: Boolean = false,
+    ) {
+        composeRule.setContent {
+            AppTheme(darkTheme = dark) { EndChatDialog(saveFailed = saveFailed, onKeep = {}, onDelete = {}, onKeepChatting = {}) }
+        }
+        composeRule.waitForIdle()
+        composeRule.onNode(isDialog()).captureRoboImage("$SCREENSHOT_DIR/$PACKAGE.${this::class.simpleName}.${testName.methodName}.png")
+    }
+
+    @Test
+    fun endChatDialogLightTheme() = endDialog(dark = false)
+
+    @Test
+    fun endChatDialogDarkTheme() = endDialog(dark = true)
+
+    @Test
+    fun endChatDialogSaveFailedLightTheme() = endDialog(dark = false, saveFailed = true)
+
+    @Test
+    @Config(fontScale = 2f)
+    fun endChatDialogLargeFontScale() = endDialog(dark = false)
 
     @Test
     fun headerLightTheme() = header(dark = false)

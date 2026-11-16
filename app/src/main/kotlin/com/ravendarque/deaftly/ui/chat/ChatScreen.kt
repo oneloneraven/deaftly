@@ -42,7 +42,21 @@ private fun ChatContent(
 ) {
     var editingParticipants by rememberSaveable { mutableStateOf(false) }
     var confirmingEnd by rememberSaveable { mutableStateOf(false) }
-    val requestEnd = { if (current.conversation.messages.isEmpty()) onEnd() else confirmingEnd = true }
+    val requestEnd = {
+        when {
+            current.kept -> {
+                onEnd()
+            }
+
+            current.conversation.messages.isEmpty() -> {
+                onEnd()
+            }
+
+            else -> {
+                confirmingEnd = true
+            }
+        }
+    }
     BackHandler(onBack = requestEnd)
     SidesChat(
         current,
@@ -68,20 +82,14 @@ private fun ChatContent(
         )
     }
     if (confirmingEnd) {
-        ConfirmDialog(
-            spec =
-                ConfirmSpec(
-                    title = stringResource(R.string.chat_end_title),
-                    text = stringResource(R.string.chat_end_text),
-                    confirm = stringResource(R.string.chat_end_confirm),
-                    dismiss = stringResource(R.string.chat_end_keep),
-                    destructive = true,
-                ),
-            onConfirm = {
+        KeepChatDialog(
+            conversation = current.conversation,
+            keeper = viewModel.keeper,
+            onEnd = {
                 confirmingEnd = false
                 onEnd()
             },
-            onDismiss = { confirmingEnd = false },
+            onKeepChatting = { confirmingEnd = false },
         )
     }
 }
