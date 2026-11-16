@@ -97,7 +97,7 @@ class ChatScreenshotTest {
             SavedStateHandle(
                 mapOf("conversation" to ChatCodec.encode(orderingConversation(turn)), "draft_a" to draft, "draft_b" to draft),
             )
-        val viewModel = ChatViewModel(FakeSettingsRepository(), saved)
+        val viewModel = ChatViewModel(FakeSettingsRepository(), saved, store = FakeSavedChatStore(), writeScope = testWriteScope)
         shot { AppTheme(darkTheme = dark) { ChatScreen(viewModel, onEnd = {}, onInsertTemplate = {}) } }
     }
 
@@ -109,7 +109,7 @@ class ChatScreenshotTest {
                     "draft_b" to ChatCodec.encodeDraft(formattingDraft()),
                 ),
             )
-        val viewModel = ChatViewModel(FakeSettingsRepository(), saved)
+        val viewModel = ChatViewModel(FakeSettingsRepository(), saved, store = FakeSavedChatStore(), writeScope = testWriteScope)
         shot { AppTheme(darkTheme = dark) { ChatScreen(viewModel, onEnd = {}, onInsertTemplate = {}) } }
     }
 
@@ -122,7 +122,13 @@ class ChatScreenshotTest {
         me: ColourRole = ColourRole.Blue,
     ) {
         val saved = SavedStateHandle(mapOf("conversation" to ChatCodec.encode(scriptConversation(them, me, turn))))
-        val viewModel = ChatViewModel(FakeSettingsRepository(textSize = size, sidesSwapped = swapped), saved)
+        val viewModel =
+            ChatViewModel(
+                FakeSettingsRepository(textSize = size, sidesSwapped = swapped),
+                saved,
+                store = FakeSavedChatStore(),
+                writeScope = testWriteScope,
+            )
         shot { AppTheme(darkTheme = dark) { ChatScreen(viewModel, onEnd = {}, onInsertTemplate = {}) } }
     }
 
@@ -133,7 +139,8 @@ class ChatScreenshotTest {
         swapped: Boolean = false,
     ) {
         val saved = SavedStateHandle(mapOf("conversation" to ChatCodec.encode(scriptConversation(turn = ParticipantId.A))))
-        val viewModel = ChatViewModel(FakeSettingsRepository(sidesSwapped = swapped), saved)
+        val viewModel =
+            ChatViewModel(FakeSettingsRepository(sidesSwapped = swapped), saved, store = FakeSavedChatStore(), writeScope = testWriteScope)
         composeRule.setContent { AppTheme(darkTheme = dark) { ChatScreen(viewModel, onEnd = {}, onInsertTemplate = {}) } }
         composeRule.waitForIdle()
         composeRule
@@ -168,6 +175,8 @@ class ChatScreenshotTest {
                 FakeSettingsRepository(),
                 SavedStateHandle(),
                 ChatOpening(listOf("Hi! I'm deaf. Could I have a table for two, please?")),
+                store = FakeSavedChatStore(),
+                writeScope = testWriteScope,
             )
         shot { AppTheme(darkTheme = dark) { ChatScreen(viewModel, onEnd = {}, onInsertTemplate = {}) } }
     }

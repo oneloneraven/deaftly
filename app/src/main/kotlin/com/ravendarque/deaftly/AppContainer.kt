@@ -47,9 +47,9 @@ class AppContainer(
 
     val settingsRepository: SettingsRepository by lazy { DataStoreSettingsRepository(store) }
 
-    val savedChatStore: SavedChatStore by lazy {
-        FileSavedChatStore(File(context.filesDir, "chats"), Dispatchers.IO, CoroutineScope(SupervisorJob() + Dispatchers.IO))
-    }
+    private val appScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
+    val savedChatStore: SavedChatStore by lazy { FileSavedChatStore(File(context.filesDir, "chats"), Dispatchers.IO, appScope) }
 
     val helpRepository by lazy { HelpRepository(context.assets) }
 
@@ -116,7 +116,7 @@ class AppContainer(
 
     fun chatViewModelFactory(opening: ChatOpening) =
         viewModelFactory {
-            initializer { ChatViewModel(settingsRepository, createSavedStateHandle(), opening, chatInsertions) }
+            initializer { ChatViewModel(settingsRepository, createSavedStateHandle(), opening, chatInsertions, savedChatStore, appScope) }
         }
 
     fun fillViewModelFactory(templateId: String) =

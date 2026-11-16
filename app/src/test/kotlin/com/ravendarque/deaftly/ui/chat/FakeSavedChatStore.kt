@@ -5,6 +5,8 @@ import com.ravendarque.deaftly.storage.SavedChat
 import com.ravendarque.deaftly.storage.SavedChatStore
 import com.ravendarque.deaftly.storage.SavedChatSummary
 import com.ravendarque.deaftly.storage.isSavedChatId
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import java.util.UUID
@@ -43,5 +45,16 @@ class FakeSavedChatStore(
     private fun summarise(): List<SavedChatSummary> =
         chats.values
             .sortedByDescending { it.changedAt }
-            .map { SavedChatSummary(it.id, it.conversation.participantB.name, it.conversation.messages.lastOrNull()?.plainText, it.changedAt) }
+            .map {
+                SavedChatSummary(
+                    it.id,
+                    it.conversation.participantB.name,
+                    it.conversation.messages
+                        .lastOrNull()
+                        ?.plainText,
+                    it.changedAt,
+                )
+            }
 }
+
+val testWriteScope = CoroutineScope(Dispatchers.Unconfined)
