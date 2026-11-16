@@ -63,8 +63,10 @@
     <string name="saved_chats_them">Them</string>
     <string name="saved_chats_no_messages">No messages</string>
     <string name="saved_chats_delete">Delete chat with %1$s</string>
+    <string name="saved_chats_unreadable">This chat cannot be read</string>
+    <string name="saved_chats_delete_unreadable">Delete the chat that cannot be read</string>
     <string name="saved_chats_delete_title">Delete this chat?</string>
-    <string name="saved_chats_delete_text">It will be removed from this phone and your Android backup.</string>
+    <string name="saved_chats_delete_text">It will be removed from this phone. Your Android backup removes it the next time it runs.</string>
     <string name="saved_chats_delete_confirm">Delete</string>
     <string name="saved_chats_delete_cancel">Cancel</string>
     <string name="saved_chats_empty">No saved chats. When you end a chat, choose Keep to save it here.</string>
@@ -196,7 +198,7 @@
     <string name="chat_keep_text">Kept chats stay on this phone and in your Android backup, so you can read them or carry on later.</string>
     <string name="chat_keep_confirm">Keep</string>
     <string name="chat_keep_delete">Delete</string>
-    <string name="chat_keep_failed">This chat couldn\u2019t be saved. Try Keep again, or Delete to end without saving.</string>
+    <string name="chat_keep_failed">This chat couldn\u2019t be saved. Try again, or Delete to end without saving.</string>
     <string name="chat_copy_action">Copy</string>
     <string name="chat_quote_action">Quote</string>
     <string name="chat_delete_action">Delete</string>

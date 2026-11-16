@@ -36,7 +36,7 @@ class SavedChatsScreenTest {
     @get:Rule
     val composeRule = createComposeRule()
 
-    private val store = FakeSavedChatStore()
+    private var store = FakeSavedChatStore()
     private val opened = mutableListOf<String>()
 
     @Before
@@ -130,6 +130,22 @@ class SavedChatsScreenTest {
 
         composeRule.onNodeWithText("Kwame").assertDoesNotExist()
         composeRule.onNodeWithText("Siobhan").assertIsDisplayed()
+    }
+
+    @Test
+    fun anUnreadableChatSaysSoCannotBeOpenedAndCanBeDeleted() {
+        val id = "0f8fad5b-d9cb-469f-a165-70867728950e"
+        store = FakeSavedChatStore(unreadable = mapOf(id to 0L))
+        show()
+
+        composeRule.onNodeWithText("This chat cannot be read").assertIsDisplayed().performClick()
+        assertEquals(emptyList(), opened)
+        composeRule.onRoot().tryPerformAccessibilityChecks()
+
+        composeRule.onNodeWithContentDescription("Delete the chat that cannot be read").performClick()
+        composeRule.onNodeWithText("Delete").performClick()
+
+        composeRule.onNodeWithText("This chat cannot be read").assertDoesNotExist()
     }
 
     @Test

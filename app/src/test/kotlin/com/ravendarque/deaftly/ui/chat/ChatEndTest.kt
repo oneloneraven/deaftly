@@ -148,7 +148,7 @@ class ChatEndTest {
 
         composeRule.onNodeWithText("Keep").performClick()
 
-        composeRule.onNodeWithText("This chat couldn\u2019t be saved. Try Keep again, or Delete to end without saving.").assertIsDisplayed()
+        composeRule.onNodeWithText("This chat couldn\u2019t be saved. Try again, or Delete to end without saving.").assertIsDisplayed()
         assertEquals(0, ended)
         composeRule.onRoot().tryPerformAccessibilityChecks()
     }

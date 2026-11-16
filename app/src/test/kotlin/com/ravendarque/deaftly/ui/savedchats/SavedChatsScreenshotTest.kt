@@ -72,8 +72,9 @@ class SavedChatsScreenshotTest {
     private fun shot(
         dark: Boolean,
         saved: List<SavedChat> = chats,
+        unreadable: Map<String, Long> = emptyMap(),
     ) {
-        val viewModel = SavedChatsViewModel(FakeSavedChatStore(saved))
+        val viewModel = SavedChatsViewModel(FakeSavedChatStore(saved, unreadable = unreadable))
         composeRule.setContent { AppTheme(darkTheme = dark) { SavedChatsScreen(viewModel, onOpen = {}, onBack = {}) } }
         composeRule.waitForIdle()
         composeRule.onRoot().captureRoboImage("$SCREENSHOT_DIR/$PACKAGE.${this::class.simpleName}.${testName.methodName}.png")
@@ -91,4 +92,8 @@ class SavedChatsScreenshotTest {
 
     @Test
     fun emptyLightTheme() = shot(dark = false, saved = emptyList())
+
+    @Test
+    fun withUnreadableLightTheme() =
+        shot(dark = false, saved = chats.take(2), unreadable = mapOf("c56a4180-65aa-42ec-a945-5fd21dec0538" to NOON_17_NOV_2026 - 40 * DAY))
 }

@@ -102,6 +102,8 @@ private fun SavedChatRow(
 ) {
     val shape = Deaftly.shapes.cardSmall
     val name = chat.otherName ?: stringResource(R.string.saved_chats_them)
+    val deleteLabel =
+        if (chat.readable) stringResource(R.string.saved_chats_delete, name) else stringResource(R.string.saved_chats_delete_unreadable)
     val date = DateFormat.format(Instant.ofEpochMilli(chat.changedAt).atZone(ZoneId.systemDefault()))
     Row(
         modifier =
@@ -116,20 +118,28 @@ private fun SavedChatRow(
             modifier =
                 Modifier
                     .weight(1f)
-                    .clickable(role = Role.Button, onClick = onOpen)
+                    .then(if (chat.readable) Modifier.clickable(role = Role.Button, onClick = onOpen) else Modifier)
                     .padding(horizontal = Deaftly.spacing.space16, vertical = Deaftly.spacing.space12),
             verticalArrangement = Arrangement.spacedBy(Deaftly.spacing.space4),
         ) {
-            Text(text = name, style = MaterialTheme.typography.titleMedium, color = Deaftly.colors.ink)
-            Text(
-                text = chat.lastMessage ?: stringResource(R.string.saved_chats_no_messages),
-                style = MaterialTheme.typography.bodyMedium,
-                color = Deaftly.colors.inkSecondary,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
+            if (chat.readable) {
+                Text(text = name, style = MaterialTheme.typography.titleMedium, color = Deaftly.colors.ink)
+                Text(
+                    text = chat.lastMessage ?: stringResource(R.string.saved_chats_no_messages),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Deaftly.colors.inkSecondary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            } else {
+                Text(
+                    text = stringResource(R.string.saved_chats_unreadable),
+                    style = MaterialTheme.typography.titleMedium,
+                    color = Deaftly.colors.ink,
+                )
+            }
             Text(text = date, style = MaterialTheme.typography.bodySmall, color = Deaftly.colors.inkSecondary)
         }
-        DeaftlyIconButton(DeaftlyIcons.Trash, stringResource(R.string.saved_chats_delete, name), onClick = onDelete)
+        DeaftlyIconButton(DeaftlyIcons.Trash, deleteLabel, onClick = onDelete)
     }
 }
