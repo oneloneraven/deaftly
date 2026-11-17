@@ -1,5 +1,6 @@
 package com.ravendarque.deaftly.ui.fill
 
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.SemanticsMatcher
@@ -22,7 +23,11 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performImeAction
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.tryPerformAccessibilityChecks
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.LifecycleRegistry
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.ravendarque.deaftly.navigation.HighlightRange
 import com.ravendarque.deaftly.navigation.Route
@@ -52,10 +57,14 @@ class FillScreenTest {
         composeRule.enableAccessibilityChecks()
     }
 
+    private val entry = EntryLifecycle()
+
     private fun show(templateId: String) {
         val viewModel = FillViewModel(templateId, FakeTemplateRepository(fillTemplates), FakeSettingsRepository(), SavedStateHandle())
         composeRule.setContent {
-            AppTheme { FillScreen(templateId, viewModel, onNavigate = { navigated += it }, onBack = { backs++ }) }
+            CompositionLocalProvider(LocalLifecycleOwner provides entry) {
+                AppTheme { FillScreen(templateId, viewModel, onNavigate = { navigated += it }, onBack = { backs++ }) }
+            }
         }
         composeRule.waitForIdle()
     }
@@ -244,6 +253,18 @@ class FillScreenTest {
     }
 
     @Test
+    fun theSheetStaysClosedWhileTheScreenIsOnlyAPreviewUnderAnother() {
+        show("order-food")
+        chip("menu item").performClick()
+
+        composeRule.runOnIdle { entry.registry.currentState = Lifecycle.State.STARTED }
+        composeRule.onNodeWithText("Scan the menu").assertDoesNotExist()
+
+        composeRule.runOnIdle { entry.registry.currentState = Lifecycle.State.RESUMED }
+        composeRule.onNodeWithText("Scan the menu").assertExists()
+    }
+
+    @Test
     fun typeItRevealsTheFieldAndFillsTheChip() {
         show("order-food")
         chip("menu item").performClick()
@@ -354,4 +375,9 @@ class FillScreenTest {
         assertEquals(emptyList(), navigated)
         composeRule.onRoot().tryPerformAccessibilityChecks()
     }
+}
+
+private class EntryLifecycle : LifecycleOwner {
+    val registry = LifecycleRegistry(this).apply { currentState = Lifecycle.State.RESUMED }
+    override val lifecycle: Lifecycle get() = registry
 }
