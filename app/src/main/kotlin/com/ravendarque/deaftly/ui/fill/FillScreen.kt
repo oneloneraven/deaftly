@@ -15,8 +15,12 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.compose.currentStateAsState
+import androidx.lifecycle.findViewTreeLifecycleOwner
 import com.ravendarque.deaftly.R
 import com.ravendarque.deaftly.navigation.HighlightRange
 import com.ravendarque.deaftly.navigation.Route
@@ -117,7 +121,16 @@ fun FillContent(
             )
         }
     }
-    state.active?.let { FillSheet(it, actions.onChoose, actions.onScan, actions.onDismiss) }
+    if (!isBackPreview()) state.active?.let { FillSheet(it, actions.onChoose, actions.onScan, actions.onDismiss) }
+}
+
+// The sheet is a separate window: shown during a back-gesture preview, it takes focus and cancels the gesture.
+@Composable
+private fun isBackPreview(): Boolean {
+    val entry by LocalLifecycleOwner.current.lifecycle.currentStateAsState()
+    val host = LocalView.current.findViewTreeLifecycleOwner() ?: return false
+    val activity by host.lifecycle.currentStateAsState()
+    return entry < activity
 }
 
 private fun FillUiState.Ready.toShowRoute() = Route.Show(text, highlights.map { HighlightRange(it.start, it.end) })
