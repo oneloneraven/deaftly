@@ -22,4 +22,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "deaftly"
 
-include(":app", ":core", ":baselineprofile")
+include(":app", ":core", ":baselineprofile", ":spike-stt")
