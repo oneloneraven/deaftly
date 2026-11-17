@@ -1,6 +1,6 @@
 ## On-device speech-to-text: spike results
 
-Branch `spike/285-speech-to-text`. Not for merge as-is. For #59 (speech-to-text for the hearing person in side-by-side chat).
+The harness is on branch `spike/285-speech-to-text`, not for merge. For #59 (speech-to-text for the hearing person in side-by-side chat).
 
 ### Question
 
