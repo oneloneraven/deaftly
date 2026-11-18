@@ -10,6 +10,7 @@ public data class Message(
     val author: ParticipantId,
     val spans: List<Span>,
     val quote: Quote? = null,
+    val voiceTyped: Boolean = false,
 ) {
     public val plainText: String get() = RichText.plainText(spans)
 }

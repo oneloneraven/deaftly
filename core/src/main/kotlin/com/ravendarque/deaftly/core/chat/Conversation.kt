@@ -51,6 +51,12 @@ public data class Conversation(
         return copy(messages = messages + message)
     }
 
+    public fun appendVoiceTyped(text: String): Conversation {
+        require(text.isNotBlank()) { "A message must not be empty" }
+        val message = Message(messages.size, ParticipantId.B, RichText.spans(text.trim()), voiceTyped = true)
+        return copy(messages = messages + message)
+    }
+
     public fun deleteMessage(id: Int): Conversation {
         if (id !in messages.indices) return this
         val kept =

@@ -34,6 +34,7 @@ internal data class MessageDto(
     val spans: List<SpanDto>,
     val quoteId: Int? = null,
     val quoteText: String? = null,
+    val voiceTyped: Boolean = false,
 )
 
 @Serializable
@@ -116,7 +117,7 @@ internal fun ConversationDto.toDomain() =
 
 private fun Participant.toDto() = ParticipantDto(colour, name)
 
-private fun Message.toDto() = MessageDto(author, spans.map { SpanDto(it.text, it.styles) }, quote?.messageId, quote?.text)
+private fun Message.toDto() = MessageDto(author, spans.map { SpanDto(it.text, it.styles) }, quote?.messageId, quote?.text, voiceTyped)
 
 private fun MessageDto.toDomain(id: Int) =
     Message(
@@ -124,4 +125,5 @@ private fun MessageDto.toDomain(id: Int) =
         author = author,
         spans = spans.map { Span(it.text, it.styles) },
         quote = quoteText?.let { Quote(quoteId, it) },
+        voiceTyped = voiceTyped,
     )

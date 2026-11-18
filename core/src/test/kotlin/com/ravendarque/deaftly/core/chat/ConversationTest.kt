@@ -221,4 +221,31 @@ class ConversationTest {
 
         assertEquals(Quote(null, "two"), conversation.messages.last().quote)
     }
+
+    @Test
+    fun appendVoiceTypedIsAuthoredByBWhateverTheTurn() {
+        val conversation = conversation().appendVoiceTyped("  Tuesday ")
+        val message = conversation.messages.single()
+        assertEquals(ParticipantId.B, message.author)
+        assertEquals("Tuesday", message.plainText)
+        assertTrue(message.voiceTyped)
+        assertEquals(ParticipantId.A, conversation.turn)
+    }
+
+    @Test
+    fun appendVoiceTypedRefusesBlankText() {
+        assertFailsWith<IllegalArgumentException> { conversation().appendVoiceTyped("  ") }
+    }
+
+    @Test
+    fun deletingKeepsVoiceTypedFlags() {
+        val conversation =
+            conversation()
+                .append(text("typed"))
+                .appendVoiceTyped("one")
+                .appendVoiceTyped("two")
+                .deleteMessage(0)
+        assertEquals(listOf(0, 1), conversation.messages.map { it.id })
+        assertTrue(conversation.messages.all { it.voiceTyped })
+    }
 }
