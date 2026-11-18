@@ -16,7 +16,7 @@ import java.security.DigestInputStream
 import java.security.MessageDigest
 import javax.inject.Inject
 
-abstract class FetchNcnnTask
+abstract class FetchArchiveTask
     @Inject
     constructor(
         private val files: FileSystemOperations,
@@ -29,29 +29,45 @@ abstract class FetchNcnnTask
         abstract val sha256: Property<String>
 
         @get:Input
-        abstract val abis: ListProperty<String>
+        abstract val includes: ListProperty<String>
+
+        @get:Input
+        abstract val stripFirstDir: Property<Boolean>
 
         @get:OutputDirectory
         abstract val outputDir: DirectoryProperty
 
+        init {
+            stripFirstDir.convention(true)
+        }
+
         @TaskAction
         fun fetch() {
-            val zip = temporaryDir.resolve("ncnn.zip")
+            val source = url.get()
+            val archive = temporaryDir.resolve("archive")
             val hash = MessageDigest.getInstance("SHA-256")
             val connection =
-                URI(url.get()).toURL().openConnection().apply {
+                URI(source).toURL().openConnection().apply {
                     connectTimeout = TIMEOUT_MS
                     readTimeout = TIMEOUT_MS
                 }
             DigestInputStream(connection.getInputStream(), hash).use {
-                Files.copy(it, zip.toPath(), StandardCopyOption.REPLACE_EXISTING)
+                Files.copy(it, archive.toPath(), StandardCopyOption.REPLACE_EXISTING)
             }
             val actual = hash.digest().joinToString("") { "%02x".format(it) }
-            check(actual == sha256.get()) { "ncnn archive checksum mismatch: expected ${sha256.get()}, got $actual" }
+            check(actual == sha256.get()) { "Archive checksum mismatch for $source: expected ${sha256.get()}, got $actual" }
+            val tree =
+                when {
+                    source.endsWith(".zip") -> archives.zipTree(archive)
+                    source.endsWith(".tar.gz") -> archives.tarTree(archives.gzip(archive))
+                    else -> error("Unsupported archive type: $source")
+                }
+            val patterns = includes.getOrElse(emptyList())
+            val strip = stripFirstDir.get()
             files.sync {
-                from(archives.zipTree(zip)) {
-                    include(abis.get().map { "*/$it/**" })
-                    eachFile { path = path.substringAfter('/') }
+                from(tree) {
+                    if (patterns.isNotEmpty()) include(patterns)
+                    if (strip) eachFile { path = path.substringAfter('/') }
                     includeEmptyDirs = false
                 }
                 into(outputDir)
