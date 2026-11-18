@@ -12,14 +12,15 @@ def norm(t):
 def sherpa(model):
     import sherpa_ncnn
     d = Path("models") / model
-    r = sherpa_ncnn.Recognizer(
+    make = lambda: sherpa_ncnn.Recognizer(
         tokens=str(d / "tokens.txt"),
         encoder_param=str(d / "encoder_jit_trace-pnnx.ncnn.param"), encoder_bin=str(d / "encoder_jit_trace-pnnx.ncnn.bin"),
         decoder_param=str(d / "decoder_jit_trace-pnnx.ncnn.param"), decoder_bin=str(d / "decoder_jit_trace-pnnx.ncnn.bin"),
         joiner_param=str(d / "joiner_jit_trace-pnnx.ncnn.param"), joiner_bin=str(d / "joiner_jit_trace-pnnx.ncnn.bin"),
         num_threads=2)
+    holder = {"r": make()}
     def run(a):
-        s = r.create_stream() if hasattr(r, "create_stream") else None
+        r = holder["r"]
         first = None
         for i in range(0, len(a), CHUNK):
             r.accept_waveform(16000, a[i:i + CHUNK])
@@ -27,7 +28,8 @@ def sherpa(model):
         r.accept_waveform(16000, np.zeros(int(0.5 * 16000), dtype=np.float32))
         r.input_finished()
         t = r.text
-        r.reset() if hasattr(r, "reset") else None
+        holder["r"] = None
+        t1 = time.perf_counter(); holder["r"] = make(); run.setup_s = time.perf_counter() - t1
         return t, first
     return run
 
@@ -49,6 +51,9 @@ def vosk(model):
     return run
 
 ENGINES = {
+    "sherpa-20M-int8": lambda: sherpa("sherpa-ncnn-streaming-zipformer-20M-2023-02-17-int8"),
+    "sherpa-librigiga-70M": lambda: sherpa("sherpa-ncnn-zipformer-libri-giga-70M-2023-04-04"),
+    "sherpa-librigiga-70M-int8": lambda: sherpa("sherpa-ncnn-zipformer-libri-giga-70M-2023-04-04-int8"),
     "sherpa-zipformer-en": lambda: sherpa("sherpa-ncnn-streaming-zipformer-en-2023-02-13"),
     "sherpa-zipformer-20M": lambda: sherpa("sherpa-ncnn-streaming-zipformer-20M-2023-02-17"),
     "vosk-small-en-us": lambda: vosk("vosk-model-small-en-us-0.15"),
@@ -63,7 +68,7 @@ rows = []
 for cond in conds:
     for c in manifest:
         a, _ = sf.read(f"clips/{cond}/{c['id']}.wav", dtype="float32")
-        t0 = time.perf_counter(); hyp, first = run(a); dt = time.perf_counter() - t0
+        t0 = time.perf_counter(); hyp, first = run(a); dt = time.perf_counter() - t0 - getattr(run, "setup_s", 0)
         rows.append({"engine": name, "cond": cond, "id": c["id"], "accent": c["accent"], "ref": norm(c["text"]),
                      "hyp": norm(hyp), "first_partial_s": first, "audio_s": len(a) / 16000, "proc_s": dt})
     sub = [r for r in rows if r["cond"] == cond]
