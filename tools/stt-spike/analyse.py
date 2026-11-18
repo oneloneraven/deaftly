@@ -1,4 +1,4 @@
-import json, glob, re, statistics as st
+import json, glob, re, sys, statistics as st
 import numpy as np, soundfile as sf, jiwer
 from collections import defaultdict
 
@@ -60,10 +60,11 @@ for e, (_, rows) in host.items():
     lat = sorted(r["first_partial_s"] - onset[r["id"]] for r in rows if r["first_partial_s"] is not None)
     print(f"| {e} | {rtf:.3f} | {st.median(lat):.2f} s / {lat[int(0.95 * len(lat))]:.2f} s |")
 
-dev = load("results/device-*.json", True)
+label, pattern = (sys.argv[1], sys.argv[2]) if len(sys.argv) > 2 else ("Emulator", "results/device-*.json")
+dev = load(pattern, True)
 if dev:
-    tables(dev, "Emulator")
-    print("\n### Emulator: speed and memory\n\n| Engine | Load | Per 100 ms chunk (median / p95) | Real-time factor | First words shown after speech starts (median / p95) | Final text after audio ends (median) | App memory, PSS (max) |\n|---|---|---|---|---|---|---|")
+    tables(dev, label)
+    print(f"\n### {label}: speed and memory\n\n| Engine | Load | Per 100 ms chunk (median / p95) | Real-time factor | First words shown after speech starts (median / p95) | Final text after audio ends (median) | App memory, PSS (max) |\n|---|---|---|---|---|---|---|")
     for e, (load_ms, rows) in dev.items():
         ch = sorted(x for r in rows for x in r["chunk_ms"])
         android = e.startswith("android")
