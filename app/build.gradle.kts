@@ -1,7 +1,7 @@
 import com.android.build.api.artifact.SingleArtifact
 import com.ravendarque.deaftly.guard.VerifyReleaseManifestTask
 import com.ravendarque.deaftly.help.CopyHelpTask
-import com.ravendarque.deaftly.nativelibs.FetchNcnnTask
+import com.ravendarque.deaftly.nativelibs.FetchArchiveTask
 
 plugins {
     alias(libs.plugins.android.application)
@@ -20,12 +20,45 @@ val (appMajor, appMinor, appPatch) = appVersionParts
 
 val ncnnDist = rootProject.layout.projectDirectory.dir("third_party/ncnn/dist")
 
+val ncnnAbis = listOf("arm64-v8a", "armeabi-v7a", "x86_64")
+
 val fetchNcnn =
-    tasks.register<FetchNcnnTask>("fetchNcnn") {
+    tasks.register<FetchArchiveTask>("fetchNcnn") {
         url.set("https://github.com/Tencent/ncnn/releases/download/20261020/ncnn-20261020-android.zip")
         sha256.set("62a9edb493ceb42a5c9cbf2d3a79b3f44bff06c625134ffb64d183dcc42c25fc")
-        abis.set(listOf("arm64-v8a", "armeabi-v7a", "x86_64"))
+        includes.set(ncnnAbis.map { "*/$it/**" })
         outputDir.set(ncnnDist)
+    }
+
+val sherpaSources = rootProject.layout.projectDirectory.dir("third_party/sherpa-ncnn/src")
+
+val fetchSherpaNcnn =
+    tasks.register<FetchArchiveTask>("fetchSherpaNcnn") {
+        url.set("https://github.com/k2-fsa/sherpa-ncnn/archive/refs/tags/v2.1.15.tar.gz")
+        sha256.set("f4bb8bdd3cea20049cff97aa90dec1cee048b7fdac9a92464ca64df7efe5f27b")
+        includes.set(listOf("*/sherpa-ncnn/csrc/**", "*/LICENSE"))
+        outputDir.set(sherpaSources.dir("sherpa-ncnn"))
+    }
+
+val fetchKaldiNativeFbank =
+    tasks.register<FetchArchiveTask>("fetchKaldiNativeFbank") {
+        url.set("https://github.com/csukuangfj/kaldi-native-fbank/archive/refs/tags/v1.21.5.tar.gz")
+        sha256.set("499966d4cdeb05060df2b26a0c171f92a6a2a119e7747b69e621e62c7fad0e9c")
+        includes.set(listOf("*/kaldi-native-fbank/csrc/**", "*/LICENSE"))
+        outputDir.set(sherpaSources.dir("kaldi-native-fbank"))
+    }
+
+val fetchKissFft =
+    tasks.register<FetchArchiveTask>("fetchKissFft") {
+        url.set("https://github.com/mborgerding/kissfft/archive/febd4caeed32e33ad8b2e0bb5ea77542c40f18ec.zip")
+        sha256.set("497103e664168ebe39580b757adbe616f6cf85a16572af581ca7bc42d0ab13fd")
+        includes.set(listOf("*/*.c", "*/*.h", "*/COPYING"))
+        outputDir.set(sherpaSources.dir("kissfft"))
+    }
+
+val fetchSherpaSources =
+    tasks.register("fetchSherpaSources") {
+        dependsOn(fetchSherpaNcnn, fetchKaldiNativeFbank, fetchKissFft)
     }
 
 val releaseKeystore = providers.environmentVariable("ANDROID_KEYSTORE_PATH")
@@ -51,6 +84,9 @@ android {
             cmake {
                 arguments(
                     "-DNCNN_ROOT=${ncnnDist.asFile.absolutePath}",
+                    "-DSHERPA_NCNN_SRC=${sherpaSources.dir("sherpa-ncnn").asFile.absolutePath}",
+                    "-DKALDI_FBANK_SRC=${sherpaSources.dir("kaldi-native-fbank").asFile.absolutePath}",
+                    "-DKISSFFT_SRC=${sherpaSources.dir("kissfft").asFile.absolutePath}",
                     "-DANDROID_STL=c++_static",
                 )
             }
@@ -257,4 +293,4 @@ tasks.named("check") {
 
 tasks
     .matching { it.name.startsWith("configureCMake") || it.name.startsWith("generateJsonModel") }
-    .configureEach { dependsOn(fetchNcnn) }
+    .configureEach { dependsOn(fetchNcnn, fetchSherpaSources) }
