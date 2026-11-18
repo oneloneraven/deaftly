@@ -11,11 +11,6 @@ endif()
 set(ncnn_DIR "${NCNN_ROOT}/${ANDROID_ABI}/lib/cmake/ncnn")
 find_package(ncnn REQUIRED)
 
-add_library(deaftly_ppocr SHARED ppocr_engine.cpp ppocr_jni.cpp)
-target_compile_options(deaftly_ppocr PRIVATE -O3 -fvisibility=hidden -Wall -Wextra)
-target_link_options(deaftly_ppocr PRIVATE -Wl,--gc-sections -Wl,--exclude-libs,ALL -Wl,-z,max-page-size=16384)
-target_link_libraries(deaftly_ppocr PRIVATE ncnn android log)
-
 foreach(var SHERPA_NCNN_SRC KALDI_FBANK_SRC KISSFFT_SRC)
     if(NOT DEFINED ${var})
         message(FATAL_ERROR "${var} must point at the extracted source tree fetched by Gradle")
@@ -64,10 +59,11 @@ set(fbank_srcs
     whisper-feature.cc)
 list(TRANSFORM fbank_srcs PREPEND "${fbank_csrc}/")
 
-add_library(deaftly_speech SHARED speech_jni.cpp ${sherpa_srcs} ${fbank_srcs}
+add_library(deaftly_native SHARED ppocr_engine.cpp ppocr_jni.cpp speech_jni.cpp ${sherpa_srcs} ${fbank_srcs}
     "${KISSFFT_SRC}/kiss_fft.c" "${KISSFFT_SRC}/kiss_fftr.c")
-target_include_directories(deaftly_speech PRIVATE "${SHERPA_NCNN_SRC}" "${KALDI_FBANK_SRC}" "${KISSFFT_SRC}")
-target_compile_definitions(deaftly_speech PRIVATE kiss_fft_scalar=float)
-target_compile_options(deaftly_speech PRIVATE -O3 -fvisibility=hidden)
-target_link_options(deaftly_speech PRIVATE -Wl,--gc-sections -Wl,--exclude-libs,ALL -Wl,-z,max-page-size=16384)
-target_link_libraries(deaftly_speech PRIVATE ncnn android log)
+set_source_files_properties(ppocr_engine.cpp ppocr_jni.cpp PROPERTIES COMPILE_OPTIONS "-Wall;-Wextra")
+set_source_files_properties("${KISSFFT_SRC}/kiss_fft.c" "${KISSFFT_SRC}/kiss_fftr.c" PROPERTIES COMPILE_DEFINITIONS kiss_fft_scalar=float)
+target_include_directories(deaftly_native PRIVATE "${SHERPA_NCNN_SRC}" "${KALDI_FBANK_SRC}" "${KISSFFT_SRC}")
+target_compile_options(deaftly_native PRIVATE -O3 -fvisibility=hidden)
+target_link_options(deaftly_native PRIVATE -Wl,--gc-sections -Wl,--exclude-libs,ALL -Wl,-z,max-page-size=16384)
+target_link_libraries(deaftly_native PRIVATE ncnn android log)
