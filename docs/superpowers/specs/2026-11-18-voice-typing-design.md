@@ -2,7 +2,7 @@
 
 Issue: #59. Engine decision: [ADR-0013](../../adr/0013-transcribe-speech-with-sherpa-ncnn-bundled-in-the-app.md). Evidence: [#285](../../spikes/285-speech-to-text/results.md), [#287](../../spikes/287-speech-to-text-models/results.md).
 
-Status: agreed with the owner in conversation on 18 November 2026. The builder check (a fresh reviewer reading this doc for gaps) has **not** been run yet. Run it before planning.
+Status: agreed with the owner in conversation on 18 November 2026. The builder check (a fresh reviewer reading this doc for gaps) ran the same day; its outcomes are under [Builder check outcomes](#builder-check-outcomes). Plan: [2026-11-18-voice-typing.md](../plans/2026-11-18-voice-typing.md).
 
 ## Why
 
@@ -59,6 +59,27 @@ These would make it a failure even if it technically works:
 - **Returning to the hearing person's turn:** if voice typing was on when the turn moved away, it comes back on.
 - **Pause length:** start at 2 seconds of trailing silence, using sherpa-ncnn's own endpoint rule (`rule2MinTrailingSilence`).
 - **Microphone permission:** Android asks the first time the mic is tapped. If they refuse, typing still works and the mic offers a way to grant it later.
+
+## Builder check outcomes
+
+The owner decided these on 18 November 2026:
+
+- **Words still being spoken are sent, not dropped.** When voice typing stops for any reason (mic off, turn moves to the deaf user, chat ends, app goes to the background), the words recognised so far are sent as the hearing person's message. The message is always stamped with the hearing person as its author, never taken from whoever's turn it is when it lands.
+- **Editing:** tapping a voice-typed message edits it. "Edit" is also in the long-press menu, and is a TalkBack action.
+- **Editing with a draft already typed:** the message text is added to the end of the draft.
+- **Where the model lives:** a GitHub release asset on this repo, separate from app releases, fetched in the build and checked against its SHA-256. It isn't committed to git.
+- **Showing that voice typing is on:** a status line that stays up while it's on, separate from the turn prompt. The turn prompt only shows until a participant has sent something, so it can't carry this.
+
+The builder decided these; they're open to change:
+
+- **Saving the flag:** "voice-typed" is a field on the message, saved with the chat. It defaults to false, so existing chats read as before.
+- **What counts as a message:** only empty or whitespace results are dropped. Anything else is a message, however short.
+- **Coming back on:** when the turn returns to the hearing person, voice typing listens again without a tap, but only if the microphone permission is still granted. The status line and a TalkBack announcement show it's listening.
+- **Editing is for the hearing person's turn:** tap to edit and the Edit command work only on their turn. On the deaf user's turn, a tap does nothing, so the deaf user can't start an edit by accident.
+- **When the model fails to load:** voice typing turns off, the mic shows that it's unavailable, and typing works as normal. Nothing derived from audio is logged.
+- **Denied for good:** if the microphone permission is refused for good, the mic offers to open the app's settings, as the camera does.
+- **The sherpa-ncnn source:** fetched as a pinned release tarball with a checksum, then compiled in the app's CMake against the app's ncnn. The model files are converted once by hand; the checkpoint and the SHA-256 of each output are recorded in `third_party/`.
+- **Last words when stopping:** stopping sends the text already shown on screen, at once, rather than waiting for the engine to finish decoding. A word cut off at the moment of stopping may be lost; the hearing person can correct it by editing.
 
 ## Approaches considered
 
