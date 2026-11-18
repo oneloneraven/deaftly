@@ -27,6 +27,28 @@ class ChatCodecTest {
     }
 
     @Test
+    fun voiceTypedSurvivesARoundTrip() {
+        val conversation = Conversation(Participant.defaultA(), Participant.defaultB()).appendVoiceTyped("Tuesday")
+
+        assertEquals(conversation, ChatCodec.decode(ChatCodec.encode(conversation)))
+    }
+
+    @Test
+    fun messagesWithoutTheFieldReadAsTyped() {
+        val encoded =
+            """{"a":{"colour":"Red"},"b":{"colour":"Blue"},"turn":"A","messages":[{"author":"A","spans":[{"text":"Hi"}]}]}"""
+
+        assertEquals(
+            false,
+            ChatCodec
+                .decode(encoded)
+                ?.messages
+                ?.single()
+                ?.voiceTyped,
+        )
+    }
+
+    @Test
     fun anythingUnreadableDecodesToNothing() {
         assertNull(ChatCodec.decode(null))
         assertNull(ChatCodec.decode("not json"))
