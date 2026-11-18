@@ -20,3 +20,4 @@ old one's status becomes "Superseded by ADR-NNNN".
 | [0010](0010-recognise-text-with-paddleocr-on-ncnn.md) | Recognise text with PaddleOCR on ncnn |
 | [0011](0011-review-permissions-against-an-allowlist.md) | Review permissions against an allowlist |
 | [0012](0012-back-up-kept-chats.md) | Back up kept chats |
+| [0013](0013-transcribe-speech-with-sherpa-ncnn-bundled-in-the-app.md) | Transcribe speech with sherpa-ncnn, bundled in the app |
