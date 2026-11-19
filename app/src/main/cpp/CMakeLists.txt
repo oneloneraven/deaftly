@@ -59,9 +59,9 @@ set(fbank_srcs
     whisper-feature.cc)
 list(TRANSFORM fbank_srcs PREPEND "${fbank_csrc}/")
 
-add_library(deaftly_native SHARED ppocr_engine.cpp ppocr_jni.cpp speech_jni.cpp ${sherpa_srcs} ${fbank_srcs}
+add_library(deaftly_native SHARED jni_strings.cpp ppocr_engine.cpp ppocr_jni.cpp speech_jni.cpp ${sherpa_srcs} ${fbank_srcs}
     "${KISSFFT_SRC}/kiss_fft.c" "${KISSFFT_SRC}/kiss_fftr.c")
-set_source_files_properties(ppocr_engine.cpp ppocr_jni.cpp PROPERTIES COMPILE_OPTIONS "-Wall;-Wextra")
+set_source_files_properties(jni_strings.cpp ppocr_engine.cpp ppocr_jni.cpp PROPERTIES COMPILE_OPTIONS "-Wall;-Wextra")
 set_source_files_properties("${KISSFFT_SRC}/kiss_fft.c" "${KISSFFT_SRC}/kiss_fftr.c" PROPERTIES COMPILE_DEFINITIONS kiss_fft_scalar=float)
 target_include_directories(deaftly_native PRIVATE "${SHERPA_NCNN_SRC}" "${KALDI_FBANK_SRC}" "${KISSFFT_SRC}")
 target_compile_options(deaftly_native PRIVATE -O3 -fvisibility=hidden)
