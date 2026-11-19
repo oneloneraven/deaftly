@@ -26,7 +26,7 @@ Side by side is for a back-and-forth conversation on one phone. You pass the pho
 
 ## Voice typing
 
-Voice typing is for the other person, so the microphone button only shows on their turn. It turns what they say into text on this phone. The audio isn't kept.
+Voice typing is for the other person, so the microphone button only shows on their turn. It turns what they say into text on this device. The audio isn't kept.
 
 - Tap the microphone button next to **Send** to start. The first time, Android asks to use the microphone. If it's blocked, the button offers to open settings.
 - While it's on, their words appear in the chat as they speak. A pause sends the message, so each message stays short.
