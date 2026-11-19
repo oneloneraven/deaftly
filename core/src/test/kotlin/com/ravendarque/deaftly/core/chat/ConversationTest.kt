@@ -248,4 +248,54 @@ class ConversationTest {
         assertEquals(listOf(0, 1), conversation.messages.map { it.id })
         assertTrue(conversation.messages.all { it.voiceTyped })
     }
+
+    private fun edited() =
+        conversation()
+            .append(text("one"))
+            .withTurn(ParticipantId.B)
+            .append(text("two"))
+            .append(text("three"), quote = Quote(0, "one"))
+
+    @Test
+    fun replaceMessageKeepsPlaceAuthorAndMarksEdited() {
+        val before = edited().appendVoiceTyped("spoken")
+        val replaced = before.replaceMessage(1, text("second"), Quote(0, "one"))
+
+        assertEquals(before.messages.size, replaced.messages.size)
+        val message = replaced.messages[1]
+        assertEquals(1, message.id)
+        assertEquals(ParticipantId.B, message.author)
+        assertEquals("second", message.plainText)
+        assertEquals(Quote(0, "one"), message.quote)
+        assertTrue(message.edited)
+        assertEquals(before.messages[0], replaced.messages[0])
+        assertEquals(before.messages[2], replaced.messages[2])
+        assertEquals(before.turn, replaced.turn)
+        assertTrue(before.replaceMessage(3, text("changed"), null).messages[3].voiceTyped)
+    }
+
+    @Test
+    fun replaceMessageKeepsQuotesToItLinked() {
+        val replaced = edited().replaceMessage(0, text("uno"), null)
+
+        assertEquals(Quote(0, "one"), replaced.messages[2].quote)
+    }
+
+    @Test
+    fun replaceMessageRefusesBlankAndUnknownIds() {
+        val chat = edited()
+
+        assertFailsWith<IllegalArgumentException> { chat.replaceMessage(1, emptyList(), null) }
+        assertFailsWith<IllegalArgumentException> { chat.replaceMessage(3, text("x"), null) }
+        assertFailsWith<IllegalArgumentException> { chat.replaceMessage(-1, text("x"), null) }
+        assertFailsWith<IllegalArgumentException> { chat.replaceMessage(1, text("x"), Quote(1, "two")) }
+        assertFailsWith<IllegalArgumentException> { chat.replaceMessage(1, text("x"), Quote(9, "nine")) }
+    }
+
+    @Test
+    fun deletingKeepsEditedFlags() {
+        val conversation = edited().replaceMessage(2, text("third"), null).deleteMessage(0)
+
+        assertEquals(listOf(false, true), conversation.messages.map { it.edited })
+    }
 }

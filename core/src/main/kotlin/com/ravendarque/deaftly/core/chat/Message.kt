@@ -11,6 +11,7 @@ public data class Message(
     val spans: List<Span>,
     val quote: Quote? = null,
     val voiceTyped: Boolean = false,
+    val edited: Boolean = false,
 ) {
     public val plainText: String get() = RichText.plainText(spans)
 }

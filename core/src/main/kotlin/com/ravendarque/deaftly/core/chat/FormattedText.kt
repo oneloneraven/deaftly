@@ -76,17 +76,29 @@ public data class FormattedText(
         return if (start < end) StyleRange(start, end, range.style) else null
     }
 
-    private fun merge(candidates: List<StyleRange>): List<StyleRange> =
-        SpanStyle.entries.flatMap { style ->
-            val merged = ArrayList<StyleRange>()
-            for (range in candidates.filter { it.style == style && it.start < it.end }.sortedBy { it.start }) {
-                val last = merged.lastOrNull()
-                if (last != null && range.start <= last.end) {
-                    merged[merged.lastIndex] = last.copy(end = maxOf(last.end, range.end))
-                } else {
-                    merged += range
-                }
+    public companion object {
+        public fun of(spans: List<Span>): FormattedText {
+            var offset = 0
+            val ranges = ArrayList<StyleRange>()
+            for (span in spans) {
+                span.styles.forEach { ranges += StyleRange(offset, offset + span.text.length, it) }
+                offset += span.text.length
             }
-            merged
+            return FormattedText(RichText.plainText(spans), merge(ranges))
         }
+
+        private fun merge(candidates: List<StyleRange>): List<StyleRange> =
+            SpanStyle.entries.flatMap { style ->
+                val merged = ArrayList<StyleRange>()
+                for (range in candidates.filter { it.style == style && it.start < it.end }.sortedBy { it.start }) {
+                    val last = merged.lastOrNull()
+                    if (last != null && range.start <= last.end) {
+                        merged[merged.lastIndex] = last.copy(end = maxOf(last.end, range.end))
+                    } else {
+                        merged += range
+                    }
+                }
+                merged
+            }
+    }
 }
