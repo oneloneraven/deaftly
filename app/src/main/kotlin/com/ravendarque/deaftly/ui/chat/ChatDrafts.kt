@@ -34,6 +34,33 @@ class ChatDrafts(
         update { it.copy(composition = it.composition.insert(text)) }
     }
 
+    fun appendText(
+        owner: ParticipantId,
+        text: String,
+    ) {
+        drafts.update { all ->
+            val draft = all.getValue(owner)
+            val existing = draft.composition.text
+            val separator = if (existing.isNotEmpty() && !existing.last().isWhitespace()) " " else ""
+            val end = existing.length
+            val appended = draft.composition.select(end, end).insert(separator + text)
+            all + (owner to draft.copy(composition = appended))
+        }
+        persist(owner)
+    }
+
+    fun restoreQuote(
+        owner: ParticipantId,
+        quote: Quote,
+        deletedId: Int,
+        messageCount: Int,
+    ) {
+        val quoted = quote.messageId?.let { if (it > deletedId) it - 1 else it } ?: return
+        if (quoted !in 0 until messageCount || drafts.value.getValue(owner).quote != null) return
+        drafts.update { it + (owner to it.getValue(owner).copy(quote = quote.copy(messageId = quoted))) }
+        persist(owner)
+    }
+
     fun setQuote(quote: Quote?) {
         update { it.copy(quote = quote) }
     }

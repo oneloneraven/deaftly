@@ -98,7 +98,15 @@ class ChatScreenshotTest {
             SavedStateHandle(
                 mapOf("conversation" to ChatCodec.encode(orderingConversation(turn)), "draft_a" to draft, "draft_b" to draft),
             )
-        val viewModel = ChatViewModel(FakeSettingsRepository(), saved, store = FakeSavedChatStore(), writeScope = testWriteScope)
+        val viewModel =
+            ChatViewModel(
+                FakeSettingsRepository(),
+                saved,
+                store = FakeSavedChatStore(),
+                writeScope = testWriteScope,
+                createSpeechRecogniser = ::silentRecogniser,
+                audio = silentAudio(),
+            )
         shot { AppTheme(darkTheme = dark) { ChatScreen(viewModel, onEnd = {}, onInsertTemplate = {}) } }
     }
 
@@ -110,7 +118,15 @@ class ChatScreenshotTest {
                     "draft_b" to ChatCodec.encodeDraft(formattingDraft()),
                 ),
             )
-        val viewModel = ChatViewModel(FakeSettingsRepository(), saved, store = FakeSavedChatStore(), writeScope = testWriteScope)
+        val viewModel =
+            ChatViewModel(
+                FakeSettingsRepository(),
+                saved,
+                store = FakeSavedChatStore(),
+                writeScope = testWriteScope,
+                createSpeechRecogniser = ::silentRecogniser,
+                audio = silentAudio(),
+            )
         shot { AppTheme(darkTheme = dark) { ChatScreen(viewModel, onEnd = {}, onInsertTemplate = {}) } }
     }
 
@@ -129,6 +145,8 @@ class ChatScreenshotTest {
                 saved,
                 store = FakeSavedChatStore(),
                 writeScope = testWriteScope,
+                createSpeechRecogniser = ::silentRecogniser,
+                audio = silentAudio(),
             )
         shot { AppTheme(darkTheme = dark) { ChatScreen(viewModel, onEnd = {}, onInsertTemplate = {}) } }
     }
@@ -141,7 +159,14 @@ class ChatScreenshotTest {
     ) {
         val saved = SavedStateHandle(mapOf("conversation" to ChatCodec.encode(scriptConversation(turn = ParticipantId.A))))
         val viewModel =
-            ChatViewModel(FakeSettingsRepository(sidesSwapped = swapped), saved, store = FakeSavedChatStore(), writeScope = testWriteScope)
+            ChatViewModel(
+                FakeSettingsRepository(sidesSwapped = swapped),
+                saved,
+                store = FakeSavedChatStore(),
+                writeScope = testWriteScope,
+                createSpeechRecogniser = ::silentRecogniser,
+                audio = silentAudio(),
+            )
         composeRule.setContent { AppTheme(darkTheme = dark) { ChatScreen(viewModel, onEnd = {}, onInsertTemplate = {}) } }
         composeRule.waitForIdle()
         composeRule
@@ -178,6 +203,8 @@ class ChatScreenshotTest {
                 ChatOpening(listOf("Hi! I'm deaf. Could I have a table for two, please?")),
                 store = FakeSavedChatStore(),
                 writeScope = testWriteScope,
+                createSpeechRecogniser = ::silentRecogniser,
+                audio = silentAudio(),
             )
         shot { AppTheme(darkTheme = dark) { ChatScreen(viewModel, onEnd = {}, onInsertTemplate = {}) } }
     }

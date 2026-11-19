@@ -9,6 +9,8 @@ import com.ravendarque.deaftly.core.settings.SettingsRepository
 import com.ravendarque.deaftly.core.template.TemplateRepository
 import com.ravendarque.deaftly.help.HelpRepository
 import com.ravendarque.deaftly.ocr.paddle.PaddleOcrNcnnRecogniser
+import com.ravendarque.deaftly.speech.MicrophoneAudioSource
+import com.ravendarque.deaftly.speech.SherpaSpeechRecogniser
 import com.ravendarque.deaftly.storage.DataStoreSettingsRepository
 import com.ravendarque.deaftly.storage.DataStoreTemplateRepository
 import com.ravendarque.deaftly.storage.FileSavedChatStore
@@ -122,7 +124,18 @@ class AppContainer(
 
     fun chatViewModelFactory(opening: ChatOpening) =
         viewModelFactory {
-            initializer { ChatViewModel(settingsRepository, createSavedStateHandle(), opening, chatInsertions, savedChatStore, appScope) }
+            initializer {
+                ChatViewModel(
+                    settingsRepository,
+                    createSavedStateHandle(),
+                    opening,
+                    chatInsertions,
+                    savedChatStore,
+                    appScope,
+                    createSpeechRecogniser = { SherpaSpeechRecogniser(context.applicationContext) },
+                    audio = MicrophoneAudioSource(Dispatchers.IO),
+                )
+            }
         }
 
     fun fillViewModelFactory(templateId: String) =
