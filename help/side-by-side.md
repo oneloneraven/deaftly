@@ -24,9 +24,21 @@ Side by side is for a back-and-forth conversation on one phone. You pass the pho
 - **Insert template** adds one of your [templates](templates.md).
 - **Change text size** switches between small, medium and large.
 
-## Copying, quoting and deleting
+## Voice typing
 
-Long-press a message to **Copy**, **Quote** or **Delete** it. A quoted message appears above your reply.
+Voice typing is for the other person, so the microphone button only shows on their turn. It turns what they say into text on this phone. The audio isn't kept.
+
+- Tap the microphone button next to **Send** to start. The first time, Android asks to use the microphone. If it's blocked, the button offers to open settings.
+- While it's on, their words appear in the chat as they speak. A pause sends the message, so each message stays short.
+- Tap the button again to stop. Anything already shown is sent first.
+- It only listens on the other person's turn, while Deaftly is open. When you switch to your turn, you get the keyboard back.
+- If voice typing isn't available, you'll see a note and can type as usual.
+
+To fix a mistake, tap their message. Voice typing stops, the message comes out of the chat and goes into the text box, ready to change and send again. If something is already in the box, the message is added to the end. Tapping only works on the other person's turn.
+
+## Copying, quoting, editing and deleting
+
+Long-press a message to **Edit**, **Copy**, **Quote** or **Delete** it. **Edit** only shows on voice-typed messages, on the other person's turn. A quoted message appears above your reply.
 
 ## Ending the chat
 
