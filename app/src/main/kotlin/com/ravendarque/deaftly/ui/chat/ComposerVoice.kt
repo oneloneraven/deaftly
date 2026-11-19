@@ -22,7 +22,6 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.dp
 import com.ravendarque.deaftly.R
-import com.ravendarque.deaftly.ui.components.PrimaryButton
 import com.ravendarque.deaftly.ui.components.SecondaryButton
 import com.ravendarque.deaftly.ui.icons.DeaftlyIcons
 import com.ravendarque.deaftly.ui.theme.Deaftly
@@ -69,7 +68,7 @@ internal fun VoicePermissionCard(prompt: VoicePermissionPrompt) {
                 DeaftlyIcons.Settings,
             )
         } else {
-            PrimaryButton(stringResource(R.string.chat_voice_allow), prompt.onAllow, Modifier.fillMaxWidth(), DeaftlyIcons.Mic)
+            SecondaryButton(stringResource(R.string.chat_voice_allow), prompt.onAllow, Modifier.fillMaxWidth(), DeaftlyIcons.Mic)
         }
     }
 }
