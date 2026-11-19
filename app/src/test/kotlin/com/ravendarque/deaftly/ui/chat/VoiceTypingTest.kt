@@ -198,6 +198,22 @@ class VoiceTypingTest {
         }
 
     @Test
+    fun theFailureClearsWhenListeningCanStartAgain() =
+        runTest {
+            val voice = voiceTyping(create = { error("model missing") })
+            voice.turnOn()
+            voice.update(true)
+            runCurrent()
+
+            voice.update(false)
+            assertTrue(voice.state.value.unavailable)
+            voice.update(true)
+
+            assertFalse(voice.state.value.unavailable)
+            assertFalse(voice.state.value.on)
+        }
+
+    @Test
     fun restoredOnStateWaitsForResume() =
         runTest {
             val audio = HangingAudio(0)

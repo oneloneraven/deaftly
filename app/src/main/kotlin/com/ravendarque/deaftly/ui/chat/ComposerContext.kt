@@ -67,7 +67,7 @@ private fun QuotePreview(
 private fun EditingBar(onCancel: () -> Unit) {
     val cancelLabel = stringResource(R.string.chat_cancel_editing)
     Row(verticalAlignment = Alignment.CenterVertically) {
-        PromptLine(DeaftlyIcons.Edit, R.string.chat_editing_message, announce = true, modifier = Modifier.weight(1f))
+        PromptLine(DeaftlyIcons.Edit, R.string.chat_editing_message, modifier = Modifier.weight(1f))
         Box(
             modifier =
                 Modifier

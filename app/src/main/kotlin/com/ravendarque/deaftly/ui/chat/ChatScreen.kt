@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -53,7 +54,6 @@ private fun ChatContent(
 ) {
     var editingParticipants by rememberSaveable { mutableStateOf(false) }
     var confirmingEnd by rememberSaveable { mutableStateOf(false) }
-    val voiceControls = rememberVoiceControls(current, viewModel, microphone)
     val requestEnd = {
         viewModel.voice.stop()
         when {
@@ -74,8 +74,8 @@ private fun ChatContent(
     SidesChat(
         current,
         viewModel,
-        rememberComposerActions(viewModel, onInsertTemplate).copy(onToggleVoice = voiceControls.toggle),
-        voiceControls.permissionPrompt,
+        rememberComposerActions(viewModel, onInsertTemplate),
+        microphone,
         ChatHeaderActions(
             onEnd = requestEnd,
             onEditParticipants = { editingParticipants = true },
@@ -115,14 +115,17 @@ private fun ChatContent(
 private fun SidesChat(
     current: ChatUiState.Ready,
     viewModel: ChatViewModel,
-    composerActions: ComposerActions,
-    voicePermission: VoicePermissionPrompt?,
+    baseActions: ComposerActions,
+    microphone: RuntimePermission,
     headerActions: ChatHeaderActions,
 ) {
+    val notice = remember { ChatNotice() }
+    val voiceControls = rememberVoiceControls(current, viewModel, microphone, notice)
+    val composerActions = baseActions.copy(onToggleVoice = voiceControls.toggle)
+    val voicePermission = voiceControls.permissionPrompt
     val conversation = current.conversation
     val hearingPersonsTurn = conversation.turn == ParticipantId.B
     val tail = remember { BubbleTailState() }
-    var notYours by remember { mutableIntStateOf(0) }
     Surface(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.safeDrawingPadding()) {
             ChatHeader(current.textSize, headerActions)
@@ -134,7 +137,7 @@ private fun SidesChat(
                     onQuote = { viewModel.quote(it) },
                     onDelete = viewModel::deleteMessage,
                     onEdit = viewModel::startEdit,
-                    onNotYours = { notYours++ },
+                    onNotYours = { notice.show(R.string.chat_edit_not_yours) },
                 ),
                 Modifier.weight(1f).fillMaxSize(),
                 liveText = current.voice.live,
@@ -152,11 +155,7 @@ private fun SidesChat(
                     voice = current.voice.takeIf { hearingPersonsTurn },
                     voicePermission = voicePermission.takeIf { hearingPersonsTurn },
                 )
-                TransientNotice(
-                    notYours,
-                    stringResource(R.string.chat_edit_not_yours),
-                    Modifier.padding(horizontal = Deaftly.spacing.space24),
-                )
+                TransientNotice(notice, Modifier.padding(horizontal = Deaftly.spacing.space24))
             }
             TurnControl(
                 conversation = conversation,
@@ -195,50 +194,64 @@ private fun rememberVoiceControls(
     current: ChatUiState.Ready,
     viewModel: ChatViewModel,
     microphone: RuntimePermission,
+    notice: ChatNotice,
 ): VoiceControls {
-    var asking by rememberSaveable { mutableStateOf(false) }
-    val access = microphone.access
-    val granted = access == PermissionAccess.Granted
+    val asking = rememberSaveable { mutableStateOf(false) }
+    VoiceEffects(current, viewModel, microphone.access == PermissionAccess.Granted, asking)
+    val toggle = {
+        val voice = viewModel.voice
+        when {
+            current.voice.unavailable -> {
+                notice.show(R.string.chat_voice_unavailable)
+            }
+
+            microphone.access == PermissionAccess.Granted -> {
+                if (current.voice.on) voice.turnOff() else voice.turnOn()
+            }
+
+            microphone.access == PermissionAccess.DeniedForGood -> {
+                asking.value = !asking.value
+            }
+
+            else -> {
+                asking.value = true
+                microphone.request()
+            }
+        }
+    }
+    val prompt =
+        if (asking.value && microphone.access != PermissionAccess.Granted) {
+            VoicePermissionPrompt(microphone.access == PermissionAccess.DeniedForGood, microphone.request, microphone.openSettings)
+        } else {
+            null
+        }
+    return VoiceControls(toggle, prompt)
+}
+
+@Composable
+private fun VoiceEffects(
+    current: ChatUiState.Ready,
+    viewModel: ChatViewModel,
+    granted: Boolean,
+    asking: MutableState<Boolean>,
+) {
     val voiceOn = current.voice.on
+    val editing = current.draft.editing != null
     val hearingPersonsTurn = current.conversation.turn == ParticipantId.B
-    LifecycleResumeEffect(access) {
+    LifecycleResumeEffect(granted) {
         viewModel.setListeningAllowed(foreground = true, permitted = granted)
         onPauseOrDispose { viewModel.setListeningAllowed(foreground = false, permitted = granted) }
     }
     LaunchedEffect(granted) {
         if (!granted && voiceOn) viewModel.voice.turnOff()
     }
-    val editing = current.draft.editing != null
-    LaunchedEffect(granted, asking, editing) {
-        if (granted && asking && !editing) {
-            asking = false
+    LaunchedEffect(granted, asking.value, editing) {
+        if (granted && asking.value && !editing) {
+            asking.value = false
             viewModel.voice.turnOn()
         }
     }
     LaunchedEffect(hearingPersonsTurn, editing) {
-        if (!hearingPersonsTurn || editing) asking = false
+        if (!hearingPersonsTurn || editing) asking.value = false
     }
-    val toggle = {
-        when {
-            granted -> {
-                if (voiceOn) viewModel.voice.turnOff() else viewModel.voice.turnOn()
-            }
-
-            access == PermissionAccess.DeniedForGood -> {
-                asking = !asking
-            }
-
-            else -> {
-                asking = true
-                microphone.request()
-            }
-        }
-    }
-    val prompt =
-        if (asking && !granted) {
-            VoicePermissionPrompt(access == PermissionAccess.DeniedForGood, microphone.request, microphone.openSettings)
-        } else {
-            null
-        }
-    return VoiceControls(toggle, prompt)
 }

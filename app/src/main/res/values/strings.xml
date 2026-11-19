@@ -207,6 +207,7 @@
     <string name="chat_voice_on">Voice typing is on. Speak clearly towards the device.</string>
     <string name="chat_voice_start">Start voice typing</string>
     <string name="chat_voice_stop">Stop voice typing</string>
+    <string name="chat_voice_unavailable_button">Voice typing unavailable</string>
     <string name="chat_voice_unavailable">Voice typing isn\u2019t available right now. You can still type normally.</string>
     <string name="chat_voice_permission">To use voice typing, allow Deaftly to use the microphone. We don\u2019t upload or store any audio recordings.</string>
     <string name="chat_voice_allow">Allow microphone</string>

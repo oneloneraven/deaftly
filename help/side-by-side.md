@@ -32,7 +32,7 @@ Voice typing is for the other person, so the microphone button only shows on the
 - While it's on, their words appear in the chat as they speak. A pause sends the message, so each message stays short.
 - Tap the button again to stop. Anything already shown is sent first.
 - It only listens on the other person's turn, while Deaftly is open. When you switch to your turn, you get the keyboard back.
-- If voice typing isn't available, you'll see a note and can type as usual.
+- If voice typing isn't available, the microphone button turns grey with a line through it. Tap it to see why. You can still type as usual.
 
 To fix a mistake in a voice-typed message, they tap it on their turn. Voice typing stops while they edit, and the message stays in the chat. See Copying, quoting, editing and deleting below.
 

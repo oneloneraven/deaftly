@@ -56,6 +56,7 @@ class VoiceTyping(
     }
 
     fun update(canListen: Boolean = this.canListen) {
+        if (canListen && !this.canListen) mutableState.update { it.copy(unavailable = false) }
         this.canListen = canListen
         reconcile()
     }

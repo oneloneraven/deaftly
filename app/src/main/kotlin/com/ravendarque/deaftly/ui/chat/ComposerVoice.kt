@@ -34,8 +34,17 @@ internal fun MicButton(
     container: Color,
     content: Color,
     enabled: Boolean = true,
+    unavailable: Boolean = false,
 ) {
-    val label = stringResource(if (on) R.string.chat_voice_stop else R.string.chat_voice_start)
+    val c = Deaftly.colors
+    val label =
+        stringResource(
+            when {
+                unavailable -> R.string.chat_voice_unavailable_button
+                on -> R.string.chat_voice_stop
+                else -> R.string.chat_voice_start
+            },
+        )
     val stateText = stringResource(if (on) R.string.chat_format_on else R.string.chat_format_off)
     Box(
         modifier =
@@ -43,15 +52,24 @@ internal fun MicButton(
                 .size(width = SendWidth, height = ControlSize)
                 .alpha(if (enabled) 1f else DISABLED_ALPHA)
                 .clip(AccentShape)
-                .background(container)
+                .background(if (unavailable) c.ground else container)
                 .clickable(enabled = enabled, role = Role.Button, onClick = onClick)
                 .semantics {
                     contentDescription = label
-                    stateDescription = stateText
+                    if (!unavailable) stateDescription = stateText
                 },
         contentAlignment = Alignment.Center,
     ) {
-        Icon(if (on) DeaftlyIcons.Stop else DeaftlyIcons.Mic, contentDescription = null, tint = content, modifier = Modifier.size(22.dp))
+        Icon(
+            when {
+                unavailable -> DeaftlyIcons.MicOff
+                on -> DeaftlyIcons.Stop
+                else -> DeaftlyIcons.Mic
+            },
+            contentDescription = null,
+            tint = if (unavailable) c.inkSecondary else content,
+            modifier = Modifier.size(22.dp),
+        )
     }
 }
 

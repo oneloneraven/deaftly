@@ -121,13 +121,10 @@ fun Composer(
                 ),
         verticalArrangement = Arrangement.spacedBy(Deaftly.spacing.space8),
     ) {
-        val mic: @Composable () -> Unit = {
-            MicButton(voiceOn, actions.onToggleVoice, colours.strong, colours.onStrong, draft.editing == null)
-        }
+        val mic: @Composable () -> Unit = { ComposerMic(voice, draft, actions, colours) }
         when {
-            voiceOn -> WithMic(mic) { PromptLine(DeaftlyIcons.Mic, R.string.chat_voice_on, announce = true, modifier = it) }
+            voiceOn -> WithMic(mic) { PromptLine(DeaftlyIcons.Mic, R.string.chat_voice_on, modifier = it) }
             voicePermission != null -> VoicePermissionCard(voicePermission)
-            voice?.unavailable == true -> PromptLine(DeaftlyIcons.Info, R.string.chat_voice_unavailable, announce = false)
             !hasSent -> TurnPrompt(participant.id)
         }
         if (!voiceOn) {
@@ -154,6 +151,23 @@ fun Composer(
 }
 
 @Composable
+private fun ComposerMic(
+    voice: VoiceTypingState?,
+    draft: Draft,
+    actions: ComposerActions,
+    colours: ParticipantColours,
+) {
+    MicButton(
+        on = voice?.on == true,
+        onClick = actions.onToggleVoice,
+        container = colours.strong,
+        content = colours.onStrong,
+        enabled = draft.editing == null,
+        unavailable = voice?.unavailable == true,
+    )
+}
+
+@Composable
 private fun WithMic(
     mic: @Composable () -> Unit,
     content: @Composable (Modifier) -> Unit,
@@ -173,7 +187,6 @@ private fun TurnPrompt(id: ParticipantId) {
     PromptLine(
         DeaftlyIcons.Edit,
         if (id == ParticipantId.B) R.string.chat_turn_prompt_other else R.string.chat_turn_prompt_own,
-        announce = true,
     )
 }
 
@@ -181,12 +194,11 @@ private fun TurnPrompt(id: ParticipantId) {
 internal fun PromptLine(
     icon: ImageVector,
     @StringRes text: Int,
-    announce: Boolean,
     modifier: Modifier = Modifier,
 ) {
     val c = Deaftly.colors
     Row(
-        modifier = if (announce) modifier.semantics { liveRegion = LiveRegionMode.Polite } else modifier,
+        modifier = modifier.semantics { liveRegion = LiveRegionMode.Polite },
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(Deaftly.spacing.space8),
     ) {

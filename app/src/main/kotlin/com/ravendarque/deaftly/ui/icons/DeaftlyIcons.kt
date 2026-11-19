@@ -146,6 +146,18 @@ object DeaftlyIcons {
         strokeIcon("Mic", "M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z", "M19 10v2a7 7 0 0 1-14 0v-2", "M12 19v3")
     }
 
+    val MicOff: ImageVector by lazy {
+        strokeIcon(
+            "MicOff",
+            "M2 2l20 20",
+            "M18.89 13.23A7 7 0 0 0 19 12v-2",
+            "M5 10v2a7 7 0 0 0 12 5",
+            "M15 9.34V5a3 3 0 0 0-5.68-1.33",
+            "M9 9v3a3 3 0 0 0 5.12 2.12",
+            "M12 19v3",
+        )
+    }
+
     val Stop: ImageVector by lazy { strokeIcon("Stop", "M8 6h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z") }
 
     val Send: ImageVector by lazy { strokeIcon("Send", "M22 2L11 13M22 2l-7 20-4-9-9-4z") }

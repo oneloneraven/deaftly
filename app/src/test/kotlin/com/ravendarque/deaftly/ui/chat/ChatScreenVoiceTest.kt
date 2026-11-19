@@ -264,7 +264,7 @@ class ChatScreenVoiceTest {
     }
 
     @Test
-    fun unavailableShowsTheFallbackLine() {
+    fun unavailableGreysTheMicAndExplainsWhenTapped() {
         show(
             orderingConversation(ParticipantId.B),
             createSpeechRecogniser = { error("The model would not load") },
@@ -273,10 +273,18 @@ class ChatScreenVoiceTest {
 
         startVoiceTyping()
 
-        composeRule.onNodeWithText("Voice typing isn\u2019t available right now. You can still type normally.").assertIsDisplayed()
+        composeRule.onNodeWithText("Voice typing isn\u2019t available right now. You can still type normally.").assertDoesNotExist()
         composeRule.onNode(isMessageField).assertIsDisplayed()
-        composeRule.onNodeWithContentDescription("Start voice typing").assertIsDisplayed()
         composeRule.onRoot().tryPerformAccessibilityChecks()
+
+        composeRule.onNodeWithContentDescription("Voice typing unavailable").performClick()
+        composeRule.waitForIdle()
+
+        assertEquals(false, viewModel.voice.state.value.on)
+        composeRule.mainClock.autoAdvance = false
+        composeRule.onNodeWithContentDescription("Voice typing unavailable").performClick()
+        composeRule.mainClock.advanceTimeBy(UNAVAILABLE_NOTICE_SHOWN_MILLIS)
+        composeRule.onNodeWithText("Voice typing isn\u2019t available right now. You can still type normally.").assertIsDisplayed()
     }
 
     @Test
@@ -295,3 +303,5 @@ class ChatScreenVoiceTest {
         assertEquals("Tuesday works", conversation().messages.last().plainText)
     }
 }
+
+private const val UNAVAILABLE_NOTICE_SHOWN_MILLIS = 1_000L
