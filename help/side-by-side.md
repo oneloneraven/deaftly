@@ -40,9 +40,9 @@ To fix a mistake in a voice-typed message, they tap it on their turn. Voice typi
 
 Long-press a message to **Edit**, **Copy**, **Quote** or **Delete** it. A quoted message appears above your reply.
 
-You can edit your own messages, on your own turn. Tap the message, or long-press it and choose **Edit**. It stays where it is in the chat, and its text, formatting and quote go into the text box under "Editing message". Make your changes and tap **Send** to replace it. It then shows "Edited" under it. Tap the X beside "Editing message" to cancel and leave the message as it was.
+You can edit your own messages, on your own turn. Tap the message, or long-press it and choose **Edit**. It stays where it is in the chat, and its text, formatting and quote go into the text box under "Editing message". Make your changes and tap **Send** to replace it. It then shows EDITED under it. Tap the X beside "Editing message" to cancel and leave the message as it was.
 
-Whatever you had already written in the box is set aside while you edit, and comes back when you send or cancel. The other person can do the same with their own messages on their turn, including voice-typed ones. You can't edit each other's messages.
+Whatever you had already written in the box is set aside while you edit, and comes back when you send or cancel. The other person can do the same with their own messages on their turn, including voice-typed ones. You can't edit each other's messages. If you tap the other person's message, a note reminds you.
 
 ## Ending the chat
 

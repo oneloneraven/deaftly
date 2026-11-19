@@ -137,15 +137,17 @@ fun Composer(
             }
             if (voice != null) WithMic(mic, field) else field(Modifier)
         }
-        FlowRow(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(Deaftly.spacing.space4),
-            verticalArrangement = Arrangement.spacedBy(Deaftly.spacing.space4),
-            itemVerticalAlignment = Alignment.CenterVertically,
-        ) {
-            FormattingButtons(state, actions, ToolbarLook(colours, enabled = !voiceOn))
-            Box(Modifier.weight(1f), contentAlignment = Alignment.CenterEnd) {
-                SendButton(enabled = canSend && !voiceOn, onClick = send, container = colours.strong, content = colours.onStrong)
+        if (!voiceOn) {
+            FlowRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(Deaftly.spacing.space4),
+                verticalArrangement = Arrangement.spacedBy(Deaftly.spacing.space4),
+                itemVerticalAlignment = Alignment.CenterVertically,
+            ) {
+                FormattingButtons(state, actions, colours)
+                Box(Modifier.weight(1f), contentAlignment = Alignment.CenterEnd) {
+                    SendButton(enabled = canSend, onClick = send, container = colours.strong, content = colours.onStrong)
+                }
             }
         }
     }
@@ -193,18 +195,13 @@ internal fun PromptLine(
     }
 }
 
-private class ToolbarLook(
-    val colours: ParticipantColours,
-    val enabled: Boolean,
-)
-
 @Composable
 private fun FormattingButtons(
     state: ComposerState,
     actions: ComposerActions,
-    look: ToolbarLook,
+    colours: ParticipantColours,
 ) {
-    FormatButton(state, SpanStyle.Bold, R.string.chat_format_bold, look) {
+    FormatButton(state, SpanStyle.Bold, R.string.chat_format_bold, colours) {
         Text(
             text = stringResource(R.string.chat_format_glyph_bold),
             fontSize = GLYPH_SP.sp,
@@ -212,7 +209,7 @@ private fun FormattingButtons(
             color = it,
         )
     }
-    FormatButton(state, SpanStyle.Italic, R.string.chat_format_italic, look) {
+    FormatButton(state, SpanStyle.Italic, R.string.chat_format_italic, colours) {
         Text(
             text = stringResource(R.string.chat_format_glyph_italic),
             fontSize = GLYPH_SP.sp,
@@ -221,15 +218,14 @@ private fun FormattingButtons(
             color = it,
         )
     }
-    FormatButton(state, SpanStyle.Highlight, R.string.chat_format_highlight, look) {
+    FormatButton(state, SpanStyle.Highlight, R.string.chat_format_highlight, colours) {
         Icon(DeaftlyIcons.Highlight, contentDescription = null, modifier = Modifier.size(ToolbarIcon), tint = it)
     }
     ToolbarButton(
         label = stringResource(R.string.chat_insert_template),
         selected = false,
-        colours = look.colours,
+        colours = colours,
         onClick = actions.onInsertTemplate,
-        enabled = look.enabled,
     ) {
         Icon(DeaftlyIcons.Template, contentDescription = null, modifier = Modifier.size(ToolbarIcon), tint = it)
     }
@@ -240,15 +236,14 @@ private fun FormatButton(
     state: ComposerState,
     style: SpanStyle,
     label: Int,
-    look: ToolbarLook,
+    colours: ParticipantColours,
     glyph: @Composable (Color) -> Unit,
 ) {
     ToolbarButton(
         label = stringResource(label),
         selected = state.composition.isActive(style),
-        colours = look.colours,
+        colours = colours,
         onClick = { state.toggle(style) },
-        enabled = look.enabled,
         glyph = glyph,
     )
 }

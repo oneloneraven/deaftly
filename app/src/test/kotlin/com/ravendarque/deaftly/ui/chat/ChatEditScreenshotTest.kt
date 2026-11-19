@@ -35,6 +35,7 @@ class ChatEditScreenshotTest {
         conversation: Conversation,
         dark: Boolean,
         tap: String? = null,
+        holdClock: Boolean = false,
     ) {
         val viewModel =
             ChatViewModel(
@@ -47,14 +48,17 @@ class ChatEditScreenshotTest {
             )
         composeRule.setContent { AppTheme(darkTheme = dark) { ChatScreen(viewModel, onEnd = {}, onInsertTemplate = {}) } }
         composeRule.waitForIdle()
+        composeRule.mainClock.autoAdvance = !holdClock
         tap?.let {
             composeRule.onNodeWithContentDescription(it, substring = true).performClick()
-            composeRule.waitForIdle()
+            if (holdClock) composeRule.mainClock.advanceTimeBy(NOTICE_SHOWN_MILLIS) else composeRule.waitForIdle()
         }
         composeRule.onRoot().captureRoboImage("$SCREENSHOT_DIR/$PACKAGE.${this::class.simpleName}.${testName.methodName}.png")
     }
 
     private fun editing(dark: Boolean) = show(orderingConversation(ParticipantId.A), dark, tap = "Sam: Mild please")
+
+    private fun notice(dark: Boolean) = show(orderingConversation(ParticipantId.A), dark, tap = "Waiter: No problem", holdClock = true)
 
     private fun edited(dark: Boolean) =
         show(
@@ -66,6 +70,12 @@ class ChatEditScreenshotTest {
 
     @Test
     fun editingMessageLightTheme() = editing(dark = false)
+
+    @Test
+    fun notYoursNoticeLightTheme() = notice(dark = false)
+
+    @Test
+    fun notYoursNoticeDarkTheme() = notice(dark = true)
 
     @Test
     fun editingMessageDarkTheme() = editing(dark = true)
@@ -84,3 +94,5 @@ class ChatEditScreenshotTest {
     @Test
     fun editedLabelDarkTheme() = edited(dark = true)
 }
+
+private const val NOTICE_SHOWN_MILLIS = 1_000L

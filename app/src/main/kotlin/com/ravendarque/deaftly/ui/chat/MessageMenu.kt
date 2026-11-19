@@ -24,6 +24,7 @@ data class MessageActions(
     val onQuote: (messageId: Int) -> Unit,
     val onDelete: (messageId: Int) -> Unit,
     val onEdit: (messageId: Int) -> Unit,
+    val onNotYours: () -> Unit = {},
 )
 
 internal data class MessageCommand(

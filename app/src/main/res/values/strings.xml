@@ -203,6 +203,7 @@
     <string name="chat_quote_action">Quote</string>
     <string name="chat_delete_action">Delete</string>
     <string name="chat_edit_action">Edit</string>
+    <string name="chat_edit_not_yours">You can only edit your own messages</string>
     <string name="chat_voice_on">Voice typing is on. Speak clearly towards the device.</string>
     <string name="chat_voice_start">Start voice typing</string>
     <string name="chat_voice_stop">Stop voice typing</string>

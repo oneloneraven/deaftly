@@ -156,7 +156,7 @@ private fun ScriptMessage(
                 Modifier
                     .pointerInput(editable) {
                         detectTapGestures(
-                            onTap = { if (editable) actions.onEdit(message.id) },
+                            onTap = { if (editable) actions.onEdit(message.id) else actions.onNotYours() },
                             onLongPress = { menuOpen = true },
                         )
                     }.semantics(mergeDescendants = true) {
@@ -264,9 +264,9 @@ private fun NameLabel(
 @Composable
 private fun EditedLabel(align: TextAlign) {
     Text(
-        text = stringResource(R.string.chat_message_edited),
+        text = stringResource(R.string.chat_message_edited).uppercase(),
         color = Deaftly.colors.inkSecondary,
-        style = MaterialTheme.typography.labelMedium,
+        style = MaterialTheme.typography.labelSmall.copy(letterSpacing = LABEL_TRACKING.em),
         textAlign = align,
         modifier = Modifier.fillMaxWidth(),
     )

@@ -1,6 +1,7 @@
 package com.ravendarque.deaftly.ui.chat
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -9,10 +10,12 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.LifecycleResumeEffect
@@ -119,6 +122,7 @@ private fun SidesChat(
     val conversation = current.conversation
     val hearingPersonsTurn = conversation.turn == ParticipantId.B
     val tail = remember { BubbleTailState() }
+    var notYours by remember { mutableIntStateOf(0) }
     Surface(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.safeDrawingPadding()) {
             ChatHeader(current.textSize, headerActions)
@@ -130,22 +134,30 @@ private fun SidesChat(
                     onQuote = { viewModel.quote(it) },
                     onDelete = viewModel::deleteMessage,
                     onEdit = viewModel::startEdit,
+                    onNotYours = { notYours++ },
                 ),
                 Modifier.weight(1f).fillMaxSize(),
                 liveText = current.voice.live,
                 editable = { it.author == conversation.turn },
             )
-            Composer(
-                participant = conversation.activeParticipant,
-                hasSent = conversation.messages.any { it.author == conversation.turn },
-                draft = current.draft,
-                textSize = current.textSize,
-                actions = composerActions,
-                modifier = Modifier.padding(horizontal = Deaftly.spacing.space12),
-                tail = tail,
-                voice = current.voice.takeIf { hearingPersonsTurn },
-                voicePermission = voicePermission.takeIf { hearingPersonsTurn },
-            )
+            Box(contentAlignment = Alignment.Center) {
+                Composer(
+                    participant = conversation.activeParticipant,
+                    hasSent = conversation.messages.any { it.author == conversation.turn },
+                    draft = current.draft,
+                    textSize = current.textSize,
+                    actions = composerActions,
+                    modifier = Modifier.padding(horizontal = Deaftly.spacing.space12),
+                    tail = tail,
+                    voice = current.voice.takeIf { hearingPersonsTurn },
+                    voicePermission = voicePermission.takeIf { hearingPersonsTurn },
+                )
+                TransientNotice(
+                    notYours,
+                    stringResource(R.string.chat_edit_not_yours),
+                    Modifier.padding(horizontal = Deaftly.spacing.space24),
+                )
+            }
             TurnControl(
                 conversation = conversation,
                 sidesSwapped = current.sidesSwapped,

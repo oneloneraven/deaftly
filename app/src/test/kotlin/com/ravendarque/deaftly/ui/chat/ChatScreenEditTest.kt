@@ -114,6 +114,31 @@ class ChatScreenEditTest {
     }
 
     @Test
+    fun tappingTheOtherPersonsMessageShowsANoticeThatFades() {
+        show(orderingConversation(ParticipantId.A))
+        composeRule.mainClock.autoAdvance = false
+
+        message(theirMessage).performClick()
+        composeRule.mainClock.advanceTimeBy(FADE_MILLIS)
+
+        composeRule.onNodeWithText("You can only edit your own messages").assertIsDisplayed()
+
+        composeRule.mainClock.advanceTimeBy(NOTICE_MILLIS + FADE_MILLIS)
+
+        composeRule.onNodeWithText("You can only edit your own messages").assertDoesNotExist()
+    }
+
+    @Test
+    fun tappingYourOwnMessageOnYourTurnShowsNoNotice() {
+        show(orderingConversation(ParticipantId.A))
+
+        message(ownMessage).performClick()
+        composeRule.waitForIdle()
+
+        composeRule.onNodeWithText("You can only edit your own messages").assertDoesNotExist()
+    }
+
+    @Test
     fun tappingYourOwnMessageOnTheOtherPersonsTurnDoesNothing() {
         show(orderingConversation(ParticipantId.B))
 
@@ -184,7 +209,7 @@ class ChatScreenEditTest {
         composeRule.waitForIdle()
 
         composeRule.onNodeWithText("Editing message").assertDoesNotExist()
-        composeRule.onNodeWithText("Edited").assertIsDisplayed()
+        composeRule.onNodeWithText("EDITED").assertIsDisplayed()
         message("Sam: Medium please, edited").assertIsDisplayed()
         assertEquals(listOf(0, 1, 2, 3), conversation().messages.map { it.id })
     }
@@ -194,7 +219,7 @@ class ChatScreenEditTest {
         val edited = orderingConversation(ParticipantId.A).replaceMessage(3, RichText.spans("Ten minutes."), null)
         show(edited)
 
-        composeRule.onNodeWithText("Edited").assertIsDisplayed()
+        composeRule.onNodeWithText("EDITED").assertIsDisplayed()
         message("Waiter: Ten minutes., edited").assertIsDisplayed()
         composeRule.onRoot().tryPerformAccessibilityChecks()
     }
@@ -212,3 +237,5 @@ class ChatScreenEditTest {
         composeRule.onRoot().tryPerformAccessibilityChecks()
     }
 }
+
+private const val FADE_MILLIS = 500L

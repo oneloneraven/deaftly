@@ -38,7 +38,7 @@ These would make it a failure even if it technically works:
 
 1. **The mic button** sits next to Send in the composer, in the same accented style (the participant's strong colour, as `SendButton` uses). It shows **only on the hearing person's turn** (participant B). The deaf user never sees it.
 2. **Tapping the mic turns voice typing on:**
-   - the other composer buttons are disabled
+   - the other composer buttons are hidden (first built as disabled; the owner asked for hidden on 19 November 2026)
    - the text input is hidden
    - the turn prompt changes to something like "Voice typing is on. Speak clearly towards the phone." (final copy to agree; professional register, no en dashes)
 3. **Words appear live** in the message pane as they're spoken, in the hearing person's bubble style.
@@ -84,6 +84,8 @@ The owner tried the first build on a phone on 19 November 2026 and changed editi
 - **A draft already typed is set aside** while editing and comes back when the edit is sent or cancelled (replacing "the message text is added to the end of the draft").
 - **Voice typing turns off** when an edit starts, and the mic is disabled while editing.
 - **An edited message can be edited again.**
+- **Tapping someone else's message** shows a short notice over the composer, "You can only edit your own messages", which fades after a few seconds.
+- **The "Edited" label** is in capitals at the app's smallest type size, like the speaker names.
 
 ## Approaches considered
 

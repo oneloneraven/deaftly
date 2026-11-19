@@ -135,7 +135,7 @@ class ChatScreenVoiceTest {
     }
 
     @Test
-    fun voiceOnHidesTheFieldAndDisablesTheOtherButtons() {
+    fun voiceOnHidesTheFieldAndTheOtherButtons() {
         showListening()
         composeRule.onNode(isMessageField).assertIsDisplayed()
 
@@ -143,7 +143,7 @@ class ChatScreenVoiceTest {
 
         composeRule.onNode(isMessageField).assertDoesNotExist()
         listOf("Send", "Bold", "Italic", "Highlight", "Insert template").forEach {
-            composeRule.onNodeWithContentDescription(it).assertIsNotEnabled()
+            composeRule.onNodeWithContentDescription(it).assertDoesNotExist()
         }
         composeRule
             .onNodeWithContentDescription("Stop voice typing")
