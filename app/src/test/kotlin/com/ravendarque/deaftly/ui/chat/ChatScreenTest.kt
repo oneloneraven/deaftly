@@ -257,7 +257,7 @@ class ChatScreenTest {
     fun theHearingPersonsPromptShowsUntilTheyHaveSent() {
         show(SavedStateHandle(mapOf("conversation" to ChatCodec.encode(deafUserHasSpoken()))))
 
-        composeRule.onNodeWithText("Your turn – type your reply here").assertIsDisplayed()
+        composeRule.onNodeWithText("Your turn: type your reply here").assertIsDisplayed()
         turnControl().assert(hasState("Waiter\u2019s turn"))
     }
 
@@ -265,7 +265,7 @@ class ChatScreenTest {
     fun theHearingPersonsPromptIsGoneOnceTheyHaveSent() {
         showOrdering(ParticipantId.B)
 
-        composeRule.onNodeWithText("Your turn – type your reply here").assertDoesNotExist()
+        composeRule.onNodeWithText("Your turn: type your reply here").assertDoesNotExist()
         turnControl().assert(hasState("Waiter\u2019s turn"))
     }
 
@@ -274,7 +274,7 @@ class ChatScreenTest {
         showOrdering(ParticipantId.A)
 
         composeRule.onNodeWithText("Type your message").assertDoesNotExist()
-        composeRule.onNodeWithText("Your turn – type your reply here").assertDoesNotExist()
+        composeRule.onNodeWithText("Your turn: type your reply here").assertDoesNotExist()
     }
 
     @Test
@@ -289,12 +289,12 @@ class ChatScreenTest {
 
         composeRule.runOnUiThread { viewModel.selectTurn(ParticipantId.B) }
         composeRule.waitForIdle()
-        composeRule.onNodeWithText("Your turn – type your reply here").assertIsDisplayed()
+        composeRule.onNodeWithText("Your turn: type your reply here").assertIsDisplayed()
 
         composeRule.onNode(isMessageField).performTextInput("Hi")
         composeRule.onNodeWithContentDescription("Send").performClick()
         composeRule.waitForIdle()
-        composeRule.onNodeWithText("Your turn – type your reply here").assertDoesNotExist()
+        composeRule.onNodeWithText("Your turn: type your reply here").assertDoesNotExist()
     }
 
     @Test

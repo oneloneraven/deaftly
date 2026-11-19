@@ -21,13 +21,11 @@ val ktlintRules =
 
 spotless {
     kotlin {
-        target("**/*.kt")
-        targetExclude("**/build/**")
+        target("*/src/**/*.kt")
         ktlint(libs.versions.ktlint.get()).editorConfigOverride(ktlintRules)
     }
     kotlinGradle {
-        target("**/*.gradle.kts")
-        targetExclude("**/build/**")
+        target("*.gradle.kts", "*/*.gradle.kts")
         ktlint(libs.versions.ktlint.get()).editorConfigOverride(ktlintRules)
     }
 }

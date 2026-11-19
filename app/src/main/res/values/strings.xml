@@ -167,7 +167,7 @@
     <string name="colour_green">Green</string>
     <string name="colour_blue">Blue</string>
     <string name="colour_indigo">Indigo</string>
-    <string name="chat_turn_prompt_other">Your turn \u2013 type your reply here</string>
+    <string name="chat_turn_prompt_other">Your turn: type your reply here</string>
     <string name="chat_turn_prompt_own">Type your message</string>
     <string name="chat_composer_hint">Type here\u2026</string>
     <string name="chat_composer_label">%1$s\u2019s message</string>
