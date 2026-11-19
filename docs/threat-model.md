@@ -17,6 +17,13 @@ change that adds or moves a trust boundary ([coding standards](coding-standards.
   (the user types instead). Frames go from CameraX to on-device text
   recognition and are never stored. Freezing keeps one frame as a bitmap in
   memory until the user unfreezes or leaves the screen.
+- **Microphone**: the `RECORD_AUDIO` permission is requested at runtime the
+  first time the hearing person turns on voice typing in a side by side chat,
+  after a plain explanation, and the app works without it (the user types
+  instead). Audio is read only while voice typing is on, it is the hearing
+  person's turn and the app is in the foreground. It goes from the microphone
+  to an on-device speech recogniser in memory and is never stored, logged or
+  sent anywhere. Only the recognised text is kept, as a chat message.
 - **Android backup**: the template and settings store and kept chats are
   included in the user's own Android backup and device transfer
   ([ADR-0012](adr/0012-back-up-kept-chats.md)).
@@ -30,6 +37,7 @@ change that adds or moves a trust boundary ([coding standards](coding-standards.
 | Boundary | Between | What crosses it | Controls |
 |---|---|---|---|
 | Camera → app | The physical world and the recogniser | Frames of whatever the camera sees, which may include other people's text or faces | Camera access needs the runtime permission, which the user can refuse or revoke (the screen then offers typing or the app settings); the preview is bound to the screen and released on leaving; frames are processed in memory and never stored or logged, and a frozen frame is held in memory only while frozen; recognised text only enters a template when the user selects it and chooses Add to message |
+| Microphone → app | The physical world and the speech recogniser | Audio of whatever the microphone hears, which may include other people's speech | Microphone access needs the runtime permission, which the user can refuse or revoke (the chat then works by typing, or the user is offered the app settings); the microphone is open only while voice typing is on, it is the hearing person's turn and the app is in the foreground, and it is released when any of those stops; audio is processed in memory in short chunks and never stored, logged or sent; recognised text becomes a chat message the user can edit or delete, and is stored only if the user keeps the chat |
 | Kotlin → native recogniser | The app's Kotlin code and the ncnn-based C++ recogniser (JNI) | Pixel buffers from CameraX and the bundled model files | Frames come only from CameraX or the fixture tests and are validated in Kotlin and again in the JNI entry point (positive size within a pixel cap, stride, rotation, buffer capacity), so oversized or inconsistent frames fail before any allocation or read; the models are bundled assets, never downloaded |
 | App → Android backup | The app's private storage and the user's backup transport | Templates, settings and kept chats | Only the store and the `chats/` folder are included, through explicit backup and data-extraction rules; the user controls backup in system settings; Android encrypts it |
 | Other apps → the app | Other apps on the device and Deaftly | Intents to exported components | Only the launcher activity is exported; no content providers, deep links or broadcast receivers |
@@ -70,6 +78,10 @@ change that adds or moves a trust boundary ([coding standards](coding-standards.
 | Recognised text or messages written to logs | Information disclosure | Logs never contain user content (coding standards), checked in review | Mitigated |
 | A crafted or corrupt camera frame corrupts memory or crashes the native recogniser | Tampering, Denial of service | Bounds checks at the JNI entry point reject inconsistent sizes before any pixel is read; the detector caps candidates and the recogniser caps crop width; no frames from other apps or the network; `NativeInputValidationTest` feeds invalid geometry, noise and degenerate frames on every device-test run | Mitigated |
 | A tampered ncnn download or model file enters the build | Tampering | `fetchNcnn` refuses an archive whose SHA-256 differs from the pinned value; models are committed with their hashes and the conversion is reproducible from `third_party/ncnn/README.md` | Mitigated |
+| Speech is heard when the user does not expect it | Information disclosure | The microphone is opened only after the user turns voice typing on and grants the permission; listening stops when the turn passes, the chat ends or the app leaves the foreground; the screen shows when it is listening; the app has no background service | Mitigated |
+| Spoken words reach a log, a file or the network | Information disclosure | Audio and partial text are held in memory only; the app has no `INTERNET` permission (ADR-0011); logs never contain user content | Mitigated |
+| Recognised speech exposed through a kept chat or the user's backup | Information disclosure | Recognised text is stored only as a message in a chat the user chooses to keep, with the same controls as other kept chats (ADR-0012) | Accepted |
+| Another app already holds the microphone, or recording fails to start | Denial of service | Voice typing turns itself off and says it is unavailable; typing is unaffected and the app does not crash | Mitigated |
 | Another app drives the app through intents | Elevation of privilege | Only the launcher activity is exported | Mitigated |
 | Malformed stored data crashes the app on start | Denial of service | The store is versioned with tested migrations; unreadable data falls back to the built-in templates rather than crashing | Mitigated once #29 ships |
 | Leaked release token or App key used to alter workflow files | Elevation of privilege | The Workflows permission is needed because GitHub refuses a tag whose commit's workflow files differ from the default branch's. Tokens last one hour and are minted only in the release job; the key is a repository secret; the App is installed on this repository only | Accepted |
