@@ -1,5 +1,6 @@
 package com.ravendarque.deaftly.ui.chat
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -29,6 +30,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.Role
@@ -58,9 +60,10 @@ import com.ravendarque.deaftly.ui.theme.ParticipantColours
 import com.ravendarque.deaftly.ui.theme.colours
 
 private val CardBorder = 2.5.dp
-private val SendWidth = 52.dp
-private val ControlSize = 48.dp
+internal val SendWidth = 52.dp
+internal val ControlSize = 48.dp
 private val InputMinHeight = 44.dp
+internal val AccentShape = RoundedCornerShape(14.dp)
 private val ToolbarIcon = 20.dp
 private const val DISABLED_ALPHA = 0.4f
 private const val MAX_LINES = 4
@@ -72,6 +75,13 @@ data class ComposerActions(
     val onChange: (Composition) -> Unit,
     val onRemoveQuote: () -> Unit,
     val onSend: () -> Unit,
+    val onToggleVoice: () -> Unit,
+)
+
+data class VoicePermissionPrompt(
+    val blocked: Boolean,
+    val onAllow: () -> Unit,
+    val onOpenSettings: () -> Unit,
 )
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -84,8 +94,11 @@ fun Composer(
     actions: ComposerActions,
     modifier: Modifier = Modifier,
     tail: BubbleTailState? = null,
+    voice: VoiceTypingState? = null,
+    voicePermission: VoicePermissionPrompt? = null,
 ) {
     val colours = participant.colour.colours()
+    val voiceOn = voice?.on == true
     val shape = Deaftly.shapes.card as CornerBasedShape
     val c = Deaftly.colors
     val state = rememberComposerState(participant.id, draft.composition, actions.onChange)
@@ -108,18 +121,30 @@ fun Composer(
                 ),
         verticalArrangement = Arrangement.spacedBy(Deaftly.spacing.space8),
     ) {
-        if (!hasSent) TurnPrompt(participant.id)
-        draft.quote?.let { QuotePreview(it.text, colours.strong, actions.onRemoveQuote) }
-        MessageField(state, participant.labelled().displayName.orEmpty(), colours.strong, textSize.sp, send)
+        when {
+            voiceOn -> PromptLine(DeaftlyIcons.Mic, R.string.chat_voice_on, announce = true)
+            voicePermission != null -> VoicePermissionCard(voicePermission)
+            voice?.unavailable == true -> PromptLine(DeaftlyIcons.Info, R.string.chat_voice_unavailable, announce = false)
+            !hasSent -> TurnPrompt(participant.id)
+        }
+        if (!voiceOn) {
+            draft.quote?.let { QuotePreview(it.text, colours.strong, actions.onRemoveQuote) }
+            MessageField(state, participant.labelled().displayName.orEmpty(), colours.strong, textSize.sp, send)
+        }
         FlowRow(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(Deaftly.spacing.space4),
             verticalArrangement = Arrangement.spacedBy(Deaftly.spacing.space4),
             itemVerticalAlignment = Alignment.CenterVertically,
         ) {
-            FormattingButtons(state, actions, colours)
+            FormattingButtons(state, actions, ToolbarLook(colours, enabled = !voiceOn))
             Box(Modifier.weight(1f), contentAlignment = Alignment.CenterEnd) {
-                SendButton(enabled = canSend, onClick = send, container = colours.strong, content = colours.onStrong)
+                Row(horizontalArrangement = Arrangement.spacedBy(Deaftly.spacing.space8)) {
+                    if (voice != null) {
+                        MicButton(voiceOn, actions.onToggleVoice, colours.strong, colours.onStrong)
+                    }
+                    SendButton(enabled = canSend && !voiceOn, onClick = send, container = colours.strong, content = colours.onStrong)
+                }
             }
         }
     }
@@ -127,28 +152,42 @@ fun Composer(
 
 @Composable
 private fun TurnPrompt(id: ParticipantId) {
+    PromptLine(
+        DeaftlyIcons.Edit,
+        if (id == ParticipantId.B) R.string.chat_turn_prompt_other else R.string.chat_turn_prompt_own,
+        announce = true,
+    )
+}
+
+@Composable
+private fun PromptLine(
+    icon: ImageVector,
+    @StringRes text: Int,
+    announce: Boolean,
+) {
     val c = Deaftly.colors
     Row(
-        modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
+        modifier = if (announce) Modifier.semantics { liveRegion = LiveRegionMode.Polite } else Modifier,
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(Deaftly.spacing.space8),
     ) {
-        Icon(DeaftlyIcons.Edit, contentDescription = null, modifier = Modifier.size(20.dp), tint = c.ink)
-        Text(
-            text = stringResource(if (id == ParticipantId.B) R.string.chat_turn_prompt_other else R.string.chat_turn_prompt_own),
-            style = MaterialTheme.typography.titleSmall,
-            color = c.ink,
-        )
+        Icon(icon, contentDescription = null, modifier = Modifier.size(20.dp), tint = c.ink)
+        Text(text = stringResource(text), style = MaterialTheme.typography.titleSmall, color = c.ink)
     }
 }
+
+private class ToolbarLook(
+    val colours: ParticipantColours,
+    val enabled: Boolean,
+)
 
 @Composable
 private fun FormattingButtons(
     state: ComposerState,
     actions: ComposerActions,
-    colours: ParticipantColours,
+    look: ToolbarLook,
 ) {
-    FormatButton(state, SpanStyle.Bold, R.string.chat_format_bold, colours) {
+    FormatButton(state, SpanStyle.Bold, R.string.chat_format_bold, look) {
         Text(
             text = stringResource(R.string.chat_format_glyph_bold),
             fontSize = GLYPH_SP.sp,
@@ -156,7 +195,7 @@ private fun FormattingButtons(
             color = it,
         )
     }
-    FormatButton(state, SpanStyle.Italic, R.string.chat_format_italic, colours) {
+    FormatButton(state, SpanStyle.Italic, R.string.chat_format_italic, look) {
         Text(
             text = stringResource(R.string.chat_format_glyph_italic),
             fontSize = GLYPH_SP.sp,
@@ -165,14 +204,15 @@ private fun FormattingButtons(
             color = it,
         )
     }
-    FormatButton(state, SpanStyle.Highlight, R.string.chat_format_highlight, colours) {
+    FormatButton(state, SpanStyle.Highlight, R.string.chat_format_highlight, look) {
         Icon(DeaftlyIcons.Highlight, contentDescription = null, modifier = Modifier.size(ToolbarIcon), tint = it)
     }
     ToolbarButton(
         label = stringResource(R.string.chat_insert_template),
         selected = false,
-        colours = colours,
+        colours = look.colours,
         onClick = actions.onInsertTemplate,
+        enabled = look.enabled,
     ) {
         Icon(DeaftlyIcons.Template, contentDescription = null, modifier = Modifier.size(ToolbarIcon), tint = it)
     }
@@ -183,14 +223,15 @@ private fun FormatButton(
     state: ComposerState,
     style: SpanStyle,
     label: Int,
-    colours: ParticipantColours,
+    look: ToolbarLook,
     glyph: @Composable (Color) -> Unit,
 ) {
     ToolbarButton(
         label = stringResource(label),
         selected = state.composition.isActive(style),
-        colours = colours,
+        colours = look.colours,
         onClick = { state.toggle(style) },
+        enabled = look.enabled,
         glyph = glyph,
     )
 }
@@ -269,7 +310,7 @@ internal fun SendButton(
             Modifier
                 .size(width = SendWidth, height = ControlSize)
                 .alpha(if (enabled) 1f else DISABLED_ALPHA)
-                .clip(RoundedCornerShape(14.dp))
+                .clip(AccentShape)
                 .background(container)
                 .clickable(enabled = enabled, role = Role.Button, onClick = onClick)
                 .semantics { contentDescription = label },

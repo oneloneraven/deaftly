@@ -75,6 +75,8 @@ class ChatViewModel(
         }
     private val listeningAllowed = MutableStateFlow(false to false)
 
+    val latestConversation: Conversation? get() = conversation.value
+
     val state: StateFlow<ChatUiState> =
         combine(
             combine(conversation, keeper.keptId, voice.state) { chat, id, speech -> Triple(chat, id != null, speech) },

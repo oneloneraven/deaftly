@@ -53,7 +53,7 @@ class BubbleTailTest {
                         hasSent = true,
                         draft = state.draft,
                         textSize = state.textSize,
-                        actions = ComposerActions({}, {}, {}, {}),
+                        actions = ComposerActions({}, {}, {}, {}, {}),
                         tail = tail,
                     )
                     TurnControl(state.conversation, state.sidesSwapped, onSelect = viewModel::selectTurn, tail = tail)

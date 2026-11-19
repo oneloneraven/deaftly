@@ -55,7 +55,7 @@ class VoiceTyping(
         setOn(false)
     }
 
-    fun update(canListen: Boolean) {
+    fun update(canListen: Boolean = this.canListen) {
         this.canListen = canListen
         reconcile()
     }
