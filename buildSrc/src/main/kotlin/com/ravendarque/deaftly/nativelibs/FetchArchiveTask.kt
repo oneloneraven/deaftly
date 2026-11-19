@@ -34,11 +34,15 @@ abstract class FetchArchiveTask
         @get:Input
         abstract val stripFirstDir: Property<Boolean>
 
+        @get:Input
+        abstract val prefix: Property<String>
+
         @get:OutputDirectory
         abstract val outputDir: DirectoryProperty
 
         init {
             stripFirstDir.convention(true)
+            prefix.convention("")
         }
 
         @TaskAction
@@ -64,10 +68,14 @@ abstract class FetchArchiveTask
                 }
             val patterns = includes.getOrElse(emptyList())
             val strip = stripFirstDir.get()
+            val root = prefix.get()
             files.sync {
                 from(tree) {
                     if (patterns.isNotEmpty()) include(patterns)
-                    if (strip) eachFile { path = path.substringAfter('/') }
+                    eachFile {
+                        val stripped = if (strip) path.substringAfter('/') else path
+                        path = if (root.isEmpty()) stripped else "$root/$stripped"
+                    }
                     includeEmptyDirs = false
                 }
                 into(outputDir)

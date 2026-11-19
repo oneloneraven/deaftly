@@ -61,6 +61,17 @@ val fetchSherpaSources =
         dependsOn(fetchSherpaNcnn, fetchKaldiNativeFbank, fetchKissFft)
     }
 
+val fetchSpeechModel =
+    tasks.register<FetchArchiveTask>("fetchSpeechModel") {
+        url.set(
+            "https://github.com/oneloneraven/deaftly/releases/download/speech-model-libri-giga-2023-04-04/speech-model-libri-giga-2023-04-04.zip",
+        )
+        sha256.set("f2fcb07c3971fd49730ab1d0ab6c5228ef44f962a2dfa8cfa9a93767ee01704a")
+        stripFirstDir.set(false)
+        prefix.set("speech")
+        outputDir.set(layout.buildDirectory.dir("generated/speechModel"))
+    }
+
 val releaseKeystore = providers.environmentVariable("ANDROID_KEYSTORE_PATH")
 
 fun signingEnv(name: String): String =
@@ -265,6 +276,7 @@ androidComponents {
                 pages.from(fileTree(rootProject.layout.projectDirectory.dir("help")) { include("*.md") })
             }
         variant.sources.assets?.addGeneratedSourceDirectory(copyHelp, CopyHelpTask::outputDir)
+        variant.sources.assets?.addGeneratedSourceDirectory(fetchSpeechModel, FetchArchiveTask::outputDir)
     }
     finalizeDsl { extension ->
         extension.buildTypes
