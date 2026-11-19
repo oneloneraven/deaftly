@@ -181,10 +181,10 @@ class ChatScreenVoiceTest {
         startVoiceTyping()
 
         composeRule
-            .onNodeWithText("Voice typing is on. Speak clearly towards the phone.")
+            .onNodeWithText("Voice typing is on. Speak clearly towards the device.")
             .assertIsDisplayed()
         composeRule
-            .onNode(hasAnyDescendant(hasText("Voice typing is on. Speak clearly towards the phone.")) and hasPoliteLiveRegion)
+            .onNode(hasAnyDescendant(hasText("Voice typing is on. Speak clearly towards the device.")) and hasPoliteLiveRegion)
             .assertExists()
     }
 
@@ -339,7 +339,7 @@ class ChatScreenVoiceTest {
 
         startVoiceTyping()
 
-        composeRule.onNodeWithText("Voice typing isn\u2019t available right now. You can still type.").assertIsDisplayed()
+        composeRule.onNodeWithText("Voice typing isn\u2019t available right now. You can still type normally.").assertIsDisplayed()
         composeRule.onNode(isMessageField).assertIsDisplayed()
         composeRule.onNodeWithContentDescription("Start voice typing").assertIsDisplayed()
         composeRule.onRoot().tryPerformAccessibilityChecks()
