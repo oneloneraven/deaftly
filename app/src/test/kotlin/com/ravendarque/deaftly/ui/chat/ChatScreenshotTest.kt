@@ -264,6 +264,14 @@ class ChatScreenshotTest {
     fun voiceOffLargeFontScale() = voice(dark = false)
 
     @Test
+    @Config(qualifiers = "en-rGB-w340dp-h760dp")
+    fun voiceOffNarrowScreenDarkTheme() = voice(dark = true)
+
+    @Test
+    @Config(qualifiers = "en-rGB-w340dp-h760dp")
+    fun voiceListeningNarrowScreenDarkTheme() = voice(dark = true, on = true)
+
+    @Test
     fun voiceListeningWithLiveTextLightTheme() = voice(dark = false, on = true)
 
     @Test

@@ -121,15 +121,19 @@ fun Composer(
                 ),
         verticalArrangement = Arrangement.spacedBy(Deaftly.spacing.space8),
     ) {
+        val mic: @Composable () -> Unit = { MicButton(voiceOn, actions.onToggleVoice, colours.strong, colours.onStrong) }
         when {
-            voiceOn -> PromptLine(DeaftlyIcons.Mic, R.string.chat_voice_on, announce = true)
+            voiceOn -> WithMic(mic) { PromptLine(DeaftlyIcons.Mic, R.string.chat_voice_on, announce = true, modifier = it) }
             voicePermission != null -> VoicePermissionCard(voicePermission)
             voice?.unavailable == true -> PromptLine(DeaftlyIcons.Info, R.string.chat_voice_unavailable, announce = false)
             !hasSent -> TurnPrompt(participant.id)
         }
         if (!voiceOn) {
             draft.quote?.let { QuotePreview(it.text, colours.strong, actions.onRemoveQuote) }
-            MessageField(state, participant.labelled().displayName.orEmpty(), colours.strong, textSize.sp, send)
+            val field: @Composable (Modifier) -> Unit = {
+                MessageField(state, participant.labelled().displayName.orEmpty(), colours.strong, textSize.sp, send, it)
+            }
+            if (voice != null) WithMic(mic, field) else field(Modifier)
         }
         FlowRow(
             modifier = Modifier.fillMaxWidth(),
@@ -139,14 +143,24 @@ fun Composer(
         ) {
             FormattingButtons(state, actions, ToolbarLook(colours, enabled = !voiceOn))
             Box(Modifier.weight(1f), contentAlignment = Alignment.CenterEnd) {
-                Row(horizontalArrangement = Arrangement.spacedBy(Deaftly.spacing.space8)) {
-                    if (voice != null) {
-                        MicButton(voiceOn, actions.onToggleVoice, colours.strong, colours.onStrong)
-                    }
-                    SendButton(enabled = canSend && !voiceOn, onClick = send, container = colours.strong, content = colours.onStrong)
-                }
+                SendButton(enabled = canSend && !voiceOn, onClick = send, container = colours.strong, content = colours.onStrong)
             }
         }
+    }
+}
+
+@Composable
+private fun WithMic(
+    mic: @Composable () -> Unit,
+    content: @Composable (Modifier) -> Unit,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(Deaftly.spacing.space8),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        content(Modifier.weight(1f))
+        mic()
     }
 }
 
@@ -164,10 +178,11 @@ private fun PromptLine(
     icon: ImageVector,
     @StringRes text: Int,
     announce: Boolean,
+    modifier: Modifier = Modifier,
 ) {
     val c = Deaftly.colors
     Row(
-        modifier = if (announce) Modifier.semantics { liveRegion = LiveRegionMode.Polite } else Modifier,
+        modifier = if (announce) modifier.semantics { liveRegion = LiveRegionMode.Polite } else modifier,
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(Deaftly.spacing.space8),
     ) {
