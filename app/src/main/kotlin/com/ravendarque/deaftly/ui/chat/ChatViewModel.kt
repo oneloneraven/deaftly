@@ -53,7 +53,6 @@ sealed interface ChatUiState {
     }
 }
 
-@Suppress("TooManyFunctions")
 class ChatViewModel(
     private val settings: SettingsRepository,
     private val savedState: SavedStateHandle,
@@ -181,10 +180,6 @@ class ChatViewModel(
                 ?: return
         voice.turnOff()
         drafts.startEdit(current.turn, message)
-    }
-
-    fun cancelEdit() {
-        drafts.cancelEdit()
     }
 
     fun send() {

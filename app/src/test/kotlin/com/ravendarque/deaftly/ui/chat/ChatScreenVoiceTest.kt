@@ -223,6 +223,21 @@ class ChatScreenVoiceTest {
     }
 
     @Test
+    fun startingAnEditDismissesThePermissionPromptSoGrantingDoesNotTurnVoiceTypingOn() {
+        microphoneAccess = PermissionAccess.NotAsked
+        showListening()
+        startVoiceTyping()
+        val own = (viewModel.state.value as ChatUiState.Ready).conversation.messages.first { it.author == ParticipantId.B }
+
+        composeRule.runOnIdle { viewModel.startEdit(own.id) }
+        microphoneAccess = PermissionAccess.Granted
+        composeRule.waitForIdle()
+
+        assertEquals(false, viewModel.voice.state.value.on)
+        composeRule.onNodeWithText("To use voice typing", substring = true).assertDoesNotExist()
+    }
+
+    @Test
     fun deniedOffersAnotherGo() {
         microphoneAccess = PermissionAccess.Denied
         showListening()

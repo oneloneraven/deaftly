@@ -147,7 +147,7 @@ class ChatViewModelEditTest {
             viewModel.startEdit(2)
             viewModel.type("Something else")
 
-            viewModel.cancelEdit()
+            viewModel.drafts.cancelEdit()
 
             assertEquals(before, viewModel.conversation())
             assertEquals(Draft(Composition().withText("Half typed", 10, 10)), viewModel.draft())
@@ -162,14 +162,14 @@ class ChatViewModelEditTest {
             assertNull(viewModel.draft().editing)
             viewModel.startEdit(2)
             assertEquals(2, viewModel.draft().editing?.messageId)
-            viewModel.cancelEdit()
+            viewModel.drafts.cancelEdit()
 
             viewModel.selectTurn(ParticipantId.B)
             viewModel.startEdit(2)
             assertNull(viewModel.draft().editing)
             viewModel.startEdit(3)
             assertEquals(3, viewModel.draft().editing?.messageId)
-            viewModel.cancelEdit()
+            viewModel.drafts.cancelEdit()
 
             viewModel.startEdit(0)
             assertNull(viewModel.draft().editing)

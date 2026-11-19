@@ -169,7 +169,7 @@ private fun rememberComposerActions(
             onRemoveQuote = { viewModel.drafts.setQuote(null) },
             onSend = viewModel::send,
             onToggleVoice = {},
-            onCancelEdit = viewModel::cancelEdit,
+            onCancelEdit = viewModel.drafts::cancelEdit,
         )
     }
 
@@ -196,14 +196,15 @@ private fun rememberVoiceControls(
     LaunchedEffect(granted) {
         if (!granted && voiceOn) viewModel.voice.turnOff()
     }
-    LaunchedEffect(granted, asking) {
-        if (granted && asking) {
+    val editing = current.draft.editing != null
+    LaunchedEffect(granted, asking, editing) {
+        if (granted && asking && !editing) {
             asking = false
             viewModel.voice.turnOn()
         }
     }
-    LaunchedEffect(hearingPersonsTurn) {
-        if (!hearingPersonsTurn) asking = false
+    LaunchedEffect(hearingPersonsTurn, editing) {
+        if (!hearingPersonsTurn || editing) asking = false
     }
     val toggle = {
         when {
