@@ -7,5 +7,8 @@
 # Reading text with the camera.
 android.permission.CAMERA
 
+# Voice typing in side by side chat.
+android.permission.RECORD_AUDIO
+
 # AndroidX adds this signature permission to protect the app's own receivers.
 {namespace}.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION

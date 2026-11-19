@@ -28,6 +28,7 @@ import com.ravendarque.deaftly.R
 import com.ravendarque.deaftly.core.ocr.OcrSelection
 import com.ravendarque.deaftly.core.ocr.Phrase
 import com.ravendarque.deaftly.core.ocr.TextSelection
+import com.ravendarque.deaftly.ui.permissions.findActivity
 import com.ravendarque.deaftly.ui.theme.CameraColours
 
 @Composable
