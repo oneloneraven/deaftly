@@ -10,7 +10,7 @@ Side by side is for a back-and-forth conversation on one phone. You pass the pho
 ## Taking turns
 
 - The switch shows whose turn it is. Flip it to change turns.
-- When it's the other person's turn, a prompt tells them where to type: "Your turn – type your reply here".
+- When it's the other person's turn, a prompt tells them where to type: "Your turn: type your reply here".
 - Tap **Send** to add a message.
 
 ## Names, colours and sides
