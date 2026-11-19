@@ -65,9 +65,8 @@ internal val ControlSize = 48.dp
 private val InputMinHeight = 44.dp
 internal val AccentShape = RoundedCornerShape(14.dp)
 private val ToolbarIcon = 20.dp
-private const val DISABLED_ALPHA = 0.4f
+internal const val DISABLED_ALPHA = 0.4f
 private const val MAX_LINES = 4
-private const val QUOTE_LINES = 2
 private const val GLYPH_SP = 18
 
 data class ComposerActions(
@@ -76,6 +75,7 @@ data class ComposerActions(
     val onRemoveQuote: () -> Unit,
     val onSend: () -> Unit,
     val onToggleVoice: () -> Unit,
+    val onCancelEdit: () -> Unit = {},
 )
 
 data class VoicePermissionPrompt(
@@ -121,7 +121,9 @@ fun Composer(
                 ),
         verticalArrangement = Arrangement.spacedBy(Deaftly.spacing.space8),
     ) {
-        val mic: @Composable () -> Unit = { MicButton(voiceOn, actions.onToggleVoice, colours.strong, colours.onStrong) }
+        val mic: @Composable () -> Unit = {
+            MicButton(voiceOn, actions.onToggleVoice, colours.strong, colours.onStrong, draft.editing == null)
+        }
         when {
             voiceOn -> WithMic(mic) { PromptLine(DeaftlyIcons.Mic, R.string.chat_voice_on, announce = true, modifier = it) }
             voicePermission != null -> VoicePermissionCard(voicePermission)
@@ -129,7 +131,7 @@ fun Composer(
             !hasSent -> TurnPrompt(participant.id)
         }
         if (!voiceOn) {
-            draft.quote?.let { QuotePreview(it.text, colours.strong, actions.onRemoveQuote) }
+            DraftContext(draft, colours.strong, actions)
             val field: @Composable (Modifier) -> Unit = {
                 MessageField(state, participant.labelled().displayName.orEmpty(), colours.strong, textSize.sp, send, it)
             }
@@ -174,7 +176,7 @@ private fun TurnPrompt(id: ParticipantId) {
 }
 
 @Composable
-private fun PromptLine(
+internal fun PromptLine(
     icon: ImageVector,
     @StringRes text: Int,
     announce: Boolean,
@@ -278,37 +280,6 @@ private fun ToolbarButton(
         contentAlignment = Alignment.Center,
     ) {
         Box(Modifier.clearAndSetSemantics {}) { glyph(if (selected) colours.onStrong else c.ink) }
-    }
-}
-
-@Composable
-private fun QuotePreview(
-    text: String,
-    bar: Color,
-    onRemove: () -> Unit,
-) {
-    val description = stringResource(R.string.chat_quote_pending, text)
-    val removeLabel = stringResource(R.string.chat_quote_remove)
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Row(
-            modifier =
-                Modifier
-                    .weight(1f)
-                    .semantics(mergeDescendants = true) { contentDescription = description },
-        ) {
-            QuoteBlock(text, bar, Deaftly.colors.inkSecondary, MaterialTheme.typography.bodyMedium, QUOTE_LINES)
-        }
-        Box(
-            modifier =
-                Modifier
-                    .size(ControlSize)
-                    .clip(Deaftly.shapes.controlSmall)
-                    .clickable(role = Role.Button, onClick = onRemove)
-                    .semantics { contentDescription = removeLabel },
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(DeaftlyIcons.Close, contentDescription = null, modifier = Modifier.size(18.dp))
-        }
     }
 }
 

@@ -5,6 +5,7 @@ import com.ravendarque.deaftly.core.chat.Conversation
 import com.ravendarque.deaftly.core.chat.FormattedText
 import com.ravendarque.deaftly.core.chat.Participant
 import com.ravendarque.deaftly.core.chat.Quote
+import com.ravendarque.deaftly.core.chat.RichText
 import com.ravendarque.deaftly.core.chat.SpanStyle
 import com.ravendarque.deaftly.core.chat.StyleRange
 import kotlin.test.Test
@@ -46,6 +47,56 @@ class ChatCodecTest {
                 ?.single()
                 ?.voiceTyped,
         )
+    }
+
+    @Test
+    fun editedSurvivesARoundTrip() {
+        val conversation =
+            Conversation(Participant.defaultA(), Participant.defaultB())
+                .append(RichText.spans("Tuesday"))
+                .replaceMessage(0, RichText.spans("Wednesday"), null)
+
+        assertEquals(conversation, ChatCodec.decode(ChatCodec.encode(conversation)))
+        assertEquals(
+            true,
+            ChatCodec
+                .decode(ChatCodec.encode(conversation))
+                ?.messages
+                ?.single()
+                ?.edited,
+        )
+    }
+
+    @Test
+    fun messagesWithoutEditedReadAsUnedited() {
+        val encoded =
+            """{"a":{"colour":"Red"},"b":{"colour":"Blue"},"turn":"A","messages":[{"author":"A","spans":[{"text":"Hi"}]}]}"""
+
+        assertEquals(
+            false,
+            ChatCodec
+                .decode(encoded)
+                ?.messages
+                ?.single()
+                ?.edited,
+        )
+    }
+
+    @Test
+    fun anEditingDraftWithItsSetAsideDraftSurvivesARoundTrip() {
+        val resume =
+            Draft(
+                Composition(FormattedText("Half typed", listOf(StyleRange(0, 4, SpanStyle.Italic))), 4, 4),
+                Quote(0, "Hello"),
+            )
+        val draft =
+            Draft(
+                Composition(FormattedText("Wednesday", listOf(StyleRange(0, 3, SpanStyle.Bold)))),
+                Quote(1, "Tuesday"),
+                Editing(2, resume),
+            )
+
+        assertEquals(draft, ChatCodec.decodeDraft(ChatCodec.encodeDraft(draft)))
     }
 
     @Test

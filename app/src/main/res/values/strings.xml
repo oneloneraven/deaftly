@@ -211,6 +211,10 @@
     <string name="chat_voice_allow">Allow microphone</string>
     <string name="chat_voice_open_settings">Open settings</string>
     <string name="chat_message_actions">Message actions</string>
+    <string name="chat_editing_message">Editing message</string>
+    <string name="chat_cancel_editing">Cancel editing</string>
+    <string name="chat_message_edited">Edited</string>
+    <string name="chat_message_edited_description">%1$s, edited</string>
     <string name="chat_quote_remove">Remove quote</string>
     <string name="chat_quote_pending">Quoting: %1$s</string>
     <string name="editor_title_new">New template</string>

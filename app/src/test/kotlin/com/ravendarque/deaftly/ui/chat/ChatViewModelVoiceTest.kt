@@ -65,8 +65,6 @@ class ChatViewModelVoiceTest {
         return viewModel
     }
 
-    private fun ChatViewModel.type(text: String) = drafts.setComposition(Composition().withText(text, text.length, text.length))
-
     private fun ChatViewModel.draft(): Draft = assertIs<ChatUiState.Ready>(state.value).draft
 
     private fun ChatViewModel.conversation(): Conversation = assertIs<ChatUiState.Ready>(state.value).conversation
@@ -129,54 +127,5 @@ class ChatViewModelVoiceTest {
             runCurrent()
             assertFalse(audio.isOpen)
             assertEquals(1, audio.opened)
-        }
-
-    @Test
-    fun editAppendsToDraftAndUnlinksQuotes() =
-        runTest {
-            val viewModel = listening(listOf(SpeechEvent.Utterance("Thursday")), HangingAudio(1), firstMessage = "Hello")
-            viewModel.quote(1)
-            viewModel.type("Is that fine?")
-            viewModel.send()
-            viewModel.type("Sorry")
-
-            viewModel.editVoiceMessage(1)
-            runCurrent()
-
-            val conversation = viewModel.conversation()
-            assertFalse(viewModel.voice.state.value.on)
-            assertEquals(listOf("Hello", "Is that fine?"), conversation.messages.map { it.plainText })
-            val quote = conversation.messages.last().quote
-            assertNull(quote?.messageId)
-            assertEquals("Thursday", quote?.text)
-            assertEquals("Sorry Thursday", viewModel.draft().text)
-        }
-
-    @Test
-    fun editDoesNothingOnTheDeafUsersTurn() =
-        runTest {
-            val viewModel = listening(listOf(SpeechEvent.Utterance("Thursday")), HangingAudio(1))
-            viewModel.selectTurn(ParticipantId.A)
-            runCurrent()
-
-            viewModel.editVoiceMessage(0)
-
-            assertEquals(listOf("Thursday"), viewModel.conversation().messages.map { it.plainText })
-            assertTrue(viewModel.voice.state.value.on)
-            assertEquals("", viewModel.draft().text)
-        }
-
-    @Test
-    fun editIgnoresTypedMessages() =
-        runTest {
-            val viewModel = listening(emptyList(), HangingAudio(0))
-            viewModel.type("Typed")
-            viewModel.send()
-
-            viewModel.editVoiceMessage(0)
-
-            assertEquals(listOf("Typed"), viewModel.conversation().messages.map { it.plainText })
-            assertTrue(viewModel.voice.state.value.on)
-            assertEquals("", viewModel.draft().text)
         }
 }

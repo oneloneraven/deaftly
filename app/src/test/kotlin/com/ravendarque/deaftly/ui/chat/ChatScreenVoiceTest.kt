@@ -116,16 +116,7 @@ class ChatScreenVoiceTest {
 
     private fun draft() = (viewModel.state.value as ChatUiState.Ready).draft
 
-    private fun longPress(description: String) {
-        composeRule
-            .onNodeWithContentDescription(description, substring = true)
-            .performTouchInput { longClick() }
-        composeRule.waitForIdle()
-    }
-
     private val hasPoliteLiveRegion = SemanticsMatcher.expectValue(SemanticsProperties.LiveRegion, LiveRegionMode.Polite)
-
-    private fun voiceTypedConversation() = orderingConversation(ParticipantId.B).appendVoiceTyped("Thursday")
 
     @Test
     fun micShowsOnlyOnTheHearingPersonsTurn() {
@@ -200,78 +191,6 @@ class ChatScreenVoiceTest {
             .assert(SemanticsMatcher.keyNotDefined(SemanticsProperties.LiveRegion))
             .assert(SemanticsMatcher.keyNotDefined(SemanticsActions.CustomActions))
         assertEquals(4, conversation().messages.size)
-    }
-
-    @Test
-    fun tappingAVoiceMessageEditsItOnTheHearingPersonsTurn() {
-        showListening(speech = emptyList(), conversation = voiceTypedConversation())
-
-        composeRule.onNodeWithContentDescription("Waiter: Thursday", substring = true).performClick()
-        composeRule.waitForIdle()
-
-        assertEquals(4, conversation().messages.size)
-        assertEquals("Thursday", draft().text)
-        composeRule.onNodeWithText("Thursday").assertIsDisplayed()
-    }
-
-    @Test
-    fun tappingAVoiceMessageOnTheDeafUsersTurnDoesNothing() {
-        showListening(speech = emptyList(), conversation = voiceTypedConversation().withTurn(ParticipantId.A))
-
-        composeRule.onNodeWithContentDescription("Waiter: Thursday", substring = true).performClick()
-        composeRule.waitForIdle()
-
-        assertEquals(5, conversation().messages.size)
-        assertEquals("", draft().text)
-    }
-
-    @Test
-    fun tappingATypedMessageDoesNothing() {
-        showListening(speech = emptyList(), conversation = voiceTypedConversation())
-
-        composeRule.onNodeWithContentDescription("Waiter: No problem. It will take about 15 minutes.").performClick()
-        composeRule.waitForIdle()
-
-        assertEquals(5, conversation().messages.size)
-    }
-
-    @Test
-    fun editIsInTheMenuAndTalkBackActions() {
-        showListening(speech = emptyList(), conversation = voiceTypedConversation())
-
-        val labels =
-            composeRule
-                .onNodeWithContentDescription("Waiter: Thursday", substring = true)
-                .fetchSemanticsNode()
-                .config[SemanticsActions.CustomActions]
-                .map { it.label }
-        assertEquals(listOf("Edit", "Copy", "Quote", "Delete"), labels)
-
-        longPress("Waiter: Thursday")
-        listOf("Edit", "Copy", "Quote", "Delete").forEach { composeRule.onNodeWithText(it).assertIsDisplayed() }
-        composeRule.onNodeWithText("Edit").performClick()
-        composeRule.waitForIdle()
-        assertEquals("Thursday", draft().text)
-    }
-
-    @Test
-    fun editIsNotOfferedOnTypedMessages() {
-        showListening(speech = emptyList(), conversation = voiceTypedConversation())
-
-        longPress("Waiter: No problem. It will take about 15 minutes.")
-
-        composeRule.onNodeWithText("Copy").assertIsDisplayed()
-        composeRule.onNodeWithText("Edit").assertDoesNotExist()
-    }
-
-    @Test
-    fun editIsNotOfferedOnTheDeafUsersTurn() {
-        showListening(speech = emptyList(), conversation = voiceTypedConversation().withTurn(ParticipantId.A))
-
-        longPress("Waiter: Thursday")
-
-        composeRule.onNodeWithText("Copy").assertIsDisplayed()
-        composeRule.onNodeWithText("Edit").assertDoesNotExist()
     }
 
     @Test

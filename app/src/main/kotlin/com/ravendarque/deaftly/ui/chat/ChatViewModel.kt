@@ -5,7 +5,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ravendarque.deaftly.core.chat.ChatProfile
 import com.ravendarque.deaftly.core.chat.Conversation
-import com.ravendarque.deaftly.core.chat.Message
 import com.ravendarque.deaftly.core.chat.Participant
 import com.ravendarque.deaftly.core.chat.ParticipantId
 import com.ravendarque.deaftly.core.chat.RichText
@@ -54,6 +53,7 @@ sealed interface ChatUiState {
     }
 }
 
+@Suppress("TooManyFunctions")
 class ChatViewModel(
     private val settings: SettingsRepository,
     private val savedState: SavedStateHandle,
@@ -155,8 +155,9 @@ class ChatViewModel(
         excerpt: String? = null,
     ) {
         val current = conversation.value ?: return
-        if (messageId !in current.messages.indices) return
-        drafts.setQuote(current.quote(messageId, excerpt))
+        if (messageId in current.messages.indices && !drafts.isEditing(current.turn, messageId)) {
+            drafts.setQuote(current.quote(messageId, excerpt))
+        }
     }
 
     fun deleteMessage(messageId: Int) {
@@ -173,12 +174,17 @@ class ChatViewModel(
         listeningAllowed.value = foreground to permitted
     }
 
-    fun editVoiceMessage(messageId: Int) {
+    fun startEdit(messageId: Int) {
         val current = conversation.value ?: return
-        val message = current.editableVoiceMessage(messageId) ?: return
+        val message =
+            current.messages.getOrNull(messageId)?.takeIf { it.author == current.turn && !drafts.isEditing(current.turn, messageId) }
+                ?: return
         voice.turnOff()
-        deleteMessage(messageId)
-        drafts.appendText(ParticipantId.B, message.plainText)
+        drafts.startEdit(current.turn, message)
+    }
+
+    fun cancelEdit() {
+        drafts.cancelEdit()
     }
 
     fun send() {
@@ -189,7 +195,8 @@ class ChatViewModel(
                 draft.composition.content
                     .trimmed()
                     .spans
-            change { it.append(spans, draft.quote) }
+            val editing = draft.editing
+            change { if (editing == null) it.append(spans, draft.quote) else it.replaceMessage(editing.messageId, spans, draft.quote) }
             drafts.clear()
         }
     }
@@ -224,6 +231,3 @@ private fun opened(
 private fun SavedStateHandle.saveConversation(conversation: Conversation) {
     this[CONVERSATION_KEY] = ChatCodec.encode(conversation)
 }
-
-private fun Conversation.editableVoiceMessage(id: Int): Message? =
-    messages.getOrNull(id)?.takeIf { turn == ParticipantId.B && it.author == ParticipantId.B && it.voiceTyped }

@@ -143,7 +143,8 @@ private fun ScriptMessage(
     val commands = rememberMessageCommands(message, actions, editable)
     val menuLabel = stringResource(R.string.chat_message_actions)
     val author = conversation.participant(message.author).labelled()
-    val said = stringResource(R.string.chat_message_from, author.displayName.orEmpty(), message.plainText)
+    val spoken = stringResource(R.string.chat_message_from, author.displayName.orEmpty(), message.plainText)
+    val said = if (message.edited) stringResource(R.string.chat_message_edited_description, spoken) else spoken
     val description = message.quote?.let { stringResource(R.string.chat_message_quoting, it.text, said) } ?: said
     Box {
         ScriptLine(
@@ -232,6 +233,7 @@ private fun ScriptLine(
             NameLabel(author.displayName.orEmpty(), colours.label, align)
             message.quote?.let { QuoteLine(it.text, textSize, align, onRight) }
             MessageText(message, textSize, align, pending)
+            if (message.edited) EditedLabel(align)
         }
         if (onRight) SpeakerBar(colours.strong)
     }
@@ -256,6 +258,17 @@ private fun NameLabel(
         textAlign = align,
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,
+    )
+}
+
+@Composable
+private fun EditedLabel(align: TextAlign) {
+    Text(
+        text = stringResource(R.string.chat_message_edited),
+        color = Deaftly.colors.inkSecondary,
+        style = MaterialTheme.typography.labelMedium,
+        textAlign = align,
+        modifier = Modifier.fillMaxWidth(),
     )
 }
 

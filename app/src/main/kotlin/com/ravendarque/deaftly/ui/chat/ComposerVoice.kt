@@ -13,6 +13,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
@@ -32,6 +33,7 @@ internal fun MicButton(
     onClick: () -> Unit,
     container: Color,
     content: Color,
+    enabled: Boolean = true,
 ) {
     val label = stringResource(if (on) R.string.chat_voice_stop else R.string.chat_voice_start)
     val stateText = stringResource(if (on) R.string.chat_format_on else R.string.chat_format_off)
@@ -39,9 +41,10 @@ internal fun MicButton(
         modifier =
             Modifier
                 .size(width = SendWidth, height = ControlSize)
+                .alpha(if (enabled) 1f else DISABLED_ALPHA)
                 .clip(AccentShape)
                 .background(container)
-                .clickable(role = Role.Button, onClick = onClick)
+                .clickable(enabled = enabled, role = Role.Button, onClick = onClick)
                 .semantics {
                     contentDescription = label
                     stateDescription = stateText

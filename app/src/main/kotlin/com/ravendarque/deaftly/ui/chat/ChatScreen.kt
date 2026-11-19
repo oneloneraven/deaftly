@@ -129,11 +129,11 @@ private fun SidesChat(
                 MessageActions(
                     onQuote = { viewModel.quote(it) },
                     onDelete = viewModel::deleteMessage,
-                    onEdit = viewModel::editVoiceMessage,
+                    onEdit = viewModel::startEdit,
                 ),
                 Modifier.weight(1f).fillMaxSize(),
                 liveText = current.voice.live,
-                editable = { hearingPersonsTurn && it.author == ParticipantId.B && it.voiceTyped },
+                editable = { it.author == conversation.turn },
             )
             Composer(
                 participant = conversation.activeParticipant,
@@ -169,6 +169,7 @@ private fun rememberComposerActions(
             onRemoveQuote = { viewModel.drafts.setQuote(null) },
             onSend = viewModel::send,
             onToggleVoice = {},
+            onCancelEdit = viewModel::cancelEdit,
         )
     }
 

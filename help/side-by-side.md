@@ -34,11 +34,15 @@ Voice typing is for the other person, so the microphone button only shows on the
 - It only listens on the other person's turn, while Deaftly is open. When you switch to your turn, you get the keyboard back.
 - If voice typing isn't available, you'll see a note and can type as usual.
 
-To fix a mistake, tap their message. Voice typing stops, the message comes out of the chat and goes into the text box, ready to change and send again. If something is already in the box, the message is added to the end. Tapping only works on the other person's turn.
+To fix a mistake in a voice-typed message, they tap it on their turn. Voice typing stops while they edit, and the message stays in the chat. See Copying, quoting, editing and deleting below.
 
 ## Copying, quoting, editing and deleting
 
-Long-press a message to **Edit**, **Copy**, **Quote** or **Delete** it. **Edit** only shows on voice-typed messages, on the other person's turn. A quoted message appears above your reply.
+Long-press a message to **Edit**, **Copy**, **Quote** or **Delete** it. A quoted message appears above your reply.
+
+You can edit your own messages, on your own turn. Tap the message, or long-press it and choose **Edit**. It stays where it is in the chat, and its text, formatting and quote go into the text box under "Editing message". Make your changes and tap **Send** to replace it. It then shows "Edited" under it. Tap the X beside "Editing message" to cancel and leave the message as it was.
+
+Whatever you had already written in the box is set aside while you edit, and comes back when you send or cancel. The other person can do the same with their own messages on their turn, including voice-typed ones. You can't edit each other's messages.
 
 ## Ending the chat
 
