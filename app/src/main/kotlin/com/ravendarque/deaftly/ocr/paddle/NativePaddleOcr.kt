@@ -36,7 +36,7 @@ internal class NativePaddleOcr {
 
     private companion object {
         init {
-            System.loadLibrary("deaftly_ppocr")
+            System.loadLibrary("deaftly_native")
         }
     }
 }
