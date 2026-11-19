@@ -15,7 +15,9 @@ import androidx.compose.ui.test.isDialog
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.longClick
 import androidx.compose.ui.test.onFirst
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onRoot
+import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTouchInput
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -27,10 +29,15 @@ import com.ravendarque.deaftly.core.chat.Conversation
 import com.ravendarque.deaftly.core.chat.Participant
 import com.ravendarque.deaftly.core.chat.ParticipantId
 import com.ravendarque.deaftly.core.settings.ChatTextSize
+import com.ravendarque.deaftly.core.speech.FakeSpeechRecogniser
+import com.ravendarque.deaftly.core.speech.SpeechEvent
 import com.ravendarque.deaftly.ui.components.SheetBody
 import com.ravendarque.deaftly.ui.components.SheetHandle
+import com.ravendarque.deaftly.ui.permissions.PermissionAccess
+import com.ravendarque.deaftly.ui.permissions.RuntimePermission
 import com.ravendarque.deaftly.ui.theme.AppTheme
 import com.ravendarque.deaftly.ui.theme.Deaftly
+import kotlinx.coroutines.Dispatchers
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestName
@@ -98,7 +105,15 @@ class ChatScreenshotTest {
             SavedStateHandle(
                 mapOf("conversation" to ChatCodec.encode(orderingConversation(turn)), "draft_a" to draft, "draft_b" to draft),
             )
-        val viewModel = ChatViewModel(FakeSettingsRepository(), saved, store = FakeSavedChatStore(), writeScope = testWriteScope)
+        val viewModel =
+            ChatViewModel(
+                FakeSettingsRepository(),
+                saved,
+                store = FakeSavedChatStore(),
+                writeScope = testWriteScope,
+                createSpeechRecogniser = ::silentRecogniser,
+                audio = silentAudio(),
+            )
         shot { AppTheme(darkTheme = dark) { ChatScreen(viewModel, onEnd = {}, onInsertTemplate = {}) } }
     }
 
@@ -110,7 +125,15 @@ class ChatScreenshotTest {
                     "draft_b" to ChatCodec.encodeDraft(formattingDraft()),
                 ),
             )
-        val viewModel = ChatViewModel(FakeSettingsRepository(), saved, store = FakeSavedChatStore(), writeScope = testWriteScope)
+        val viewModel =
+            ChatViewModel(
+                FakeSettingsRepository(),
+                saved,
+                store = FakeSavedChatStore(),
+                writeScope = testWriteScope,
+                createSpeechRecogniser = ::silentRecogniser,
+                audio = silentAudio(),
+            )
         shot { AppTheme(darkTheme = dark) { ChatScreen(viewModel, onEnd = {}, onInsertTemplate = {}) } }
     }
 
@@ -129,8 +152,47 @@ class ChatScreenshotTest {
                 saved,
                 store = FakeSavedChatStore(),
                 writeScope = testWriteScope,
+                createSpeechRecogniser = ::silentRecogniser,
+                audio = silentAudio(),
             )
         shot { AppTheme(darkTheme = dark) { ChatScreen(viewModel, onEnd = {}, onInsertTemplate = {}) } }
+    }
+
+    private fun voice(
+        dark: Boolean,
+        on: Boolean = false,
+        failing: Boolean = false,
+        access: PermissionAccess = PermissionAccess.Granted,
+        tapMic: Boolean = false,
+    ) {
+        val saved =
+            SavedStateHandle(
+                mapOf("conversation" to ChatCodec.encode(orderingConversation(ParticipantId.B)), "voice_typing" to on),
+            )
+        val viewModel =
+            ChatViewModel(
+                FakeSettingsRepository(),
+                saved,
+                store = FakeSavedChatStore(),
+                writeScope = testWriteScope,
+                createSpeechRecogniser = {
+                    check(!failing) { "The model would not load" }
+                    FakeSpeechRecogniser(listOf(SpeechEvent.Partial("Thursday at six would suit me best")))
+                },
+                audio = HangingAudio(1),
+                speechWork = Dispatchers.Unconfined,
+            )
+        composeRule.setContent {
+            AppTheme(darkTheme = dark) {
+                ChatScreen(viewModel, onEnd = {}, onInsertTemplate = {}, microphone = RuntimePermission(access, {}, {}))
+            }
+        }
+        composeRule.waitForIdle()
+        if (tapMic) {
+            composeRule.onNodeWithContentDescription("Start voice typing").performClick()
+            composeRule.waitForIdle()
+        }
+        composeRule.onRoot().captureRoboImage("$SCREENSHOT_DIR/$PACKAGE.${this::class.simpleName}.${testName.methodName}.png")
     }
 
     @OptIn(ExperimentalRoborazziApi::class)
@@ -141,7 +203,14 @@ class ChatScreenshotTest {
     ) {
         val saved = SavedStateHandle(mapOf("conversation" to ChatCodec.encode(scriptConversation(turn = ParticipantId.A))))
         val viewModel =
-            ChatViewModel(FakeSettingsRepository(sidesSwapped = swapped), saved, store = FakeSavedChatStore(), writeScope = testWriteScope)
+            ChatViewModel(
+                FakeSettingsRepository(sidesSwapped = swapped),
+                saved,
+                store = FakeSavedChatStore(),
+                writeScope = testWriteScope,
+                createSpeechRecogniser = ::silentRecogniser,
+                audio = silentAudio(),
+            )
         composeRule.setContent { AppTheme(darkTheme = dark) { ChatScreen(viewModel, onEnd = {}, onInsertTemplate = {}) } }
         composeRule.waitForIdle()
         composeRule
@@ -178,9 +247,65 @@ class ChatScreenshotTest {
                 ChatOpening(listOf("Hi! I'm deaf. Could I have a table for two, please?")),
                 store = FakeSavedChatStore(),
                 writeScope = testWriteScope,
+                createSpeechRecogniser = ::silentRecogniser,
+                audio = silentAudio(),
             )
         shot { AppTheme(darkTheme = dark) { ChatScreen(viewModel, onEnd = {}, onInsertTemplate = {}) } }
     }
+
+    @Test
+    fun voiceOffLightTheme() = voice(dark = false)
+
+    @Test
+    fun voiceOffDarkTheme() = voice(dark = true)
+
+    @Test
+    @Config(fontScale = 2f)
+    fun voiceOffLargeFontScale() = voice(dark = false)
+
+    @Test
+    @Config(qualifiers = "en-rGB-w340dp-h760dp")
+    fun voiceOffNarrowScreenDarkTheme() = voice(dark = true)
+
+    @Test
+    @Config(qualifiers = "en-rGB-w340dp-h760dp")
+    fun voiceListeningNarrowScreenDarkTheme() = voice(dark = true, on = true)
+
+    @Test
+    fun voiceListeningWithLiveTextLightTheme() = voice(dark = false, on = true)
+
+    @Test
+    fun voiceListeningWithLiveTextDarkTheme() = voice(dark = true, on = true)
+
+    @Test
+    @Config(fontScale = 2f)
+    fun voiceListeningWithLiveTextLargeFontScale() = voice(dark = false, on = true)
+
+    @Test
+    fun voiceUnavailableLightTheme() = voice(dark = false, on = true, failing = true)
+
+    @Test
+    fun voiceUnavailableDarkTheme() = voice(dark = true, on = true, failing = true)
+
+    @Test
+    @Config(fontScale = 2f)
+    fun voiceUnavailableLargeFontScale() = voice(dark = false, on = true, failing = true)
+
+    @Test
+    fun voicePermissionLightTheme() = voice(dark = false, access = PermissionAccess.NotAsked, tapMic = true)
+
+    @Test
+    fun voicePermissionDarkTheme() = voice(dark = true, access = PermissionAccess.NotAsked, tapMic = true)
+
+    @Test
+    @Config(fontScale = 2f)
+    fun voicePermissionLargeFontScale() = voice(dark = false, access = PermissionAccess.NotAsked, tapMic = true)
+
+    @Test
+    fun voicePermissionBlockedLightTheme() = voice(dark = false, access = PermissionAccess.DeniedForGood, tapMic = true)
+
+    @Test
+    fun voicePermissionBlockedDarkTheme() = voice(dark = true, access = PermissionAccess.DeniedForGood, tapMic = true)
 
     @Test
     fun messageMenuLeftSpeakerLightTheme() = messageMenu(dark = false, speaker = "Waiter")

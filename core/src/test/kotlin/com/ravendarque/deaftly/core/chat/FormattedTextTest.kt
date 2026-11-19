@@ -18,6 +18,14 @@ class FormattedTextTest {
     }
 
     @Test
+    fun ofSpansRebuildsTheSameTextAndRanges() {
+        val formatted = FormattedText.of(hello().spans)
+
+        assertEquals(hello(), formatted)
+        assertEquals(hello().spans, formatted.spans)
+    }
+
+    @Test
     fun aRangeBeyondTheTextIsRejected() {
         assertFailsWith<IllegalArgumentException> { FormattedText("abc", listOf(StyleRange(1, 4, SpanStyle.Bold))) }
     }

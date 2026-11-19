@@ -23,6 +23,8 @@ private val MenuBorder = 1.dp
 data class MessageActions(
     val onQuote: (messageId: Int) -> Unit,
     val onDelete: (messageId: Int) -> Unit,
+    val onEdit: (messageId: Int) -> Unit,
+    val onNotYours: () -> Unit = {},
 )
 
 internal data class MessageCommand(
@@ -35,13 +37,16 @@ internal data class MessageCommand(
 internal fun rememberMessageCommands(
     message: Message,
     actions: MessageActions,
+    editable: Boolean,
 ): List<MessageCommand> {
     val clipboard = LocalClipboard.current
     val scope = rememberCoroutineScope()
+    val editLabel = stringResource(R.string.chat_edit_action)
     val copyLabel = stringResource(R.string.chat_copy_action)
     val quoteLabel = stringResource(R.string.chat_quote_action)
     val deleteLabel = stringResource(R.string.chat_delete_action)
-    return listOf(
+    return listOfNotNull(
+        if (editable) MessageCommand(editLabel) { actions.onEdit(message.id) } else null,
         MessageCommand(copyLabel) {
             scope.launch { clipboard.setClipEntry(ClipEntry(ClipData.newPlainText(null, message.plainText))) }
         },

@@ -59,6 +59,8 @@ class ChatViewModelTest {
         insertions,
         store,
         CoroutineScope(UnconfinedTestDispatcher()),
+        ::silentRecogniser,
+        silentAudio(),
     )
 
     private val store = FakeSavedChatStore()
@@ -697,6 +699,8 @@ class ChatViewModelTest {
                     ChatInsertions(),
                     store,
                     CoroutineScope(UnconfinedTestDispatcher()),
+                    ::silentRecogniser,
+                    silentAudio(),
                 )
             collect(viewModel)
 

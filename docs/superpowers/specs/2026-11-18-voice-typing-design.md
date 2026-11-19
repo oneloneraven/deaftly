@@ -38,7 +38,7 @@ These would make it a failure even if it technically works:
 
 1. **The mic button** sits next to Send in the composer, in the same accented style (the participant's strong colour, as `SendButton` uses). It shows **only on the hearing person's turn** (participant B). The deaf user never sees it.
 2. **Tapping the mic turns voice typing on:**
-   - the other composer buttons are disabled
+   - the other composer buttons are hidden (first built as disabled; the owner asked for hidden on 19 November 2026)
    - the text input is hidden
    - the turn prompt changes to something like "Voice typing is on. Speak clearly towards the phone." (final copy to agree; professional register, no en dashes)
 3. **Words appear live** in the message pane as they're spoken, in the hearing person's bubble style.
@@ -47,11 +47,7 @@ These would make it a failure even if it technically works:
    - When the turn switches to the deaf user, listening stops and they get the normal keyboard.
 5. **A longer pause sends the message,** so messages don't grow too long. The pause length may need tuning after real use.
 6. **No minimum length.** One-word and two-word messages ("Yeah", "Tuesday") are valid turns and must not be dropped.
-7. **Tapping a message to edit it:**
-   - only the hearing person's own voice-typed messages can be tapped
-   - tapping one turns voice typing off and takes the message out of the chat
-   - the message goes into the normal text field to edit, and sends again like any other reply
-   - in-place editing was rejected, because the chat would then show something other than what was first said
+7. **Editing a message** (revised by the owner on 19 November 2026, after trying it on a phone; see "Editing, as revised" below).
 
 ## Builder's calls (made in conversation, open to change)
 
@@ -65,8 +61,7 @@ These would make it a failure even if it technically works:
 The owner decided these on 18 November 2026:
 
 - **Words still being spoken are sent, not dropped.** When voice typing stops for any reason (mic off, turn moves to the deaf user, chat ends, app goes to the background), the words recognised so far are sent as the hearing person's message. The message is always stamped with the hearing person as its author, never taken from whoever's turn it is when it lands.
-- **Editing:** tapping a voice-typed message edits it. "Edit" is also in the long-press menu, and is a TalkBack action.
-- **Editing with a draft already typed:** the message text is added to the end of the draft.
+- **Editing:** superseded by "Editing, as revised" below.
 - **Where the model lives:** a GitHub release asset on this repo, separate from app releases, fetched in the build and checked against its SHA-256. It isn't committed to git.
 - **Showing that voice typing is on:** a status line that stays up while it's on, separate from the turn prompt. The turn prompt only shows until a participant has sent something, so it can't carry this.
 
@@ -75,11 +70,22 @@ The builder decided these; they're open to change:
 - **Saving the flag:** "voice-typed" is a field on the message, saved with the chat. It defaults to false, so existing chats read as before.
 - **What counts as a message:** only empty or whitespace results are dropped. Anything else is a message, however short.
 - **Coming back on:** when the turn returns to the hearing person, voice typing listens again without a tap, but only if the microphone permission is still granted. The status line and a TalkBack announcement show it's listening.
-- **Editing is for the hearing person's turn:** tap to edit and the Edit command work only on their turn. On the deaf user's turn, a tap does nothing, so the deaf user can't start an edit by accident.
-- **When the model fails to load:** voice typing turns off, the mic shows that it's unavailable, and typing works as normal. Nothing derived from audio is logged.
+- **When the model fails to load, or the microphone can't be opened:** voice typing turns off and typing works as normal. Nothing derived from audio is logged. As revised by the owner on 19 November 2026, the mic button turns grey with a line through it, and tapping it shows the unavailable message as a fading notice over the composer, the same as tapping someone else's message. It goes back to normal when listening could start again: the app returns to the foreground, or the turn comes back to the hearing person.
 - **Denied for good:** if the microphone permission is refused for good, the mic offers to open the app's settings, as the camera does.
 - **The sherpa-ncnn source:** fetched as a pinned release tarball with a checksum, then compiled in the app's CMake against the app's ncnn. The model files are converted once by hand; the checkpoint and the SHA-256 of each output are recorded in `third_party/`.
 - **Last words when stopping:** stopping sends the text already shown on screen, at once, rather than waiting for the engine to finish decoding. A word cut off at the moment of stopping may be lost; the hearing person can correct it by editing.
+
+## Editing, as revised
+
+The owner tried the first build on a phone on 19 November 2026 and changed editing:
+
+- **Both people can edit** their own messages, typed or voice-typed, on their own turn. Tapping one of your own messages edits it, and "Edit" is in the long-press menu and the TalkBack actions. Neither person can edit the other's words.
+- **The message stays in place.** It's loaded into the composer with its formatting and quote, under an "Editing message" bar with a cancel button. Sending replaces it where it was and labels it "Edited", which TalkBack reads with the message. This replaces the first design, which took the message out and re-sent it at the end.
+- **A draft already typed is set aside** while editing and comes back when the edit is sent or cancelled (replacing "the message text is added to the end of the draft").
+- **Voice typing turns off** when an edit starts, and the mic is disabled while editing.
+- **An edited message can be edited again.**
+- **Tapping someone else's message** shows a short notice over the composer, "You can only edit your own messages", which fades after a few seconds.
+- **The "Edited" label** is in capitals at the app's smallest type size, like the speaker names.
 
 ## Approaches considered
 
@@ -104,7 +110,7 @@ The builder decided these; they're open to change:
   - update `docs/threat-model.md`, `docs/data-protection.md`, `docs/privacy.md` and the website privacy page, in the same PR
   - add a `SpeechSendsNothingTest` alongside `OcrSendsNothingTest`
   - no `INTERNET` permission
-- **Storage:** a sent voice-typed message is stored like a typed message, so kept chats need no format change. "Voice-typed", which decides whether a message can be tapped to edit, needs a flag on the message. Keep it in memory or in the chat file, as the builder sees fit.
+- **Storage:** a sent voice-typed message is stored like a typed message, so kept chats need no format change. Messages carry a "voice-typed" flag and an "edited" flag, saved with the chat.
 - **Measurements still owed before release** (from #59):
   - a mid-range phone: a Pixel 6a counts as an optimistic proxy; a Galaxy A-series is preferred
   - real recordings of hearing speakers in real places, with their consent. The recordings stay out of git.

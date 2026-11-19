@@ -49,6 +49,8 @@ class ChatEndTest {
                 ChatOpening(savedChatId = savedChatId),
                 store = store,
                 writeScope = testWriteScope,
+                createSpeechRecogniser = ::silentRecogniser,
+                audio = silentAudio(),
             )
         composeRule.setContent {
             com.ravendarque.deaftly.ui.theme.AppTheme {

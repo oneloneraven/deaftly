@@ -85,7 +85,15 @@ class ChatScreenTest {
     }
 
     private fun show(savedState: SavedStateHandle = SavedStateHandle()) {
-        viewModel = ChatViewModel(settings, savedState, store = FakeSavedChatStore(), writeScope = testWriteScope)
+        viewModel =
+            ChatViewModel(
+                settings,
+                savedState,
+                store = FakeSavedChatStore(),
+                writeScope = testWriteScope,
+                createSpeechRecogniser = ::silentRecogniser,
+                audio = silentAudio(),
+            )
         composeRule.setContent {
             CompositionLocalProvider(LocalHapticFeedback provides recordingHaptics) {
                 AppTheme { ChatScreen(viewModel, onEnd = { ended++ }, onInsertTemplate = { inserts++ }) }

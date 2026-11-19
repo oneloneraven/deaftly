@@ -44,6 +44,7 @@ import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.onLongClick
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.traversalIndex
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -54,6 +55,8 @@ import com.ravendarque.deaftly.R
 import com.ravendarque.deaftly.core.chat.Conversation
 import com.ravendarque.deaftly.core.chat.Message
 import com.ravendarque.deaftly.core.chat.Participant
+import com.ravendarque.deaftly.core.chat.ParticipantId
+import com.ravendarque.deaftly.core.chat.RichText
 import com.ravendarque.deaftly.core.settings.ChatTextSize
 import com.ravendarque.deaftly.ui.theme.Deaftly
 import com.ravendarque.deaftly.ui.theme.ParticipantColours
@@ -63,6 +66,7 @@ import kotlinx.coroutines.launch
 private const val QUOTE_SIZE_RATIO = 0.8f
 private const val QUOTE_MAX_LINES = 3
 private const val LABEL_TRACKING = 0.04f
+private const val LIVE_KEY = "live"
 private val BarWidth = 4.dp
 private val DividerHeight = 1.dp
 private val QuoteIndent = 12.dp
@@ -74,10 +78,14 @@ fun MessageList(
     sidesSwapped: Boolean,
     actions: MessageActions,
     modifier: Modifier = Modifier,
+    liveText: String = "",
+    editable: (Message) -> Boolean = { false },
 ) {
     val listState = rememberLazyListState()
     val count = conversation.messages.size
-    if (count == 0) {
+    val live = liveText.isNotBlank()
+    val lastItem = if (live) count else count - 1
+    if (count == 0 && !live) {
         Box(modifier, contentAlignment = Alignment.Center) {
             Text(
                 text = stringResource(R.string.chat_empty),
@@ -87,8 +95,11 @@ fun MessageList(
         }
         return
     }
-    LaunchedEffect(count, textSize) {
-        if (count > 0) listState.animateScrollToItem(count - 1)
+    LaunchedEffect(count, textSize, live) {
+        if (lastItem >= 0) listState.animateScrollToItem(lastItem)
+    }
+    LaunchedEffect(liveText) {
+        if (live) listState.scrollToItem(lastItem)
     }
     LazyColumn(
         modifier = modifier.semantics { isTraversalGroup = true },
@@ -98,10 +109,21 @@ fun MessageList(
     ) {
         itemsIndexed(conversation.messages, key = { _, message -> message.id }) { index, message ->
             if (index > 0) MessageDivider()
-            ScriptMessage(message, conversation, textSize, message.author.isOnRight(sidesSwapped), actions)
+            ScriptMessage(message, conversation, ScriptSide(textSize, message.author.isOnRight(sidesSwapped)), actions, editable(message))
+        }
+        if (live) {
+            item(key = LIVE_KEY) {
+                if (count > 0) MessageDivider()
+                LiveLine(liveText, count, conversation, textSize, ParticipantId.B.isOnRight(sidesSwapped))
+            }
         }
     }
 }
+
+private data class ScriptSide(
+    val textSize: ChatTextSize,
+    val onRight: Boolean,
+)
 
 @Composable
 private fun MessageDivider() {
@@ -112,15 +134,17 @@ private fun MessageDivider() {
 private fun ScriptMessage(
     message: Message,
     conversation: Conversation,
-    textSize: ChatTextSize,
-    onRight: Boolean,
+    side: ScriptSide,
     actions: MessageActions,
+    editable: Boolean,
 ) {
+    val (textSize, onRight) = side
     var menuOpen by remember { mutableStateOf(false) }
-    val commands = rememberMessageCommands(message, actions)
+    val commands = rememberMessageCommands(message, actions, editable)
     val menuLabel = stringResource(R.string.chat_message_actions)
     val author = conversation.participant(message.author).labelled()
-    val said = stringResource(R.string.chat_message_from, author.displayName.orEmpty(), message.plainText)
+    val spoken = stringResource(R.string.chat_message_from, author.displayName.orEmpty(), message.plainText)
+    val said = if (message.edited) stringResource(R.string.chat_message_edited_description, spoken) else spoken
     val description = message.quote?.let { stringResource(R.string.chat_message_quoting, it.text, said) } ?: said
     Box {
         ScriptLine(
@@ -130,8 +154,12 @@ private fun ScriptMessage(
             onRight = onRight,
             modifier =
                 Modifier
-                    .pointerInput(Unit) { detectTapGestures(onLongPress = { menuOpen = true }) }
-                    .semantics(mergeDescendants = true) {
+                    .pointerInput(editable) {
+                        detectTapGestures(
+                            onTap = { if (editable) actions.onEdit(message.id) else actions.onNotYours() },
+                            onLongPress = { menuOpen = true },
+                        )
+                    }.semantics(mergeDescendants = true) {
                         contentDescription = description
                         traversalIndex = message.id.toFloat()
                         onLongClick(menuLabel) {
@@ -154,12 +182,37 @@ private fun ScriptMessage(
 }
 
 @Composable
+private fun LiveLine(
+    text: String,
+    index: Int,
+    conversation: Conversation,
+    textSize: ChatTextSize,
+    onRight: Boolean,
+) {
+    val author = conversation.participant(ParticipantId.B).labelled()
+    val said = stringResource(R.string.chat_message_from, author.displayName.orEmpty(), text)
+    ScriptLine(
+        message = Message(index, ParticipantId.B, RichText.spans(text.trim()), voiceTyped = true),
+        author = author,
+        textSize = textSize,
+        onRight = onRight,
+        modifier =
+            Modifier.semantics(mergeDescendants = true) {
+                contentDescription = said
+                traversalIndex = index.toFloat()
+            },
+        pending = true,
+    )
+}
+
+@Composable
 private fun ScriptLine(
     message: Message,
     author: Participant,
     textSize: ChatTextSize,
     onRight: Boolean,
     modifier: Modifier,
+    pending: Boolean = false,
 ) {
     val colours = author.colour.colours()
     val align = if (onRight) TextAlign.End else TextAlign.Start
@@ -179,7 +232,8 @@ private fun ScriptLine(
         ) {
             NameLabel(author.displayName.orEmpty(), colours.label, align)
             message.quote?.let { QuoteLine(it.text, textSize, align, onRight) }
-            MessageText(message, textSize, align)
+            MessageText(message, textSize, align, pending)
+            if (message.edited) EditedLabel(align)
         }
         if (onRight) SpeakerBar(colours.strong)
     }
@@ -208,6 +262,17 @@ private fun NameLabel(
 }
 
 @Composable
+private fun EditedLabel(align: TextAlign) {
+    Text(
+        text = stringResource(R.string.chat_message_edited).uppercase(),
+        color = Deaftly.colors.inkSecondary,
+        style = MaterialTheme.typography.labelSmall.copy(letterSpacing = LABEL_TRACKING.em),
+        textAlign = align,
+        modifier = Modifier.fillMaxWidth(),
+    )
+}
+
+@Composable
 private fun QuoteLine(
     text: String,
     textSize: ChatTextSize,
@@ -230,12 +295,13 @@ private fun MessageText(
     message: Message,
     textSize: ChatTextSize,
     align: TextAlign,
+    pending: Boolean,
 ) {
     val formatting = rememberChatFormatting()
     Text(
         text = formatting.annotate(message.spans),
-        color = Deaftly.colors.ink,
-        style = chatTextStyle(textSize.sp),
+        color = if (pending) Deaftly.colors.inkSecondary else Deaftly.colors.ink,
+        style = chatTextStyle(textSize.sp).let { if (pending) it.copy(fontStyle = FontStyle.Italic) else it },
         textAlign = align,
         modifier = Modifier.fillMaxWidth(),
     )

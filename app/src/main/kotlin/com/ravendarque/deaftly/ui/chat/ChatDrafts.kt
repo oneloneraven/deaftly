@@ -3,6 +3,7 @@ package com.ravendarque.deaftly.ui.chat
 import androidx.lifecycle.SavedStateHandle
 import com.ravendarque.deaftly.core.chat.Composition
 import com.ravendarque.deaftly.core.chat.FormattedText
+import com.ravendarque.deaftly.core.chat.Message
 import com.ravendarque.deaftly.core.chat.ParticipantId
 import com.ravendarque.deaftly.core.chat.Quote
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -34,22 +35,29 @@ class ChatDrafts(
         update { it.copy(composition = it.composition.insert(text)) }
     }
 
+    fun startEdit(
+        owner: ParticipantId,
+        message: Message,
+    ) {
+        drafts.update { all ->
+            val draft = all.getValue(owner)
+            val resume = draft.editing?.resume ?: draft
+            val loaded = Draft(Composition(FormattedText.of(message.spans)), message.quote, Editing(message.id, resume))
+            all + (owner to loaded)
+        }
+        persist(owner)
+    }
+
+    fun cancelEdit() {
+        update { it.editing?.resume ?: it }
+    }
+
     fun setQuote(quote: Quote?) {
         update { it.copy(quote = quote) }
     }
 
     fun afterDeleting(messageId: Int) {
-        drafts.update { all ->
-            all.mapValues { (_, draft) ->
-                val quote = draft.quote
-                val quoted = quote?.messageId
-                when {
-                    quote == null || quoted == null || quoted < messageId -> draft
-                    quoted == messageId -> draft.copy(quote = null)
-                    else -> draft.copy(quote = quote.copy(messageId = quoted - 1))
-                }
-            }
-        }
+        drafts.update { all -> all.mapValues { (_, draft) -> draft.afterDeleting(messageId) } }
         ParticipantId.entries.forEach(::persist)
     }
 
@@ -63,7 +71,7 @@ class ChatDrafts(
     }
 
     fun clear() {
-        update { Draft() }
+        update { it.editing?.resume ?: Draft() }
     }
 
     private fun update(transform: (Draft) -> Draft) {
@@ -76,3 +84,42 @@ class ChatDrafts(
         savedState[if (owner == ParticipantId.A) DRAFT_A_KEY else DRAFT_B_KEY] = ChatCodec.encodeDraft(drafts.value.getValue(owner))
     }
 }
+
+private fun Draft.afterDeleting(deletedId: Int): Draft {
+    val editing = editing
+    return when {
+        editing?.messageId == deletedId -> {
+            editing.resume.afterDeleting(deletedId)
+        }
+
+        else -> {
+            copy(
+                quote = quote.afterDeleting(deletedId, keepUnlinked = editing != null),
+                editing =
+                    editing?.copy(
+                        messageId = editing.messageId.afterDeleting(deletedId),
+                        resume = editing.resume.afterDeleting(deletedId),
+                    ),
+            )
+        }
+    }
+}
+
+private fun Int.afterDeleting(deletedId: Int): Int = if (this > deletedId) this - 1 else this
+
+private fun Quote?.afterDeleting(
+    deletedId: Int,
+    keepUnlinked: Boolean,
+): Quote? {
+    val quoted = this?.messageId
+    return when {
+        this == null || quoted == null || quoted < deletedId -> this
+        quoted == deletedId -> if (keepUnlinked) copy(messageId = null) else null
+        else -> copy(messageId = quoted - 1)
+    }
+}
+
+internal fun ChatDrafts.isEditing(
+    owner: ParticipantId,
+    messageId: Int,
+): Boolean = all.value[owner]?.editing?.messageId == messageId

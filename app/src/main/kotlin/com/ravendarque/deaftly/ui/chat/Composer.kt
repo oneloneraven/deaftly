@@ -1,5 +1,6 @@
 package com.ravendarque.deaftly.ui.chat
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -29,6 +30,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.Role
@@ -58,13 +60,13 @@ import com.ravendarque.deaftly.ui.theme.ParticipantColours
 import com.ravendarque.deaftly.ui.theme.colours
 
 private val CardBorder = 2.5.dp
-private val SendWidth = 52.dp
-private val ControlSize = 48.dp
+internal val SendWidth = 52.dp
+internal val ControlSize = 48.dp
 private val InputMinHeight = 44.dp
+internal val AccentShape = RoundedCornerShape(14.dp)
 private val ToolbarIcon = 20.dp
-private const val DISABLED_ALPHA = 0.4f
+internal const val DISABLED_ALPHA = 0.4f
 private const val MAX_LINES = 4
-private const val QUOTE_LINES = 2
 private const val GLYPH_SP = 18
 
 data class ComposerActions(
@@ -72,6 +74,14 @@ data class ComposerActions(
     val onChange: (Composition) -> Unit,
     val onRemoveQuote: () -> Unit,
     val onSend: () -> Unit,
+    val onToggleVoice: () -> Unit,
+    val onCancelEdit: () -> Unit = {},
+)
+
+data class VoicePermissionPrompt(
+    val blocked: Boolean,
+    val onAllow: () -> Unit,
+    val onOpenSettings: () -> Unit,
 )
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -84,8 +94,11 @@ fun Composer(
     actions: ComposerActions,
     modifier: Modifier = Modifier,
     tail: BubbleTailState? = null,
+    voice: VoiceTypingState? = null,
+    voicePermission: VoicePermissionPrompt? = null,
 ) {
     val colours = participant.colour.colours()
+    val voiceOn = voice?.on == true
     val shape = Deaftly.shapes.card as CornerBasedShape
     val c = Deaftly.colors
     val state = rememberComposerState(participant.id, draft.composition, actions.onChange)
@@ -108,37 +121,89 @@ fun Composer(
                 ),
         verticalArrangement = Arrangement.spacedBy(Deaftly.spacing.space8),
     ) {
-        if (!hasSent) TurnPrompt(participant.id)
-        draft.quote?.let { QuotePreview(it.text, colours.strong, actions.onRemoveQuote) }
-        MessageField(state, participant.labelled().displayName.orEmpty(), colours.strong, textSize.sp, send)
-        FlowRow(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(Deaftly.spacing.space4),
-            verticalArrangement = Arrangement.spacedBy(Deaftly.spacing.space4),
-            itemVerticalAlignment = Alignment.CenterVertically,
-        ) {
-            FormattingButtons(state, actions, colours)
-            Box(Modifier.weight(1f), contentAlignment = Alignment.CenterEnd) {
-                SendButton(enabled = canSend, onClick = send, container = colours.strong, content = colours.onStrong)
+        val mic: @Composable () -> Unit = { ComposerMic(voice, draft, actions, colours) }
+        when {
+            voiceOn -> WithMic(mic) { PromptLine(DeaftlyIcons.Mic, R.string.chat_voice_on, modifier = it) }
+            voicePermission != null -> VoicePermissionCard(voicePermission)
+            !hasSent -> TurnPrompt(participant.id)
+        }
+        if (!voiceOn) {
+            DraftContext(draft, colours.strong, actions)
+            val field: @Composable (Modifier) -> Unit = {
+                MessageField(state, participant.labelled().displayName.orEmpty(), colours.strong, textSize.sp, send, it)
+            }
+            if (voice != null) WithMic(mic, field) else field(Modifier)
+        }
+        if (!voiceOn) {
+            FlowRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(Deaftly.spacing.space4),
+                verticalArrangement = Arrangement.spacedBy(Deaftly.spacing.space4),
+                itemVerticalAlignment = Alignment.CenterVertically,
+            ) {
+                FormattingButtons(state, actions, colours)
+                Box(Modifier.weight(1f), contentAlignment = Alignment.CenterEnd) {
+                    SendButton(enabled = canSend, onClick = send, container = colours.strong, content = colours.onStrong)
+                }
             }
         }
     }
 }
 
 @Composable
+private fun ComposerMic(
+    voice: VoiceTypingState?,
+    draft: Draft,
+    actions: ComposerActions,
+    colours: ParticipantColours,
+) {
+    MicButton(
+        on = voice?.on == true,
+        onClick = actions.onToggleVoice,
+        container = colours.strong,
+        content = colours.onStrong,
+        enabled = draft.editing == null,
+        unavailable = voice?.unavailable == true,
+    )
+}
+
+@Composable
+private fun WithMic(
+    mic: @Composable () -> Unit,
+    content: @Composable (Modifier) -> Unit,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(Deaftly.spacing.space8),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        content(Modifier.weight(1f))
+        mic()
+    }
+}
+
+@Composable
 private fun TurnPrompt(id: ParticipantId) {
+    PromptLine(
+        DeaftlyIcons.Edit,
+        if (id == ParticipantId.B) R.string.chat_turn_prompt_other else R.string.chat_turn_prompt_own,
+    )
+}
+
+@Composable
+internal fun PromptLine(
+    icon: ImageVector,
+    @StringRes text: Int,
+    modifier: Modifier = Modifier,
+) {
     val c = Deaftly.colors
     Row(
-        modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
+        modifier = modifier.semantics { liveRegion = LiveRegionMode.Polite },
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(Deaftly.spacing.space8),
     ) {
-        Icon(DeaftlyIcons.Edit, contentDescription = null, modifier = Modifier.size(20.dp), tint = c.ink)
-        Text(
-            text = stringResource(if (id == ParticipantId.B) R.string.chat_turn_prompt_other else R.string.chat_turn_prompt_own),
-            style = MaterialTheme.typography.titleSmall,
-            color = c.ink,
-        )
+        Icon(icon, contentDescription = null, modifier = Modifier.size(20.dp), tint = c.ink)
+        Text(text = stringResource(text), style = MaterialTheme.typography.titleSmall, color = c.ink)
     }
 }
 
@@ -226,37 +291,6 @@ private fun ToolbarButton(
 }
 
 @Composable
-private fun QuotePreview(
-    text: String,
-    bar: Color,
-    onRemove: () -> Unit,
-) {
-    val description = stringResource(R.string.chat_quote_pending, text)
-    val removeLabel = stringResource(R.string.chat_quote_remove)
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Row(
-            modifier =
-                Modifier
-                    .weight(1f)
-                    .semantics(mergeDescendants = true) { contentDescription = description },
-        ) {
-            QuoteBlock(text, bar, Deaftly.colors.inkSecondary, MaterialTheme.typography.bodyMedium, QUOTE_LINES)
-        }
-        Box(
-            modifier =
-                Modifier
-                    .size(ControlSize)
-                    .clip(Deaftly.shapes.controlSmall)
-                    .clickable(role = Role.Button, onClick = onRemove)
-                    .semantics { contentDescription = removeLabel },
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(DeaftlyIcons.Close, contentDescription = null, modifier = Modifier.size(18.dp))
-        }
-    }
-}
-
-@Composable
 internal fun SendButton(
     enabled: Boolean,
     onClick: () -> Unit,
@@ -269,7 +303,7 @@ internal fun SendButton(
             Modifier
                 .size(width = SendWidth, height = ControlSize)
                 .alpha(if (enabled) 1f else DISABLED_ALPHA)
-                .clip(RoundedCornerShape(14.dp))
+                .clip(AccentShape)
                 .background(container)
                 .clickable(enabled = enabled, role = Role.Button, onClick = onClick)
                 .semantics { contentDescription = label },

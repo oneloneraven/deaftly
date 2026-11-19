@@ -1,0 +1,307 @@
+package com.ravendarque.deaftly.ui.chat
+
+import androidx.activity.ComponentActivity
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.assertHeightIsAtLeast
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.assertWidthIsAtLeast
+import androidx.compose.ui.test.hasAnyDescendant
+import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.junit4.accessibility.enableAccessibilityChecks
+import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
+import androidx.compose.ui.test.longClick
+import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onRoot
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.tryPerformAccessibilityChecks
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.SavedStateHandle
+import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.ravendarque.deaftly.core.chat.ChatProfile
+import com.ravendarque.deaftly.core.chat.ColourRole
+import com.ravendarque.deaftly.core.chat.Conversation
+import com.ravendarque.deaftly.core.chat.ParticipantId
+import com.ravendarque.deaftly.core.speech.AudioSource
+import com.ravendarque.deaftly.core.speech.FakeSpeechRecogniser
+import com.ravendarque.deaftly.core.speech.SpeechEvent
+import com.ravendarque.deaftly.core.speech.SpeechRecogniser
+import com.ravendarque.deaftly.ui.permissions.PermissionAccess
+import com.ravendarque.deaftly.ui.permissions.RuntimePermission
+import com.ravendarque.deaftly.ui.theme.AppTheme
+import kotlinx.coroutines.Dispatchers
+import org.junit.Before
+import org.junit.Rule
+import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.annotation.Config
+import org.robolectric.annotation.GraphicsMode
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
+
+@RunWith(AndroidJUnit4::class)
+@GraphicsMode(GraphicsMode.Mode.NATIVE)
+@Config(qualifiers = "en-rGB-w390dp-h1600dp")
+class ChatScreenVoiceTest {
+    @get:Rule
+    val composeRule = createAndroidComposeRule<ComponentActivity>()
+
+    private val settings = FakeSettingsRepository(ChatProfile("Alex", ColourRole.Green))
+    private var ended = 0
+    private var microphoneAccess by mutableStateOf(PermissionAccess.Granted)
+    private var permissionRequests = 0
+    private var settingsOpened = 0
+    private lateinit var viewModel: ChatViewModel
+
+    @Before
+    fun enableChecks() {
+        composeRule.enableAccessibilityChecks()
+    }
+
+    private fun show(
+        conversation: Conversation? = null,
+        createSpeechRecogniser: () -> SpeechRecogniser = ::silentRecogniser,
+        audio: AudioSource = silentAudio(),
+    ) {
+        viewModel =
+            ChatViewModel(
+                settings,
+                SavedStateHandle(listOfNotNull(conversation?.let { "conversation" to ChatCodec.encode(it) }).toMap()),
+                store = FakeSavedChatStore(),
+                writeScope = testWriteScope,
+                createSpeechRecogniser = createSpeechRecogniser,
+                audio = audio,
+                speechWork = Dispatchers.Unconfined,
+            )
+        composeRule.setContent {
+            AppTheme {
+                ChatScreen(
+                    viewModel,
+                    onEnd = { ended++ },
+                    onInsertTemplate = {},
+                    microphone = RuntimePermission(microphoneAccess, { permissionRequests++ }, { settingsOpened++ }),
+                )
+            }
+        }
+        composeRule.waitForIdle()
+    }
+
+    private fun showListening(
+        speech: List<SpeechEvent?> = listOf(SpeechEvent.Partial("Tuesday works")),
+        conversation: Conversation = orderingConversation(ParticipantId.B),
+    ) = show(conversation, createSpeechRecogniser = { FakeSpeechRecogniser(speech) }, audio = HangingAudio(1))
+
+    private fun startVoiceTyping() {
+        composeRule.onNodeWithContentDescription("Start voice typing").performClick()
+        composeRule.waitForIdle()
+    }
+
+    private fun showOrdering(turn: ParticipantId) = show(orderingConversation(turn))
+
+    private fun tapName(name: String) = composeRule.onNodeWithText(name).performClick()
+
+    private fun hasState(text: String) = SemanticsMatcher.expectValue(SemanticsProperties.StateDescription, text)
+
+    private fun conversation() = (viewModel.state.value as ChatUiState.Ready).conversation
+
+    private fun draft() = (viewModel.state.value as ChatUiState.Ready).draft
+
+    private val hasPoliteLiveRegion = SemanticsMatcher.expectValue(SemanticsProperties.LiveRegion, LiveRegionMode.Polite)
+
+    @Test
+    fun micShowsOnlyOnTheHearingPersonsTurn() {
+        showOrdering(ParticipantId.A)
+        composeRule.onNodeWithContentDescription("Start voice typing").assertDoesNotExist()
+
+        tapName("Waiter")
+        composeRule.waitForIdle()
+
+        composeRule
+            .onNodeWithContentDescription("Start voice typing")
+            .assertIsDisplayed()
+            .assertWidthIsAtLeast(48.dp)
+            .assertHeightIsAtLeast(48.dp)
+        composeRule.onRoot().tryPerformAccessibilityChecks()
+    }
+
+    @Test
+    fun voiceOnHidesTheFieldAndTheOtherButtons() {
+        showListening()
+        composeRule.onNode(isMessageField).assertIsDisplayed()
+
+        startVoiceTyping()
+
+        composeRule.onNode(isMessageField).assertDoesNotExist()
+        listOf("Send", "Bold", "Italic", "Highlight", "Insert template").forEach {
+            composeRule.onNodeWithContentDescription(it).assertDoesNotExist()
+        }
+        composeRule
+            .onNodeWithContentDescription("Stop voice typing")
+            .assertIsEnabled()
+            .assert(hasState("On"))
+        composeRule.onRoot().tryPerformAccessibilityChecks()
+    }
+
+    @Test
+    fun stoppingVoiceTypingBringsTheFieldBack() {
+        showListening(speech = emptyList())
+        startVoiceTyping()
+
+        composeRule.onNodeWithContentDescription("Stop voice typing").performClick()
+        composeRule.waitForIdle()
+
+        composeRule.onNode(isMessageField).assertIsDisplayed()
+        composeRule.onNodeWithContentDescription("Start voice typing").assert(hasState("Off"))
+        composeRule.onNodeWithContentDescription("Send").assertIsNotEnabled()
+    }
+
+    @Test
+    fun voiceOnShowsTheStatusLine() {
+        showListening()
+
+        startVoiceTyping()
+
+        composeRule
+            .onNodeWithText("Voice typing is on. Speak clearly towards the device.")
+            .assertIsDisplayed()
+        composeRule
+            .onNode(hasAnyDescendant(hasText("Voice typing is on. Speak clearly towards the device.")) and hasPoliteLiveRegion)
+            .assertExists()
+    }
+
+    @Test
+    fun liveTextShowsInTheMessageList() {
+        showListening()
+
+        startVoiceTyping()
+
+        composeRule
+            .onNodeWithContentDescription("Waiter: Tuesday works")
+            .assertIsDisplayed()
+            .assert(SemanticsMatcher.keyNotDefined(SemanticsProperties.LiveRegion))
+            .assert(SemanticsMatcher.keyNotDefined(SemanticsActions.CustomActions))
+        assertEquals(4, conversation().messages.size)
+    }
+
+    @Test
+    fun notAskedExplainsThePermissionAndRequestsIt() {
+        microphoneAccess = PermissionAccess.NotAsked
+        showListening()
+
+        startVoiceTyping()
+
+        assertEquals(1, permissionRequests)
+        composeRule.onNodeWithText("To use voice typing", substring = true).assertIsDisplayed()
+        composeRule.onNodeWithText("Allow microphone").assertIsDisplayed()
+        composeRule.onNode(isMessageField).assertIsDisplayed()
+        assertEquals(false, viewModel.voice.state.value.on)
+        composeRule.onRoot().tryPerformAccessibilityChecks()
+    }
+
+    @Test
+    fun grantingThePermissionTurnsVoiceTypingOn() {
+        microphoneAccess = PermissionAccess.NotAsked
+        showListening()
+        startVoiceTyping()
+
+        microphoneAccess = PermissionAccess.Granted
+        composeRule.waitForIdle()
+
+        assertTrue(viewModel.voice.state.value.on)
+        composeRule.onNodeWithText("To use voice typing", substring = true).assertDoesNotExist()
+        composeRule.onNodeWithContentDescription("Waiter: Tuesday works").assertIsDisplayed()
+    }
+
+    @Test
+    fun startingAnEditDismissesThePermissionPromptSoGrantingDoesNotTurnVoiceTypingOn() {
+        microphoneAccess = PermissionAccess.NotAsked
+        showListening()
+        startVoiceTyping()
+        val own = (viewModel.state.value as ChatUiState.Ready).conversation.messages.first { it.author == ParticipantId.B }
+
+        composeRule.runOnIdle { viewModel.startEdit(own.id) }
+        microphoneAccess = PermissionAccess.Granted
+        composeRule.waitForIdle()
+
+        assertEquals(false, viewModel.voice.state.value.on)
+        composeRule.onNodeWithText("To use voice typing", substring = true).assertDoesNotExist()
+    }
+
+    @Test
+    fun deniedOffersAnotherGo() {
+        microphoneAccess = PermissionAccess.Denied
+        showListening()
+        startVoiceTyping()
+
+        composeRule.onNodeWithText("Allow microphone").performClick()
+
+        assertEquals(2, permissionRequests)
+    }
+
+    @Test
+    fun deniedForGoodOffersSettings() {
+        microphoneAccess = PermissionAccess.DeniedForGood
+        showListening()
+
+        startVoiceTyping()
+
+        assertEquals(0, permissionRequests)
+        composeRule.onNodeWithText("To use voice typing", substring = true).assertIsDisplayed()
+        composeRule.onNodeWithText("Allow microphone").assertDoesNotExist()
+        composeRule.onNodeWithText("Open settings").assertIsDisplayed().performClick()
+        assertEquals(1, settingsOpened)
+        composeRule.onRoot().tryPerformAccessibilityChecks()
+    }
+
+    @Test
+    fun unavailableGreysTheMicAndExplainsWhenTapped() {
+        show(
+            orderingConversation(ParticipantId.B),
+            createSpeechRecogniser = { error("The model would not load") },
+            audio = HangingAudio(1),
+        )
+
+        startVoiceTyping()
+
+        composeRule.onNodeWithText("Voice typing isn\u2019t available right now. You can still type normally.").assertDoesNotExist()
+        composeRule.onNode(isMessageField).assertIsDisplayed()
+        composeRule.onRoot().tryPerformAccessibilityChecks()
+
+        composeRule.onNodeWithContentDescription("Voice typing unavailable").performClick()
+        composeRule.waitForIdle()
+
+        assertEquals(false, viewModel.voice.state.value.on)
+        composeRule.mainClock.autoAdvance = false
+        composeRule.onNodeWithContentDescription("Voice typing unavailable").performClick()
+        composeRule.mainClock.advanceTimeBy(UNAVAILABLE_NOTICE_SHOWN_MILLIS)
+        composeRule.onNodeWithText("Voice typing isn\u2019t available right now. You can still type normally.").assertIsDisplayed()
+    }
+
+    @Test
+    fun endingWhileListeningShowsKeepDialog() {
+        show(createSpeechRecogniser = { FakeSpeechRecogniser(listOf(SpeechEvent.Partial("Tuesday works"))) }, audio = HangingAudio(1))
+        tapName("Them")
+        composeRule.waitForIdle()
+        startVoiceTyping()
+        composeRule.onNodeWithContentDescription("Them: Tuesday works").assertIsDisplayed()
+
+        composeRule.onNodeWithContentDescription("End chat").performClick()
+        composeRule.waitForIdle()
+
+        composeRule.onNodeWithText("Keep this chat?").assertIsDisplayed()
+        assertEquals(0, ended)
+        assertEquals("Tuesday works", conversation().messages.last().plainText)
+    }
+}
+
+private const val UNAVAILABLE_NOTICE_SHOWN_MILLIS = 1_000L

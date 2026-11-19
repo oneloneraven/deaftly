@@ -57,6 +57,19 @@ public data class Conversation(
         return copy(messages = messages + message)
     }
 
+    public fun replaceMessage(
+        id: Int,
+        spans: List<Span>,
+        quote: Quote?,
+    ): Conversation {
+        val existing = requireNotNull(messages.getOrNull(id)) { "No message with id $id" }
+        require(spans.isNotEmpty()) { "A message must not be empty" }
+        require(quote?.messageId == null || (quote.messageId in messages.indices && quote.messageId != id)) {
+            "No message with id ${quote?.messageId} to quote"
+        }
+        return copy(messages = messages.map { if (it.id == id) existing.copy(spans = spans, quote = quote, edited = true) else it })
+    }
+
     public fun deleteMessage(id: Int): Conversation {
         if (id !in messages.indices) return this
         val kept =

@@ -46,6 +46,8 @@ class ChatViewModelKeepingTest {
             ChatInsertions(),
             store,
             CoroutineScope(UnconfinedTestDispatcher()),
+            ::silentRecogniser,
+            silentAudio(),
         )
 
     private fun ChatViewModel.type(text: String) = drafts.setComposition(Composition().withText(text, text.length, text.length))

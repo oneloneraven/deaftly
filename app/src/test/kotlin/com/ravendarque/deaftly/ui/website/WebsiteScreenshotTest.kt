@@ -36,6 +36,8 @@ import com.ravendarque.deaftly.ui.chat.ChatScreen
 import com.ravendarque.deaftly.ui.chat.ChatViewModel
 import com.ravendarque.deaftly.ui.chat.FakeSavedChatStore
 import com.ravendarque.deaftly.ui.chat.FakeSettingsRepository
+import com.ravendarque.deaftly.ui.chat.silentAudio
+import com.ravendarque.deaftly.ui.chat.silentRecogniser
 import com.ravendarque.deaftly.ui.chat.testWriteScope
 import com.ravendarque.deaftly.ui.facetoface.FaceToFaceContent
 import com.ravendarque.deaftly.ui.fill.FillScreen
@@ -238,6 +240,8 @@ class WebsiteScreenshotTest {
                 SavedStateHandle(mapOf("conversation" to ChatCodec.encode(conversation))),
                 store = FakeSavedChatStore(),
                 writeScope = testWriteScope,
+                createSpeechRecogniser = ::silentRecogniser,
+                audio = silentAudio(),
             )
         shot { ChatScreen(viewModel, onEnd = {}, onInsertTemplate = {}) }
     }

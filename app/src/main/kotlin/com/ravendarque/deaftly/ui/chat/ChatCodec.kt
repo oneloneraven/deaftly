@@ -35,6 +35,7 @@ internal data class MessageDto(
     val quoteId: Int? = null,
     val quoteText: String? = null,
     val voiceTyped: Boolean = false,
+    val edited: Boolean = false,
 )
 
 @Serializable
@@ -52,6 +53,8 @@ private data class DraftDto(
     val typing: Set<SpanStyle>? = null,
     val quoteId: Int? = null,
     val quoteText: String? = null,
+    val editingId: Int? = null,
+    val resume: DraftDto? = null,
 )
 
 @Serializable
@@ -69,34 +72,32 @@ internal object ChatCodec {
     fun decode(encoded: String?): Conversation? =
         encoded?.let { runCatching { json.decodeFromString(ConversationDto.serializer(), it).toDomain() }.getOrNull() }
 
-    fun encodeDraft(draft: Draft): String =
-        json.encodeToString(
-            DraftDto.serializer(),
-            DraftDto(
-                text = draft.composition.text,
-                ranges =
-                    draft.composition.content.ranges
-                        .map { RangeDto(it.start, it.end, it.style) },
-                selectionStart = draft.composition.selectionStart,
-                selectionEnd = draft.composition.selectionEnd,
-                typing = draft.composition.typing,
-                quoteId = draft.quote?.messageId,
-                quoteText = draft.quote?.text,
-            ),
-        )
+    fun encodeDraft(draft: Draft): String = json.encodeToString(DraftDto.serializer(), draft.toDto())
 
     fun decodeDraft(encoded: String?): Draft =
-        encoded
-            ?.let {
-                runCatching {
-                    val dto = json.decodeFromString(DraftDto.serializer(), it)
-                    val content = FormattedText(dto.text, dto.ranges.map { range -> StyleRange(range.start, range.end, range.style) })
-                    Draft(
-                        composition = Composition(content, dto.selectionStart, dto.selectionEnd, dto.typing),
-                        quote = dto.quoteText?.let { Quote(dto.quoteId, it) },
-                    )
-                }.getOrNull()
-            } ?: Draft()
+        encoded?.let { runCatching { json.decodeFromString(DraftDto.serializer(), it).toDomain() }.getOrNull() } ?: Draft()
+}
+
+private fun Draft.toDto(): DraftDto =
+    DraftDto(
+        text = composition.text,
+        ranges = composition.content.ranges.map { RangeDto(it.start, it.end, it.style) },
+        selectionStart = composition.selectionStart,
+        selectionEnd = composition.selectionEnd,
+        typing = composition.typing,
+        quoteId = quote?.messageId,
+        quoteText = quote?.text,
+        editingId = editing?.messageId,
+        resume = editing?.resume?.toDto(),
+    )
+
+private fun DraftDto.toDomain(): Draft {
+    val content = FormattedText(text, ranges.map { range -> StyleRange(range.start, range.end, range.style) })
+    return Draft(
+        composition = Composition(content, selectionStart, selectionEnd, typing),
+        quote = quoteText?.let { Quote(quoteId, it) },
+        editing = editingId?.let { id -> resume?.let { Editing(id, it.toDomain()) } },
+    )
 }
 
 internal fun Conversation.toDto() =
@@ -117,7 +118,17 @@ internal fun ConversationDto.toDomain() =
 
 private fun Participant.toDto() = ParticipantDto(colour, name)
 
-private fun Message.toDto() = MessageDto(author, spans.map { SpanDto(it.text, it.styles) }, quote?.messageId, quote?.text, voiceTyped)
+private fun Message.toDto() =
+    MessageDto(
+        author,
+        spans.map {
+            SpanDto(it.text, it.styles)
+        },
+        quote?.messageId,
+        quote?.text,
+        voiceTyped,
+        edited,
+    )
 
 private fun MessageDto.toDomain(id: Int) =
     Message(
@@ -126,4 +137,5 @@ private fun MessageDto.toDomain(id: Int) =
         spans = spans.map { Span(it.text, it.styles) },
         quote = quoteText?.let { Quote(quoteId, it) },
         voiceTyped = voiceTyped,
+        edited = edited,
     )
