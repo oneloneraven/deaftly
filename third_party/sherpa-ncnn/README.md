@@ -144,7 +144,7 @@ Checked on 19 November 2026 against https://bdsmovement.net/Guide-to-BDS-Boycott
 | kissfft | Mark Borgerding (individual open source maintainer) | N | BSD-3-Clause. |
 | Checkpoint host: Hugging Face (account `marcoyang`) | Hugging Face, Xiaoyu Yang | N | The checkpoint is downloaded once by hand. The app's build fetches the model from a release asset on this repository, not from Hugging Face. |
 | LibriSpeech (OpenSLR) and GigaSpeech (SpeechColab) | OpenSLR, SpeechColab | N | Training data and test audio only. |
-| PyTorch 1.13.1 (export only) | PyTorch (created at Meta, now under the Linux Foundation) | Y, indirectly | Meta appears on the No Tech for Apartheid list. PyTorch is a free, industry-standard tool run once on the developer's machine to export the model, with no viable alternative for icefall's export script. It is not in the app or in the model files, so the free-tool exception in ADR-0002 applies, but it is recorded here for the owner to confirm. |
+| PyTorch 1.13.1 (export only) | PyTorch (created at Meta, now under the Linux Foundation) | Y, indirectly | Meta appears on the No Tech for Apartheid list. PyTorch is a free, industry-standard tool run once on the developer's machine to export the model, with no viable alternative for icefall's export script. It is not in the app or in the model files, so the free-tool exception in ADR-0002 applies. The owner accepted it on 19 November 2026. |
 | Ubuntu g++ 15.2.0, CMake, Ninja (pnnx build only) | Canonical, GNU, Kitware, Ninja authors | Not checked | Build-time tools for a one-off conversion. Not looked up. |
 
 The licence and screening columns record what could be read on the date above. Re-check before substantially expanding the relationship, as ADR-0002 says.
