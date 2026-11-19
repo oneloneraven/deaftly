@@ -177,7 +177,6 @@ class ChatViewModel(
         voice.turnOff()
         deleteMessage(messageId)
         drafts.appendText(ParticipantId.B, message.plainText)
-        message.quote?.let { drafts.restoreQuote(ParticipantId.B, it, messageId, conversation.value?.messages?.size ?: 0) }
     }
 
     fun send() {

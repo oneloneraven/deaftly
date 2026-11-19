@@ -49,18 +49,6 @@ class ChatDrafts(
         persist(owner)
     }
 
-    fun restoreQuote(
-        owner: ParticipantId,
-        quote: Quote,
-        deletedId: Int,
-        messageCount: Int,
-    ) {
-        val quoted = quote.messageId?.let { if (it > deletedId) it - 1 else it } ?: return
-        if (quoted !in 0 until messageCount || drafts.value.getValue(owner).quote != null) return
-        drafts.update { it + (owner to it.getValue(owner).copy(quote = quote.copy(messageId = quoted))) }
-        persist(owner)
-    }
-
     fun setQuote(quote: Quote?) {
         update { it.copy(quote = quote) }
     }

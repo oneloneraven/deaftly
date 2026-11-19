@@ -172,7 +172,7 @@ Behaviour `VoiceTyping` owns:
 - `turnOff` and `close` also close the recogniser. `stop` commits but leaves `on` as it is (used before ending the chat and on background).
 - `AudioUnavailableException` or a recogniser that throws on creation: `on = false`, `unavailable = true`, recogniser closed. `turnOn` clears `unavailable`.
 
-`editVoiceMessage(id)` does nothing unless the turn is B and the message exists, is by B and is voice-typed. Otherwise: `voice.turnOff()`, then delete the message (through the existing `deleteMessage`, so drafts' quotes are re-indexed), then `drafts.appendText(B, message.plainText)`; if B's draft has no quote and the message had one whose message still exists, set it.
+`editVoiceMessage(id)` does nothing unless the turn is B and the message exists, is by B and is voice-typed. Otherwise: `voice.turnOff()`, then delete the message (through the existing `deleteMessage`, so drafts' quotes are re-indexed), then `drafts.appendText(B, message.plainText)`. Voice-typed messages never carry a quote, so there's none to restore.
 
 - [ ] **Step 1: Write the failing `VoiceTypingTest` cases** (with `StandardTestDispatcher`, `FakeSpeechRecogniser`, `FakeAudioSource`, a list collecting utterances):
   - `pauseSendsAnUtterance`: script `[Partial("yeah"), Utterance("Yeah")]`; turn on, `update(true)`, advance; utterances are `["Yeah"]` and `live == ""`.
