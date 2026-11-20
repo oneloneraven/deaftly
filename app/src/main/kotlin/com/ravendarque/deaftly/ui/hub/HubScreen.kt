@@ -57,6 +57,7 @@ private val chatOptions =
     listOf(
         HubOption(R.string.hub_face_to_face, R.string.hub_face_to_face_help, DeaftlyIcons.FaceToFace, Route.FaceToFace),
         HubOption(R.string.hub_side_by_side, R.string.hub_side_by_side_help, DeaftlyIcons.SideBySide, Route.Chat()),
+        HubOption(R.string.hub_listen, R.string.hub_listen_help, DeaftlyIcons.Mic, Route.Listen),
     )
 
 private val savedChatsOption =

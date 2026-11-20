@@ -38,6 +38,8 @@ import com.ravendarque.deaftly.ui.help.HelpTopicsScreen
 import com.ravendarque.deaftly.ui.home.HomeViewModel
 import com.ravendarque.deaftly.ui.home.TemplatesScreen
 import com.ravendarque.deaftly.ui.hub.HubScreen
+import com.ravendarque.deaftly.ui.listen.ListenScreen
+import com.ravendarque.deaftly.ui.listen.ListenViewModel
 import com.ravendarque.deaftly.ui.ocr.OcrOutcome
 import com.ravendarque.deaftly.ui.ocr.OcrScreen
 import com.ravendarque.deaftly.ui.savedchats.SavedChatsScreen
@@ -194,9 +196,19 @@ private fun EntryProviderScope<NavKey>.conversationEntries(
             onContinue = { backStack[backStack.lastIndex] = it },
         )
     }
+    entry<Route.Listen> {
+        val viewModel = viewModel<ListenViewModel>(factory = container.listenViewModelFactory)
+        ListenScreen(
+            viewModel,
+            onEnd = { backStack.removeLastOrNull() },
+            onContinue = { backStack[backStack.lastIndex] = it },
+        )
+    }
     entry<Route.Chat> { route ->
         val viewModel =
-            viewModel<ChatViewModel>(factory = container.chatViewModelFactory(ChatOpening(route.messages, route.draft, route.savedChatId)))
+            viewModel<ChatViewModel>(
+                factory = container.chatViewModelFactory(ChatOpening(route.messages, route.draft, route.savedChatId, route.heard)),
+            )
         ChatScreen(
             viewModel,
             onEnd = { backStack.removeLastOrNull() },

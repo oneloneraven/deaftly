@@ -128,4 +128,32 @@ class ChatViewModelVoiceTest {
             assertFalse(audio.isOpen)
             assertEquals(1, audio.opened)
         }
+
+    @Test
+    fun whatTheySaidInListenForMeOpensAsTheirVoiceTypedMessagesOnTheirTurn() =
+        runTest {
+            val audio = HangingAudio(0)
+            val viewModel =
+                ChatViewModel(
+                    FakeSettingsRepository(),
+                    SavedStateHandle(),
+                    ChatOpening(heard = listOf("Any allergies?", "We also have a vegan menu")),
+                    ChatInsertions(),
+                    store,
+                    CoroutineScope(UnconfinedTestDispatcher()),
+                    { FakeSpeechRecogniser(emptyList()) },
+                    audio,
+                    StandardTestDispatcher(testScheduler),
+                )
+            backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { viewModel.state.collect {} }
+            viewModel.setListeningAllowed(foreground = true, permitted = true)
+            runCurrent()
+
+            val conversation = viewModel.conversation()
+            assertEquals(listOf("Any allergies?", "We also have a vegan menu"), conversation.messages.map { it.plainText })
+            assertTrue(conversation.messages.all { it.author == ParticipantId.B && it.voiceTyped })
+            assertEquals(ParticipantId.B, conversation.turn)
+            assertTrue(assertIs<ChatUiState.Ready>(viewModel.state.value).voice.on)
+            assertTrue(audio.isOpen)
+        }
 }

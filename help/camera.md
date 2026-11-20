@@ -1,6 +1,6 @@
 ---
 title: Reading text with the camera
-order: 7
+order: 8
 ---
 
 # Reading text with the camera

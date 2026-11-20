@@ -14,6 +14,8 @@ public interface SettingsRepository {
 
     public val chatSidesSwapped: Flow<Boolean>
 
+    public val listenSignFacesThem: Flow<Boolean>
+
     public val themeMode: Flow<ThemeMode>
 
     public val personalNames: Flow<PersonalNames>
@@ -27,6 +29,8 @@ public interface SettingsRepository {
     public suspend fun setChatTextSize(size: ChatTextSize)
 
     public suspend fun setChatSidesSwapped(swapped: Boolean)
+
+    public suspend fun setListenSignFacesThem(facesThem: Boolean)
 
     public suspend fun setThemeMode(mode: ThemeMode)
 

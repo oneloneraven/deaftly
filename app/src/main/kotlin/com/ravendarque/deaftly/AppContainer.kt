@@ -27,6 +27,7 @@ import com.ravendarque.deaftly.ui.facetoface.FaceToFaceViewModel
 import com.ravendarque.deaftly.ui.fill.FillViewModel
 import com.ravendarque.deaftly.ui.firstrun.FirstRunViewModel
 import com.ravendarque.deaftly.ui.home.HomeViewModel
+import com.ravendarque.deaftly.ui.listen.ListenViewModel
 import com.ravendarque.deaftly.ui.ocr.FrameImage
 import com.ravendarque.deaftly.ui.ocr.OcrOutcomes
 import com.ravendarque.deaftly.ui.ocr.OcrViewModel
@@ -100,6 +101,18 @@ class AppContainer(
     val faceToFaceViewModelFactory =
         viewModelFactory {
             initializer { FaceToFaceViewModel(createSavedStateHandle()) }
+        }
+
+    val listenViewModelFactory =
+        viewModelFactory {
+            initializer {
+                ListenViewModel(
+                    settingsRepository,
+                    createSavedStateHandle(),
+                    createSpeechRecogniser = { SherpaSpeechRecogniser(context.applicationContext) },
+                    audio = MicrophoneAudioSource(Dispatchers.IO),
+                )
+            }
         }
 
     val showViewModelFactory =

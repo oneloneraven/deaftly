@@ -18,6 +18,7 @@ class FakeSettingsRepository(
     sidesSwapped: Boolean = false,
     theme: ThemeMode = ThemeMode.System,
     names: PersonalNames = PersonalNames(),
+    signFacesThem: Boolean = true,
 ) : SettingsRepository {
     private val profile = MutableStateFlow(initial)
     private val scheme = MutableStateFlow(showScheme)
@@ -26,6 +27,7 @@ class FakeSettingsRepository(
     private val swapped = MutableStateFlow(sidesSwapped)
     private val mode = MutableStateFlow(theme)
     private val personal = MutableStateFlow(names)
+    private val facesThem = MutableStateFlow(signFacesThem)
 
     override val chatProfile: Flow<ChatProfile> = profile
 
@@ -36,6 +38,8 @@ class FakeSettingsRepository(
     override val chatTextSize: Flow<ChatTextSize> = size
 
     override val chatSidesSwapped: Flow<Boolean> = swapped
+
+    override val listenSignFacesThem: Flow<Boolean> = facesThem
 
     override val themeMode: Flow<ThemeMode> = mode
 
@@ -63,6 +67,10 @@ class FakeSettingsRepository(
 
     override suspend fun setChatSidesSwapped(swapped: Boolean) {
         this.swapped.value = swapped
+    }
+
+    override suspend fun setListenSignFacesThem(facesThem: Boolean) {
+        this.facesThem.value = facesThem
     }
 
     override suspend fun setThemeMode(mode: ThemeMode) {
