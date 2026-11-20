@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
 import androidx.compose.ui.Modifier
@@ -52,11 +53,28 @@ import com.ravendarque.deaftly.ui.typeshow.TypeShowScreen
 import kotlinx.coroutines.flow.first
 
 @Composable
-fun AppNavigation(container: AppContainer) {
+fun AppNavigation(
+    container: AppContainer,
+    shortcut: Route? = null,
+    onShortcutHandled: () -> Unit = {},
+) {
     val firstRunDone by produceState<Boolean?>(null) { value = container.settingsRepository.firstRunDone.first() }
     when (val done = firstRunDone) {
         null -> Box(Modifier.fillMaxSize().background(Deaftly.colors.ground))
-        else -> AppNavigationHost(container, if (done) Route.Home else Route.FirstRun)
+        else -> AppNavigationHost(container, if (done) Route.Home else Route.FirstRun, shortcut, onShortcutHandled)
+    }
+}
+
+@Composable
+private fun OpenShortcut(
+    backStack: NavBackStack<NavKey>,
+    shortcut: Route?,
+    onHandled: () -> Unit,
+) {
+    LaunchedEffect(shortcut) {
+        if (shortcut == null) return@LaunchedEffect
+        if (backStack.firstOrNull() == Route.Home && backStack.lastOrNull() != shortcut) backStack.add(shortcut)
+        onHandled()
     }
 }
 
@@ -64,8 +82,11 @@ fun AppNavigation(container: AppContainer) {
 private fun AppNavigationHost(
     container: AppContainer,
     start: Route,
+    shortcut: Route?,
+    onShortcutHandled: () -> Unit,
 ) {
     val backStack = rememberNavBackStack(start)
+    OpenShortcut(backStack, shortcut, onShortcutHandled)
     val insertIntoChat: (String) -> Unit = { text ->
         container.chatInsertions.offer(text)
         while (backStack.lastOrNull() !is Route.Chat && backStack.size > 1) backStack.removeLastOrNull()
