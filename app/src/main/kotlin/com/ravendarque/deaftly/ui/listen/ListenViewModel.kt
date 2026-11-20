@@ -78,6 +78,8 @@ class ListenViewModel(
         val live =
             voice.state.value.live
                 .trim()
-        return Route.Chat(heard = if (live.isEmpty()) heard.value else heard.value + live)
+        val route = Route.Chat(heard = if (live.isEmpty()) heard.value else heard.value + live)
+        voice.close()
+        return route
     }
 }

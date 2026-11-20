@@ -114,9 +114,12 @@ class ListenViewModelTest {
     @Test
     fun continuingCarriesWhatTheySaidIncludingTheLiveLine() =
         runTest {
-            val viewModel = listening(listOf(SpeechEvent.Utterance("Any allergies?"), SpeechEvent.Partial("We also have")))
+            val audio = HangingAudio(2)
+            val viewModel = listening(listOf(SpeechEvent.Utterance("Any allergies?"), SpeechEvent.Partial("We also have")), audio)
 
             assertEquals(Route.Chat(heard = listOf("Any allergies?", "We also have")), viewModel.continueAsChat())
+            runCurrent()
+            assertFalse(audio.isOpen)
         }
 
     @Test
