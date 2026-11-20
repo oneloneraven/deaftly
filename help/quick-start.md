@@ -33,3 +33,12 @@ Each option has an **About** button that explains it in a sentence or two.
 1. Tap **Use a template**, then **Check in**.
 2. Tap a highlighted word, such as your name, and fill it in.
 3. Tap **Show**. Hold up your phone so they can read it.
+
+## Shortcuts
+
+To get to Start typing, Face to face, Side by side or Listen for me faster:
+
+- **Long-press the Deaftly icon** on your home screen or in your apps list, then tap the one you want.
+- **Add one to your home screen**: on Deaftly's home screen, tap the option's **About** button, then **Add to home screen**. You can also drag it out of the long-press list onto your home screen.
+
+Some phones don't support shortcuts. If you don't see them, your phone's home screen app doesn't offer them.

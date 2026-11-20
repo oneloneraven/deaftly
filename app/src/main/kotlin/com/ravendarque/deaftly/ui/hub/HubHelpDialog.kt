@@ -1,7 +1,9 @@
 package com.ravendarque.deaftly.ui.hub
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
@@ -18,6 +20,8 @@ import com.ravendarque.deaftly.R
 import com.ravendarque.deaftly.ui.components.ButtonMinHeight
 import com.ravendarque.deaftly.ui.components.HubIconDisc
 import com.ravendarque.deaftly.ui.components.PrimaryButton
+import com.ravendarque.deaftly.ui.components.SecondaryButton
+import com.ravendarque.deaftly.ui.icons.DeaftlyIcons
 import com.ravendarque.deaftly.ui.theme.Deaftly
 
 @Composable
@@ -27,6 +31,7 @@ internal fun HubHelpDialog(
     icon: ImageVector,
     onStart: () -> Unit,
     onDismiss: () -> Unit,
+    onAddToHomeScreen: (() -> Unit)? = null,
 ) {
     val c = Deaftly.colors
     AlertDialog(
@@ -40,6 +45,14 @@ internal fun HubHelpDialog(
         text = {
             Column(Modifier.verticalScroll(rememberScrollState())) {
                 Text(help, style = MaterialTheme.typography.bodyLarge)
+                if (onAddToHomeScreen != null) {
+                    SecondaryButton(
+                        stringResource(R.string.hub_help_add_to_home),
+                        onAddToHomeScreen,
+                        Modifier.fillMaxWidth().padding(top = Deaftly.spacing.space16),
+                        DeaftlyIcons.Plus,
+                    )
+                }
             }
         },
         confirmButton = { PrimaryButton(stringResource(R.string.hub_help_start), onClick = onStart) },

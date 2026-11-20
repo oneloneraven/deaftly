@@ -82,6 +82,7 @@
     <string name="share_qr_description">QR code for deaftly.com/download</string>
     <string name="share_link_button">Share link</string>
     <string name="hub_help_start">Start</string>
+    <string name="hub_help_add_to_home">Add to home screen</string>
     <string name="hub_help_close">Close</string>
     <string name="chip_state_empty">Empty</string>
     <string name="chip_state_filled">Filled in</string>

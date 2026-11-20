@@ -30,21 +30,26 @@ enum class AppShortcut(
             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
             .putExtra(EXTRA_SHORTCUT, id)
 
+    private fun info(context: Context): ShortcutInfoCompat =
+        ShortcutInfoCompat
+            .Builder(context, id)
+            .setShortLabel(context.getString(label))
+            .setRank(ordinal)
+            .setIcon(IconCompat.createWithResource(context, icon))
+            .setIntent(intent(context))
+            .build()
+
+    fun requestPin(context: Context) {
+        ShortcutManagerCompat.requestPinShortcut(context, info(context), null)
+    }
+
     companion object {
+        fun forRoute(route: Route): AppShortcut? = entries.firstOrNull { it.route == route }
+
         fun from(intent: Intent?): AppShortcut? = intent?.getStringExtra(EXTRA_SHORTCUT)?.let { id -> entries.firstOrNull { it.id == id } }
 
         fun publish(context: Context) {
-            val shortcuts =
-                entries.map { shortcut ->
-                    ShortcutInfoCompat
-                        .Builder(context, shortcut.id)
-                        .setShortLabel(context.getString(shortcut.label))
-                        .setRank(shortcut.ordinal)
-                        .setIcon(IconCompat.createWithResource(context, shortcut.icon))
-                        .setIntent(shortcut.intent(context))
-                        .build()
-                }
-            ShortcutManagerCompat.setDynamicShortcuts(context, shortcuts)
+            ShortcutManagerCompat.setDynamicShortcuts(context, entries.map { it.info(context) })
         }
     }
 }

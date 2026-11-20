@@ -30,6 +30,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import com.ravendarque.deaftly.R
+import com.ravendarque.deaftly.navigation.AppShortcut
 import com.ravendarque.deaftly.navigation.Route
 import com.ravendarque.deaftly.ui.components.DeaftlyIconButton
 import com.ravendarque.deaftly.ui.components.HubCard
@@ -75,6 +76,7 @@ private val allOptions = showOptions + chatOptions + savedChatsOption + supportO
 fun HubScreen(
     onNavigate: (Route) -> Unit,
     hasSavedChats: Boolean = false,
+    addToHomeScreen: ((Route) -> Unit)? = null,
 ) {
     var helpLabel by rememberSaveable { mutableStateOf<Int?>(null) }
     val helpOption = allOptions.firstOrNull { it.label == helpLabel }
@@ -119,6 +121,13 @@ fun HubScreen(
                 onNavigate(option.route)
             },
             onDismiss = { helpLabel = null },
+            onAddToHomeScreen =
+                addToHomeScreen?.takeIf { AppShortcut.forRoute(option.route) != null }?.let { add ->
+                    {
+                        helpLabel = null
+                        add(option.route)
+                    }
+                },
         )
     }
 }
