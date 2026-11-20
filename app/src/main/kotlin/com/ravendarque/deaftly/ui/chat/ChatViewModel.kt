@@ -35,6 +35,7 @@ data class ChatOpening(
     val messages: List<String> = emptyList(),
     val draft: String = "",
     val savedChatId: String? = null,
+    val heard: List<String> = emptyList(),
 )
 
 sealed interface ChatUiState {
@@ -115,6 +116,7 @@ class ChatViewModel(
                 if (conversation.compareAndSet(null, started)) {
                     savedState.saveConversation(started)
                     if (reopened == null) drafts.restore(ParticipantId.A, opening.draft)
+                    if (reopened == null && opening.heard.isNotEmpty()) voice.turnOn()
                 }
             }
         }
@@ -212,14 +214,12 @@ private fun opened(
     conversation: Conversation,
 ): Conversation {
     val sent = opening.messages.map { it.trim() }.filter { it.isNotEmpty() }
-    return if (sent.isEmpty()) {
+    val heard = opening.heard.filter { it.isNotBlank() }
+    return if (sent.isEmpty() && heard.isEmpty()) {
         conversation
     } else {
-        sent
-            .fold(
-                conversation,
-            ) { chat, text -> chat.append(RichText.spans(text)) }
-            .withTurn(ParticipantId.B)
+        val withSent = sent.fold(conversation) { chat, text -> chat.append(RichText.spans(text)) }
+        heard.fold(withSent.withTurn(ParticipantId.B)) { chat, text -> chat.appendVoiceTyped(text) }
     }
 }
 

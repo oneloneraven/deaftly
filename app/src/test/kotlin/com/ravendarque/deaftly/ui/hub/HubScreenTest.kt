@@ -33,11 +33,11 @@ import org.robolectric.annotation.GraphicsMode
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-private val options = listOf("Start typing", "Use a template", "Face to face", "Side by side", "Help", "Share")
+private val options = listOf("Start typing", "Use a template", "Face to face", "Side by side", "Listen for me", "Help", "Share")
 
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
-@Config(qualifiers = "en-rGB-w390dp-h1600dp")
+@Config(qualifiers = "en-rGB-w390dp-h2000dp")
 class HubScreenTest {
     @get:Rule
     val composeRule = createComposeRule()
@@ -127,7 +127,7 @@ class HubScreenTest {
         composeRule.onNodeWithContentDescription("Settings").performClick()
 
         assertEquals(
-            listOf(Route.TypeShow, Route.Templates, Route.FaceToFace, Route.Chat(), Route.Help, Route.Share, Route.Settings),
+            listOf(Route.TypeShow, Route.Templates, Route.FaceToFace, Route.Chat(), Route.Listen, Route.Help, Route.Share, Route.Settings),
             navigated,
         )
     }
@@ -149,7 +149,10 @@ class HubScreenTest {
                 "For a back-and-forth conversation. You share one phone, passing it between you and taking turns to type. " +
                 "Each person’s messages appear in their own colour, like a script, so it’s easy to follow who said what. " +
                 "Flip the switch to change whose turn it is.",
-            "Help" to "Find out how to use Deaftly: templates, Show, Face to face, Side by side and the camera.",
+            "Listen for me" to
+                "For when someone wants to talk to you. Deaftly turns what they say into text on your phone, so you can read along. " +
+                "The audio isn’t kept. If you want to reply, switch to Side by side.",
+            "Help" to "Find out how to use Deaftly: templates, Show, Face to face, Side by side, Listen for me and the camera.",
             "Share" to "Show someone the QR code so they can get Deaftly, or send them the link.",
         )
 

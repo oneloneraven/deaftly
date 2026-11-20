@@ -85,6 +85,7 @@ class TemplateStoreSerializerTest {
                     mapOf(
                         "firstRunDone" to JsonPrimitive(false),
                         "chatSidesSwapped" to JsonPrimitive(false),
+                        "listenSignFacesThem" to JsonPrimitive(true),
                         "firstName" to JsonPrimitive(""),
                         "lastName" to JsonPrimitive(""),
                         "legalNameDiffers" to JsonPrimitive(false),

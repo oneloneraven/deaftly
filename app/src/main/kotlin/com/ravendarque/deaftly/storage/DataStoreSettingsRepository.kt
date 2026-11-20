@@ -29,6 +29,8 @@ class DataStoreSettingsRepository(
 
     override val chatSidesSwapped: Flow<Boolean> = store.data.map { it.settings.chatSidesSwapped }.distinctUntilChanged()
 
+    override val listenSignFacesThem: Flow<Boolean> = store.data.map { it.settings.listenSignFacesThem }.distinctUntilChanged()
+
     override val themeMode: Flow<ThemeMode> =
         store.data.map { it.settings.themeMode?.toDomain() ?: ThemeMode.System }.distinctUntilChanged()
 
@@ -52,6 +54,10 @@ class DataStoreSettingsRepository(
 
     override suspend fun setChatSidesSwapped(swapped: Boolean) {
         store.updateData { document -> document.copy(settings = document.settings.copy(chatSidesSwapped = swapped)) }
+    }
+
+    override suspend fun setListenSignFacesThem(facesThem: Boolean) {
+        store.updateData { document -> document.copy(settings = document.settings.copy(listenSignFacesThem = facesThem)) }
     }
 
     override suspend fun setThemeMode(mode: ThemeMode) {

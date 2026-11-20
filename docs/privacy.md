@@ -25,10 +25,13 @@ processed, and by whom, is in [data protection](data-protection.md).
 - Microphone audio is processed in memory on the phone to turn speech into
   text. It is never written to a file, a log, saved state or a chat, and
   never sent anywhere.
-- The microphone is used only while voice typing is on, it is the hearing
-  person's turn and the app is in the foreground. The screen shows when it
+- The microphone is used only while voice typing is on and the app is in the
+  foreground: in Side by side, on the hearing person's turn; in Listen for
+  me, until the user pauses it or leaves the screen. The screen shows when it
   is listening.
-- Only the recognised text is kept, as a chat message the user can edit or
-  delete. It is stored only if the user keeps the chat, and a kept chat can
-  reach the user's own Android backup ([ADR-0012](adr/0012-back-up-kept-chats.md)).
+- Only the recognised text is kept. In Side by side it is a chat message the
+  user can edit or delete. It is stored only if the user keeps the chat, and a
+  kept chat can reach the user's own Android backup ([ADR-0012](adr/0012-back-up-kept-chats.md)).
+  In Listen for me it stays on that screen until the user ends it, and is not
+  stored; continuing to Side by side carries it into that chat.
 - The app works without the permission: the user can refuse it and type.

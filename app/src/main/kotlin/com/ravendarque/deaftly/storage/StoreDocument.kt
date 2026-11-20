@@ -33,6 +33,7 @@ data class SettingsDto(
     val firstRunDone: Boolean = false,
     val chatTextSize: ChatTextSizeDto? = null,
     val chatSidesSwapped: Boolean = false,
+    val listenSignFacesThem: Boolean = true,
     val themeMode: ThemeModeDto? = null,
     val firstName: String = "",
     val lastName: String = "",

@@ -24,6 +24,7 @@ The home screen has two groups.
 
 - **Face to face**: type to someone opposite you while they read along. See [Face to face](face-to-face.md).
 - **Side by side**: share one phone and take turns to type. See [Side by side](side-by-side.md).
+- **Listen for me**: they speak and you read what they say on your phone. See [Listen for me](listen-for-me.md).
 
 Each option has an **About** button that explains it in a sentence or two.
 

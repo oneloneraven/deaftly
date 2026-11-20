@@ -34,10 +34,14 @@ sealed interface Route : NavKey {
         val messages: List<String> = emptyList(),
         val draft: String = "",
         val savedChatId: String? = null,
+        val heard: List<String> = emptyList(),
     ) : Route
 
     @Serializable
     data object FaceToFace : Route
+
+    @Serializable
+    data object Listen : Route
 
     @Serializable
     data class Ocr(

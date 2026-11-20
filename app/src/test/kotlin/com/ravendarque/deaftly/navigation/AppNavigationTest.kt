@@ -396,6 +396,34 @@ class AppNavigationTest {
     }
 
     @Test
+    fun listenForMeOpensFromTheHubAndContinuesSideBySide() {
+        composeRule.enableAccessibilityChecks()
+        showApp()
+        composeRule.onNodeWithText(text(R.string.hub_listen)).performClick()
+        composeRule.waitForIdle()
+
+        composeRule.onNodeWithText(text(R.string.listen_sign)).assertIsDisplayed()
+        composeRule.onRoot().tryPerformAccessibilityChecks()
+        composeRule.onNodeWithText(text(R.string.f2f_continue)).performClick()
+        composeRule.waitUntil(LOAD_TIMEOUT_MILLIS) {
+            composeRule.onAllNodesWithText(text(R.string.chat_empty)).fetchSemanticsNodes().isNotEmpty()
+        }
+        composeRule.onNodeWithContentDescription(text(R.string.chat_end)).performClick()
+        composeRule.onNodeWithText(text(R.string.hub_listen)).assertExists()
+    }
+
+    @Test
+    fun endingListenForMeWithNothingHeardGoesHome() {
+        showApp()
+        composeRule.onNodeWithText(text(R.string.hub_listen)).performClick()
+        composeRule.waitForIdle()
+
+        composeRule.onNodeWithContentDescription(text(R.string.listen_close)).performClick()
+
+        composeRule.onNodeWithText(text(R.string.hub_listen)).assertExists()
+    }
+
+    @Test
     fun faceToFaceContinuesSideBySideWithEachSentMessageFromTheDeafUserAndTheTurnPassedOn() {
         composeRule.enableAccessibilityChecks()
         showApp()

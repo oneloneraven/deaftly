@@ -21,6 +21,7 @@ enum class AppShortcut(
     StartTyping("start-typing", R.string.hub_start_typing, R.drawable.ic_shortcut_start_typing, Route.TypeShow),
     FaceToFace("face-to-face", R.string.hub_face_to_face, R.drawable.ic_shortcut_face_to_face, Route.FaceToFace),
     SideBySide("side-by-side", R.string.hub_side_by_side, R.drawable.ic_shortcut_side_by_side, Route.Chat()),
+    Listen("listen", R.string.hub_listen, R.drawable.ic_shortcut_listen, Route.Listen),
     ;
 
     fun intent(context: Context): Intent =
