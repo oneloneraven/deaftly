@@ -60,6 +60,13 @@ class AppShortcutTest {
     }
 
     @Test
+    fun eachHubFeatureMapsToItsShortcut() {
+        assertEquals(AppShortcut.SideBySide, AppShortcut.forRoute(Route.Chat()))
+        assertEquals(AppShortcut.Listen, AppShortcut.forRoute(Route.Listen))
+        assertNull(AppShortcut.forRoute(Route.Templates))
+    }
+
+    @Test
     fun ignoresIntentsThatAreNotShortcuts() {
         assertNull(AppShortcut.from(Intent(Intent.ACTION_MAIN)))
         assertNull(AppShortcut.from(Intent().putExtra("com.ravendarque.deaftly.extra.SHORTCUT", "unknown")))

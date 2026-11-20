@@ -7,8 +7,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
@@ -108,10 +110,7 @@ private fun AppNavigationHost(
                     val viewModel = viewModel<FirstRunViewModel>(factory = container.firstRunViewModelFactory)
                     FirstRunScreen(viewModel, onDone = { backStack[backStack.lastIndex] = Route.Home })
                 }
-                entry<Route.Home> {
-                    val savedChats by container.savedChatStore.summaries.collectAsStateWithLifecycle()
-                    HubScreen(onNavigate = { backStack.add(it) }, hasSavedChats = savedChats.isNotEmpty())
-                }
+                homeEntry(container, backStack)
                 entry<Route.Templates> {
                     val viewModel = viewModel<HomeViewModel>(factory = container.homeViewModelFactory)
                     TemplatesScreen(viewModel, onNavigate = { backStack.add(it) }, onHome = { backStack.removeLastOrNull() })
@@ -143,6 +142,22 @@ private fun AppNavigationHost(
                 shareEntry(backStack)
             },
     )
+}
+
+private fun EntryProviderScope<NavKey>.homeEntry(
+    container: AppContainer,
+    backStack: NavBackStack<NavKey>,
+) {
+    entry<Route.Home> {
+        val savedChats by container.savedChatStore.summaries.collectAsStateWithLifecycle()
+        val context = LocalContext.current
+        val canPin = remember(context) { ShortcutManagerCompat.isRequestPinShortcutSupported(context) }
+        HubScreen(
+            onNavigate = { backStack.add(it) },
+            hasSavedChats = savedChats.isNotEmpty(),
+            addToHomeScreen = if (canPin) { route -> AppShortcut.forRoute(route)?.requestPin(context) } else null,
+        )
+    }
 }
 
 private fun EntryProviderScope<NavKey>.shareEntry(backStack: NavBackStack<NavKey>) {

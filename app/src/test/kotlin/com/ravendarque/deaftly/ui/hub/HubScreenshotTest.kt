@@ -31,8 +31,9 @@ class HubScreenshotTest {
     private fun captureDialog(
         dark: Boolean,
         option: String = "Face to face",
+        canPin: Boolean = false,
     ) {
-        composeRule.setContent { AppTheme(darkTheme = dark) { HubScreen(onNavigate = {}) } }
+        composeRule.setContent { AppTheme(darkTheme = dark) { HubScreen(onNavigate = {}, addToHomeScreen = if (canPin) ({}) else null) } }
         composeRule.onNodeWithContentDescription("About $option").performScrollTo().performClick()
         composeRule.waitForIdle()
         composeRule.onNode(isDialog()).captureRoboImage()
@@ -47,6 +48,16 @@ class HubScreenshotTest {
     @Test
     @Config(fontScale = 2f)
     fun dialogLargeFontScale() = captureDialog(dark = false)
+
+    @Test
+    fun dialogAddToHomeScreenLightTheme() = captureDialog(dark = false, canPin = true)
+
+    @Test
+    fun dialogAddToHomeScreenDarkTheme() = captureDialog(dark = true, option = "Listen for me", canPin = true)
+
+    @Test
+    @Config(fontScale = 2f)
+    fun dialogAddToHomeScreenLargeFontScale() = captureDialog(dark = false, canPin = true)
 
     @Test
     fun dialogHelpLightTheme() = captureDialog(dark = false, option = "Help")
