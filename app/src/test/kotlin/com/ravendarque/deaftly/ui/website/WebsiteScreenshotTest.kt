@@ -37,6 +37,7 @@ import com.ravendarque.deaftly.ui.chat.ChatScreen
 import com.ravendarque.deaftly.ui.chat.ChatViewModel
 import com.ravendarque.deaftly.ui.chat.FakeSavedChatStore
 import com.ravendarque.deaftly.ui.chat.FakeSettingsRepository
+import com.ravendarque.deaftly.ui.chat.VoiceTypingState
 import com.ravendarque.deaftly.ui.chat.silentAudio
 import com.ravendarque.deaftly.ui.chat.silentRecogniser
 import com.ravendarque.deaftly.ui.chat.testWriteScope
@@ -46,6 +47,9 @@ import com.ravendarque.deaftly.ui.fill.FillViewModel
 import com.ravendarque.deaftly.ui.fill.fillTemplates
 import com.ravendarque.deaftly.ui.home.FakeTemplateRepository
 import com.ravendarque.deaftly.ui.hub.HubScreen
+import com.ravendarque.deaftly.ui.listen.ListenActions
+import com.ravendarque.deaftly.ui.listen.ListenContent
+import com.ravendarque.deaftly.ui.listen.ListenUiState
 import com.ravendarque.deaftly.ui.ocr.OcrActions
 import com.ravendarque.deaftly.ui.ocr.OcrCameraContent
 import com.ravendarque.deaftly.ui.ocr.OcrContent
@@ -247,6 +251,19 @@ open class WebsiteScreenshotTest {
             )
         shot { ChatScreen(viewModel, onEnd = {}, onInsertTemplate = {}) }
     }
+
+    @Test
+    fun listen() =
+        shot {
+            ListenContent(
+                ListenUiState(
+                    heard = listOf("Hi, welcome in. A table for two by the window?", "Of course. Follow me, it's just over here."),
+                    voice = VoiceTypingState(on = true, listening = true, live = "Can I get you any drinks while"),
+                ),
+                permissionPrompt = null,
+                actions = ListenActions({}, {}, {}, {}, { false }),
+            )
+        }
 
     @Test
     fun settings() {
