@@ -31,6 +31,7 @@ import com.ravendarque.deaftly.core.ocr.PhraseWord
 import com.ravendarque.deaftly.core.ocr.Point
 import com.ravendarque.deaftly.core.ocr.Quad
 import com.ravendarque.deaftly.core.ocr.ViewportMapping
+import com.ravendarque.deaftly.core.settings.PersonalNames
 import com.ravendarque.deaftly.ui.chat.ChatCodec
 import com.ravendarque.deaftly.ui.chat.ChatScreen
 import com.ravendarque.deaftly.ui.chat.ChatViewModel
@@ -71,6 +72,7 @@ private const val MESSAGE = "Could I have a table for two by the window, please?
 private const val ORDER = "Hi! I'm deaf. Could I have Pasta arrabbiata please? If you have a question, please type it on my phone."
 private const val VIEWPORT_WIDTH = 390f
 private const val VIEWPORT_HEIGHT = 600f
+internal val EXAMPLE_NAMES = PersonalNames(firstName = "Keisha", lastName = "Grant", useFirstNameInChats = true)
 private val PRICE = Regex("^£\\d+(\\.\\d{2})?$")
 
 private class Fixture(
@@ -124,20 +126,20 @@ private fun viewportOf(
 @RunWith(AndroidJUnit4::class)
 @GraphicsMode(GraphicsMode.Mode.NATIVE)
 @Config(qualifiers = "en-rGB-w390dp-h600dp")
-class WebsiteScreenshotTest {
+open class WebsiteScreenshotTest {
     @get:Rule
     val composeRule = createComposeRule()
 
     @get:Rule
     val testName = TestName()
 
-    private fun shot(content: @Composable () -> Unit) {
+    protected fun shot(content: @Composable () -> Unit) {
         composeRule.setContent { AppTheme(darkTheme = false) { content() } }
         composeRule.waitForIdle()
         capture()
     }
 
-    private fun capture() {
+    protected fun capture() {
         composeRule.onRoot().captureRoboImage("$SCREENSHOT_DIR/$PACKAGE.${this::class.simpleName}.${testName.methodName}.png")
     }
 
@@ -248,7 +250,7 @@ class WebsiteScreenshotTest {
 
     @Test
     fun settings() {
-        val settings = FakeSettingsRepository(ChatProfile("Me", ColourRole.Blue))
+        val settings = FakeSettingsRepository(ChatProfile("Me", ColourRole.Blue), names = EXAMPLE_NAMES)
         val viewModel = SettingsViewModel(settings, FakeTemplateRepository(emptyList(), emptyList()))
         shot { SettingsScreen(viewModel, onBack = {}) }
     }
