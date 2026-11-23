@@ -45,7 +45,7 @@ jobs:
         run: node --test ".github/scripts/*.test.mjs"
       - name: Check the help pages
         run: node .github/scripts/check-help.mjs
-      - run: ./gradlew check
+      - run: node .github/scripts/gradle.mjs check
       - name: Upload the reports when the check fails
         if: failure()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
