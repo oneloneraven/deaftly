@@ -19,14 +19,14 @@ All processing happens on the user's device. The project receives none of it.
 | Templates and the values typed into them (may include names, health details or routines) | Composing messages to show | Not applicable: processed only on the user's device for their own use | Until the user deletes them or the app | The user, and anyone they show the phone to |
 | Participant names and colours, and other settings | Personalising chat and show mode | As above | Until the user changes them or deletes the app | The user |
 | The user's first name, last name and full legal name (all optional) | Pre-filling the name gaps in templates, and optionally naming the user in chats | As above: kept on the device only, in the settings store, and never sent anywhere. The Android backup includes the settings with the template store, at the user's choice ([ADR-0012](adr/0012-back-up-kept-chats.md)) | Until the user changes them or deletes the app | The user, and anyone they show the phone to once a name is filled into a message |
-| Chat messages | Holding a conversation | As above | In memory only; discarded when the chat ends | The two people in the conversation |
+| Chat messages | Holding a conversation | As above | In memory only; discarded when the chat ends, unless the user keeps it (see Kept chats) | The two people in the conversation |
 | Kept chats: messages, both people's names and colours, and when the chat last changed | Reading a chat again later, or carrying it on | As above: kept on the device only when the user chooses Keep, and included in the user's Android backup at their choice ([ADR-0012](adr/0012-back-up-kept-chats.md)) | Until the user deletes the chat or the app | The user, and anyone they show the phone to |
 | Camera frames and recognised text | Lifting text into a template | As above | Frames: never stored. Text: only if the user inserts it into a template | The user |
 | Microphone audio and recognised speech | Letting the hearing person speak their replies in a side by side chat, or speak to the user in Listen for me | As above | Audio: processed in memory only and never stored or sent. Recognised text: in Listen for me, held only on that screen (in memory and its saved state) until the user ends it or continues to side by side; in side by side, stored as a chat message, so it is discarded when the chat ends unless the user keeps it, and a kept chat can reach the user's Android backup at their choice ([ADR-0012](adr/0012-back-up-kept-chats.md)) | The two people in the conversation, and anyone the user shows a kept chat to |
 
 ## Gaps to settle
 
-None. Revisit if any feature adds network access, a processor or stored conversations.
+None. Stored conversations are covered by the Kept chats row and [ADR-0012](adr/0012-back-up-kept-chats.md). Revisit if any feature adds network access or a processor.
 
 ## Security measures
 

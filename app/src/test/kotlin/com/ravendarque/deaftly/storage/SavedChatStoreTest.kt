@@ -7,15 +7,26 @@ import com.ravendarque.deaftly.core.chat.Participant
 import com.ravendarque.deaftly.core.chat.ParticipantId
 import com.ravendarque.deaftly.core.chat.Span
 import com.ravendarque.deaftly.core.chat.SpanStyle
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.joinAll
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
 import org.junit.runner.RunWith
 import java.io.File
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertFalse
@@ -180,4 +191,115 @@ class SavedChatStoreTest {
                     .toSet(),
             )
         }
+
+    @Test
+    fun isLoadedOnlyOnceTheFolderHasBeenRead() =
+        runTest {
+            val store = FileSavedChatStore(dir, StandardTestDispatcher(testScheduler), backgroundScope, clock = { now })
+            assertFalse(store.loaded.value)
+
+            runCurrent()
+
+            assertTrue(store.loaded.value)
+        }
+
+    @Test
+    fun aChatThatCannotBeDeletedStaysListed() =
+        runTest {
+            val store = store()
+            store.save(VALID_ID, conversation())
+            dir.setWritable(false)
+            try {
+                assertFalse(store.delete(VALID_ID))
+                assertEquals(listOf(VALID_ID), store.summaries.value.map { it.id })
+            } finally {
+                dir.setWritable(true)
+            }
+        }
+
+    @Test
+    fun aFileWithFieldsFromANewerVersionStillLoads() =
+        runTest {
+            store().save(VALID_ID, conversation())
+            val file = File(dir, "$VALID_ID.json")
+            file.writeText(file.readText().replaceFirst("{", "{\"addedLater\":{\"nested\":[1,2]},"))
+
+            assertEquals(conversation(), store().load(VALID_ID)?.conversation)
+        }
+
+    @Test
+    fun reopeningStraightAfterAnUnfinishedSaveReadsTheNewVersion() =
+        runBlocking {
+            val slow = AtomicBoolean(false)
+            val saving = CountDownLatch(1)
+            val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+            val store =
+                FileSavedChatStore(dir, Dispatchers.IO, scope, clock = {
+                    if (slow.get()) {
+                        saving.countDown()
+                        Thread.sleep(SLOW_WRITE_MILLIS)
+                    }
+                    now
+                })
+            store.save(VALID_ID, conversation(lines = listOf("Old")))
+            slow.set(true)
+            val pending = scope.launch { store.save(VALID_ID, conversation(lines = listOf("New"))) }
+            saving.await()
+
+            assertEquals(conversation(lines = listOf("New")), store.load(VALID_ID)?.conversation)
+            pending.join()
+            scope.cancel()
+        }
+
+    @Test
+    fun interleavedSavesAndDeletesLeaveTheListMatchingTheFiles() =
+        runBlocking {
+            val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+            val store = FileSavedChatStore(dir, Dispatchers.IO, scope, clock = { now })
+            val ids = listOf(VALID_ID, OTHER_VALID_ID)
+            (0 until INTERLEAVED_OPERATIONS)
+                .map { index ->
+                    val id = ids[index % ids.size]
+                    scope.launch { if (index % 3 == 0) store.delete(id) else store.save(id, conversation(lines = listOf("Line $index"))) }
+                }.joinAll()
+
+            val onDisk =
+                dir
+                    .listFiles()
+                    .orEmpty()
+                    .map { it.name.removeSuffix(".json") }
+                    .toSet()
+            assertEquals(
+                onDisk,
+                store.summaries.value
+                    .map { it.id }
+                    .toSet(),
+            )
+            scope.cancel()
+        }
+
+    @Test
+    fun loadingAChatWhoseFileHasGoneDropsItFromTheList() =
+        runTest {
+            val store = store()
+            store.save(VALID_ID, conversation())
+            File(dir, "$VALID_ID.json").delete()
+
+            assertNull(store.load(VALID_ID))
+            assertEquals(emptyList(), store.summaries.value)
+        }
+
+    @Test
+    fun loadingAChatThatHasBecomeUnreadableMarksItSo() =
+        runTest {
+            val store = store()
+            store.save(VALID_ID, conversation())
+            File(dir, "$VALID_ID.json").writeText("not json")
+
+            assertNull(store.load(VALID_ID))
+            assertEquals(listOf(false), store.summaries.value.map { it.readable })
+        }
 }
+
+private const val SLOW_WRITE_MILLIS = 300L
+private const val INTERLEAVED_OPERATIONS = 60

@@ -23,8 +23,13 @@ class HubSavedChatsTest {
 
     private val navigated = mutableListOf<Route>()
 
-    private fun show(hasSavedChats: Boolean) {
-        composeRule.setContent { AppTheme { HubScreen(onNavigate = { navigated += it }, hasSavedChats = hasSavedChats) } }
+    private fun show(
+        hasSavedChats: Boolean,
+        savedChatsLoaded: Boolean = true,
+    ) {
+        composeRule.setContent {
+            AppTheme { HubScreen(onNavigate = { navigated += it }, hasSavedChats = hasSavedChats, savedChatsLoaded = savedChatsLoaded) }
+        }
         composeRule.waitForIdle()
     }
 
@@ -42,5 +47,12 @@ class HubSavedChatsTest {
         composeRule.onNodeWithText("Saved chats").performScrollTo().performClick()
 
         assertEquals(listOf<Route>(Route.SavedChats), navigated)
+    }
+
+    @Test
+    fun theCardsWaitUntilSavedChatsHaveBeenRead() {
+        show(hasSavedChats = false, savedChatsLoaded = false)
+
+        composeRule.onNodeWithText("Start typing").assertDoesNotExist()
     }
 }

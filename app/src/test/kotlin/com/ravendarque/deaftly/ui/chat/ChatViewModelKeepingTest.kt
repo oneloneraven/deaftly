@@ -38,17 +38,19 @@ class ChatViewModelKeepingTest {
         Dispatchers.resetMain()
     }
 
-    private fun viewModel(savedChatId: String? = null) =
-        ChatViewModel(
-            FakeSettingsRepository(),
-            SavedStateHandle(),
-            ChatOpening(savedChatId = savedChatId),
-            ChatInsertions(),
-            store,
-            CoroutineScope(UnconfinedTestDispatcher()),
-            ::silentRecogniser,
-            silentAudio(),
-        )
+    private fun viewModel(
+        savedChatId: String? = null,
+        savedState: SavedStateHandle = SavedStateHandle(),
+    ) = ChatViewModel(
+        FakeSettingsRepository(),
+        savedState,
+        ChatOpening(savedChatId = savedChatId),
+        ChatInsertions(),
+        store,
+        CoroutineScope(UnconfinedTestDispatcher()),
+        ::silentRecogniser,
+        silentAudio(),
+    )
 
     private fun ChatViewModel.type(text: String) = drafts.setComposition(Composition().withText(text, text.length, text.length))
 
@@ -122,5 +124,24 @@ class ChatViewModelKeepingTest {
 
             assertEquals(Conversation(Participant.defaultA(), Participant.defaultB()), viewModel.conversation())
             assertFalse(viewModel.kept())
+        }
+
+    @Test
+    fun aReopenedChatSurvivesProcessDeathWithItsChangesAndStaysKept() =
+        runTest {
+            val id = store.newId()
+            store.save(id, Conversation(Participant.defaultA(), Participant.defaultB("Kwame")).append(RichText.spans("See you at 6")))
+            val savedState = SavedStateHandle()
+            val first = viewModel(savedChatId = id, savedState = savedState)
+            collect(first)
+            first.type("On my way")
+            first.send()
+
+            val restored = viewModel(savedChatId = id, savedState = savedState)
+            collect(restored)
+
+            assertEquals(first.conversation(), restored.conversation())
+            assertTrue(restored.kept())
+            assertEquals(restored.conversation(), restored.stored())
         }
 }
