@@ -104,8 +104,8 @@ public class PhraseTracker(
     }
 
     public companion object {
-        public const val DEFAULT_MIN_OVERLAP: Float = 0.4f
-        public const val DEFAULT_SMOOTHING: Float = 0.6f
-        public const val DEFAULT_MAX_MISSES: Int = 2
+        public const val DEFAULT_MIN_OVERLAP: Float = 0.2f
+        public const val DEFAULT_SMOOTHING: Float = 0.8f
+        public const val DEFAULT_MAX_MISSES: Int = 1
     }
 }

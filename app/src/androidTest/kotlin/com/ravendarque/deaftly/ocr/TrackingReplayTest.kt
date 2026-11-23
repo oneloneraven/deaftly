@@ -1,6 +1,7 @@
 package com.ravendarque.deaftly.ocr
 
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Matrix
@@ -36,13 +37,15 @@ import kotlin.test.assertTrue
  * measures how the outlines behave: how many are shown against how many lines are detected, how many outlines overlap,
  * how many sit over nothing, how often a line gets a new identity, and how far outlines lag the text. Each tracker variant
  * sees the same detections, so the differences come from tracking alone. Diagnostic for #222.
+ *
+ * Frames recorded on a phone are replayed too when they are in the app's files directory under `replay-222`, copied with
+ * `adb shell "run-as <package> sh -c 'cat > files/replay-222/<frame>.jpg'" < <frame>.jpg`, 720 by 960 portrait JPEGs.
  */
 @RunWith(AndroidJUnit4::class)
 class TrackingReplayTest {
     private class Scene(
         val name: String,
-        val fixture: String,
-        val region: RectF?,
+        val frames: () -> List<RecognitionFrame>,
     )
 
     private class Variant(
@@ -72,34 +75,46 @@ class TrackingReplayTest {
             )
     }
 
-    private val scenes =
-        listOf(
-            Scene("close", "label-cereal", RectF(95f, 360f, 670f, 840f)),
-            Scene("far", "label-cereal", null),
-        )
+    private fun synthetic(
+        name: String,
+        region: RectF?,
+    ): Scene =
+        Scene("$name (label-cereal, $FRAMES frames of seeded wobble)") {
+            val source = checkNotNull(FixtureSet.load().firstOrNull { it.truth.id == "label-cereal" }) { "Missing label-cereal" }.bitmap
+            wobble(Random(SEED), FRAMES).map { frameOf(source, region, it) }
+        }
+
+    private fun recorded(): Scene? {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val directory = File(context.filesDir, RECORDED_DIRECTORY)
+        val files = directory.listFiles { file -> file.name.endsWith(".jpg") }.orEmpty().sortedBy { it.name }
+        if (files.isEmpty()) return null
+        return Scene("recorded (${files.size} frames from a hand-held phone)") {
+            files.map { file -> frameOf(checkNotNull(BitmapFactory.decodeFile(file.path)) { "Cannot decode ${file.name}" }) }
+        }
+    }
+
+    private val scenes get() = listOfNotNull(synthetic("close", RectF(95f, 360f, 670f, 840f)), synthetic("far", null), recorded())
 
     private val variants =
         listOf(
-            Variant("current") { PhraseTracker() },
+            Variant("defaults") { PhraseTracker() },
+            Variant("before #222") { PhraseTracker(minOverlap = 0.4f, smoothing = 0.6f, maxMisses = 2) },
             Variant("no stale") { PhraseTracker(maxMisses = 0) },
             Variant("no easing") { PhraseTracker(smoothing = 1f) },
-            Variant("looser match") { PhraseTracker(minOverlap = LOOSE_OVERLAP) },
         )
 
     @Test
     fun replaysAHandHeldCameraOverSmallDenseText() {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
-        val fixtures = FixtureSet.load().associateBy { it.truth.id }
         val report = StringBuilder()
         PaddleOcrNcnnRecogniser(context).use { recogniser ->
             val live = LiveRecognition(recogniser)
             scenes.forEach { scene ->
-                val source = checkNotNull(fixtures[scene.fixture]) { "Missing ${scene.fixture}" }.bitmap
                 val trackers = variants.map { it.tracker() }
                 val totals = variants.map { Totals() }
                 val seen = variants.map { mutableSetOf<Long>() }
-                wobble(Random(SEED), FRAMES).forEachIndexed { index, jitter ->
-                    val frame = frameOf(source, scene.region, jitter)
+                scene.frames().forEachIndexed { index, frame ->
                     val mapping = ViewportMapping.of(frame, BoundingBox(0f, 0f, FRAME_WIDTH.toFloat(), FRAME_HEIGHT.toFloat()))
                     val detected = live.detect(runBlocking { recogniser.recognise(frame) }, mapping)
                     trackers.forEachIndexed { v, tracker ->
@@ -107,7 +122,7 @@ class TrackingReplayTest {
                         record(totals[v], detected, shown, seen[v], firstFrame = index == 0)
                     }
                 }
-                report.appendLine("${scene.name} (${scene.fixture}, $FRAMES frames, seed $SEED)")
+                report.appendLine(scene.name)
                 variants.forEachIndexed { v, variant -> report.appendLine("  " + totals[v].line(variant.name)) }
             }
         }
@@ -187,6 +202,10 @@ class TrackingReplayTest {
         matrix.postRotate(jitter.degrees, FRAME_WIDTH / 2f, FRAME_HEIGHT / 2f)
         matrix.postTranslate(jitter.dx, jitter.dy)
         canvas.drawBitmap(source, matrix, Paint(Paint.FILTER_BITMAP_FLAG))
+        return frameOf(bitmap)
+    }
+
+    private fun frameOf(bitmap: Bitmap): RecognitionFrame {
         val buffer = ByteBuffer.allocateDirect(bitmap.byteCount)
         bitmap.copyPixelsToBuffer(buffer)
         buffer.rewind()
@@ -215,6 +234,7 @@ class TrackingReplayTest {
         const val FRAME_HEIGHT = 960
         const val FRAMES = 40
         const val SEED = 222
+        const val RECORDED_DIRECTORY = "replay-222"
         const val BACKGROUND = 90
         const val STEP_PX = 6f
         const val MAX_PX = 30f
@@ -222,7 +242,6 @@ class TrackingReplayTest {
         const val MAX_DEGREES = 3f
         const val STEP_SCALE = 0.015f
         const val MAX_SCALE = 0.06f
-        const val LOOSE_OVERLAP = 0.2f
         const val OVERLAP_PAIR = 0.2f
         const val OVER_NOTHING = 0.1f
     }
