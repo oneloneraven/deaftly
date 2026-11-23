@@ -22,6 +22,8 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.ravendarque.deaftly.AppContainer
+import com.ravendarque.deaftly.feedback.FeedbackScreen
+import com.ravendarque.deaftly.feedback.FeedbackViewModel
 import com.ravendarque.deaftly.ui.chat.ChatOpening
 import com.ravendarque.deaftly.ui.chat.ChatScreen
 import com.ravendarque.deaftly.ui.chat.ChatViewModel
@@ -181,7 +183,12 @@ private fun EntryProviderScope<NavKey>.helpEntries(
             container.helpRepository,
             onOpen = { backStack.add(Route.HelpPage(it)) },
             onBack = { backStack.removeLastOrNull() },
+            onFeedback = { backStack.add(Route.Feedback(it)) },
         )
+    }
+    entry<Route.Feedback> { route ->
+        val viewModel = viewModel<FeedbackViewModel>(factory = container.feedbackViewModelFactory(route.kind))
+        FeedbackScreen(viewModel, container.appVersion, onDone = { backStack.removeLastOrNull() })
     }
     entry<Route.HelpPage> { route ->
         HelpPageScreen(

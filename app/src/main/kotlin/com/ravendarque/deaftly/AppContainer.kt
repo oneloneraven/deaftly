@@ -7,6 +7,11 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.ravendarque.deaftly.core.settings.SettingsRepository
 import com.ravendarque.deaftly.core.template.TemplateRepository
+import com.ravendarque.deaftly.feedback.ENGAGE_SUBMISSIONS
+import com.ravendarque.deaftly.feedback.FeedbackKind
+import com.ravendarque.deaftly.feedback.FeedbackSender
+import com.ravendarque.deaftly.feedback.FeedbackViewModel
+import com.ravendarque.deaftly.feedback.HttpFeedbackSender
 import com.ravendarque.deaftly.help.HelpRepository
 import com.ravendarque.deaftly.ocr.paddle.PaddleOcrNcnnRecogniser
 import com.ravendarque.deaftly.speech.MicrophoneAudioSource
@@ -37,6 +42,7 @@ import com.ravendarque.deaftly.ui.show.ShowViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import java.io.File
+import java.net.URL
 
 class AppContainer(
     private val context: Context,
@@ -56,6 +62,17 @@ class AppContainer(
     fun startReadingSavedChats() {
         savedChatStore
     }
+
+    val appVersion: String by lazy {
+        context.packageManager.getPackageInfo(context.packageName, 0).versionName ?: "0.0.0"
+    }
+
+    private val feedbackSender: FeedbackSender by lazy { HttpFeedbackSender(URL(ENGAGE_SUBMISSIONS), appVersion) }
+
+    fun feedbackViewModelFactory(kind: FeedbackKind) =
+        viewModelFactory {
+            initializer { FeedbackViewModel(kind, feedbackSender, createSavedStateHandle()) }
+        }
 
     val helpRepository by lazy { HelpRepository(context.assets) }
 

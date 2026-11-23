@@ -30,4 +30,6 @@ If you deleted it, tap **Restore built-in templates** in [Settings](settings.md)
 
 ## Something else is wrong
 
-Tell us through the feedback form on the Deaftly website, and include your app version if you can.
+Open Help, then under **Get in touch**, tap **Report an issue**. Say what you did and what happened. Deaftly adds your app version for you. To get a reply, add your email address.
+
+To tell us what you think or suggest an idea, tap **Tell us what you think** instead. You can also use the feedback form on the Deaftly website.

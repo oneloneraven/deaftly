@@ -20,12 +20,14 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.tryPerformAccessibilityChecks
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.unit.dp
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.ravendarque.deaftly.feedback.FeedbackKind
 import com.ravendarque.deaftly.help.HelpRepository
 import com.ravendarque.deaftly.ui.theme.AppTheme
 import org.junit.Before
@@ -58,6 +60,7 @@ class HelpScreenTest {
 
     private val repository = HelpRepository(ApplicationProvider.getApplicationContext<Context>().assets)
     private val opened = mutableListOf<String>()
+    private val feedback = mutableListOf<FeedbackKind>()
     private val externalLinks = mutableListOf<String>()
     private val external =
         object : UriHandler {
@@ -75,7 +78,7 @@ class HelpScreenTest {
 
     private fun showTopics() {
         composeRule.setContent {
-            AppTheme { HelpTopicsScreen(repository, onOpen = { opened += it }, onBack = {}) }
+            AppTheme { HelpTopicsScreen(repository, onOpen = { opened += it }, onBack = {}, onFeedback = { feedback += it }) }
         }
         composeRule.waitUntil(LOAD_TIMEOUT_MILLIS) { composeRule.onAllNodesWithText("Quick start").fetchSemanticsNodes().isNotEmpty() }
     }
@@ -115,6 +118,21 @@ class HelpScreenTest {
         titlesInOrder.forEach {
             composeRule.onNodeWithText(it).assertHasClickAction().assertHeightIsAtLeast(48.dp)
         }
+    }
+
+    @Test
+    fun getInTouchFollowsTheTopicsAndOpensEachForm() {
+        showTopics()
+
+        composeRule.onNode(hasText("Get in touch").and(isHeading())).assertExists()
+        composeRule
+            .onNodeWithText("Report an issue")
+            .performScrollTo()
+            .assertHeightIsAtLeast(48.dp)
+            .performClick()
+        composeRule.onNodeWithText("Tell us what you think").performScrollTo().performClick()
+
+        assertEquals(listOf(FeedbackKind.Issue, FeedbackKind.Feedback), feedback)
     }
 
     @Test

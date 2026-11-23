@@ -1,6 +1,7 @@
 package com.ravendarque.deaftly.navigation
 
 import androidx.navigation3.runtime.NavKey
+import com.ravendarque.deaftly.feedback.FeedbackKind
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -70,6 +71,11 @@ sealed interface Route : NavKey {
 
     @Serializable
     data object Share : Route
+
+    @Serializable
+    data class Feedback(
+        val kind: FeedbackKind,
+    ) : Route
 
     @Serializable
     data object FirstRun : Route

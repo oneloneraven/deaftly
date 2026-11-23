@@ -278,7 +278,7 @@ private fun NameInput(
 }
 
 @Composable
-private fun CheckRow(
+internal fun CheckRow(
     checked: Boolean,
     label: String,
     onChange: (Boolean) -> Unit,

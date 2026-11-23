@@ -6,13 +6,13 @@ updates it in the same PR.
 
 ## Processors
 
-None. The app requests no network permission today, so no third party receives data from it. Any feature that would change that adds the permission to the allowlist and updates this record in the same PR ([ADR-0011](adr/0011-review-permissions-against-an-allowlist.md)).
+One Lone Raven's feedback system receives feedback and issue reports that the user chooses to send from the app (see Processing activities). It's the same system the website's feedback form uses, run by One Lone Raven itself. No other part of the app uses the network. The `INTERNET` permission is on the allowlist for this alone ([ADR-0011](adr/0011-review-permissions-against-an-allowlist.md)).
 
 The user's own Android backup can copy the template and settings store and kept chats off the device ([ADR-0012](adr/0012-back-up-kept-chats.md)). That is a service the user chooses and controls in system settings; the app neither configures nor reads it.
 
 ## Processing activities
 
-All processing happens on the user's device. The project receives none of it.
+All processing happens on the user's device, except a feedback or issue report the user chooses to send. The project receives nothing else.
 
 | Data | Purpose | Lawful basis | Retention | Who can see it |
 |---|---|---|---|---|
@@ -23,10 +23,11 @@ All processing happens on the user's device. The project receives none of it.
 | Kept chats: messages, both people's names and colours, and when the chat last changed | Reading a chat again later, or carrying it on | As above: kept on the device only when the user chooses Keep, and included in the user's Android backup at their choice ([ADR-0012](adr/0012-back-up-kept-chats.md)) | Until the user deletes the chat or the app | The user, and anyone they show the phone to |
 | Camera frames and recognised text | Lifting text into a template | As above | Frames: never stored. Text: only if the user inserts it into a template | The user |
 | Microphone audio and recognised speech | Letting the hearing person speak their replies in a side by side chat, or speak to the user in Listen for me | As above | Audio: processed in memory only and never stored or sent. Recognised text: in Listen for me, held only on that screen (in memory and its saved state) until the user ends it or continues to side by side; in side by side, stored as a chat message, so it is discarded when the chat ends unless the user keeps it, and a kept chat can reach the user's Android backup at their choice ([ADR-0012](adr/0012-back-up-kept-chats.md)) | The two people in the conversation, and anyone the user shows a kept chat to |
+| Feedback and issue reports sent from the app: the message and app version, plus an email address, quote consent, credit choice and name if the user gives them. The request's IP address is used for rate limiting | Understanding and fixing problems, improving Deaftly, replying when asked, and quoting people who agreed | Consent: sent only when the user writes a report and taps Send | 12 months after it's dealt with, or after its last update if not. Spam is deleted after 30 days. A quote lasts until the person asks us to stop or the report is deleted | One Lone Raven |
 
 ## Gaps to settle
 
-None. Stored conversations are covered by the Kept chats row and [ADR-0012](adr/0012-back-up-kept-chats.md). Revisit if any feature adds network access or a processor.
+None. Stored conversations are covered by the Kept chats row and [ADR-0012](adr/0012-back-up-kept-chats.md). Revisit if any other feature adds network access or a processor.
 
 ## Security measures
 
