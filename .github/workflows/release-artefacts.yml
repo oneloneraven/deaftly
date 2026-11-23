@@ -71,7 +71,7 @@ jobs:
           export ANDROID_KEYSTORE_PATH="$RUNNER_TEMP/play-upload.jks"
           trap 'rm -f "$ANDROID_KEYSTORE_PATH"' EXIT
           base64 --decode <<< "$PLAY_UPLOAD_KEYSTORE_BASE64" > "$ANDROID_KEYSTORE_PATH"
-          ./gradlew :app:bundleRelease -PappVersion="${TAG#v}"
+          node .github/scripts/gradle.mjs :app:bundleRelease -PappVersion="${TAG#v}"
           aab="deaftly-${TAG#v}.aab"
           cp app/build/outputs/bundle/release/app-release.aab "$aab"
           echo "file=$aab" >> "$GITHUB_OUTPUT"
