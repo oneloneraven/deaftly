@@ -41,6 +41,7 @@
     <string name="templates_add_new">Add new template</string>
     <string name="home_search_label">Search templates</string>
     <string name="home_pinned">Pinned</string>
+    <string name="home_templates">Templates</string>
     <string name="home_categories">Categories</string>
     <string name="home_category_all">All</string>
     <string name="home_no_results">No templates match \u201c%1$s\u201d</string>

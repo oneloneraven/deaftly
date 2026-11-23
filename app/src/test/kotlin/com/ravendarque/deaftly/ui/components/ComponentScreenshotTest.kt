@@ -126,23 +126,6 @@ class BottomSheetScreenshotTest : ComponentScreenshotTest() {
 
 class CardsScreenshotTest : ComponentScreenshotTest() {
     override val content: @Composable () -> Unit = {
-        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            PinnedTile(
-                title = "Check in",
-                preview = "Hi! I'm deaf. I'd like to check in…",
-                icon = DeaftlyIcons.Check,
-                onClick = {},
-                modifier = Modifier.weight(1f),
-            )
-            PinnedTile(
-                title = "Order food",
-                preview = "Could I have … please?",
-                icon = DeaftlyIcons.Scan,
-                onClick = {},
-                modifier = Modifier.weight(1f),
-                tone = TileTone.PersonB,
-            )
-        }
         ListCard(
             title = "Explain I'm deaf",
             preview =

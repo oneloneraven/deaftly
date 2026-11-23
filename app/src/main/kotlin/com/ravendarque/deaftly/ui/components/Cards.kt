@@ -40,21 +40,7 @@ import androidx.compose.ui.unit.sp
 import com.ravendarque.deaftly.ui.icons.DeaftlyIcons
 import com.ravendarque.deaftly.ui.theme.Deaftly
 
-sealed interface PreviewPart {
-    data class Plain(
-        val text: String,
-    ) : PreviewPart
-
-    data class Placeholder(
-        val label: String,
-    ) : PreviewPart
-}
-
-enum class TileTone { Accent, PersonB }
-
 private const val NO_BREAK_SPACE = " "
-private val TileMinHeight = 132.dp
-private val TileIconSize = 26.dp
 private val HubIconDiscSize = 64.dp
 private val HubIconSize = 32.dp
 private val HubInfoTarget = 48.dp
@@ -151,48 +137,6 @@ private fun rememberPreview(parts: List<PreviewPart>): AnnotatedString {
                     }
                 }
             }
-        }
-    }
-}
-
-@Composable
-fun PinnedTile(
-    title: String,
-    preview: String,
-    icon: ImageVector,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    tone: TileTone = TileTone.Accent,
-    onLongClick: (() -> Unit)? = null,
-    onLongClickLabel: String? = null,
-    customActions: List<CustomAccessibilityAction> = emptyList(),
-) {
-    val c = Deaftly.colors
-    val shape = Deaftly.shapes.card
-    val (container, titleColour, previewColour) =
-        when (tone) {
-            TileTone.Accent -> Triple(c.accent, c.onAccent, c.onAccentMuted)
-            TileTone.PersonB -> Triple(c.personB, c.onPersonB, c.onPersonBMuted)
-        }
-    Column(
-        modifier =
-            modifier
-                .heightIn(min = TileMinHeight)
-                .clip(shape)
-                .background(container, shape)
-                .combinedClickable(
-                    role = Role.Button,
-                    onLongClickLabel = onLongClickLabel,
-                    onLongClick = onLongClick,
-                    onClick = onClick,
-                ).semantics { this.customActions = customActions }
-                .padding(Deaftly.spacing.space16),
-        verticalArrangement = Arrangement.spacedBy(Deaftly.spacing.space12),
-    ) {
-        Icon(imageVector = icon, contentDescription = null, modifier = Modifier.size(TileIconSize), tint = titleColour)
-        Column(verticalArrangement = Arrangement.spacedBy(Deaftly.spacing.space4)) {
-            Text(text = title, style = MaterialTheme.typography.titleLarge, color = titleColour)
-            Text(text = preview, style = MaterialTheme.typography.bodySmall, color = previewColour, maxLines = 2)
         }
     }
 }

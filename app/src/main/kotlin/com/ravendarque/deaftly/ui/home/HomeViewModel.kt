@@ -91,14 +91,17 @@ class HomeViewModel(
     ): HomeUiState {
         val categories = templates.map { it.category }.distinct()
         val category = selected?.takeIf { it in categories }
-        val matching = templates.filter { TemplateSearch.matches(it, query) }
+        val (pinned, others) =
+            templates
+                .filter { TemplateSearch.matches(it, query) && (category == null || it.category == category) }
+                .partition { it.pinned }
         return HomeUiState(
             isLoading = false,
-            pinned = matching.filter { it.pinned }.map(::toHomeTemplate),
+            pinned = pinned.map(::toHomeTemplate),
             categories = categories,
             selectedCategory = category,
             query = query,
-            templates = matching.filter { category == null || it.category == category }.map(::toHomeTemplate),
+            templates = others.map(::toHomeTemplate),
         )
     }
 

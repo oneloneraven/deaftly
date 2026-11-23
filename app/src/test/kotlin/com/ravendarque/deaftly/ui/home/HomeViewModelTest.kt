@@ -63,7 +63,7 @@ class HomeViewModelTest {
             val state = viewModel().state.value
             assertFalse(state.isLoading)
 
-            assertEquals(listOf("check-in", "order", "cafe", "doctor"), state.templates.map { it.id })
+            assertEquals(listOf("cafe", "doctor"), state.templates.map { it.id })
             assertEquals(listOf("check-in", "order"), state.pinned.map { it.id })
             assertEquals("", state.query)
             assertNull(state.selectedCategory)
@@ -91,7 +91,7 @@ class HomeViewModelTest {
         runTest {
             val preview =
                 viewModel()
-                    .state.value.templates
+                    .state.value.pinned
                     .first { it.id == "check-in" }
                     .preview
 
@@ -102,7 +102,7 @@ class HomeViewModelTest {
         }
 
     @Test
-    fun filtersByCategoryAndKeepsPinnedTiles() =
+    fun aCategoryFiltersPinnedAndOtherTemplates() =
         runTest {
             val viewModel = viewModel()
             viewModel.onCategorySelected("Food & drink")
@@ -110,8 +110,8 @@ class HomeViewModelTest {
             val state = viewModel.state.value
 
             assertEquals("Food & drink", state.selectedCategory)
-            assertEquals(listOf("order", "cafe"), state.templates.map { it.id })
-            assertEquals(listOf("check-in", "order"), state.pinned.map { it.id })
+            assertEquals(listOf("cafe"), state.templates.map { it.id })
+            assertEquals(listOf("order"), state.pinned.map { it.id })
         }
 
     @Test
@@ -124,7 +124,8 @@ class HomeViewModelTest {
             val state = viewModel.state.value
 
             assertNull(state.selectedCategory)
-            assertEquals(4, state.templates.size)
+            assertEquals(2, state.pinned.size)
+            assertEquals(2, state.templates.size)
         }
 
     @Test
@@ -149,7 +150,7 @@ class HomeViewModelTest {
             viewModel.onQueryChange("Hi!")
             assertEquals(
                 listOf("check-in"),
-                viewModel.state.value.templates
+                viewModel.state.value.pinned
                     .map { it.id },
             )
         }
@@ -194,7 +195,8 @@ class HomeViewModelTest {
 
             val restored = viewModel.state.value
             assertEquals("", restored.query)
-            assertEquals(4, restored.templates.size)
+            assertEquals(2, restored.pinned.size)
+            assertEquals(2, restored.templates.size)
         }
 
     @Test
@@ -254,7 +256,7 @@ class HomeViewModelTest {
         runTest {
             val template =
                 viewModel()
-                    .state.value.templates
+                    .state.value.pinned
                     .first { it.id == "order" }
 
             assertEquals("Food & drink", template.category)

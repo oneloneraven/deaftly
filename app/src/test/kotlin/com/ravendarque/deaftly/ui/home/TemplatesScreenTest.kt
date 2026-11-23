@@ -61,11 +61,18 @@ class TemplatesScreenTest {
 
     private fun count(text: String) = composeRule.onAllNodesWithText(text).fetchSemanticsNodes().size
 
+    private fun top(text: String) =
+        composeRule
+            .onAllNodesWithText(text)[0]
+            .fetchSemanticsNode()
+            .boundsInRoot.top
+
     @Test
-    fun showsPinnedTilesCategoriesAndTheTemplateList() {
+    fun showsCategoriesPinnedAndTheOtherTemplatesOnce() {
         composeRule.onNodeWithText("PINNED").assertExists()
+        composeRule.onNodeWithText("TEMPLATES").assert(SemanticsMatcher.keyIsDefined(SemanticsProperties.Heading))
         listOf("All", "Everyday", "Food & drink", "Health").forEach { composeRule.onNodeWithText(it).assertExists() }
-        assertEquals(2, count("Check in"))
+        assertEquals(1, count("Check in"))
         assertEquals(1, count("Explain I'm deaf"))
         composeRule.onNodeWithText("All").assertIsSelected()
         composeRule.onNodeWithText("Everyday").assertIsNotSelected()
@@ -92,7 +99,7 @@ class TemplatesScreenTest {
 
         composeRule.onNodeWithText("Clear search").assertDoesNotExist()
         assertEquals(1, count("Explain I'm deaf"))
-        assertEquals(2, count("Check in"))
+        assertEquals(1, count("Check in"))
     }
 
     @Test
@@ -103,7 +110,7 @@ class TemplatesScreenTest {
         composeRule.onNodeWithText("All").assertIsNotSelected()
         composeRule.onNodeWithText("At the doctor's").assertExists()
         assertEquals(0, count("Explain I'm deaf"))
-        assertEquals(1, count("Check in"))
+        assertEquals(0, count("Check in"))
 
         composeRule.onNodeWithText("All").performClick()
         assertEquals(1, count("Explain I'm deaf"))
@@ -119,6 +126,22 @@ class TemplatesScreenTest {
         composeRule.onNodeWithText("At the doctor's").performClick()
 
         assertEquals(listOf<Route>(Route.Fill("doctor")), navigated)
+    }
+
+    @Test
+    fun theOrderIsCategoriesPinnedTemplatesThenAddNew() {
+        val tops = listOf("All", "PINNED", "Check in", "TEMPLATES", "Explain I'm deaf", "Add new template").map(::top)
+
+        assertEquals(tops.sorted(), tops)
+    }
+
+    @Test
+    fun whenOnlyPinnedTemplatesMatchThereIsNoEmptyMessage() {
+        composeRule.onNode(hasSetTextAction()).performTextInput("check in")
+
+        composeRule.onNodeWithText("Check in").assertExists()
+        assertEquals(0, count("No templates match \u201ccheck in\u201d"))
+        composeRule.onNodeWithText("TEMPLATES").assertDoesNotExist()
     }
 
     @Test
@@ -219,7 +242,8 @@ class TemplatesScreenTest {
         composeRule.waitForIdle()
 
         assertTrue(templateInRepository("explain-deaf").pinned)
-        assertEquals(2, count("Explain I'm deaf"))
+        assertEquals(1, count("Explain I'm deaf"))
+        assertTrue(top("Explain I'm deaf") < top("TEMPLATES"))
         composeRule.onNodeWithText("Pin").assertDoesNotExist()
     }
 
@@ -231,6 +255,7 @@ class TemplatesScreenTest {
 
         assertFalse(templateInRepository("check-in").pinned)
         assertEquals(1, count("Check in"))
+        assertTrue(top("Check in") > top("TEMPLATES"))
     }
 
     @Test

@@ -172,7 +172,6 @@ class ComponentSemanticsTest {
                 preview = listOf(PreviewPart.Plain("Please "), PreviewPart.Placeholder("how to reply")),
                 onClick = { cardClicks++ },
             )
-            PinnedTile("Check in", "Hi! I'm deaf.", DeaftlyIcons.Check, onClick = { cardClicks++ })
         }
 
         composeRule
@@ -180,12 +179,7 @@ class ComponentSemanticsTest {
             .assert(hasRole(Role.Button))
             .assertTouchTarget()
             .performClick()
-        composeRule
-            .onNodeWithText("Check in")
-            .assert(hasRole(Role.Button))
-            .assertTouchTarget()
-            .performClick()
-        assertEquals(2, cardClicks)
+        assertEquals(1, cardClicks)
     }
 
     @Test

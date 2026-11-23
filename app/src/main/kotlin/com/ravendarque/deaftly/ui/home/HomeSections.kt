@@ -34,17 +34,10 @@ import com.ravendarque.deaftly.navigation.Route
 import com.ravendarque.deaftly.ui.components.AddCard
 import com.ravendarque.deaftly.ui.components.CategoryChip
 import com.ravendarque.deaftly.ui.components.ListCard
-import com.ravendarque.deaftly.ui.components.PinnedTile
 import com.ravendarque.deaftly.ui.components.PreviewPart
 import com.ravendarque.deaftly.ui.components.SecondaryButton
-import com.ravendarque.deaftly.ui.components.TileTone
 import com.ravendarque.deaftly.ui.icons.DeaftlyIcons
 import com.ravendarque.deaftly.ui.theme.Deaftly
-
-private const val TILES_PER_ROW = 2
-private const val SINGLE_COLUMN_FONT_SCALE = 1.5f
-private const val UNFILLED_ELLIPSIS = "\u2026"
-private val tileIcons = listOf(DeaftlyIcons.Home, DeaftlyIcons.Utensils)
 
 @Composable
 internal fun TemplateList(
@@ -65,33 +58,24 @@ internal fun TemplateList(
             ),
         verticalArrangement = Arrangement.spacedBy(Deaftly.spacing.space10),
     ) {
-        if (state.pinned.isNotEmpty()) {
-            item(key = "pinned") {
-                PinnedSection(state.pinned, actions, onOpenOptions, Modifier.padding(bottom = Deaftly.spacing.space12))
-            }
-        }
         if (state.categories.isNotEmpty()) {
             item(key = "categories") {
                 CategoryRow(state, actions.onCategorySelected, Modifier.padding(bottom = Deaftly.spacing.space4))
             }
         }
-        if (!state.isLoading && state.templates.isEmpty()) {
+        if (state.pinned.isNotEmpty()) {
+            item(key = "pinned-heading") { SectionHeading(R.string.home_pinned) }
+            items(state.pinned, key = { it.id }) { TemplateCard(it, actions, onOpenOptions) }
+        }
+        if (state.pinned.isNotEmpty() && state.templates.isNotEmpty()) {
+            item(key = "templates-heading") {
+                SectionHeading(R.string.home_templates, Modifier.padding(top = Deaftly.spacing.space12))
+            }
+        }
+        if (!state.isLoading && state.pinned.isEmpty() && state.templates.isEmpty()) {
             item(key = "empty") { EmptyState(state.query, actions.onClearSearch) }
         }
-        items(state.templates, key = { it.id }) { template ->
-            ListCard(
-                title = template.title,
-                preview = template.preview.map(::toPreviewPart),
-                onClick = { actions.onNavigate(Route.Fill(template.id)) },
-                onLongClick = onOpenOptions?.let { open -> { open(template.id) } },
-                onLongClickLabel = stringResource(R.string.template_options_label),
-                customActions =
-                    onOpenOptions
-                        ?.let { open ->
-                            optionsActions(template, actions) { open(template.id) }
-                        }.orEmpty(),
-            )
-        }
+        items(state.templates, key = { it.id }) { TemplateCard(it, actions, onOpenOptions) }
         if (onAddTemplate != null && !state.isLoading) {
             item(key = "add") {
                 AddCard(stringResource(R.string.templates_add_new), DeaftlyIcons.Plus, onAddTemplate)
@@ -101,43 +85,32 @@ internal fun TemplateList(
 }
 
 @Composable
-private fun PinnedSection(
-    pinned: List<HomeTemplate>,
-    actions: HomeActions,
-    onOpenOptions: ((String) -> Unit)?,
+private fun SectionHeading(
+    text: Int,
     modifier: Modifier = Modifier,
 ) {
-    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(Deaftly.spacing.space12)) {
-        Text(
-            text = stringResource(R.string.home_pinned).uppercase(),
-            style = MaterialTheme.typography.labelMedium,
-            color = Deaftly.colors.inkMuted,
-            modifier = Modifier.semantics { heading() },
-        )
-        val perRow = if (LocalDensity.current.fontScale >= SINGLE_COLUMN_FONT_SCALE) 1 else TILES_PER_ROW
-        pinned.withIndex().chunked(perRow).forEach { row ->
-            Row(
-                modifier = Modifier.height(IntrinsicSize.Min),
-                horizontalArrangement = Arrangement.spacedBy(Deaftly.spacing.space12),
-            ) {
-                row.forEach { (index, template) ->
-                    PinnedTile(
-                        title = template.title,
-                        preview = tilePreview(template.preview),
-                        icon = tileIcons[index % tileIcons.size],
-                        onClick = { actions.onNavigate(Route.Fill(template.id)) },
-                        modifier = Modifier.weight(1f).fillMaxHeight(),
-                        tone = if (index % 2 == 0) TileTone.Accent else TileTone.PersonB,
-                        onLongClick = onOpenOptions?.let { open -> { open(template.id) } },
-                        onLongClickLabel = stringResource(R.string.template_options_label),
-                        customActions =
-                            onOpenOptions?.let { open -> optionsActions(template, actions) { open(template.id) } }.orEmpty(),
-                    )
-                }
-                repeat(perRow - row.size) { Spacer(Modifier.weight(1f)) }
-            }
-        }
-    }
+    Text(
+        text = stringResource(text).uppercase(),
+        style = MaterialTheme.typography.labelMedium,
+        color = Deaftly.colors.inkMuted,
+        modifier = modifier.semantics { heading() },
+    )
+}
+
+@Composable
+private fun TemplateCard(
+    template: HomeTemplate,
+    actions: HomeActions,
+    onOpenOptions: ((String) -> Unit)?,
+) {
+    ListCard(
+        title = template.title,
+        preview = template.preview.map(::toPreviewPart),
+        onClick = { actions.onNavigate(Route.Fill(template.id)) },
+        onLongClick = onOpenOptions?.let { open -> { open(template.id) } },
+        onLongClickLabel = stringResource(R.string.template_options_label),
+        customActions = onOpenOptions?.let { open -> optionsActions(template, actions) { open(template.id) } }.orEmpty(),
+    )
 }
 
 @Composable
@@ -234,13 +207,4 @@ private fun toPreviewPart(part: RenderedPart): PreviewPart =
         is RenderedPart.Text -> PreviewPart.Plain(part.text)
         is RenderedPart.Value -> PreviewPart.Plain(part.text)
         is RenderedPart.Unfilled -> PreviewPart.Placeholder(part.label)
-    }
-
-private fun tilePreview(parts: List<RenderedPart>): String =
-    parts.joinToString("") {
-        when (it) {
-            is RenderedPart.Text -> it.text
-            is RenderedPart.Value -> it.text
-            is RenderedPart.Unfilled -> UNFILLED_ELLIPSIS
-        }
     }
