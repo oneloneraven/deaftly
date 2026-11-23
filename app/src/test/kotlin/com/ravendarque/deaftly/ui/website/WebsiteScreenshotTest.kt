@@ -18,6 +18,8 @@ import androidx.compose.ui.unit.IntSize
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.takahirom.roborazzi.captureRoboImage
+import com.ravendarque.deaftly.templates.BuiltInIds
+import com.ravendarque.deaftly.templates.builtInTemplates
 import com.ravendarque.deaftly.core.chat.ChatProfile
 import com.ravendarque.deaftly.core.chat.ColourRole
 import com.ravendarque.deaftly.core.chat.Conversation
@@ -44,7 +46,6 @@ import com.ravendarque.deaftly.ui.chat.testWriteScope
 import com.ravendarque.deaftly.ui.facetoface.FaceToFaceContent
 import com.ravendarque.deaftly.ui.fill.FillScreen
 import com.ravendarque.deaftly.ui.fill.FillViewModel
-import com.ravendarque.deaftly.ui.fill.fillTemplates
 import com.ravendarque.deaftly.ui.home.FakeTemplateRepository
 import com.ravendarque.deaftly.ui.hub.HubScreen
 import com.ravendarque.deaftly.ui.listen.ListenActions
@@ -65,6 +66,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestName
 import org.junit.runner.RunWith
+import org.robolectric.RuntimeEnvironment
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 import java.io.File
@@ -136,6 +138,8 @@ open class WebsiteScreenshotTest {
 
     @get:Rule
     val testName = TestName()
+
+    protected val builtIns by lazy { builtInTemplates(RuntimeEnvironment.getApplication().resources) }
 
     protected fun shot(content: @Composable () -> Unit) {
         composeRule.setContent { AppTheme(darkTheme = false) { content() } }
@@ -210,9 +214,9 @@ open class WebsiteScreenshotTest {
 
     @Test
     fun fill() {
-        val viewModel = FillViewModel("order-food", FakeTemplateRepository(fillTemplates), FakeSettingsRepository(), SavedStateHandle())
+        val viewModel = FillViewModel(BuiltInIds.ORDER_FOOD, FakeTemplateRepository(builtIns), FakeSettingsRepository(), SavedStateHandle())
         composeRule.setContent {
-            AppTheme(darkTheme = false) { FillScreen("order-food", viewModel, onNavigate = {}, onBack = {}) }
+            AppTheme(darkTheme = false) { FillScreen(BuiltInIds.ORDER_FOOD, viewModel, onNavigate = {}, onBack = {}) }
         }
         composeRule.waitForIdle()
         composeRule.onNodeWithText("menu item").performClick()
