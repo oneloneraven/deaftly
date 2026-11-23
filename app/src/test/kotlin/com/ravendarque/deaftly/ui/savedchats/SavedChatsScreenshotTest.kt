@@ -13,12 +13,15 @@ import com.ravendarque.deaftly.storage.SavedChat
 import com.ravendarque.deaftly.ui.chat.FakeSavedChatStore
 import com.ravendarque.deaftly.ui.chat.testWriteScope
 import com.ravendarque.deaftly.ui.theme.AppTheme
+import org.junit.After
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestName
 import org.junit.runner.RunWith
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
+import java.util.TimeZone
 
 private const val SCREENSHOT_DIR = "src/test/screenshots"
 private const val PACKAGE = "com.ravendarque.deaftly.ui.savedchats"
@@ -34,6 +37,18 @@ class SavedChatsScreenshotTest {
 
     @get:Rule
     val testName = TestName()
+
+    private val zone = TimeZone.getDefault()
+
+    @Before
+    fun pinTheTimeZone() {
+        TimeZone.setDefault(TimeZone.getTimeZone("Europe/London"))
+    }
+
+    @After
+    fun restoreTheTimeZone() {
+        TimeZone.setDefault(zone)
+    }
 
     private fun chat(
         id: String,
