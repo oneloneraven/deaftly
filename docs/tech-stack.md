@@ -66,7 +66,7 @@ The spike's outcome is recorded as an ADR.
 | Setting | Value | Why |
 |---------|-------|-----|
 | `minSdk` | **26** (Android 8.0) | Covers roughly 95% or more of active devices. Android 11 and later alone was about 88% in October 2026 ([Beebom](https://gadgets.beebom.com/news/google-android-17-adoption-figures-october-2026)). |
-| `targetSdk` / `compileSdk` | **36** | The current Google Play requirement ([target SDK](https://developer.android.com/google/play/requirements/target-sdk)). Kept even though we don't publish to Play, so a later move to Play needs no work. |
+| `targetSdk` / `compileSdk` | **36** | The current Google Play requirement ([target SDK](https://developer.android.com/google/play/requirements/target-sdk)). Required for publishing on Play. |
 | Permissions | Only what's in `config/permissions-allowlist.txt` ([ADR-0011](adr/0011-review-permissions-against-an-allowlist.md)): today `CAMERA`, requested the first time OCR is used. Merged library permissions not on the list fail the build or are removed. | N6, N7. |
 | Backup | Android Auto Backup **enabled** for templates and settings (D7) | Users keep their own templates when they change phone. The backup is controlled by the user in Android settings and encrypted; the app itself runs no sync. |
 
@@ -89,7 +89,7 @@ These come from the `android-toolchain` module (D9) and the plugin's `core` modu
 
 ## 6. Distribution
 
-**Signed APK on GitHub Releases only, for now (D8).** Google Play would mean paying Google, a BDS pressure target, where an alternative exists. The cost is reach: installing from outside the Play Store is a real barrier for the target users. This is in the backlog for review ([#69](https://github.com/oneloneraven/deaftly/issues/69)). F-Droid isn't an option, because the project's licence is non-commercial and so isn't open source.
+**Google Play and a signed APK on GitHub Releases ([ADR-0014](adr/0014-distribute-through-google-play-and-github-releases.md)).** Most people won't install from outside the Play Store, so Deaftly is published there too, accepting Play's one-off registration fee. Both channels share one app signing key, so people can move between them. CI uploads each release to Play's internal testing track, and the owner promotes it from there ([runbook](runbooks/google-play.md)). F-Droid isn't an option, because the project's licence is non-commercial and so isn't open source.
 
 ## 7. Security and privacy
 
@@ -107,7 +107,6 @@ These come from the `android-toolchain` module (D9) and the plugin's `core` modu
 | Kotlin Multiplatform now | iOS is out of scope; a pure-Kotlin `:core` keeps the option open. |
 | Room, Hilt | More than this app needs (KISS). |
 | Tesseract | Too slow and inaccurate for live camera OCR. |
-| Google Play (for now) | BDS screening (D8). |
 | Renovate | Replaced by the plugin's Dependabot setup. |
 
 ## 9. Dependency screening register
@@ -131,5 +130,6 @@ Every dependency and vendor, screened against the BDS movement's [consumer boyco
 | ML Kit | Considered for OCR | Google | Yes | Rejected: viable alternatives exist and it sends usage data by default (ADR-0010) |
 | ONNX Runtime | Considered for OCR | Microsoft | Yes: consumer boycott target | Rejected |
 | GitHub (code, issues, CI, releases) | Hosting the project | Microsoft | Yes: consumer boycott target | Free-tool exception: free tier only, industry standard. Nothing is paid. |
-| Google Play | Distribution (planned, #69) | Google | Yes | To be decided in #69's ADR: a paid registration fee is a cost the exception doesn't cover |
+| Google Play | Distribution | Google | Yes | Accepted in [ADR-0014](adr/0014-distribute-through-google-play-and-github-releases.md): a one-off registration fee, which the free-tool exception doesn't cover, accepted to reach users who won't sideload |
+| `r0adkll/upload-google-play` | Uploading release bundles to Play | Individual maintainer (MIT) | No | Allowed, pinned to a commit ([ADR-0014](adr/0014-distribute-through-google-play-and-github-releases.md)) |
 

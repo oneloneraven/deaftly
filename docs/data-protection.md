@@ -10,6 +10,12 @@ One Lone Raven's feedback system receives feedback and issue reports that the us
 
 The user's own Android backup can copy the template and settings store and kept chats off the device ([ADR-0012](adr/0012-back-up-kept-chats.md)). That is a service the user chooses and controls in system settings; the app neither configures nor reads it.
 
+## Distribution through Google Play
+
+Google Play is an independent controller for the accounts, installs and payments it handles. The app shares nothing with it ([ADR-0014](adr/0014-distribute-through-google-play-and-github-releases.md)). Play Console shows the project aggregate install and rating statistics. It also shows Android vitals: crash and freeze reports, with the device model and Android version, from users who chose in their device settings to share usage and diagnostics with app developers. The project uses these only to find and fix faults, and doesn't export them or combine them with anything else. They contain none of the data in the table below.
+
+The APK on GitHub Releases involves no third party beyond GitHub's own download logs.
+
 ## Processing activities
 
 All processing happens on the user's device, except a feedback or issue report the user chooses to send. The project receives nothing else.

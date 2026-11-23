@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted
+Superseded by [ADR-0014](0014-distribute-through-google-play-and-github-releases.md)
 
 ## Context
 

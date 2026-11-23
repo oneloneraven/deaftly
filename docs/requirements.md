@@ -27,7 +27,7 @@ Deaftly is an Android app that helps deaf people communicate quickly and with li
 | C3 | No accounts, app-run sync or backend in the MVP. The user's own Android backup of templates and settings is allowed (decision D7). |
 | C4 | All processing, including OCR, runs on the device. |
 | C5 | Free, with no paid third-party services. |
-| C6 | Distributed as a signed APK on GitHub Releases; not on Google Play for now (decision D8, see [#69](https://github.com/oneloneraven/deaftly/issues/69)). |
+| C6 | Distributed on Google Play and as a signed APK on GitHub Releases, signed with one app signing key ([ADR-0014](adr/0014-distribute-through-google-play-and-github-releases.md), [#69](https://github.com/oneloneraven/deaftly/issues/69)). |
 | C7 | Every dependency and vendor is screened against the BDS boycott lists before adoption (project-bootstrap ADR-0002). |
 
 ## 4. Functional requirements
