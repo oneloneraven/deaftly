@@ -7,7 +7,7 @@ order: 10
 
 ## The camera won't read the text
 
-- Hold the phone steady and closer to the text.
+- Hold the device steady and closer to the text.
 - Tap **Freeze camera**, then pick the words.
 - Turn on the **Torch** in low light.
 - Tap **Type it instead** if it still can't read it.
@@ -18,7 +18,7 @@ If Deaftly says camera access is blocked, tap **Open settings** and allow the ca
 
 ## The app won't install
 
-Make sure you've allowed installs from the app you used to download it. Search your phone's Settings for "Install unknown apps". See [Installing and updating](installing-and-updating.md).
+Make sure you've allowed installs from the app you used to download it. Search your device's Settings for "Install unknown apps". See [Installing and updating](installing-and-updating.md).
 
 ## Android says the app conflicts or the signatures don't match
 

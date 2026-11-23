@@ -17,7 +17,7 @@ The camera can read text from a menu, sign, label, timetable or letter, and add 
 ## Tips
 
 - **Freeze camera** holds the picture still, so it's easier to pick words.
-- **Torch** turns on your phone's light.
+- **Torch** turns on your device's light.
 - **Clear text** starts your selection again.
 - If it can't read the text, tap **Type it instead**.
 

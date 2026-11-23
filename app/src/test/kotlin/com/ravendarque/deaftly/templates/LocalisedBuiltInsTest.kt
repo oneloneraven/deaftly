@@ -66,7 +66,7 @@ class LocalisedBuiltInsTest {
                 qualifiers,
             )
             assertEquals(
-                listOf("$language interpreter", "speech to text", "typing on my phone", "lipreading"),
+                listOf("$language interpreter", "speech to text", "typing", "lipreading"),
                 templates
                     .byId(BuiltInIds.DOCTOR)
                     .placeholders
