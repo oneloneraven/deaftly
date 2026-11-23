@@ -25,6 +25,7 @@ Read a doc when the work touches it, not up front.
 - Keep the [threat model](docs/threat-model.md) current whenever a trust boundary moves.
 - Screen new dependencies and vendors: [ADR-0002](docs/adr/0002-screen-dependencies-against-bds-boycott-lists.md).
 - Significant decisions get an [ADR](docs/adr/README.md).
+- Visual and copy style: [brand style guide](docs/brand/style-guide.md). Brand changes (logo, icon, colour) wait for the owner's review.
 - Verify before claiming anything works; report failures and unverified steps plainly.
 
 ## Working with Claude
