@@ -18,8 +18,6 @@ import androidx.compose.ui.unit.IntSize
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.takahirom.roborazzi.captureRoboImage
-import com.ravendarque.deaftly.templates.BuiltInIds
-import com.ravendarque.deaftly.templates.builtInTemplates
 import com.ravendarque.deaftly.core.chat.ChatProfile
 import com.ravendarque.deaftly.core.chat.ColourRole
 import com.ravendarque.deaftly.core.chat.Conversation
@@ -34,6 +32,8 @@ import com.ravendarque.deaftly.core.ocr.Point
 import com.ravendarque.deaftly.core.ocr.Quad
 import com.ravendarque.deaftly.core.ocr.ViewportMapping
 import com.ravendarque.deaftly.core.settings.PersonalNames
+import com.ravendarque.deaftly.templates.BuiltInIds
+import com.ravendarque.deaftly.templates.builtInTemplates
 import com.ravendarque.deaftly.ui.chat.ChatCodec
 import com.ravendarque.deaftly.ui.chat.ChatScreen
 import com.ravendarque.deaftly.ui.chat.ChatViewModel
