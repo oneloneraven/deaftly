@@ -24,6 +24,9 @@ private const val LONG_MESSAGE =
         "Could you please type any questions on my phone, or write them down, because I can't hear you and I can't " +
         "read lips well. Thank you very much for your patience, it really helps."
 
+private const val LONG_WORDS =
+    "Hi! I'm deaf. I have an appointment at 10:30 with Dr Shah. I prefer to communicate by typing."
+
 private val MESSAGE_HIGHLIGHTS =
     listOf("Sam", "type on my phone").map { HighlightRange(MESSAGE.indexOf(it), MESSAGE.indexOf(it) + it.length) }
 
@@ -91,4 +94,12 @@ class ShowScreenshotTest {
 
     @Test
     fun yellowOnBlackScheme() = shot(MESSAGE, dark = false, scheme = ShowScheme.YellowOnBlack)
+
+    @Test
+    @Config(qualifiers = "en-rGB-w360dp-h800dp")
+    fun longWordsNarrowScreen() = shot(LONG_WORDS, dark = false, highlights = emptyList())
+
+    @Test
+    @Config(qualifiers = "en-rGB-w360dp-h800dp", fontScale = 2f)
+    fun longWordsNarrowScreenLargeFontScale() = shot(LONG_WORDS, dark = false, highlights = emptyList())
 }
