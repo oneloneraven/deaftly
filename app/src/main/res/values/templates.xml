@@ -8,7 +8,7 @@
     <string name="template_check_in_title">Check in</string>
     <string name="template_check_in_body">Hi! I\'m deaf. I\'d like to check in. My name is {name}. If you need to reply, please {how to reply}.</string>
     <string name="template_order_food_title">Order food</string>
-    <string name="template_order_food_body">Hi! I\'m deaf. Could I have {menu item} please? If you have a question, please type it on my phone.</string>
+    <string name="template_order_food_body">Hi! I\'m deaf. Could I have {menu item} please? If you have a question, please type it here.</string>
     <string name="template_explain_deaf_title">Explain I\'m deaf</string>
     <string name="template_explain_deaf_body">I\'m deaf. I can\'t hear you so if you need to talk to me, please {how to reply}.</string>
     <string name="template_sign_language_interpreter_body">Hi! I\'m deaf. My name is {name}. I should have %1$s booked. Are they here yet? To reply, please {how to reply}.</string>
@@ -27,7 +27,7 @@
 
     <string name="placeholder_how_to_reply_label">How should they reply?</string>
     <string-array name="placeholder_how_to_reply_options">
-        <item>type on my phone</item>
+        <item>type here</item>
         <item>type on your phone</item>
         <item>write it down</item>
         <item>point to the words</item>
@@ -66,7 +66,7 @@
     <string name="placeholder_how_i_communicate_label">How will you communicate?</string>
     <string-array name="placeholder_how_i_communicate_other_options">
         <item>speech to text</item>
-        <item>typing on my phone</item>
+        <item>typing</item>
         <item>lipreading</item>
     </string-array>
     <string name="placeholder_place_label">Where to?</string>

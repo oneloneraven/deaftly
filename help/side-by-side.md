@@ -5,7 +5,7 @@ order: 6
 
 # Side by side
 
-Side by side is for a back-and-forth conversation on one phone. You pass the phone between you and take turns to type. Each person's messages appear in their own colour, like a script, so it's easy to follow who said what.
+Side by side is for a back-and-forth conversation on one device. You pass it between you and take turns to type. Each person's messages appear in their own colour, like a script, so it's easy to follow who said what.
 
 ## Taking turns
 
@@ -56,4 +56,4 @@ Tap **End chat**. If the chat has messages, you're asked whether to keep it:
 
 Chats you keep appear in **Saved chats** on the home screen. Tap one to open it and carry on where you left off. Changes are saved as you go, and ending a kept chat saves it without asking.
 
-To delete a saved chat, tap the bin next to it. If a saved chat can't be opened, it shows as "This chat cannot be read", and you can still delete it. Kept chats stay on this phone and, if you've turned it on, in your Android backup.
+To delete a saved chat, tap the bin next to it. If a saved chat can't be opened, it shows as "This chat cannot be read", and you can still delete it. Kept chats stay on this device and, if you've turned it on, in your Android backup.

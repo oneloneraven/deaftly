@@ -4,7 +4,7 @@
     <string name="sign_language">BSL</string>
     <string name="first_run_me_heading">Your name and colour (optional)</string>
     <string name="settings_scheme_heading">Show mode colours</string>
-    <string name="hub_side_by_side_help">For a back-and-forth conversation. You share one phone, passing it between you and taking turns to type. Each person\u2019s messages appear in their own colour, like a script, so it\u2019s easy to follow who said what. Flip the switch to change whose turn it is.</string>
+    <string name="hub_side_by_side_help">For a back-and-forth conversation. You share one device, passing it between you and taking turns to type. Each person\u2019s messages appear in their own colour, like a script, so it\u2019s easy to follow who said what. Flip the switch to change whose turn it is.</string>
     <string name="ocr_torch">Torch</string>
     <string name="show_change_colours">Change colours. Now %1$s, next %2$s</string>
     <string name="chat_setup">Names and colours</string>

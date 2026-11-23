@@ -142,15 +142,15 @@ class HubScreenTest {
                 "Pick one, fill in the parts that change each time, like a time or a name, then show it. " +
                 "You can type the details or read them from a sign or document with the camera.",
             "Face to face" to
-                "For typing to someone opposite you while securely holding your phone. The keyboard faces you, " +
+                "For typing to someone opposite you while securely holding your device. The keyboard faces you, " +
                 "while the text you type faces away from you so they can read along as you type. " +
-                "If they want to reply, you can switch to Side by side and pass them the phone.",
+                "If they want to reply, you can switch to Side by side and pass it to them.",
             "Side by side" to
-                "For a back-and-forth conversation. You share one phone, passing it between you and taking turns to type. " +
+                "For a back-and-forth conversation. You share one device, passing it between you and taking turns to type. " +
                 "Each person’s messages appear in their own colour, like a script, so it’s easy to follow who said what. " +
                 "Flip the switch to change whose turn it is.",
             "Listen for me" to
-                "For when someone wants to talk to you. Deaftly turns what they say into text on your phone, so you can read along. " +
+                "For when someone wants to talk to you. Deaftly turns what they say into text on your device, so you can read along. " +
                 "The audio isn’t kept. If you want to reply, switch to Side by side.",
             "Help" to "Find out how to use Deaftly: templates, Show, Face to face, Side by side, Listen for me and the camera.",
             "Share" to "Show someone the QR code so they can get Deaftly, or send them the link.",

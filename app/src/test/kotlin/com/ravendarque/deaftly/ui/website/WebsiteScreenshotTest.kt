@@ -73,7 +73,7 @@ private const val SCREENSHOT_DIR = "src/test/screenshots"
 private const val PACKAGE = "com.ravendarque.deaftly.ui.website"
 private const val FIXTURES = "src/androidTest/assets/ocr-fixtures"
 private const val MESSAGE = "Could I have a table for two by the window, please?"
-private const val ORDER = "Hi! I'm deaf. Could I have Pasta arrabbiata please? If you have a question, please type it on my phone."
+private const val ORDER = "Hi! I'm deaf. Could I have Pasta arrabbiata please? If you have a question, please type it here."
 private const val VIEWPORT_WIDTH = 390f
 private const val VIEWPORT_HEIGHT = 600f
 internal val EXAMPLE_NAMES = PersonalNames(firstName = "Keisha", lastName = "Grant", useFirstNameInChats = true)
