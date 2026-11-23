@@ -39,7 +39,7 @@ class MarketingScreenshotTest : WebsiteScreenshotTest() {
         }
         composeRule.waitForIdle()
         composeRule.onNodeWithText("how to reply").performClick()
-        composeRule.onNodeWithText("type on my phone").performClick()
+        composeRule.onNodeWithText("write it down").performClick()
         composeRule.waitForIdle()
         capture()
     }
