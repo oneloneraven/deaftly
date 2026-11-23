@@ -191,4 +191,33 @@ class LiveRecognitionTest {
 
         assertEquals("Tea", tracker.update(listOf(phrase("Tea", box(0f, 0f, 0.4f, 0.1f)))).single().text)
     }
+
+    @Test
+    fun aThinLineThatShakesUpAndDownKeepsItsId() {
+        val tracker = PhraseTracker()
+        val first = tracker.update(listOf(phrase("Fibre 2.5g", box(0.1f, 0.50f, 0.6f, 0.52f)))).single()
+
+        val shaken = tracker.update(listOf(phrase("Fibre 2.5g", box(0.1f, 0.51f, 0.6f, 0.53f))))
+
+        assertEquals(listOf(first.id), shaken.map { it.id })
+    }
+
+    @Test
+    fun byDefaultAMissedOutlineStaysForOneFrameOnly() {
+        val tracker = PhraseTracker()
+        tracker.update(listOf(phrase("Tea", box(0f, 0f, 0.4f, 0.1f))))
+
+        assertEquals(1, tracker.update(emptyList()).size)
+        assertEquals(0, tracker.update(emptyList()).size)
+    }
+
+    @Test
+    fun byDefaultAnOutlineMovesMostOfTheWayToItsTextEachFrame() {
+        val tracker = PhraseTracker()
+        tracker.update(listOf(phrase("Tea", box(0f, 0f, 0.4f, 0.1f))))
+
+        val moved = tracker.update(listOf(phrase("Tea", box(0.02f, 0f, 0.42f, 0.1f)))).single()
+
+        assertEquals(0.016f, moved.quad.boundingBox().left, 1e-6f)
+    }
 }
