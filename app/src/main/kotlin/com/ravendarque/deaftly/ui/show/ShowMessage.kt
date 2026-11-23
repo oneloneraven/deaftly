@@ -34,6 +34,8 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.Hyphens
+import androidx.compose.ui.text.style.LineBreak
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
@@ -62,6 +64,8 @@ private fun showStyle(color: Color): TextStyle {
         fontSize = size,
         lineHeight = size * LINE_HEIGHT_RATIO,
         letterSpacing = (-0.01).em,
+        hyphens = Hyphens.Auto,
+        lineBreak = LineBreak.Paragraph,
     )
 }
 
