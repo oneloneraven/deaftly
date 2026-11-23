@@ -9,13 +9,13 @@ Deaftly needs Android 8 or newer. You download it from the Deaftly website and i
 
 ## Install
 
-1. On your phone, open the [download page](https://deaftly.com/download/) and tap the download button. Your phone may warn that this type of file can harm your device. That warning appears for every app installed this way. Tap **Download anyway** if you're happy to continue.
+1. On your phone or tablet, open the [download page](https://deaftly.com/download/) and tap the download button. Android may warn that this type of file can harm your device. That warning appears for every app installed this way. Tap **Download anyway** if you're happy to continue.
 2. When the download finishes, tap **Open**, or open the file from your Downloads folder.
 3. Android will say it can't install apps from this source. Tap **Settings**, then switch on **Allow from this source** for the app you used to download the file, such as Chrome or Files. Go back and tap **Install**.
 4. When it says the app is installed, tap **Open**.
 5. You can now switch **Allow from this source** off again. Doing so doesn't affect Deaftly.
 
-The wording and menu names differ between phone makers. If you can't see the option, open Settings and search for "Install unknown apps".
+The wording and menu names differ between device makers. If you can't see the option, open Settings and search for "Install unknown apps".
 
 ## Update
 

@@ -20,7 +20,7 @@ import kotlin.test.assertTrue
 @RunWith(AndroidJUnit4::class)
 class BuiltInTemplatesTest {
     private val templates = builtInTemplates(RuntimeEnvironment.getApplication().resources)
-    private val replyPhrases = listOf("type it on my phone", "write down", "show me")
+    private val replyPhrases = listOf("type it here", "write down", "show me")
     private val token = Regex("""\{[^}]*}""")
 
     private fun wordCounts(body: String): List<Int> =
@@ -110,7 +110,7 @@ class BuiltInTemplatesTest {
 
         assertEquals(PlaceholderType.Choices, placeholder.type)
         assertEquals(
-            listOf("type on my phone", "type on your phone", "write it down", "point to the words", "face me and speak clearly"),
+            listOf("type here", "type on your phone", "write it down", "point to the words", "face me and speak clearly"),
             placeholder.options,
         )
     }
@@ -167,7 +167,7 @@ class BuiltInTemplatesTest {
         assertTrue(communicate.repeatable)
         assertEquals(Join.Or, communicate.join)
         assertEquals("How will you communicate?", communicate.label)
-        assertEquals(listOf("BSL interpreter", "speech to text", "typing on my phone", "lipreading"), communicate.options)
+        assertEquals(listOf("BSL interpreter", "speech to text", "typing", "lipreading"), communicate.options)
         assertEquals(byId(BuiltInIds.CHECK_IN).placeholders.getValue("how to reply"), doctor.placeholders.getValue("how to reply"))
     }
 
@@ -179,12 +179,12 @@ class BuiltInTemplatesTest {
                 .set("time", "10:30")
                 .set("doctor", "Dr Shah")
                 .add("how I communicate", "lipreading")
-                .add("how I communicate", "typing on my phone")
+                .add("how I communicate", "typing")
                 .set("how to reply", "write it down")
 
         assertEquals(
             "Hi! I'm deaf. My name is Marcus Campbell. I have an appointment at 10:30 with Dr Shah. " +
-                "I prefer to communicate by lipreading or typing on my phone. If you need to reply, please write it down.",
+                "I prefer to communicate by lipreading or typing. If you need to reply, please write it down.",
             TemplateRenderer.render(byId(BuiltInIds.DOCTOR), fill).text,
         )
     }
@@ -196,14 +196,14 @@ class BuiltInTemplatesTest {
                 .set("name", "Marcus Campbell")
                 .set("time", "10:30")
                 .set("doctor", "Dr Shah")
-                .set("how I communicate", "typing on my phone")
+                .set("how I communicate", "typing")
                 .add("how to reply", "write it down")
-                .add("how to reply", "type on my phone")
+                .add("how to reply", "type here")
 
         assertEquals(
             "Hi! I'm deaf. My name is Marcus Campbell. I have an appointment at 10:30 with Dr Shah. " +
-                "I prefer to communicate by typing on my phone. " +
-                "If you need to reply, please write it down or type on my phone.",
+                "I prefer to communicate by typing. " +
+                "If you need to reply, please write it down or type here.",
             TemplateRenderer.render(byId(BuiltInIds.DOCTOR), fill).text,
         )
     }
