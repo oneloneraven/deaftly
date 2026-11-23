@@ -18,5 +18,6 @@ Use this for anything you haven't saved as a template. To show a template instea
 ## While it's showing
 
 - **Change colours** switches between black on white, white on black, and yellow on black. Choose the one that's easiest to read in the light you're in. You can set the starting colours in [Settings](settings.md).
+- **Volume up and down** make the text bigger or smaller, in three sizes. Show remembers the size you chose for next time. The volume keys work as normal everywhere else.
 - **Continue as chat** opens a chat with your message in it, so the other person can reply. See [Side by side](side-by-side.md).
 - Swipe down to go back.

@@ -9,6 +9,7 @@ import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.rememberScrollableState
 import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -36,6 +37,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -43,6 +48,7 @@ import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.ravendarque.deaftly.R
 import com.ravendarque.deaftly.core.settings.ShowScheme
+import com.ravendarque.deaftly.core.settings.ShowTextSize
 import com.ravendarque.deaftly.navigation.HighlightRange
 import com.ravendarque.deaftly.ui.icons.DeaftlyIcons
 import com.ravendarque.deaftly.ui.theme.LocalDarkTheme
@@ -71,6 +77,7 @@ fun ShowScreen(
 
         is ShowUiState.Ready -> {
             val scheme = current.chosen ?: defaultShowScheme(LocalDarkTheme.current)
+            VolumeKeysEffect(viewModel::stepTextSize)
             ShowContent(
                 text,
                 scheme,
@@ -78,6 +85,7 @@ fun ShowScreen(
                 onClose = onClose,
                 onContinueAsChat = onContinueAsChat,
                 highlights = highlights,
+                textSize = current.textSize,
             )
         }
     }
@@ -91,6 +99,7 @@ fun ShowContent(
     onClose: () -> Unit,
     onContinueAsChat: () -> Unit,
     highlights: List<HighlightRange> = emptyList(),
+    textSize: ShowTextSize = ShowTextSize.Default,
 ) {
     val colours = scheme.colours
     KeepScreenOn()
@@ -103,12 +112,13 @@ fun ShowContent(
                 .safeDrawingPadding()
                 .leaveOnSwipeDown(onClose),
     ) {
-        ShowHeader(scheme, onCycleScheme, onClose)
+        ShowHeader(scheme, textSize, onCycleScheme, onClose)
         ShowMessage(
             text = text,
             colours = colours,
             modifier = Modifier.weight(1f).fillMaxWidth().padding(horizontal = 26.dp),
             highlights = highlights,
+            textSize = textSize,
         )
         Column(
             modifier = Modifier.fillMaxWidth().padding(start = 20.dp, end = 20.dp, bottom = 28.dp, top = 8.dp),
@@ -138,8 +148,28 @@ fun ShowContent(
 }
 
 @Composable
+private fun TextSizeAnnouncement(textSize: ShowTextSize) {
+    val label = stringResource(R.string.show_text_size, stringResource(textSize.labelRes()))
+    Box(
+        modifier =
+            Modifier.size(1.dp).semantics {
+                liveRegion = LiveRegionMode.Polite
+                contentDescription = label
+            },
+    )
+}
+
+private fun ShowTextSize.labelRes(): Int =
+    when (this) {
+        ShowTextSize.Small -> R.string.show_text_size_small
+        ShowTextSize.Medium -> R.string.show_text_size_medium
+        ShowTextSize.Large -> R.string.show_text_size_large
+    }
+
+@Composable
 private fun ShowHeader(
     scheme: ShowScheme,
+    textSize: ShowTextSize,
     onCycleScheme: () -> Unit,
     onClose: () -> Unit,
 ) {
@@ -152,6 +182,7 @@ private fun ShowHeader(
         IconButton(onClick = onClose, modifier = Modifier.size(BarTarget), colors = barColours) {
             Icon(DeaftlyIcons.Close, contentDescription = stringResource(R.string.show_close))
         }
+        TextSizeAnnouncement(textSize)
         val change =
             stringResource(
                 R.string.show_change_colours,

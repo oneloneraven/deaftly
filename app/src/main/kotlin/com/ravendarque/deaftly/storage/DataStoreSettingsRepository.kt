@@ -7,6 +7,7 @@ import com.ravendarque.deaftly.core.settings.ChatTextSize
 import com.ravendarque.deaftly.core.settings.PersonalNames
 import com.ravendarque.deaftly.core.settings.SettingsRepository
 import com.ravendarque.deaftly.core.settings.ShowScheme
+import com.ravendarque.deaftly.core.settings.ShowTextSize
 import com.ravendarque.deaftly.core.settings.ThemeMode
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -23,6 +24,9 @@ class DataStoreSettingsRepository(
             .distinctUntilChanged()
 
     override val firstRunDone: Flow<Boolean> = store.data.map { it.settings.firstRunDone }.distinctUntilChanged()
+
+    override val showTextSize: Flow<ShowTextSize> =
+        store.data.map { it.settings.showTextSize?.toDomain() ?: ShowTextSize.Default }.distinctUntilChanged()
 
     override val chatTextSize: Flow<ChatTextSize> =
         store.data.map { it.settings.chatTextSize?.toDomain() ?: ChatTextSize.Default }.distinctUntilChanged()
@@ -46,6 +50,10 @@ class DataStoreSettingsRepository(
 
     override suspend fun setFirstRunDone() {
         store.updateData { document -> document.copy(settings = document.settings.copy(firstRunDone = true)) }
+    }
+
+    override suspend fun setShowTextSize(size: ShowTextSize) {
+        store.updateData { document -> document.copy(settings = document.settings.copy(showTextSize = size.toDto())) }
     }
 
     override suspend fun setChatTextSize(size: ChatTextSize) {

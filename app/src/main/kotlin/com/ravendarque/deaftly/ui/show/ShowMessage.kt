@@ -41,22 +41,25 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import com.ravendarque.deaftly.R
+import com.ravendarque.deaftly.core.settings.ShowTextSize
 import com.ravendarque.deaftly.navigation.HighlightRange
 import com.ravendarque.deaftly.ui.icons.DeaftlyIcons
 import com.ravendarque.deaftly.ui.theme.AtkinsonHyperlegibleNext
 import com.ravendarque.deaftly.ui.theme.ShowColours
 import kotlinx.coroutines.launch
 
-internal const val SHOW_FONT_SP = 56
-private val LargestShowText = 84.dp
+private const val LARGEST_SCALE = 1.5f
 private const val LINE_HEIGHT_RATIO = 1.16f
 private const val FADE_SOLID_FROM = 0.5f
 private val FadeHeight = 96.dp
 private val MoreTarget = 48.dp
 
 @Composable
-private fun showStyle(color: Color): TextStyle {
-    val size = with(LocalDensity.current) { minOf(SHOW_FONT_SP.sp.toPx(), LargestShowText.toPx()).toSp() }
+private fun showStyle(
+    color: Color,
+    textSize: ShowTextSize,
+): TextStyle {
+    val size = with(LocalDensity.current) { minOf(textSize.sp.sp.toPx(), (textSize.sp * LARGEST_SCALE).dp.toPx()).toSp() }
     return TextStyle(
         color = color,
         fontFamily = AtkinsonHyperlegibleNext,
@@ -89,6 +92,7 @@ fun ShowMessage(
     colours: ShowColours,
     modifier: Modifier = Modifier,
     highlights: List<HighlightRange> = emptyList(),
+    textSize: ShowTextSize = ShowTextSize.Default,
 ) {
     val styled = remember(text, highlights) { emphasised(text, highlights) }
     val scroll = rememberScrollState()
@@ -99,7 +103,7 @@ fun ShowMessage(
                 modifier = Modifier.fillMaxWidth().heightIn(min = viewportHeight),
                 contentAlignment = Alignment.Center,
             ) {
-                BasicText(text = styled, style = showStyle(colours.text))
+                BasicText(text = styled, style = showStyle(colours.text, textSize))
             }
         }
         if (scroll.canScrollForward) {

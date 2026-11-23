@@ -1,12 +1,18 @@
 package com.ravendarque.deaftly.ui.show
 
+import android.view.KeyEvent
 import android.view.View
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.junit4.accessibility.enableAccessibilityChecks
 import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
@@ -23,7 +29,9 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.ravendarque.deaftly.core.settings.ShowScheme
+import com.ravendarque.deaftly.core.settings.ShowTextSize
 import com.ravendarque.deaftly.navigation.HighlightRange
+import com.ravendarque.deaftly.ui.chat.FakeSettingsRepository
 import com.ravendarque.deaftly.ui.theme.AppTheme
 import org.junit.Before
 import org.junit.Rule
@@ -188,7 +196,16 @@ class ShowScreenTest {
     fun shortAndLongTextShareOneSize() {
         var text by mutableStateOf(SHORT)
         composeRule.setContent {
-            AppTheme { ShowContent(text, ShowScheme.BlackOnWhite, onCycleScheme = {}, onClose = {}, onContinueAsChat = {}) }
+            AppTheme {
+                ShowContent(
+                    text,
+                    ShowScheme.BlackOnWhite,
+                    onCycleScheme = {},
+                    onClose = {},
+                    onContinueAsChat = {},
+                    textSize = ShowTextSize.Large,
+                )
+            }
         }
         composeRule.waitForIdle()
         val short = fontSizeOf(SHORT)
@@ -196,7 +213,7 @@ class ShowScreenTest {
         composeRule.waitForIdle()
         val long = fontSizeOf(LONG)
 
-        assertEquals(SHOW_FONT_SP.sp, short)
+        assertEquals(ShowTextSize.Large.sp.sp, short)
         assertEquals(short, long)
     }
 
@@ -245,5 +262,52 @@ class ShowScreenTest {
             .action
             ?.invoke(results)
         return results.single()
+    }
+
+    @Test
+    fun eachSizeDrawsTheTextAtItsSizeAndAnnouncesIt() {
+        var size by mutableStateOf(ShowTextSize.Small)
+        composeRule.setContent {
+            AppTheme {
+                ShowContent(
+                    SHORT,
+                    ShowScheme.BlackOnWhite,
+                    onCycleScheme = {},
+                    onClose = {},
+                    onContinueAsChat = {},
+                    textSize = size,
+                )
+            }
+        }
+        ShowTextSize.entries.forEach { each ->
+            size = each
+            composeRule.waitForIdle()
+
+            assertEquals(each.sp.sp, fontSizeOf(SHORT))
+            composeRule
+                .onNodeWithContentDescription("Text size: ${each.name.lowercase()}")
+                .assert(SemanticsMatcher.expectValue(SemanticsProperties.LiveRegion, LiveRegionMode.Polite))
+        }
+    }
+
+    @Test
+    fun theShowScreenTakesTheVolumeKeysOnlyWhileItIsOpen() {
+        val keys = VolumeKeys()
+        val viewModel = ShowViewModel(FakeSettingsRepository())
+        var open by mutableStateOf(true)
+        composeRule.setContent {
+            CompositionLocalProvider(LocalVolumeKeys provides keys) {
+                AppTheme { if (open) ShowScreen(SHORT, emptyList(), viewModel, onClose = {}, onContinueAsChat = {}) }
+            }
+        }
+        composeRule.waitForIdle()
+
+        assertTrue(keys.handle(KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_VOLUME_UP)))
+        composeRule.waitForIdle()
+        assertEquals(ShowTextSize.Large.sp.sp, fontSizeOf(SHORT))
+
+        open = false
+        composeRule.waitForIdle()
+        assertFalse(keys.handle(KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_VOLUME_UP)))
     }
 }

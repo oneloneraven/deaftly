@@ -5,6 +5,7 @@ import androidx.compose.ui.test.onRoot
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.github.takahirom.roborazzi.captureRoboImage
 import com.ravendarque.deaftly.core.settings.ShowScheme
+import com.ravendarque.deaftly.core.settings.ShowTextSize
 import com.ravendarque.deaftly.navigation.HighlightRange
 import com.ravendarque.deaftly.ui.theme.AppTheme
 import com.ravendarque.deaftly.ui.theme.defaultShowScheme
@@ -45,10 +46,19 @@ class ShowScreenshotTest {
         dark: Boolean,
         scheme: ShowScheme = defaultShowScheme(dark),
         highlights: List<HighlightRange> = MESSAGE_HIGHLIGHTS,
+        textSize: ShowTextSize = ShowTextSize.Large,
     ) {
         composeRule.setContent {
             AppTheme(darkTheme = dark) {
-                ShowContent(text, scheme, onCycleScheme = {}, onClose = {}, onContinueAsChat = {}, highlights = highlights)
+                ShowContent(
+                    text,
+                    scheme,
+                    onCycleScheme = {},
+                    onClose = {},
+                    onContinueAsChat = {},
+                    highlights = highlights,
+                    textSize = textSize,
+                )
             }
         }
         composeRule.waitForIdle()
@@ -102,4 +112,14 @@ class ShowScreenshotTest {
     @Test
     @Config(qualifiers = "en-rGB-w360dp-h800dp", fontScale = 2f)
     fun longWordsNarrowScreenLargeFontScale() = shot(LONG_WORDS, dark = false, highlights = emptyList())
+
+    @Test
+    fun mediumTextLightTheme() = shot(MESSAGE, dark = false, textSize = ShowTextSize.Medium)
+
+    @Test
+    fun smallTextLightTheme() = shot(MESSAGE, dark = false, textSize = ShowTextSize.Small)
+
+    @Test
+    @Config(fontScale = 2f)
+    fun smallTextLargeFontScale() = shot(MESSAGE, dark = false, textSize = ShowTextSize.Small)
 }

@@ -5,6 +5,7 @@ import com.ravendarque.deaftly.core.chat.ColourRole
 import com.ravendarque.deaftly.core.settings.ChatTextSize
 import com.ravendarque.deaftly.core.settings.PersonalNames
 import com.ravendarque.deaftly.core.settings.ShowScheme
+import com.ravendarque.deaftly.core.settings.ShowTextSize
 import com.ravendarque.deaftly.core.settings.ThemeMode
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -132,6 +133,18 @@ class DataStoreSettingsRepositoryTest {
 
             assertEquals(ChatTextSize.Medium, repository.chatTextSize.first())
             assertEquals(false, repository.chatSidesSwapped.first())
+        }
+
+    @Test
+    fun showOpensAtMediumUntilASizeIsChosenAndTheChoiceSurvivesAFreshStore() =
+        runTest {
+            val firstRun = Job()
+            val before = repository(CoroutineScope(firstRun))
+            assertEquals(ShowTextSize.Medium, before.showTextSize.first())
+            before.setShowTextSize(ShowTextSize.Small)
+            firstRun.cancelAndJoin()
+
+            assertEquals(ShowTextSize.Small, repository(backgroundScope).showTextSize.first())
         }
 
     @Test
