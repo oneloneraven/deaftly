@@ -28,9 +28,12 @@ change that adds or moves a trust boundary ([coding standards](coding-standards.
   included in the user's own Android backup and device transfer
   ([ADR-0012](adr/0012-back-up-kept-chats.md)).
 - **Release pipeline**: GitHub Actions tags releases with the release App
-  and builds an APK signed with the upload key, attached to the GitHub
-  Release ([ADR-0007](adr/0007-distribute-signed-apks-on-github-releases.md)).
-  Users install that APK from outside the Play Store.
+  and builds an APK signed with the app signing key, attached to the GitHub
+  Release. It also builds an app bundle signed with a separate Play upload key
+  and uploads it to Google Play's internal testing track with a Play service
+  account ([ADR-0014](adr/0014-distribute-through-google-play-and-github-releases.md)).
+  Google re-signs Play's APKs with its copy of the same app signing key, so
+  people can install from either channel.
 
 ## Trust boundaries
 
@@ -43,7 +46,10 @@ change that adds or moves a trust boundary ([coding standards](coding-standards.
 | Other apps → the app | Other apps on the device and Deaftly | Intents to exported components | Only the launcher activity is exported; no content providers, deep links or broadcast receivers. Its app shortcut extra only picks one of a fixed set of screens to open |
 | Release job → GitHub API | `release.yml` and the release GitHub App | Short-lived App token (Contents and Workflows: read and write) to push release tags and create releases | Token minted only in the release job and scoped to this repository; App installed on this repository only; private key held as a repository secret |
 | Release environment → artefact job | The `release` environment and `release-artefacts.yml` | The upload keystore and its passwords | Secrets live in the `release` environment, which only `v*` tags can use; the decoded keystore is deleted on every exit path of the job |
-| GitHub Release → user's phone | The published APK and the person installing it | The app itself | Signed with an upload key only the maintainer holds; Android refuses updates signed with any other key |
+| Release environment → bundle step | The `release` environment and the Play bundle step | The Play upload keystore and its passwords | Same controls as the APK keystore: `release` environment, `v*` tags only, decoded keystore deleted on every exit path. Without the secrets, no bundle is built |
+| Artefact job → Google Play API | `release-artefacts.yml` and Play Console | The app bundle, using the service account's JSON key | The service account has access to this app only, with permission to release to testing tracks only; uploads run only when `PLAY_UPLOADS_ENABLED` is `true`; the key is a `release` environment secret; promotion to closed testing and production is done by hand in Play Console |
+| GitHub Release → user's phone | The published APK and the person installing it | The app itself | Signed with the app signing key; Android refuses updates signed with any other key |
+| Google Play → user's phone | Play's delivered APKs and the person installing them | The app itself | Signed by Google with its copy of the same app signing key, so Google is trusted not to sign anything else; Play's review applies to closed testing, open testing and production releases |
 
 ## Assets
 
@@ -52,7 +58,9 @@ change that adds or moves a trust boundary ([coding standards](coding-standards.
 | The user's templates and settings | Personal, and may reveal health conditions, names or routines |
 | Conversations held in memory | May contain anything two people say to each other |
 | Kept chats on the device | Stored conversations, possibly about health, kept until the user deletes them |
-| Upload signing key and its passwords | Anyone holding it can publish an update that installed copies accept; losing it means installed copies can never update |
+| App signing key and its passwords | Anyone holding it can publish an update that installed copies accept; losing it means GitHub installs can never update. Google holds a copy for Play ([ADR-0014](adr/0014-distribute-through-google-play-and-github-releases.md)) |
+| Play upload key and its passwords | Anyone holding it can upload a bundle to Play as us, though only to testing tracks through CI; Google can reset it |
+| Play service account key | Anyone holding it can upload builds to this app's testing tracks |
 | Release App private key | Anyone holding it can mint tokens that push tags and, through Workflows, change workflow files |
 
 ## Actors

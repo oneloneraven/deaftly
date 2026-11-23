@@ -14,10 +14,11 @@ old one's status becomes "Superseded by ADR-NNNN".
 | [0003](0003-build-a-native-android-app-with-kotlin-and-compose.md) | Build a native Android app with Kotlin and Jetpack Compose |
 | [0005](0005-store-templates-and-settings-with-datastore.md) | Store templates and settings with DataStore and JSON |
 | [0006](0006-wire-dependencies-by-hand.md) | Wire dependencies by hand |
-| [0007](0007-distribute-signed-apks-on-github-releases.md) | Distribute signed APKs on GitHub Releases |
+| [0007](0007-distribute-signed-apks-on-github-releases.md) | Distribute signed APKs on GitHub Releases (superseded by 0014) |
 | [0008](0008-allow-android-backup-of-templates-and-settings.md) | Allow Android backup of templates and settings |
 | [0009](0009-ship-the-mvp-on-0x.md) | Ship the MVP on 0.x |
 | [0010](0010-recognise-text-with-paddleocr-on-ncnn.md) | Recognise text with PaddleOCR on ncnn |
 | [0011](0011-review-permissions-against-an-allowlist.md) | Review permissions against an allowlist |
 | [0012](0012-back-up-kept-chats.md) | Back up kept chats |
 | [0013](0013-transcribe-speech-with-sherpa-ncnn-bundled-in-the-app.md) | Transcribe speech with sherpa-ncnn, bundled in the app |
+| [0014](0014-distribute-through-google-play-and-github-releases.md) | Distribute through Google Play and GitHub Releases |

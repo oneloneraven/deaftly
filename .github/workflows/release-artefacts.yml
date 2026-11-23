@@ -53,6 +53,45 @@ jobs:
           apksigner="$(find "$ANDROID_HOME/build-tools" -name apksigner -type f | sort -V | tail -n 1)"
           "$apksigner" verify --print-certs "$apk"
           gh release upload "$TAG" "$apk" --repo "$GITHUB_REPOSITORY" --clobber
+      - name: Build the bundle for Google Play
+        id: bundle
+        env:
+          PLAY_UPLOAD_KEYSTORE_BASE64: ${{ secrets.PLAY_UPLOAD_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.PLAY_UPLOAD_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.PLAY_UPLOAD_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.PLAY_UPLOAD_KEY_PASSWORD }}
+        run: |
+          if [ -z "$PLAY_UPLOAD_KEYSTORE_BASE64" ]; then
+            echo "::warning::PLAY_UPLOAD_KEYSTORE_BASE64 isn't set, so no bundle was built for Google Play."
+            exit 0
+          fi
+          for name in ANDROID_KEYSTORE_PASSWORD ANDROID_KEY_ALIAS ANDROID_KEY_PASSWORD; do
+            [ -n "${!name}" ] || { echo "::error::The Play upload secret behind $name is not set"; exit 1; }
+          done
+          export ANDROID_KEYSTORE_PATH="$RUNNER_TEMP/play-upload.jks"
+          trap 'rm -f "$ANDROID_KEYSTORE_PATH"' EXIT
+          base64 --decode <<< "$PLAY_UPLOAD_KEYSTORE_BASE64" > "$ANDROID_KEYSTORE_PATH"
+          ./gradlew :app:bundleRelease -PappVersion="${TAG#v}"
+          aab="deaftly-${TAG#v}.aab"
+          cp app/build/outputs/bundle/release/app-release.aab "$aab"
+          echo "file=$aab" >> "$GITHUB_OUTPUT"
+      - name: Keep the bundle for a manual upload
+        if: steps.bundle.outputs.file != ''
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: play-bundle
+          path: ${{ steps.bundle.outputs.file }}
+          retention-days: 30
+      - name: Upload the bundle to Google Play internal testing
+        if: steps.bundle.outputs.file != '' && vars.PLAY_UPLOADS_ENABLED == 'true'
+        uses: r0adkll/upload-google-play@e738b9dd8f2476ea806d921b64aacd24f34515a5 # v1.1.5
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: com.ravendarque.deaftly
+          releaseFiles: ${{ steps.bundle.outputs.file }}
+          releaseName: ${{ env.TAG }}
+          track: internal
+          status: completed
       - name: Warn if deaftly.com can't be asked to rebuild
         if: vars.SITE_DISPATCH_APP_CLIENT_ID == ''
         run: echo "::warning::SITE_DISPATCH_APP_CLIENT_ID isn't set, so deaftly.com won't rebuild for $TAG until its next deploy."
