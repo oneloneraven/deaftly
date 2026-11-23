@@ -38,8 +38,8 @@ import kotlin.test.assertTrue
  * how many sit over nothing, how often a line gets a new identity, and how far outlines lag the text. Each tracker variant
  * sees the same detections, so the differences come from tracking alone. Diagnostic for #222.
  *
- * Frames recorded on a phone are replayed too when they are in the app's files directory under `replay-222`, copied with
- * `adb shell "run-as <package> sh -c 'cat > files/replay-222/<frame>.jpg'" < <frame>.jpg`, 720 by 960 portrait JPEGs.
+ * The recorded scene is 54 frames from a 10.8 s hand-held phone video of a cereal box nutrition table, taken at 5 fps and
+ * cropped to the camera's 3:4 at 720 by 960.
  */
 @RunWith(AndroidJUnit4::class)
 class TrackingReplayTest {
@@ -84,17 +84,24 @@ class TrackingReplayTest {
             wobble(Random(SEED), FRAMES).map { frameOf(source, region, it) }
         }
 
-    private fun recorded(): Scene? {
-        val context = InstrumentationRegistry.getInstrumentation().targetContext
-        val directory = File(context.filesDir, RECORDED_DIRECTORY)
-        val files = directory.listFiles { file -> file.name.endsWith(".jpg") }.orEmpty().sortedBy { it.name }
-        if (files.isEmpty()) return null
-        return Scene("recorded (${files.size} frames from a hand-held phone)") {
-            files.map { file -> frameOf(checkNotNull(BitmapFactory.decodeFile(file.path)) { "Cannot decode ${file.name}" }) }
+    private fun recorded(): Scene {
+        val assets = InstrumentationRegistry.getInstrumentation().context.assets
+        val names =
+            assets
+                .list(RECORDED_DIRECTORY)
+                .orEmpty()
+                .filter { it.endsWith(".jpg") }
+                .sorted()
+        check(names.isNotEmpty()) { "No recorded frames in $RECORDED_DIRECTORY" }
+        return Scene("recorded (${names.size} frames of a nutrition table, hand-held phone)") {
+            names.map { name ->
+                val bitmap = assets.open("$RECORDED_DIRECTORY/$name").use { BitmapFactory.decodeStream(it) }
+                frameOf(checkNotNull(bitmap) { "Cannot decode $name" })
+            }
         }
     }
 
-    private val scenes get() = listOfNotNull(synthetic("close", RectF(95f, 360f, 670f, 840f)), synthetic("far", null), recorded())
+    private val scenes get() = listOf(synthetic("close", RectF(95f, 360f, 670f, 840f)), synthetic("far", null), recorded())
 
     private val variants =
         listOf(
@@ -234,7 +241,7 @@ class TrackingReplayTest {
         const val FRAME_HEIGHT = 960
         const val FRAMES = 40
         const val SEED = 222
-        const val RECORDED_DIRECTORY = "replay-222"
+        const val RECORDED_DIRECTORY = "ocr-replay/cereal-nutrition-handheld"
         const val BACKGROUND = 90
         const val STEP_PX = 6f
         const val MAX_PX = 30f
