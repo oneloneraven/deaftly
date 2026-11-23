@@ -32,6 +32,7 @@ import com.ravendarque.deaftly.core.ocr.Point
 import com.ravendarque.deaftly.core.ocr.Quad
 import com.ravendarque.deaftly.core.ocr.ViewportMapping
 import com.ravendarque.deaftly.core.settings.PersonalNames
+import com.ravendarque.deaftly.core.settings.ShowTextSize
 import com.ravendarque.deaftly.core.template.TemplateFill
 import com.ravendarque.deaftly.core.template.TemplateRenderer
 import com.ravendarque.deaftly.templates.BuiltInIds
@@ -208,6 +209,7 @@ open class WebsiteScreenshotTest {
                 onClose = {},
                 onContinueAsChat = {},
                 highlights = emptyList(),
+                textSize = ShowTextSize.Large,
             )
         }
 

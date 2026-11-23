@@ -6,6 +6,8 @@ import kotlinx.coroutines.flow.Flow
 public interface SettingsRepository {
     public val showScheme: Flow<ShowScheme?>
 
+    public val showTextSize: Flow<ShowTextSize>
+
     public val chatProfile: Flow<ChatProfile>
 
     public val firstRunDone: Flow<Boolean>
@@ -21,6 +23,8 @@ public interface SettingsRepository {
     public val personalNames: Flow<PersonalNames>
 
     public suspend fun setShowScheme(scheme: ShowScheme)
+
+    public suspend fun setShowTextSize(size: ShowTextSize)
 
     public suspend fun setChatProfile(profile: ChatProfile)
 

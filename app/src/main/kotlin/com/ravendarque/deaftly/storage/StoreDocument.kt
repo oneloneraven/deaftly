@@ -28,6 +28,7 @@ data class StoreDocument(
 @Serializable
 data class SettingsDto(
     val showScheme: ShowSchemeDto? = null,
+    val showTextSize: ShowTextSizeDto? = null,
     val chatName: String? = null,
     val chatColour: ParticipantColourDto? = null,
     val firstRunDone: Boolean = false,
@@ -41,6 +42,18 @@ data class SettingsDto(
     val legalName: String = "",
     val useFirstNameInChats: Boolean = false,
 )
+
+@Serializable
+enum class ShowTextSizeDto {
+    @SerialName("small")
+    Small,
+
+    @SerialName("medium")
+    Medium,
+
+    @SerialName("large")
+    Large,
+}
 
 @Serializable
 enum class ChatTextSizeDto {

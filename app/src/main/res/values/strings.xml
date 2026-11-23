@@ -131,6 +131,10 @@
     <string name="show_scheme_black_on_white">black on white</string>
     <string name="show_scheme_white_on_black">white on black</string>
     <string name="show_scheme_yellow_on_black">yellow on black</string>
+    <string name="show_text_size">Text size: %1$s</string>
+    <string name="show_text_size_small">small</string>
+    <string name="show_text_size_medium">medium</string>
+    <string name="show_text_size_large">large</string>
     <string name="show_hint">Swipe down to go back</string>
     <string name="show_more_below">More below</string>
     <string name="template_pin">Pin</string>
