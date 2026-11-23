@@ -1,6 +1,6 @@
-# Ravendarque Noncommercial Licence 1.0.0
+# One Lone Raven Noncommercial Licence 1.0.0
 
-Required Notice: Copyright Ravendarque (https://github.com/ravendarque)
+Required Notice: Copyright One Lone Raven (https://github.com/oneloneraven)
 
 ## Acceptance
 
