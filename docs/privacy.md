@@ -35,3 +35,17 @@ processed, and by whom, is in [data protection](data-protection.md).
   In Listen for me it stays on that screen until the user ends it, and is not
   stored; continuing to Side by side carries it into that chat.
 - The app works without the permission: the user can refuse it and type.
+
+## Feedback from the app
+
+- The app uses the network only to send a feedback or issue report the user
+  writes, when they tap Send. Nothing is sent in the background, and no other
+  feature uses the network.
+- It sends the message, the app version, and only if the user gives them, an
+  email address, their quote consent and credit choice, and a name. It goes to
+  the system One Lone Raven uses to receive feedback for all its products,
+  under the same retention as the website's form (see the website's privacy
+  page).
+- The screen asks people not to include health or other personal details, and
+  says plainly that without an email we can't reply.
+

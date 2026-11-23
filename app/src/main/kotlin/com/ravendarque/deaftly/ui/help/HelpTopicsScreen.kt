@@ -24,8 +24,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.ravendarque.deaftly.R
+import com.ravendarque.deaftly.feedback.FeedbackKind
 import com.ravendarque.deaftly.help.HelpRepository
 import com.ravendarque.deaftly.help.HelpTopic
 import com.ravendarque.deaftly.ui.components.DeaftlyTopBar
@@ -49,6 +52,7 @@ fun HelpTopicsScreen(
     repository: HelpRepository,
     onOpen: (slug: String) -> Unit,
     onBack: () -> Unit,
+    onFeedback: (FeedbackKind) -> Unit = {},
 ) {
     val topics = rememberHelpTopics(repository)
     Surface(modifier = Modifier.fillMaxSize()) {
@@ -64,6 +68,14 @@ fun HelpTopicsScreen(
                 topics?.forEach { topic ->
                     TopicRow(topic.title) { onOpen(topic.slug) }
                 }
+                Text(
+                    text = stringResource(R.string.help_get_in_touch),
+                    style = MaterialTheme.typography.titleLarge,
+                    color = Deaftly.colors.ink,
+                    modifier = Modifier.padding(top = Deaftly.spacing.space12).semantics { heading() },
+                )
+                TopicRow(stringResource(R.string.feedback_issue_title)) { onFeedback(FeedbackKind.Issue) }
+                TopicRow(stringResource(R.string.feedback_feedback_title)) { onFeedback(FeedbackKind.Feedback) }
             }
         }
     }
