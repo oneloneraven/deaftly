@@ -32,6 +32,8 @@ import com.ravendarque.deaftly.core.ocr.Point
 import com.ravendarque.deaftly.core.ocr.Quad
 import com.ravendarque.deaftly.core.ocr.ViewportMapping
 import com.ravendarque.deaftly.core.settings.PersonalNames
+import com.ravendarque.deaftly.core.template.TemplateFill
+import com.ravendarque.deaftly.core.template.TemplateRenderer
 import com.ravendarque.deaftly.templates.BuiltInIds
 import com.ravendarque.deaftly.templates.builtInTemplates
 import com.ravendarque.deaftly.ui.chat.ChatCodec
@@ -75,7 +77,6 @@ private const val SCREENSHOT_DIR = "src/test/screenshots"
 private const val PACKAGE = "com.ravendarque.deaftly.ui.website"
 private const val FIXTURES = "src/androidTest/assets/ocr-fixtures"
 private const val MESSAGE = "Could I have a table for two by the window, please?"
-private const val ORDER = "Hi! I'm deaf. Could I have Pasta arrabbiata please? If you have a question, please type it here."
 private const val VIEWPORT_WIDTH = 390f
 private const val VIEWPORT_HEIGHT = 600f
 internal val EXAMPLE_NAMES = PersonalNames(firstName = "Keisha", lastName = "Grant", useFirstNameInChats = true)
@@ -140,6 +141,11 @@ open class WebsiteScreenshotTest {
     val testName = TestName()
 
     protected val builtIns by lazy { builtInTemplates(RuntimeEnvironment.getApplication().resources) }
+
+    private val order by lazy {
+        val orderFood = builtIns.first { it.id == BuiltInIds.ORDER_FOOD }
+        TemplateRenderer.render(orderFood, TemplateFill().add("menu item", "Pasta arrabbiata")).text
+    }
 
     protected fun shot(content: @Composable () -> Unit) {
         composeRule.setContent { AppTheme(darkTheme = false) { content() } }
@@ -237,7 +243,7 @@ open class WebsiteScreenshotTest {
                 Participant(ParticipantId.A, ColourRole.Blue, "Me"),
                 Participant(ParticipantId.B, ColourRole.Gold, "Waiter"),
             ).withTurn(ParticipantId.A)
-                .append(RichText.spans(ORDER))
+                .append(RichText.spans(order))
                 .withTurn(ParticipantId.B)
                 .append(RichText.spans("Sure! Do you have any allergies?"))
                 .withTurn(ParticipantId.A)
