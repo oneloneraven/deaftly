@@ -5,11 +5,10 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.lifecycle.SavedStateHandle
-import com.ravendarque.deaftly.core.template.PersonalField
+import com.ravendarque.deaftly.templates.BuiltInIds
 import com.ravendarque.deaftly.ui.chat.FakeSettingsRepository
 import com.ravendarque.deaftly.ui.fill.FillScreen
 import com.ravendarque.deaftly.ui.fill.FillViewModel
-import com.ravendarque.deaftly.ui.fill.checkIn
 import com.ravendarque.deaftly.ui.home.FakeTemplateRepository
 import com.ravendarque.deaftly.ui.hub.HubScreen
 import com.ravendarque.deaftly.ui.theme.AppTheme
@@ -20,26 +19,19 @@ import org.robolectric.annotation.Config
 class MarketingScreenshotTest : WebsiteScreenshotTest() {
     @Test
     fun fillWithName() {
-        val template =
-            checkIn.copy(
-                placeholders =
-                    checkIn.placeholders.mapValues { (key, placeholder) ->
-                        if (key == "name") placeholder.copy(fillsWith = PersonalField.FullName) else placeholder
-                    },
-            )
         val viewModel =
             FillViewModel(
-                template.id,
-                FakeTemplateRepository(listOf(template)),
+                BuiltInIds.CHECK_IN,
+                FakeTemplateRepository(builtIns),
                 FakeSettingsRepository(names = EXAMPLE_NAMES),
                 SavedStateHandle(),
             )
         composeRule.setContent {
-            AppTheme(darkTheme = false) { FillScreen(template.id, viewModel, onNavigate = {}, onBack = {}) }
+            AppTheme(darkTheme = false) { FillScreen(BuiltInIds.CHECK_IN, viewModel, onNavigate = {}, onBack = {}) }
         }
         composeRule.waitForIdle()
         composeRule.onNodeWithText("how to reply").performClick()
-        composeRule.onNodeWithText("type on my phone").performClick()
+        composeRule.onNodeWithText("type here").performClick()
         composeRule.waitForIdle()
         capture()
     }

@@ -32,6 +32,10 @@ import com.ravendarque.deaftly.core.ocr.Point
 import com.ravendarque.deaftly.core.ocr.Quad
 import com.ravendarque.deaftly.core.ocr.ViewportMapping
 import com.ravendarque.deaftly.core.settings.PersonalNames
+import com.ravendarque.deaftly.core.template.TemplateFill
+import com.ravendarque.deaftly.core.template.TemplateRenderer
+import com.ravendarque.deaftly.templates.BuiltInIds
+import com.ravendarque.deaftly.templates.builtInTemplates
 import com.ravendarque.deaftly.ui.chat.ChatCodec
 import com.ravendarque.deaftly.ui.chat.ChatScreen
 import com.ravendarque.deaftly.ui.chat.ChatViewModel
@@ -44,7 +48,6 @@ import com.ravendarque.deaftly.ui.chat.testWriteScope
 import com.ravendarque.deaftly.ui.facetoface.FaceToFaceContent
 import com.ravendarque.deaftly.ui.fill.FillScreen
 import com.ravendarque.deaftly.ui.fill.FillViewModel
-import com.ravendarque.deaftly.ui.fill.fillTemplates
 import com.ravendarque.deaftly.ui.home.FakeTemplateRepository
 import com.ravendarque.deaftly.ui.hub.HubScreen
 import com.ravendarque.deaftly.ui.listen.ListenActions
@@ -65,6 +68,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestName
 import org.junit.runner.RunWith
+import org.robolectric.RuntimeEnvironment
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 import java.io.File
@@ -73,7 +77,6 @@ private const val SCREENSHOT_DIR = "src/test/screenshots"
 private const val PACKAGE = "com.ravendarque.deaftly.ui.website"
 private const val FIXTURES = "src/androidTest/assets/ocr-fixtures"
 private const val MESSAGE = "Could I have a table for two by the window, please?"
-private const val ORDER = "Hi! I'm deaf. Could I have Pasta arrabbiata please? If you have a question, please type it here."
 private const val VIEWPORT_WIDTH = 390f
 private const val VIEWPORT_HEIGHT = 600f
 internal val EXAMPLE_NAMES = PersonalNames(firstName = "Keisha", lastName = "Grant", useFirstNameInChats = true)
@@ -136,6 +139,13 @@ open class WebsiteScreenshotTest {
 
     @get:Rule
     val testName = TestName()
+
+    protected val builtIns by lazy { builtInTemplates(RuntimeEnvironment.getApplication().resources) }
+
+    private val order by lazy {
+        val orderFood = builtIns.first { it.id == BuiltInIds.ORDER_FOOD }
+        TemplateRenderer.render(orderFood, TemplateFill().add("menu item", "Pasta arrabbiata")).text
+    }
 
     protected fun shot(content: @Composable () -> Unit) {
         composeRule.setContent { AppTheme(darkTheme = false) { content() } }
@@ -210,9 +220,9 @@ open class WebsiteScreenshotTest {
 
     @Test
     fun fill() {
-        val viewModel = FillViewModel("order-food", FakeTemplateRepository(fillTemplates), FakeSettingsRepository(), SavedStateHandle())
+        val viewModel = FillViewModel(BuiltInIds.ORDER_FOOD, FakeTemplateRepository(builtIns), FakeSettingsRepository(), SavedStateHandle())
         composeRule.setContent {
-            AppTheme(darkTheme = false) { FillScreen("order-food", viewModel, onNavigate = {}, onBack = {}) }
+            AppTheme(darkTheme = false) { FillScreen(BuiltInIds.ORDER_FOOD, viewModel, onNavigate = {}, onBack = {}) }
         }
         composeRule.waitForIdle()
         composeRule.onNodeWithText("menu item").performClick()
@@ -233,7 +243,7 @@ open class WebsiteScreenshotTest {
                 Participant(ParticipantId.A, ColourRole.Blue, "Me"),
                 Participant(ParticipantId.B, ColourRole.Gold, "Waiter"),
             ).withTurn(ParticipantId.A)
-                .append(RichText.spans(ORDER))
+                .append(RichText.spans(order))
                 .withTurn(ParticipantId.B)
                 .append(RichText.spans("Sure! Do you have any allergies?"))
                 .withTurn(ParticipantId.A)
