@@ -34,9 +34,7 @@ import com.ravendarque.deaftly.ui.ocr.OcrViewModel
 import com.ravendarque.deaftly.ui.savedchats.SavedChatsViewModel
 import com.ravendarque.deaftly.ui.settings.SettingsViewModel
 import com.ravendarque.deaftly.ui.show.ShowViewModel
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.first
 import java.io.File
 
@@ -51,9 +49,13 @@ class AppContainer(
 
     val settingsRepository: SettingsRepository by lazy { DataStoreSettingsRepository(store) }
 
-    private val appScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    private val appScope = appScope()
 
     val savedChatStore: SavedChatStore by lazy { FileSavedChatStore(File(context.filesDir, "chats"), Dispatchers.IO, appScope) }
+
+    fun startReadingSavedChats() {
+        savedChatStore
+    }
 
     val helpRepository by lazy { HelpRepository(context.assets) }
 
@@ -127,7 +129,7 @@ class AppContainer(
 
     val savedChatsViewModelFactory =
         viewModelFactory {
-            initializer { SavedChatsViewModel(savedChatStore) }
+            initializer { SavedChatsViewModel(savedChatStore, appScope) }
         }
 
     val firstRunViewModelFactory =

@@ -16,6 +16,7 @@ class FakeSavedChatStore(
     initial: List<SavedChat> = emptyList(),
     private val failSaves: Boolean = false,
     unreadable: Map<String, Long> = emptyMap(),
+    loaded: Boolean = true,
 ) : SavedChatStore {
     private val unreadableChats = unreadable.toMutableMap()
 
@@ -28,7 +29,13 @@ class FakeSavedChatStore(
 
     override val summaries: StateFlow<List<SavedChatSummary>> = all
 
-    override suspend fun load(id: String): SavedChat? = chats[id]
+    override val loaded = MutableStateFlow(loaded)
+
+    fun loseFile(id: String) {
+        chats.remove(id)
+    }
+
+    override suspend fun load(id: String): SavedChat? = chats[id].also { if (it == null) all.value = summarise() }
 
     override suspend fun save(
         id: String,
@@ -41,10 +48,11 @@ class FakeSavedChatStore(
         all.value = summarise()
     }
 
-    override suspend fun delete(id: String) {
+    override suspend fun delete(id: String): Boolean {
         chats.remove(id)
         unreadableChats.remove(id)
         all.value = summarise()
+        return true
     }
 
     override fun newId(): String = UUID.randomUUID().toString()

@@ -21,6 +21,7 @@ class MainActivity : AppCompatActivity() {
         AppShortcut.publish(this)
         if (savedInstanceState == null) shortcut = AppShortcut.from(intent)
         val container = (application as DeaftlyApplication).container
+        container.startReadingSavedChats()
         setContent {
             AppTheme {
                 AppNavigation(container, shortcut?.route, onShortcutHandled = { shortcut = null })

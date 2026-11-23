@@ -11,6 +11,7 @@ import com.ravendarque.deaftly.core.chat.ParticipantId
 import com.ravendarque.deaftly.core.chat.RichText
 import com.ravendarque.deaftly.storage.SavedChat
 import com.ravendarque.deaftly.ui.chat.FakeSavedChatStore
+import com.ravendarque.deaftly.ui.chat.testWriteScope
 import com.ravendarque.deaftly.ui.theme.AppTheme
 import org.junit.Rule
 import org.junit.Test
@@ -74,7 +75,7 @@ class SavedChatsScreenshotTest {
         saved: List<SavedChat> = chats,
         unreadable: Map<String, Long> = emptyMap(),
     ) {
-        val viewModel = SavedChatsViewModel(FakeSavedChatStore(saved, unreadable = unreadable))
+        val viewModel = SavedChatsViewModel(FakeSavedChatStore(saved, unreadable = unreadable), testWriteScope)
         composeRule.setContent { AppTheme(darkTheme = dark) { SavedChatsScreen(viewModel, onOpen = {}, onBack = {}) } }
         composeRule.waitForIdle()
         composeRule.onRoot().captureRoboImage("$SCREENSHOT_DIR/$PACKAGE.${this::class.simpleName}.${testName.methodName}.png")

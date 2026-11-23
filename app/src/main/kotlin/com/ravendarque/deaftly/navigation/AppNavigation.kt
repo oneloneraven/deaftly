@@ -150,11 +150,13 @@ private fun EntryProviderScope<NavKey>.homeEntry(
 ) {
     entry<Route.Home> {
         val savedChats by container.savedChatStore.summaries.collectAsStateWithLifecycle()
+        val savedChatsLoaded by container.savedChatStore.loaded.collectAsStateWithLifecycle()
         val context = LocalContext.current
         val canPin = remember(context) { ShortcutManagerCompat.isRequestPinShortcutSupported(context) }
         HubScreen(
             onNavigate = { backStack.add(it) },
             hasSavedChats = savedChats.isNotEmpty(),
+            savedChatsLoaded = savedChatsLoaded,
             addToHomeScreen = if (canPin) { route -> AppShortcut.forRoute(route)?.requestPin(context) } else null,
         )
     }

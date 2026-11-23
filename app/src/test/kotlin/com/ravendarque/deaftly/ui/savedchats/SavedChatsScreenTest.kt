@@ -14,6 +14,7 @@ import com.ravendarque.deaftly.core.chat.Participant
 import com.ravendarque.deaftly.core.chat.ParticipantId
 import com.ravendarque.deaftly.core.chat.RichText
 import com.ravendarque.deaftly.ui.chat.FakeSavedChatStore
+import com.ravendarque.deaftly.ui.chat.testWriteScope
 import com.ravendarque.deaftly.ui.theme.AppTheme
 import kotlinx.coroutines.runBlocking
 import org.junit.Before
@@ -58,20 +59,19 @@ class SavedChatsScreenTest {
     }
 
     private fun show() {
-        val viewModel = SavedChatsViewModel(store)
+        val viewModel = SavedChatsViewModel(store, testWriteScope)
         composeRule.setContent { AppTheme { SavedChatsScreen(viewModel, onOpen = { opened += it }, onBack = {}) } }
         composeRule.waitForIdle()
     }
 
     private fun date(millis: Long) =
         DateTimeFormatter
-            .ofLocalizedDate(
-                FormatStyle.MEDIUM,
-            ).withLocale(Locale.UK)
+            .ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.SHORT)
+            .withLocale(Locale.UK)
             .format(Instant.ofEpochMilli(millis).atZone(ZoneId.systemDefault()))
 
     @Test
-    fun showsNameDateAndLastLine() {
+    fun showsNameDateTimeAndLastLine() {
         val id = keep("Kwame", "Hello", "See you at 6")
         show()
 
@@ -121,7 +121,7 @@ class SavedChatsScreenTest {
         show()
 
         composeRule.onNodeWithContentDescription("Delete chat with Kwame").performClick()
-        composeRule.onNodeWithText("Delete this chat?").assertIsDisplayed()
+        composeRule.onNodeWithText("Delete chat with Kwame?").assertIsDisplayed()
         composeRule.onNodeWithText("Cancel").performClick()
         composeRule.onNodeWithText("Kwame").assertIsDisplayed()
 
@@ -157,5 +157,26 @@ class SavedChatsScreenTest {
         composeRule.onNodeWithText("Delete").performClick()
 
         composeRule.onNodeWithText("No saved chats. When you end a chat, choose Keep to save it here.").assertIsDisplayed()
+    }
+
+    @Test
+    fun aChatWhoseFileHasGoneIsDroppedWithAMessage() {
+        val id = keep("Kwame", "Hello")
+        store.loseFile(id)
+        show()
+
+        composeRule.onNodeWithText("Kwame").performClick()
+
+        assertEquals(emptyList(), opened)
+        composeRule.onNodeWithText("Kwame").assertDoesNotExist()
+        composeRule.onNodeWithText("That chat could not be opened. It may have been deleted.").assertIsDisplayed()
+    }
+
+    @Test
+    fun theEmptyMessageWaitsUntilSavedChatsHaveBeenRead() {
+        store = FakeSavedChatStore(loaded = false)
+        show()
+
+        composeRule.onNodeWithText("No saved chats. When you end a chat, choose Keep to save it here.").assertDoesNotExist()
     }
 }

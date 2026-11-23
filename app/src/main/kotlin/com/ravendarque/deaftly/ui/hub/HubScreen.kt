@@ -76,6 +76,7 @@ private val allOptions = showOptions + chatOptions + savedChatsOption + supportO
 fun HubScreen(
     onNavigate: (Route) -> Unit,
     hasSavedChats: Boolean = false,
+    savedChatsLoaded: Boolean = true,
     addToHomeScreen: ((Route) -> Unit)? = null,
 ) {
     var helpLabel by rememberSaveable { mutableStateOf<Int?>(null) }
@@ -97,17 +98,7 @@ fun HubScreen(
                     color = Deaftly.colors.inkSecondary,
                     modifier = Modifier.spoken(stringResource(R.string.hub_welcome)),
                 )
-                EqualCardHeights(
-                    perRow = cardsPerRow(),
-                    options = allOptions,
-                ) { cardHeight ->
-                    Column(verticalArrangement = Arrangement.spacedBy(Deaftly.spacing.space24)) {
-                        Group(R.string.hub_show_heading, showOptions, cardHeight, onNavigate) { helpLabel = it.label }
-                        val chats = if (hasSavedChats) chatOptions + savedChatsOption else chatOptions
-                        Group(R.string.hub_chat_heading, chats, cardHeight, onNavigate) { helpLabel = it.label }
-                        Group(R.string.hub_support_heading, supportOptions, cardHeight, onNavigate) { helpLabel = it.label }
-                    }
-                }
+                if (savedChatsLoaded) HubCards(hasSavedChats, onNavigate) { helpLabel = it.label }
             }
         }
     }
@@ -153,6 +144,22 @@ private fun Header(onSettings: () -> Unit) {
 
 @Composable
 private fun cardsPerRow() = if (LocalDensity.current.fontScale >= STACK_FONT_SCALE) 1 else 2
+
+@Composable
+private fun HubCards(
+    hasSavedChats: Boolean,
+    onNavigate: (Route) -> Unit,
+    onHelp: (HubOption) -> Unit,
+) {
+    EqualCardHeights(perRow = cardsPerRow(), options = allOptions) { cardHeight ->
+        Column(verticalArrangement = Arrangement.spacedBy(Deaftly.spacing.space24)) {
+            Group(R.string.hub_show_heading, showOptions, cardHeight, onNavigate, onHelp)
+            val chats = if (hasSavedChats) chatOptions + savedChatsOption else chatOptions
+            Group(R.string.hub_chat_heading, chats, cardHeight, onNavigate, onHelp)
+            Group(R.string.hub_support_heading, supportOptions, cardHeight, onNavigate, onHelp)
+        }
+    }
+}
 
 @Composable
 private fun EqualCardHeights(

@@ -37,6 +37,8 @@ data class SavedChat(
 interface SavedChatStore {
     val summaries: StateFlow<List<SavedChatSummary>>
 
+    val loaded: StateFlow<Boolean>
+
     suspend fun load(id: String): SavedChat?
 
     suspend fun save(
@@ -44,7 +46,7 @@ interface SavedChatStore {
         conversation: Conversation,
     )
 
-    suspend fun delete(id: String)
+    suspend fun delete(id: String): Boolean
 
     fun newId(): String
 }
@@ -86,17 +88,27 @@ class FileSavedChatStore(
 
     override val summaries: StateFlow<List<SavedChatSummary>> = all.asStateFlow()
 
+    private val ready = MutableStateFlow(false)
+
+    override val loaded: StateFlow<Boolean> = ready.asStateFlow()
+
     init {
         scope.launch(io) {
-            mutex.withLock {
-                all.value = readAll().sortedByDescending { it.changedAt }
+            try {
+                mutex.withLock { all.value = readAll().sortedByDescending { it.changedAt } }
+            } finally {
+                ready.value = true
             }
         }
     }
 
     override suspend fun load(id: String): SavedChat? {
         if (!isSavedChatId(id)) return null
-        return withContext(io) { read(id) }
+        return withContext(io) {
+            mutex.withLock {
+                read(id).also { chat -> if (chat == null) forgetOrMarkUnreadable(id) }
+            }
+        }
     }
 
     override suspend fun save(
@@ -121,17 +133,27 @@ class FileSavedChatStore(
         }
     }
 
-    override suspend fun delete(id: String) {
-        if (!isSavedChatId(id)) return
-        withContext(io) {
+    override suspend fun delete(id: String): Boolean {
+        if (!isSavedChatId(id)) return true
+        return withContext(io) {
             mutex.withLock {
-                AtomicFile(File(dir, id + SUFFIX)).delete()
-                all.update { current -> current.filterNot { it.id == id } }
+                val file = File(dir, id + SUFFIX)
+                AtomicFile(file).delete()
+                val gone = !file.exists()
+                if (gone) all.update { current -> current.filterNot { it.id == id } }
+                gone
             }
         }
     }
 
     override fun newId(): String = UUID.randomUUID().toString()
+
+    private fun forgetOrMarkUnreadable(id: String) {
+        val stillThere = File(dir, id + SUFFIX).exists()
+        all.update { current ->
+            if (stillThere) current.map { if (it.id == id) it.copy(readable = false) else it } else current.filterNot { it.id == id }
+        }
+    }
 
     private fun readAll(): List<SavedChatSummary> =
         dir
