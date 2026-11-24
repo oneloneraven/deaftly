@@ -1,0 +1,46 @@
+package com.oneloneraven.deaftly.ui.website
+
+import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
+import androidx.lifecycle.SavedStateHandle
+import com.oneloneraven.deaftly.templates.BuiltInIds
+import com.oneloneraven.deaftly.ui.chat.FakeSettingsRepository
+import com.oneloneraven.deaftly.ui.fill.FillScreen
+import com.oneloneraven.deaftly.ui.fill.FillViewModel
+import com.oneloneraven.deaftly.ui.home.FakeTemplateRepository
+import com.oneloneraven.deaftly.ui.hub.HubScreen
+import com.oneloneraven.deaftly.ui.theme.AppTheme
+import org.junit.Test
+import org.robolectric.annotation.Config
+
+@Config(qualifiers = "en-rGB-w390dp-h844dp-xhdpi")
+class MarketingScreenshotTest : WebsiteScreenshotTest() {
+    @Test
+    fun fillWithName() {
+        val viewModel =
+            FillViewModel(
+                BuiltInIds.CHECK_IN,
+                FakeTemplateRepository(builtIns),
+                FakeSettingsRepository(names = EXAMPLE_NAMES),
+                SavedStateHandle(),
+            )
+        composeRule.setContent {
+            AppTheme(darkTheme = false) { FillScreen(BuiltInIds.CHECK_IN, viewModel, onNavigate = {}, onBack = {}) }
+        }
+        composeRule.waitForIdle()
+        composeRule.onNodeWithText("how to reply").performClick()
+        composeRule.onNodeWithText("type here").performClick()
+        composeRule.waitForIdle()
+        capture()
+    }
+
+    @Test
+    fun addToHomeScreen() {
+        composeRule.setContent { AppTheme(darkTheme = false) { HubScreen(onNavigate = {}, addToHomeScreen = {}) } }
+        composeRule.onNodeWithContentDescription("About Listen for me").performScrollTo().performClick()
+        composeRule.waitForIdle()
+        capture()
+    }
+}

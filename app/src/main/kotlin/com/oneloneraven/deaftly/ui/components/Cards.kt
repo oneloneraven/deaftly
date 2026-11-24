@@ -1,0 +1,199 @@
+package com.oneloneraven.deaftly.ui.components
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.CustomAccessibilityAction
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.customActions
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.oneloneraven.deaftly.ui.icons.DeaftlyIcons
+import com.oneloneraven.deaftly.ui.theme.Deaftly
+
+private const val NO_BREAK_SPACE = " "
+private val HubIconDiscSize = 64.dp
+private val HubIconSize = 32.dp
+private val HubInfoTarget = 48.dp
+private val HubInfoGlyph = 20.dp
+private val CardMinHeight = 48.dp
+private val AddIconSize = 22.sp
+
+@Composable
+fun ListCard(
+    title: String,
+    preview: List<PreviewPart>,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    onLongClick: (() -> Unit)? = null,
+    onLongClickLabel: String? = null,
+    customActions: List<CustomAccessibilityAction> = emptyList(),
+) {
+    val shape = Deaftly.shapes.cardSmall
+    val previewText = rememberPreview(preview)
+    Column(
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .heightIn(min = CardMinHeight)
+                .clip(shape)
+                .background(Deaftly.colors.surface, shape)
+                .combinedClickable(
+                    role = Role.Button,
+                    onLongClickLabel = onLongClickLabel,
+                    onLongClick = onLongClick,
+                    onClick = onClick,
+                ).semantics { this.customActions = customActions }
+                .padding(horizontal = Deaftly.spacing.space16, vertical = Deaftly.spacing.space14),
+        verticalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
+        Text(text = title, style = MaterialTheme.typography.titleMedium, color = Deaftly.colors.ink)
+        Text(text = previewText, style = MaterialTheme.typography.bodySmall, color = Deaftly.colors.inkSecondary)
+    }
+}
+
+@Composable
+fun AddCard(
+    label: String,
+    icon: ImageVector,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val shape = Deaftly.shapes.cardSmall
+    Row(
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .heightIn(min = CardMinHeight)
+                .clip(shape)
+                .background(Deaftly.colors.surface, shape)
+                .clickable(role = Role.Button, onClick = onClick)
+                .padding(horizontal = Deaftly.spacing.space16, vertical = Deaftly.spacing.space14),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(Deaftly.spacing.space12),
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            modifier =
+                Modifier.size(
+                    with(LocalDensity.current) {
+                        AddIconSize.toDp()
+                    },
+                ),
+            tint = Deaftly.colors.accentStrong,
+        )
+        Text(text = label, style = MaterialTheme.typography.titleMedium, color = Deaftly.colors.accentStrong)
+    }
+}
+
+@Composable
+private fun rememberPreview(parts: List<PreviewPart>): AnnotatedString {
+    val chipStyle =
+        SpanStyle(
+            color = Deaftly.colors.accentStrong,
+            background = Deaftly.colors.accentSoft,
+            fontWeight = FontWeight.Bold,
+        )
+    return remember(parts, chipStyle) {
+        buildAnnotatedString {
+            parts.forEach { part ->
+                when (part) {
+                    is PreviewPart.Plain -> {
+                        append(part.text)
+                    }
+
+                    is PreviewPart.Placeholder -> {
+                        withStyle(chipStyle) { append(NO_BREAK_SPACE + part.label + NO_BREAK_SPACE) }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun HubCard(
+    title: String,
+    icon: ImageVector,
+    onClick: () -> Unit,
+    infoLabel: String,
+    onInfo: () -> Unit,
+    modifier: Modifier = Modifier,
+    minHeight: Dp = Dp.Unspecified,
+) {
+    val shape = Deaftly.shapes.card
+    Box(
+        modifier =
+            modifier
+                .clip(shape)
+                .background(Deaftly.colors.surface, shape)
+                .border(1.dp, Deaftly.colors.line, shape),
+    ) {
+        Column(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = minHeight)
+                    .clickable(role = Role.Button, onClick = onClick)
+                    .semantics { contentDescription = title }
+                    .padding(horizontal = Deaftly.spacing.space16, vertical = Deaftly.spacing.space20),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(Deaftly.spacing.space12, Alignment.CenterVertically),
+        ) {
+            HubIconDisc(icon)
+            Text(text = title, style = MaterialTheme.typography.titleMedium, color = Deaftly.colors.ink, textAlign = TextAlign.Center)
+        }
+        Box(
+            modifier =
+                Modifier
+                    .align(Alignment.TopEnd)
+                    .size(HubInfoTarget)
+                    .clip(CircleShape)
+                    .clickable(role = Role.Button, onClick = onInfo)
+                    .semantics { contentDescription = infoLabel },
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(DeaftlyIcons.Info, contentDescription = null, modifier = Modifier.size(HubInfoGlyph), tint = Deaftly.colors.inkSecondary)
+        }
+    }
+}
+
+@Composable
+fun HubIconDisc(icon: ImageVector) {
+    Box(
+        modifier = Modifier.size(HubIconDiscSize).background(Deaftly.colors.accentSoft, CircleShape),
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(imageVector = icon, contentDescription = null, modifier = Modifier.size(HubIconSize), tint = Deaftly.colors.accent)
+    }
+}

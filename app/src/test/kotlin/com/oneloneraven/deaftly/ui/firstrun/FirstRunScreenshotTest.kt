@@ -1,0 +1,46 @@
+package com.oneloneraven.deaftly.ui.firstrun
+
+import androidx.compose.ui.test.junit4.v2.createComposeRule
+import androidx.compose.ui.test.onRoot
+import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.github.takahirom.roborazzi.captureRoboImage
+import com.oneloneraven.deaftly.core.chat.ColourRole
+import com.oneloneraven.deaftly.ui.theme.AppTheme
+import org.junit.Rule
+import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.annotation.Config
+import org.robolectric.annotation.GraphicsMode
+
+@RunWith(AndroidJUnit4::class)
+@GraphicsMode(GraphicsMode.Mode.NATIVE)
+@Config(qualifiers = "en-rGB-w390dp-h844dp")
+class FirstRunScreenshotTest {
+    @get:Rule
+    val composeRule = createComposeRule()
+
+    private fun capture(dark: Boolean) {
+        composeRule.setContent {
+            AppTheme(darkTheme = dark) {
+                FirstRunContent(
+                    state = FirstRunState("Alex", ColourRole.Green),
+                    onName = {},
+                    onColour = {},
+                    onGetStarted = {},
+                )
+            }
+        }
+        composeRule.waitForIdle()
+        composeRule.onRoot().captureRoboImage()
+    }
+
+    @Test
+    fun lightTheme() = capture(dark = false)
+
+    @Test
+    fun darkTheme() = capture(dark = true)
+
+    @Test
+    @Config(fontScale = 2f)
+    fun largeFontScale() = capture(dark = false)
+}

@@ -1,0 +1,167 @@
+package com.oneloneraven.deaftly.storage
+
+import androidx.datastore.core.DataStore
+import com.oneloneraven.deaftly.core.chat.ChatProfile
+import com.oneloneraven.deaftly.core.chat.ColourRole
+import com.oneloneraven.deaftly.core.settings.ChatTextSize
+import com.oneloneraven.deaftly.core.settings.PersonalNames
+import com.oneloneraven.deaftly.core.settings.SettingsRepository
+import com.oneloneraven.deaftly.core.settings.ShowScheme
+import com.oneloneraven.deaftly.core.settings.ShowTextSize
+import com.oneloneraven.deaftly.core.settings.ThemeMode
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
+
+class DataStoreSettingsRepository(
+    private val store: DataStore<StoreDocument>,
+) : SettingsRepository {
+    override val showScheme: Flow<ShowScheme?> = store.data.map { it.settings.showScheme?.toDomain() }.distinctUntilChanged()
+
+    override val chatProfile: Flow<ChatProfile> =
+        store.data
+            .map { ChatProfile(it.settings.chatName, it.settings.chatColour?.toDomain() ?: ColourRole.Indigo) }
+            .distinctUntilChanged()
+
+    override val firstRunDone: Flow<Boolean> = store.data.map { it.settings.firstRunDone }.distinctUntilChanged()
+
+    override val showTextSize: Flow<ShowTextSize> =
+        store.data.map { it.settings.showTextSize?.toDomain() ?: ShowTextSize.Default }.distinctUntilChanged()
+
+    override val chatTextSize: Flow<ChatTextSize> =
+        store.data.map { it.settings.chatTextSize?.toDomain() ?: ChatTextSize.Default }.distinctUntilChanged()
+
+    override val chatSidesSwapped: Flow<Boolean> = store.data.map { it.settings.chatSidesSwapped }.distinctUntilChanged()
+
+    override val listenSignFacesThem: Flow<Boolean> = store.data.map { it.settings.listenSignFacesThem }.distinctUntilChanged()
+
+    override val themeMode: Flow<ThemeMode> =
+        store.data.map { it.settings.themeMode?.toDomain() ?: ThemeMode.System }.distinctUntilChanged()
+
+    override val personalNames: Flow<PersonalNames> =
+        store.data
+            .map {
+                it.settings.personalNames()
+            }.distinctUntilChanged()
+
+    override suspend fun setShowScheme(scheme: ShowScheme) {
+        store.updateData { document -> document.copy(settings = document.settings.copy(showScheme = scheme.toDto())) }
+    }
+
+    override suspend fun setFirstRunDone() {
+        store.updateData { document -> document.copy(settings = document.settings.copy(firstRunDone = true)) }
+    }
+
+    override suspend fun setShowTextSize(size: ShowTextSize) {
+        store.updateData { document -> document.copy(settings = document.settings.copy(showTextSize = size.toDto())) }
+    }
+
+    override suspend fun setChatTextSize(size: ChatTextSize) {
+        store.updateData { document -> document.copy(settings = document.settings.copy(chatTextSize = size.toDto())) }
+    }
+
+    override suspend fun setChatSidesSwapped(swapped: Boolean) {
+        store.updateData { document -> document.copy(settings = document.settings.copy(chatSidesSwapped = swapped)) }
+    }
+
+    override suspend fun setListenSignFacesThem(facesThem: Boolean) {
+        store.updateData { document -> document.copy(settings = document.settings.copy(listenSignFacesThem = facesThem)) }
+    }
+
+    override suspend fun setThemeMode(mode: ThemeMode) {
+        store.updateData { document -> document.copy(settings = document.settings.copy(themeMode = mode.toDto())) }
+    }
+
+    override suspend fun updatePersonalNames(change: (PersonalNames) -> PersonalNames) {
+        store.updateData { document ->
+            val settings = document.settings
+            val names = change(settings.personalNames())
+            document.copy(
+                settings =
+                    settings.copy(
+                        firstName = names.firstName,
+                        lastName = names.lastName,
+                        legalNameDiffers = names.legalNameDiffers,
+                        legalName = names.legalName,
+                        useFirstNameInChats = names.useFirstNameInChats,
+                    ),
+            )
+        }
+    }
+
+    override suspend fun setChatProfile(profile: ChatProfile) {
+        store.updateData { document ->
+            document.copy(
+                settings =
+                    document.settings.copy(
+                        chatName = profile.name?.trim()?.takeIf { it.isNotEmpty() },
+                        chatColour = profile.colour.toDto(),
+                    ),
+            )
+        }
+    }
+}
+
+private fun ThemeModeDto.toDomain(): ThemeMode =
+    when (this) {
+        ThemeModeDto.System -> ThemeMode.System
+        ThemeModeDto.Light -> ThemeMode.Light
+        ThemeModeDto.Dark -> ThemeMode.Dark
+    }
+
+private fun ThemeMode.toDto(): ThemeModeDto =
+    when (this) {
+        ThemeMode.System -> ThemeModeDto.System
+        ThemeMode.Light -> ThemeModeDto.Light
+        ThemeMode.Dark -> ThemeModeDto.Dark
+    }
+
+private fun ChatTextSizeDto.toDomain(): ChatTextSize =
+    when (this) {
+        ChatTextSizeDto.Small -> ChatTextSize.Small
+        ChatTextSizeDto.Medium -> ChatTextSize.Medium
+        ChatTextSizeDto.Large -> ChatTextSize.Large
+    }
+
+private fun ChatTextSize.toDto(): ChatTextSizeDto =
+    when (this) {
+        ChatTextSize.Small -> ChatTextSizeDto.Small
+        ChatTextSize.Medium -> ChatTextSizeDto.Medium
+        ChatTextSize.Large -> ChatTextSizeDto.Large
+    }
+
+private fun ShowSchemeDto.toDomain(): ShowScheme =
+    when (this) {
+        ShowSchemeDto.BlackOnWhite -> ShowScheme.BlackOnWhite
+        ShowSchemeDto.WhiteOnBlack -> ShowScheme.WhiteOnBlack
+        ShowSchemeDto.YellowOnBlack -> ShowScheme.YellowOnBlack
+    }
+
+private fun ShowScheme.toDto(): ShowSchemeDto =
+    when (this) {
+        ShowScheme.BlackOnWhite -> ShowSchemeDto.BlackOnWhite
+        ShowScheme.WhiteOnBlack -> ShowSchemeDto.WhiteOnBlack
+        ShowScheme.YellowOnBlack -> ShowSchemeDto.YellowOnBlack
+    }
+
+private fun ParticipantColourDto.toDomain(): ColourRole =
+    when (this) {
+        ParticipantColourDto.Red -> ColourRole.Red
+        ParticipantColourDto.Orange -> ColourRole.Orange
+        ParticipantColourDto.Gold -> ColourRole.Gold
+        ParticipantColourDto.Green -> ColourRole.Green
+        ParticipantColourDto.Blue -> ColourRole.Blue
+        ParticipantColourDto.Indigo -> ColourRole.Indigo
+    }
+
+private fun ColourRole.toDto(): ParticipantColourDto =
+    when (this) {
+        ColourRole.Red -> ParticipantColourDto.Red
+        ColourRole.Orange -> ParticipantColourDto.Orange
+        ColourRole.Gold -> ParticipantColourDto.Gold
+        ColourRole.Green -> ParticipantColourDto.Green
+        ColourRole.Blue -> ParticipantColourDto.Blue
+        ColourRole.Indigo -> ParticipantColourDto.Indigo
+    }
+
+private fun SettingsDto.personalNames() = PersonalNames(firstName, lastName, legalNameDiffers, legalName, useFirstNameInChats)

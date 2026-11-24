@@ -25,7 +25,7 @@ Promote a build only once it has been tried on internal testing, and allow at le
 
 ### 1. Create the app
 
-In Play Console, create the app with the package name `com.ravendarque.deaftly`, as a free app.
+In Play Console, create the app with the package name `com.oneloneraven.deaftly`, as a free app.
 
 ### 2. Give Play the app signing key (D21)
 

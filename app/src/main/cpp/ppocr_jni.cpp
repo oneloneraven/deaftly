@@ -20,7 +20,7 @@ ppocr::Engine* engine(jlong handle) { return reinterpret_cast<ppocr::Engine*>(ha
 
 extern "C" {
 
-JNIEXPORT jlong JNICALL Java_com_ravendarque_deaftly_ocr_paddle_NativePaddleOcr_create(
+JNIEXPORT jlong JNICALL Java_com_oneloneraven_deaftly_ocr_paddle_NativePaddleOcr_create(
     JNIEnv* env, jobject, jobject assetManager, jstring detParam, jstring detBin, jstring recParam, jstring recBin,
     jstring dict, jint detSide, jint threads, jboolean fp16) {
     ppocr::Config config;
@@ -37,11 +37,11 @@ JNIEXPORT jlong JNICALL Java_com_ravendarque_deaftly_ocr_paddle_NativePaddleOcr_
     return reinterpret_cast<jlong>(created.release());
 }
 
-JNIEXPORT void JNICALL Java_com_ravendarque_deaftly_ocr_paddle_NativePaddleOcr_release(JNIEnv*, jobject, jlong handle) {
+JNIEXPORT void JNICALL Java_com_oneloneraven_deaftly_ocr_paddle_NativePaddleOcr_release(JNIEnv*, jobject, jlong handle) {
     delete engine(handle);
 }
 
-JNIEXPORT jint JNICALL Java_com_ravendarque_deaftly_ocr_paddle_NativePaddleOcr_recognise(
+JNIEXPORT jint JNICALL Java_com_oneloneraven_deaftly_ocr_paddle_NativePaddleOcr_recognise(
     JNIEnv* env, jobject, jlong handle, jobject pixels, jint width, jint height, jint strideBytes, jint rotation) {
     if (handle == 0 || pixels == nullptr) return kInvalid;
     const auto* data = static_cast<const uint8_t*>(env->GetDirectBufferAddress(pixels));
@@ -56,7 +56,7 @@ JNIEXPORT jint JNICALL Java_com_ravendarque_deaftly_ocr_paddle_NativePaddleOcr_r
     return (jint)engine(handle)->lines().size();
 }
 
-JNIEXPORT jfloatArray JNICALL Java_com_ravendarque_deaftly_ocr_paddle_NativePaddleOcr_geometry(JNIEnv* env, jobject, jlong handle) {
+JNIEXPORT jfloatArray JNICALL Java_com_oneloneraven_deaftly_ocr_paddle_NativePaddleOcr_geometry(JNIEnv* env, jobject, jlong handle) {
     std::vector<float> flat;
     for (const ppocr::Line& line : engine(handle)->lines()) {
         flat.push_back(line.confidence);
@@ -72,7 +72,7 @@ JNIEXPORT jfloatArray JNICALL Java_com_ravendarque_deaftly_ocr_paddle_NativePadd
     return result;
 }
 
-JNIEXPORT jobjectArray JNICALL Java_com_ravendarque_deaftly_ocr_paddle_NativePaddleOcr_texts(JNIEnv* env, jobject, jlong handle) {
+JNIEXPORT jobjectArray JNICALL Java_com_oneloneraven_deaftly_ocr_paddle_NativePaddleOcr_texts(JNIEnv* env, jobject, jlong handle) {
     std::vector<const std::string*> texts;
     for (const ppocr::Line& line : engine(handle)->lines()) {
         texts.push_back(&line.text);
@@ -88,7 +88,7 @@ JNIEXPORT jobjectArray JNICALL Java_com_ravendarque_deaftly_ocr_paddle_NativePad
     return result;
 }
 
-JNIEXPORT jdoubleArray JNICALL Java_com_ravendarque_deaftly_ocr_paddle_NativePaddleOcr_timings(JNIEnv* env, jobject, jlong handle) {
+JNIEXPORT jdoubleArray JNICALL Java_com_oneloneraven_deaftly_ocr_paddle_NativePaddleOcr_timings(JNIEnv* env, jobject, jlong handle) {
     const ppocr::Timings& t = engine(handle)->timings();
     const double values[4] = {t.prepareMs, t.detectMs, t.postprocessMs, t.recogniseMs};
     jdoubleArray result = env->NewDoubleArray(4);

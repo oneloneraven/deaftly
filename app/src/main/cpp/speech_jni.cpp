@@ -38,7 +38,7 @@ Engine* lookup(jlong handle) {
 
 extern "C" {
 
-JNIEXPORT jlong JNICALL Java_com_ravendarque_deaftly_speech_NativeSherpa_create(
+JNIEXPORT jlong JNICALL Java_com_oneloneraven_deaftly_speech_NativeSherpa_create(
     JNIEnv* env, jobject, jobject assetManager, jstring dir, jint threads, jfloat trailingSilence) {
     if (assetManager == nullptr || dir == nullptr || threads < 1 || threads > 8 || !(trailingSilence > 0.0f)) return 0;
     AAssetManager* assets = AAssetManager_fromJava(env, assetManager);
@@ -74,7 +74,7 @@ JNIEXPORT jlong JNICALL Java_com_ravendarque_deaftly_speech_NativeSherpa_create(
     return reinterpret_cast<jlong>(raw);
 }
 
-JNIEXPORT jint JNICALL Java_com_ravendarque_deaftly_speech_NativeSherpa_accept(
+JNIEXPORT jint JNICALL Java_com_oneloneraven_deaftly_speech_NativeSherpa_accept(
     JNIEnv* env, jobject, jlong handle, jfloatArray samples) {
     Engine* engine = lookup(handle);
     if (engine == nullptr || samples == nullptr) return kNoChange;
@@ -100,12 +100,12 @@ JNIEXPORT jint JNICALL Java_com_ravendarque_deaftly_speech_NativeSherpa_accept(
     return kPartial;
 }
 
-JNIEXPORT jstring JNICALL Java_com_ravendarque_deaftly_speech_NativeSherpa_text(JNIEnv* env, jobject, jlong handle) {
+JNIEXPORT jstring JNICALL Java_com_oneloneraven_deaftly_speech_NativeSherpa_text(JNIEnv* env, jobject, jlong handle) {
     Engine* engine = lookup(handle);
     return toJString(env, engine == nullptr ? std::string() : engine->current);
 }
 
-JNIEXPORT void JNICALL Java_com_ravendarque_deaftly_speech_NativeSherpa_release(JNIEnv*, jobject, jlong handle) {
+JNIEXPORT void JNICALL Java_com_oneloneraven_deaftly_speech_NativeSherpa_release(JNIEnv*, jobject, jlong handle) {
     Engine* engine;
     {
         std::lock_guard<std::mutex> guard(registryLock);

@@ -1,7 +1,7 @@
 import com.android.build.api.artifact.SingleArtifact
-import com.ravendarque.deaftly.guard.VerifyReleaseManifestTask
-import com.ravendarque.deaftly.help.CopyHelpTask
-import com.ravendarque.deaftly.nativelibs.FetchArchiveTask
+import com.oneloneraven.deaftly.guard.VerifyReleaseManifestTask
+import com.oneloneraven.deaftly.help.CopyHelpTask
+import com.oneloneraven.deaftly.nativelibs.FetchArchiveTask
 
 plugins {
     alias(libs.plugins.android.application)
@@ -80,11 +80,11 @@ fun signingEnv(name: String): String =
     }
 
 android {
-    namespace = "com.ravendarque.deaftly"
+    namespace = "com.oneloneraven.deaftly"
     compileSdk = 37
 
     defaultConfig {
-        applicationId = "com.ravendarque.deaftly"
+        applicationId = "com.oneloneraven.deaftly"
         minSdk = 26
         targetSdk = 36
         versionName = appVersion

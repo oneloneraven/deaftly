@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "com.ravendarque.deaftly.baselineprofile"
+    namespace = "com.oneloneraven.deaftly.baselineprofile"
     compileSdk = 37
 
     defaultConfig {
