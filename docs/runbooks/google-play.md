@@ -67,10 +67,10 @@ Everything the app does stays on the device, except a feedback or issue report t
 | App activity > Other user-generated content (the message) | Yes | Yes | App functionality, Analytics |
 | App info and performance > Other app performance data (the app version, sent with the message) | Yes | Yes | Analytics |
 | Personal info > Email address | Yes | Yes | App functionality |
-| Personal info > Name | Yes | Yes | App functionality, Advertising or marketing |
+| Personal info > Name | Yes | Yes | App functionality |
 
 - **Optional:** the whole report is optional, since nothing is sent unless the user writes it and taps Send, and the app works without it.
-- **Purposes:** the message and app version are used to understand and fix problems (Analytics) through the app's feedback feature (App functionality). The email address is only for replying. The name is only used to credit a quote on the website, which Play counts as marketing.
+- **Purposes:** the message and app version are used to understand and fix problems (Analytics) through the app's feedback feature (App functionality). The email address is only for replying. The name is only used to credit a quote on the website, if the user agrees to be quoted. Play's purposes cover how the app itself uses data, and its Advertising or marketing purpose is defined by ads, promotional notifications and advertising partners, none of which applies. The privacy page discloses the quoting.
 - **Shared:** no. The system that receives reports processes them on One Lone Raven's behalf, which Play doesn't count as sharing.
 - **Encrypted in transit:** yes, over HTTPS.
 - **Deletion requests:** yes, by emailing support@deaftly.com, as the website's privacy page says.
