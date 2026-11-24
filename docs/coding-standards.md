@@ -132,7 +132,9 @@ and the APK's size and startup.
 - **One entry point.** `./gradlew check` runs Spotless (ktlint), detekt,
   Android Lint, the unit and Robolectric tests, the Roborazzi screenshot
   comparison and a release build with R8. CI runs exactly that. Run it before
-  pushing.
+  pushing. A pull request that only changes `docs/`, `.claude/` or Markdown at
+  the repo root skips it (`.github/scripts/docs-only.mjs`); pushes to `main`
+  always run it.
 - **Versions live in `gradle/libs.versions.toml`**, and the Gradle wrapper
   pins its distribution by checksum. Dependabot updates both. Build scripts
   never hard-code a version, and every repository is declared once in
