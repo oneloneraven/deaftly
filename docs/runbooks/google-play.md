@@ -56,7 +56,27 @@ The Play API can't create an app's first release, so this one is manual:
 2. Download the `play-bundle` artefact from that run.
 3. Upload it to internal testing in Play Console, and add yourself as a tester.
 
-Before Play accepts a release, Play Console asks for the app's details: the store listing, content rating, target audience, app access, ads, and the Data safety form. For Data safety, the app collects and shares no data. Everything stays on the device, and nothing is sent to us or to anyone else (see [privacy](../privacy.md)).
+Before Play accepts a release, Play Console asks for the app's details: the store listing, content rating, target audience, app access, ads, and the Data safety form. Apps only on internal testing don't need the Data safety form, but closed testing and production do.
+
+### Data safety answers
+
+Everything the app does stays on the device, except a feedback or issue report the user writes and sends ([privacy](../privacy.md#feedback-from-the-app)). Play counts anything sent off the device as collected, even when the user chooses to send it, so the form declares the report:
+
+| Data type | Collected | Optional | Purposes |
+|---|---|---|---|
+| App activity > Other user-generated content (the message) | Yes | Yes | App functionality, Analytics |
+| App info and performance > Other app performance data (the app version, sent with the message) | Yes | Yes | Analytics |
+| Personal info > Email address | Yes | Yes | App functionality |
+| Personal info > Name | Yes | Yes | App functionality, Advertising or marketing |
+
+- **Optional:** the whole report is optional, since nothing is sent unless the user writes it and taps Send, and the app works without it.
+- **Purposes:** the message and app version are used to understand and fix problems (Analytics) through the app's feedback feature (App functionality). The email address is only for replying. The name is only used to credit a quote on the website, which Play counts as marketing.
+- **Shared:** no. The system that receives reports processes them on One Lone Raven's behalf, which Play doesn't count as sharing.
+- **Encrypted in transit:** yes, over HTTPS.
+- **Deletion requests:** yes, by emailing support@deaftly.com, as the website's privacy page says.
+- **Privacy policy:** the website's privacy page.
+
+Nothing else is collected: no device identifiers, location, contacts, photos, audio, crash logs or analytics. Camera pictures, microphone audio, templates and chats never leave the device.
 
 ### 5. Let CI upload (D22)
 
