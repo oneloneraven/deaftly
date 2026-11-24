@@ -11,11 +11,15 @@ How Deaftly gets onto Google Play and how releases reach it ([ADR-0014](../adr/0
 
 ### Reviews
 
-- **Internal testing:** updates are generally not reviewed before they're available, though Google may review them afterwards. The app's very first release is the exception: it's reviewed even on internal testing.
-- **Closed testing, open testing and production:** every release is reviewed. That usually takes from a few hours to seven days, and occasionally longer.
-- **Managed publishing**, under Publishing overview, holds reviewed changes until you choose to publish them. It doesn't apply to internal testing.
+Sources are Google's Play Console Help pages: [managed publishing](https://support.google.com/googleplay/android-developer/answer/9859654), [publish your app](https://support.google.com/googleplay/android-developer/answer/9859751) and [testing](https://support.google.com/googleplay/android-developer/answer/9845334).
 
-Promote a build only once it has been tried on internal testing, and allow up to a week for review before any date it's needed, such as a user testing session (#56).
+- **Internal testing:** "App updates on internal test tracks are not subject to reviews but may be subject to retroactive reviews after going live" (managed publishing).
+- **The first release:** "If your app's first release roll-out is on an Internal test track, the submission must be reviewed before it can be published" (managed publishing). A rejected submission also means the next one is reviewed before it's published.
+- **Other tracks:** "All app changes need to be processed before they can be published" (managed publishing), and only internal testing is named as exempt. The pages don't list closed testing, open testing and production by name.
+- **How long:** "a few hours or up to seven days (or longer in exceptional cases)", and Google suggests "a buffer period of at least a week" before going live (managed publishing). Submitting another change while one is in review can push the app to the back of the queue.
+- **Managed publishing**, under Publishing overview, lets you "decide when to publish approved changes". It can't be used for the first publication, and "Internal test tracks are not covered by Managed publishing" (managed publishing).
+
+Promote a build only once it has been tried on internal testing, and allow at least a week for review before any date it's needed, such as a user testing session (#56).
 
 ## One-time setup
 
@@ -56,22 +60,22 @@ The Play API can't create an app's first release, so this one is manual:
 2. Download the `play-bundle` artefact from that run.
 3. Upload it to internal testing in Play Console, and add yourself as a tester.
 
-Before Play accepts a release, Play Console asks for the app's details: the store listing, content rating, target audience, app access, ads, and the Data safety form. Apps only on internal testing don't need the Data safety form, but closed testing and production do.
+Before Play accepts a release, Play Console asks for the app's details: the store listing, content rating, target audience, app access, ads, and the Data safety form. Apps "exclusively active" on internal testing "do not need to complete the Data safety form", but apps on closed, open or production tracks must ([Data safety help](https://support.google.com/googleplay/android-developer/answer/10787469)).
 
 ### Data safety answers
 
-Everything the app does stays on the device, except a feedback or issue report the user writes and sends ([privacy](../privacy.md#feedback-from-the-app)). Play counts anything sent off the device as collected, even when the user chooses to send it, so the form declares the report:
+Everything the app does stays on the device, except a feedback or issue report the user writes and sends ([privacy](../privacy.md#feedback-from-the-app)). Play defines collecting as "transmitting data from your app off a user's device", and lists no exemption for data the user chooses to send, so the form declares the report ([Data safety help](https://support.google.com/googleplay/android-developer/answer/10787469)):
 
 | Data type | Collected | Optional | Purposes |
 |---|---|---|---|
 | App activity > Other user-generated content (the message) | Yes | Yes | App functionality, Analytics |
-| App info and performance > Other app performance data (the app version, sent with the message) | Yes | Yes | Analytics |
+| App info and performance > Other app performance data (the app version, sent with the message; Play has no type for it, so this is our choice) | Yes | Yes | Analytics |
 | Personal info > Email address | Yes | Yes | App functionality |
 | Personal info > Name | Yes | Yes | App functionality |
 
-- **Optional:** the whole report is optional, since nothing is sent unless the user writes it and taps Send, and the app works without it.
+- **Optional:** Play allows this "where a user chooses whether to manually provide that data type". The whole report is optional, since nothing is sent unless the user writes it and taps Send, and the app works without it.
 - **Purposes:** the message and app version are used to understand and fix problems (Analytics) through the app's feedback feature (App functionality). The email address is only for replying. The name is only used to credit a quote on the website, if the user agrees to be quoted. Play's purposes cover how the app itself uses data, and its Advertising or marketing purpose is defined by ads, promotional notifications and advertising partners, none of which applies. The privacy page discloses the quoting.
-- **Shared:** no. The system that receives reports processes them on One Lone Raven's behalf, which Play doesn't count as sharing.
+- **Shared:** no. The system that receives reports processes them on One Lone Raven's behalf, and Play doesn't count transfers to "an entity that processes user data on behalf of the developer" as sharing.
 - **Encrypted in transit:** yes, over HTTPS.
 - **Deletion requests:** yes, by emailing support@deaftly.com, as the website's privacy page says.
 - **Privacy policy:** the website's privacy page.
