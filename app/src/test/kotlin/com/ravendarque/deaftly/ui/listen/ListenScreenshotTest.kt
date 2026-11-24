@@ -60,6 +60,9 @@ class ListenScreenshotTest {
     fun largeTextLightTheme() = capture(state = ListenUiState(heard, listening, ChatTextSize.Large))
 
     @Test
+    fun smallTextLightTheme() = capture(state = ListenUiState(heard, listening, ChatTextSize.Small))
+
+    @Test
     fun waitingLightTheme() = capture(state = ListenUiState(voice = VoiceTypingState(on = true, listening = true)))
 
     @Test

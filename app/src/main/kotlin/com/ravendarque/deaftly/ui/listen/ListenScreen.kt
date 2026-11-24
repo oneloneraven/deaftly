@@ -47,7 +47,6 @@ import com.ravendarque.deaftly.navigation.Route
 import com.ravendarque.deaftly.ui.chat.VoicePermissionCard
 import com.ravendarque.deaftly.ui.chat.VoicePermissionPrompt
 import com.ravendarque.deaftly.ui.chat.chatTextStyle
-import com.ravendarque.deaftly.ui.chat.glyphSp
 import com.ravendarque.deaftly.ui.components.DeaftlyIconButton
 import com.ravendarque.deaftly.ui.components.SecondaryButton
 import com.ravendarque.deaftly.ui.editor.ConfirmDialog
@@ -207,7 +206,7 @@ private fun Transcript(
     val live = state.voice.live
     LaunchedEffect(state.heard.size, live) { list.scrollBy(SCROLL_TO_END) }
     val c = Deaftly.colors
-    val style = chatTextStyle(state.textSize.glyphSp)
+    val style = chatTextStyle(state.textSize.sp)
     val description = stringResource(R.string.listen_transcript)
     val liveLabel = stringResource(R.string.listen_live, live)
     LazyColumn(
