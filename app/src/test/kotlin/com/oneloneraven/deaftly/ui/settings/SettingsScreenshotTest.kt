@@ -1,0 +1,45 @@
+package com.oneloneraven.deaftly.ui.settings
+
+import androidx.compose.ui.test.junit4.v2.createComposeRule
+import androidx.compose.ui.test.onRoot
+import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.github.takahirom.roborazzi.captureRoboImage
+import com.oneloneraven.deaftly.core.chat.ChatProfile
+import com.oneloneraven.deaftly.core.chat.ColourRole
+import com.oneloneraven.deaftly.core.settings.ShowScheme
+import com.oneloneraven.deaftly.core.template.Template
+import com.oneloneraven.deaftly.ui.chat.FakeSettingsRepository
+import com.oneloneraven.deaftly.ui.home.FakeTemplateRepository
+import com.oneloneraven.deaftly.ui.theme.AppTheme
+import org.junit.Rule
+import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.annotation.Config
+import org.robolectric.annotation.GraphicsMode
+
+@RunWith(AndroidJUnit4::class)
+@GraphicsMode(GraphicsMode.Mode.NATIVE)
+@Config(qualifiers = "en-rGB-w390dp-h844dp")
+class SettingsScreenshotTest {
+    @get:Rule
+    val composeRule = createComposeRule()
+
+    private fun capture(dark: Boolean) {
+        val settings = FakeSettingsRepository(ChatProfile("Alex", ColourRole.Green), ShowScheme.YellowOnBlack)
+        val templates = FakeTemplateRepository(emptyList(), listOf(Template("a", "A", "Everyday", "Hello", builtIn = true)))
+        val viewModel = SettingsViewModel(settings, templates)
+        composeRule.setContent { AppTheme(darkTheme = dark) { SettingsScreen(viewModel, onBack = {}) } }
+        composeRule.waitForIdle()
+        composeRule.onRoot().captureRoboImage()
+    }
+
+    @Test
+    fun lightTheme() = capture(dark = false)
+
+    @Test
+    fun darkTheme() = capture(dark = true)
+
+    @Test
+    @Config(fontScale = 2f)
+    fun largeFontScale() = capture(dark = false)
+}
