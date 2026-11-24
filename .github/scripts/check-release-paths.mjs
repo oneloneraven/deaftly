@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 
-function matches(path, entry) {
+export function matches(path, entry) {
   if (entry.endsWith("/")) return path.startsWith(entry);
   if (entry.startsWith("*.")) return !path.includes("/") && path.endsWith(entry.slice(1));
   return path === entry;
