@@ -181,5 +181,4 @@ The app spaces things in steps of 4, 8, 10, 12, 14, 16, 20, 22 and 24 dp (`Deaft
 
 ## Known differences
 
-- **Listen for me transcript size:** the transcript uses the chat header's glyph sizes (15, 20 and 26 sp, `glyphSp`) instead of the chat message sizes (18, 20 and 22 sp). That's a bug, tracked in #331.
 - `deaftly-logo.svg`: the `standard` guide layer uses `#6A4696` where the accent is `#6A4596`. It's a guide layer, so no exported icon is affected. Correct it the next time the master is edited.
