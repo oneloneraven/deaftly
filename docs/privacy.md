@@ -31,7 +31,7 @@ processed, and by whom, is in [data protection](data-protection.md).
   is listening.
 - Only the recognised text is kept. In Side by side it is a chat message the
   user can edit or delete. It is stored only if the user keeps the chat, and a
-  kept chat can reach the user's own Android backup ([ADR-0012](adr/0012-back-up-kept-chats.md)).
+  kept chat can reach the user's own Android backup (ADR-0012 (in the vault)).
   In Listen for me it stays on that screen until the user ends it, and is not
   stored; continuing to Side by side carries it into that chat.
 - The app works without the permission: the user can refuse it and type.

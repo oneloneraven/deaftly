@@ -1,7 +1,7 @@
 # Deaftly – High-Level Requirements (MVP)
 
 Status: Approved (2026-11-07)
-Tech stack: [tech-stack.md](tech-stack.md).
+Tech stack: tech-stack.md (in the vault).
 Source: [PRD.md](PRD.md). Research: [research.md](research.md) (Appendix A). Deferred items: the [Post-MVP epic](https://github.com/oneloneraven/deaftly/issues/13). Delivery: the [project board](https://github.com/users/ravendarque/projects/7).
 
 Requirements added or amended in step 2 are marked with *(A: F*n*)*, where F*n* is the supporting finding in Appendix A.
@@ -27,7 +27,7 @@ Deaftly is an Android app that helps deaf people communicate quickly and with li
 | C3 | No accounts, app-run sync or backend in the MVP. The user's own Android backup of templates and settings is allowed (decision D7). |
 | C4 | All processing, including OCR, runs on the device. |
 | C5 | Free, with no paid third-party services. |
-| C6 | Distributed on Google Play and as a signed APK on GitHub Releases, signed with one app signing key ([ADR-0014](adr/0014-distribute-through-google-play-and-github-releases.md), [#69](https://github.com/oneloneraven/deaftly/issues/69)). |
+| C6 | Distributed on Google Play and as a signed APK on GitHub Releases, signed with one app signing key (ADR-0014 (in the vault), [#69](https://github.com/oneloneraven/deaftly/issues/69)). |
 | C7 | Every dependency and vendor is screened against the BDS boycott lists before adoption (project-bootstrap ADR-0002). |
 
 ## 4. Functional requirements
@@ -103,7 +103,7 @@ Everything in the [Post-MVP epic](https://github.com/oneloneraven/deaftly/issues
 
 ## 7. Open points
 
-- **Minimum Android version.** Decided: Android 8.0 (`minSdk` 26), see [tech stack](tech-stack.md).
+- **Minimum Android version.** Decided: Android 8.0 (`minSdk` 26), see tech stack (in the vault).
 - **Mockups.** Deaftly MVP mockups (a private design canvas).
 - **Content of the starter templates.** To be written to T10 and T11, and validated with deaf users.
 - **User testing with deaf users.** Decided: moderated sessions with deaf test users (#56). Their feedback is also the MVP's device verification.

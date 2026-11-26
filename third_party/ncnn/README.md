@@ -1,6 +1,6 @@
 # ncnn and the PP-OCRv5 models
 
-Decision: [ADR-0010](../../docs/adr/0010-recognise-text-with-paddleocr-on-ncnn.md).
+Decision: ADR-0010 (in the vault).
 
 ## ncnn runtime
 
@@ -47,7 +47,7 @@ The two input shapes mark the spatial dimensions as dynamic (detection: height a
 
 ### ONNX Runtime and the conversion step
 
-pnnx statically embeds ONNX Runtime (Microsoft, on the BDS lists) as its ONNX importer, so running the conversion executes Microsoft code on the developer's machine. It runs under the free-tool exception in [ADR-0002](../../docs/adr/0002-screen-dependencies-against-bds-boycott-lists.md): it is a build-time tool, used once per model update, with no alternative that converts these models. Nothing from ONNX Runtime is in the app, in the converted model files, or in the build that CI runs; the converted files are committed.
+pnnx statically embeds ONNX Runtime (Microsoft, on the BDS lists) as its ONNX importer, so running the conversion executes Microsoft code on the developer's machine. It runs under the free-tool exception in ADR-0002 (in the vault): it is a build-time tool, used once per model update, with no alternative that converts these models. Nothing from ONNX Runtime is in the app, in the converted model files, or in the build that CI runs; the converted files are committed.
 
 Alternatives tried first, to avoid ONNX Runtime:
 

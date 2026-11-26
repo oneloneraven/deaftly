@@ -170,14 +170,14 @@ and the APK's size and startup.
   run as en-GB (`robolectric.properties`); a test that sets `qualifiers` states
   its locale (`en-rGB-w390dp-h844dp`) or it runs as en-US. Built-in templates
   follow the phone's locale until the user edits them
-  ([ADR-0005](adr/0005-store-templates-and-settings-with-datastore.md)).
+  (ADR-0005 (in the vault)).
 - **Permissions are reviewed, not inherited.** The release build may only
   request what's in `config/permissions-allowlist.txt`
-  ([ADR-0011](adr/0011-review-permissions-against-an-allowlist.md)). Adding
+  (ADR-0011 (in the vault)). Adding
   one, including `INTERNET`, goes in the same PR as the feature that needs it,
   with an update to the threat model and record of processing. Backups
   and device transfer include only the template store and kept chats, through
-  explicit rules ([ADR-0012](adr/0012-back-up-kept-chats.md)).
+  explicit rules (ADR-0012 (in the vault)).
 - **Never log user content**, at any level, in any build type. Log events
   and error types, not what the user wrote, said or captured.
 - **Export nothing but the launcher activity.** Every other component sets
