@@ -4,7 +4,7 @@ The harness is on branch `spike/285-speech-to-text`, not for merge. For #59 (spe
 
 ### Question
 
-Can an open-source engine bundled in the app transcribe the hearing person's reply well enough, so that we don't need Android's on-device recogniser? That recogniser is Google's, which is a screening hit under [ADR-0002](../../adr/0002-screen-dependencies-against-bds-boycott-lists.md), the same trade-off as ML Kit in [ADR-0010](../../adr/0010-recognise-text-with-paddleocr-on-ncnn.md).
+Can an open-source engine bundled in the app transcribe the hearing person's reply well enough, so that we don't need Android's on-device recogniser? That recogniser is Google's, which is a screening hit under ADR-0002 (in the vault), the same trade-off as ML Kit in ADR-0010 (in the vault).
 
 ### Candidates
 

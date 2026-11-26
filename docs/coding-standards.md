@@ -109,8 +109,9 @@ by hand at phone and desktop widths in light and dark themes.
 
 ### Security
 
-- Keep [the threat model](threat-model.md) current. A change that adds or
-  moves a trust boundary updates it in the same PR: a new host, an auth or
+- Keep the threat model current. It's in the private vault
+  (`oneloneraven-vault/deaftly/threat-model.md`). A change that adds or moves a
+  trust boundary updates it in a paired vault PR: a new host, an auth or
   session change, data exposed beyond its owner, a new processor, a new
   secret or CI permission.
 - Secrets never enter git. Local secrets files are gitignored and treated
@@ -169,22 +170,22 @@ and the APK's size and startup.
   run as en-GB (`robolectric.properties`); a test that sets `qualifiers` states
   its locale (`en-rGB-w390dp-h844dp`) or it runs as en-US. Built-in templates
   follow the phone's locale until the user edits them
-  ([ADR-0005](adr/0005-store-templates-and-settings-with-datastore.md)).
+  (ADR-0005 (in the vault)).
 - **Permissions are reviewed, not inherited.** The release build may only
   request what's in `config/permissions-allowlist.txt`
-  ([ADR-0011](adr/0011-review-permissions-against-an-allowlist.md)). Adding
+  (ADR-0011 (in the vault)). Adding
   one, including `INTERNET`, goes in the same PR as the feature that needs it,
   with an update to the threat model and record of processing. Backups
   and device transfer include only the template store and kept chats, through
-  explicit rules ([ADR-0012](adr/0012-back-up-kept-chats.md)).
+  explicit rules (ADR-0012 (in the vault)).
 - **Never log user content**, at any level, in any build type. Log events
   and error types, not what the user wrote, said or captured.
 - **Export nothing but the launcher activity.** Every other component sets
   `android:exported="false"`; a library component that would be exported is
   removed in the manifest with `tools:node="remove"`. Check the merged
   release manifest when a dependency changes.
-- **Release builds** are minified and shrunk with R8 and signed with the
-  upload key from the `release` environment's secrets. `versionName` is the
+- **Release builds** are minified and shrunk with R8 and signed. How the
+  signing keys are held is kept in the private vault. `versionName` is the
   release tag without its `v` and `versionCode` is
   `major × 1,000,000 + minor × 1,000 + patch`, so each part stays below
   1,000. Nothing reads a version from a file; local builds are `0.0.0`. A

@@ -9,16 +9,18 @@ old one's status becomes "Superseded by ADR-NNNN".
 
 | ADR | Decision |
 |---|---|
-| [0001](0001-record-architecture-decisions.md) | Record architecture decisions |
-| [0002](0002-screen-dependencies-against-bds-boycott-lists.md) | Screen dependencies and vendors against BDS boycott lists |
-| [0003](0003-build-a-native-android-app-with-kotlin-and-compose.md) | Build a native Android app with Kotlin and Jetpack Compose |
-| [0005](0005-store-templates-and-settings-with-datastore.md) | Store templates and settings with DataStore and JSON |
-| [0006](0006-wire-dependencies-by-hand.md) | Wire dependencies by hand |
-| [0007](0007-distribute-signed-apks-on-github-releases.md) | Distribute signed APKs on GitHub Releases (superseded by 0014) |
-| [0008](0008-allow-android-backup-of-templates-and-settings.md) | Allow Android backup of templates and settings |
-| [0009](0009-ship-the-mvp-on-0x.md) | Ship the MVP on 0.x |
-| [0010](0010-recognise-text-with-paddleocr-on-ncnn.md) | Recognise text with PaddleOCR on ncnn |
-| [0011](0011-review-permissions-against-an-allowlist.md) | Review permissions against an allowlist |
-| [0012](0012-back-up-kept-chats.md) | Back up kept chats |
-| [0013](0013-transcribe-speech-with-sherpa-ncnn-bundled-in-the-app.md) | Transcribe speech with sherpa-ncnn, bundled in the app |
-| [0014](0014-distribute-through-google-play-and-github-releases.md) | Distribute through Google Play and GitHub Releases |
+| 0001 | Record architecture decisions |
+| 0002 | Screen dependencies and vendors against BDS boycott lists |
+| 0003 | Build a native Android app with Kotlin and Jetpack Compose |
+| 0005 | Store templates and settings with DataStore and JSON |
+| 0006 | Wire dependencies by hand |
+| 0007 | Distribute signed APKs on GitHub Releases (superseded by 0014) |
+| 0008 | Allow Android backup of templates and settings |
+| 0009 | Ship the MVP on 0.x |
+| 0010 | Recognise text with PaddleOCR on ncnn |
+| 0011 | Review permissions against an allowlist |
+| 0012 | Back up kept chats |
+| 0013 | Transcribe speech with sherpa-ncnn, bundled in the app |
+| 0014 | Distribute through Google Play and GitHub Releases |
+
+Every ADR is kept in the private vault, at `oneloneraven-vault/deaftly/adr/`. This index lists their numbers and titles only.

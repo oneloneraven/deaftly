@@ -22,8 +22,9 @@ Read a doc when the work touches it, not up front.
 - Code is reviewed against [coding standards](docs/coding-standards.md); hold it to the [engineering standards](.claude/skills/engineering-standards/SKILL.md).
 - No comments by default; one line for a "why" the code can't express: [comments](docs/coding-standards.md#comments-and-docs).
 - Privacy and data rules: [privacy](docs/privacy.md), [record of processing](docs/data-protection.md).
-- Keep the [threat model](docs/threat-model.md) current whenever a trust boundary moves.
-- Screen new dependencies and vendors: [ADR-0002](docs/adr/0002-screen-dependencies-against-bds-boycott-lists.md).
+- ADRs, specs, plans, runbooks, the threat model and architecture docs are written in `oneloneraven-vault/deaftly/`, never here. Keep the threat model current whenever a trust boundary moves.
+- Raise security-sensitive issues in `oneloneraven-vault`, not here. Never copy vault content into this repository, its issues, PRs or commits.
+- Screen new dependencies and vendors: ADR-0002 (in the vault).
 - Significant decisions get an [ADR](docs/adr/README.md).
 - Visual and copy style: [brand style guide](docs/brand/style-guide.md). Brand changes (logo, icon, colour) wait for the owner's review.
 - Verify before claiming anything works; report failures and unverified steps plainly.
