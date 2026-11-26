@@ -89,7 +89,7 @@ These come from the `android-toolchain` module (D9) and the plugin's `core` modu
 
 ## 6. Distribution
 
-**Google Play and a signed APK on GitHub Releases ([ADR-0014](adr/0014-distribute-through-google-play-and-github-releases.md)).** Most people won't install from outside the Play Store, so Deaftly is published there too, accepting Play's one-off registration fee. Both channels share one app signing key, so people can move between them. CI uploads each release to Play's internal testing track, and the owner promotes it from there ([runbook](runbooks/google-play.md)). F-Droid isn't an option, because the project's licence is non-commercial and so isn't open source.
+This section is kept in the private vault.
 
 ## 7. Security and privacy
 

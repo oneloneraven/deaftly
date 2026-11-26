@@ -184,8 +184,8 @@ and the APK's size and startup.
   `android:exported="false"`; a library component that would be exported is
   removed in the manifest with `tools:node="remove"`. Check the merged
   release manifest when a dependency changes.
-- **Release builds** are minified and shrunk with R8 and signed with the
-  upload key from the `release` environment's secrets. `versionName` is the
+- **Release builds** are minified and shrunk with R8 and signed. How the
+  signing keys are held is kept in the private vault. `versionName` is the
   release tag without its `v` and `versionCode` is
   `major × 1,000,000 + minor × 1,000 + patch`, so each part stays below
   1,000. Nothing reads a version from a file; local builds are `0.0.0`. A
