@@ -93,11 +93,7 @@ These come from the `android-toolchain` module (D9) and the plugin's `core` modu
 
 ## 7. Security and privacy
 
-- Permissions are limited to the allowlist ([ADR-0011](adr/0011-review-permissions-against-an-allowlist.md)), enforced on the release manifest. Only the launcher activity is exported. R8 on release builds.
-- The release signing key is held in GitHub encrypted secrets and created by the owner as a manual step; it is never committed.
-- Logs never contain user content (templates, OCR text, chat messages).
-- The threat model covers the device, the camera and the release pipeline; there is no backend. The record of processing states that no personal data leaves the device, apart from the user's own Android backup (D7).
-- No provider or library names appear in user-facing copy.
+This section is kept in the private vault.
 
 ## 8. Considered and rejected
 
