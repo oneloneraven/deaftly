@@ -1,4 +1,4 @@
-.bootstrap/
+.bootstrap/*
 .superpowers/
 .dev.vars
 .env*
@@ -32,3 +32,4 @@ third_party/sherpa-ncnn/src/
 # JVM crash dumps
 hs_err_pid*.log
 replay_pid*.log
+!.bootstrap/record.json
