@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "modules": [
+    "core",
+    "android-toolchain"
+  ],
+  "visibility": "public",
+  "flags": {},
+  "skipped": {},
+  "exceptions": []
+}

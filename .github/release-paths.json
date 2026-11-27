@@ -1,16 +1,4 @@
 {
-  "noneAllowed": [
-    "docs/",
-    ".github/",
-    ".claude/",
-    ".gitignore",
-    "*.md",
-    "app/src/test/",
-    "core/src/test/",
-    "app/src/androidTest/",
-    "config/detekt/",
-    ".editorconfig",
-    "tools/"
-  ],
+  "noneAllowed": ["docs/", ".github/", ".claude/", ".gitignore", "*.md", "app/src/test/", "core/src/test/", "app/src/androidTest/", "config/detekt/", ".editorconfig", "tools/", ".bootstrap/record.json"],
   "noneForbidden": []
 }
